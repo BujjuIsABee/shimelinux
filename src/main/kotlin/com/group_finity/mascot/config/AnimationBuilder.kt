@@ -28,10 +28,10 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class AnimationBuilder(private val schema: ResourceBundle, private val animationNode: Entry, private val imageSet: String) {
-    private val condition = animationNode.getAttribute(schema.getString("Condition") ?: "true")
+    private val condition = animationNode.getAttribute(schema.getString("Condition")) ?: "true"
     private val poses = ArrayList<Pose>()
     private val hotspots = ArrayList<Hotspot>()
-    private val turn = animationNode.getAttribute(schema.getString("IsTurn") ?: "false")
+    private val turn = animationNode.getAttribute(schema.getString("IsTurn")) ?: "false"
 
     init {
         log.log(Level.INFO, "Loading animation")
@@ -40,9 +40,8 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
             try {
                 poses.add(loadPose(frameNode))
             } catch (e: Exception) {
-                val error = frameNode.attributes.toString()
-                log.log(Level.SEVERE, "Failed to load pose: $error", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadPoseErrorMessage") + ": $error", e)
+                log.log(Level.SEVERE, "Failed to load pose: ${frameNode.attributes}", e)
+                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadPoseErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
@@ -50,9 +49,8 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
             try {
                 hotspots.add(loadHotspot(frameNode))
             } catch (e: Exception) {
-                val error = frameNode.attributes.toString()
-                log.log(Level.SEVERE, "Failed to load hotspot: $error", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadHotspotErrorMessage") + ": $error", e)
+                log.log(Level.SEVERE, "Failed to load hotspot: ${frameNode.attributes}", e)
+                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadHotspotErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
@@ -61,20 +59,14 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
 
     private fun loadPose(frameNode: Entry): Pose {
         var imageText = frameNode.getAttribute(schema.getString("Image"))
-        imageText = if (imageText != null) "/img/$imageSet/$imageText" else null
+        imageText = if (imageText.isNullOrEmpty()) "/img/$imageSet/$imageText" else null
 
         var imageRightText = frameNode.getAttribute(schema.getString("ImageRight"))
-        imageRightText = if (imageRightText != null) "/img/$imageSet/$imageRightText" else null
+        imageRightText = if (imageRightText.isNullOrEmpty()) "/img/$imageSet/$imageRightText" else null
 
-        val anchorText = frameNode.getAttribute(schema.getString("ImageAnchor"))
-            ?: throw ConfigurationException("ImageAnchor is null")
-
-        val moveText = frameNode.getAttribute(schema.getString("Velocity"))
-            ?: throw ConfigurationException("Velocity is null")
-
-        val durationText = frameNode.getAttribute(schema.getString("Duration"))
-            ?: throw ConfigurationException("Duration is null")
-
+        val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
+        val moveText = checkNotNull(frameNode.getAttribute(schema.getString("Velocity")))
+        val durationText = checkNotNull(frameNode.getAttribute(schema.getString("Duration")))
         var soundText = frameNode.getAttribute(schema.getString("Sound"))
         val volumeText = frameNode.getAttribute(schema.getString("Volume")) ?: "0"
 
@@ -82,7 +74,10 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
         val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
 
         val filterText = Main.instance.properties.getProperty("Filter", "false")
-        val filter = if (filterText.equals("true", true) || filterText.equals("hqx", true)) {
+        val filter = if (
+            filterText.equals("true", true) ||
+            filterText.equals("hqx", true)
+        ) {
             ImagePairLoader.Filter.HQX
         } else if (filterText.equals("bicubic", true)) {
             ImagePairLoader.Filter.BICUBIC
@@ -97,9 +92,8 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
             try {
                 ImagePairLoader.load(imageText, imageRightText, anchor, scaling, filter, opacity)
             } catch (e: Exception) {
-                val message = "$imageText, ${imageRightText ?: ""}"
-                log.log(Level.SEVERE, "Failed to load image: $message", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadImageErrorMessage") + ": $message", e)
+                log.log(Level.SEVERE, "Failed to load image: $imageText, ${imageRightText ?: ""}", e)
+                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadImageErrorMessage") + ": $imageText, ${imageRightText ?: ""}", e)
             }
         }
 
@@ -142,15 +136,9 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
     }
 
     private fun loadHotspot(frameNode: Entry): Hotspot {
-        val shapeText = frameNode.getAttribute(schema.getString("Shape"))
-            ?: throw ConfigurationException("Shape is null")
-
-        val originText = frameNode.getAttribute(schema.getString("Origin"))
-            ?: throw ConfigurationException("Origin is null")
-
-        val sizeText = frameNode.getAttribute(schema.getString("Size"))
-            ?: throw ConfigurationException("Size is null")
-
+        val shapeText = checkNotNull(frameNode.getAttribute(schema.getString("Shape")))
+        val originText = checkNotNull(frameNode.getAttribute(schema.getString("Origin")))
+        val sizeText = checkNotNull(frameNode.getAttribute(schema.getString("Size")))
         val behaviorText = frameNode.getAttribute(schema.getString("Behaviour"))
 
         val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
@@ -170,7 +158,12 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
         val shape = if (shapeText.equals("Rectangle", true)) {
             Rectangle(origin, size)
         } else if (shapeText.equals("Ellipse", true)) {
-            Ellipse2D.Float(origin.x.toFloat(), origin.y.toFloat(), size.width.toFloat(), size.height.toFloat())
+            Ellipse2D.Float(
+                origin.x.toFloat(),
+                origin.y.toFloat(),
+                size.width.toFloat(),
+                size.height.toFloat()
+            )
         } else {
             log.log(Level.SEVERE, "Failed to load hotspot shape: $shapeText")
             throw ConfigurationException(Main.instance.languageBundle.getString("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
@@ -185,7 +178,12 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
 
     fun buildAnimation(): Animation {
         try {
-            return Animation(Variable.parse(condition)!!, poses.toTypedArray(), hotspots.toTypedArray(), turn.toBoolean())
+            return Animation(
+                Variable.parse(condition)!!, // this won't return null because condition is not nullable
+                poses.toTypedArray(),
+                hotspots.toTypedArray(),
+                turn.toBoolean()
+            )
         } catch (e: VariableException) {
             throw AnimationInstantiationException(Main.instance.languageBundle.getString("FailedConditionEvaluationErrorMessage"), e)
         }

@@ -6,6 +6,7 @@
 package com.group_finity.mascot
 
 import java.util.logging.Logger
+import kotlin.concurrent.thread
 
 class Manager {
     private val mascots = ArrayList<Mascot>()
@@ -15,23 +16,18 @@ class Manager {
     private var thread: Thread? = null
 
     init {
-        with(Thread {
+        thread(start = true, isDaemon = true)  {
             while (true) {
                 try {
                     Thread.sleep(Long.MAX_VALUE)
                 } catch (_: InterruptedException) {
                 }
             }
-        }) {
-            isDaemon = true
-            start()
         }
     }
 
     fun start() {
-        if (thread != null && thread!!.isAlive) {
-            return
-        }
+        if (thread != null && thread!!.isAlive) return
 
         thread = Thread {
             var prev = System.nanoTime() / 1000000
@@ -60,9 +56,8 @@ class Manager {
     }
 
     fun stop() {
-        if (thread == null || thread!!.isAlive) {
-            return
-        }
+        if (thread == null || !thread!!.isAlive) return
+
         thread!!.interrupt()
         try {
             thread!!.join()

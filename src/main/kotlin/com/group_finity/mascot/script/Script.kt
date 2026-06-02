@@ -36,9 +36,7 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
 
     @Synchronized
     override fun get(variables: VariableMap): Any? {
-        if (value != null) {
-            return value
-        }
+        if (value != null) return value
 
         try {
             value = compiled.eval(variables)
@@ -49,9 +47,7 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
         return value
     }
 
-    override fun toString(): String {
-        return if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
-    }
+    override fun toString(): String = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
 
     companion object {
         private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter())

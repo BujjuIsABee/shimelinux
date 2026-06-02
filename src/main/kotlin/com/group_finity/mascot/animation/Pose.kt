@@ -13,25 +13,22 @@ import java.nio.file.Path
 
 class Pose(
     private val leftImage: Path?,
-    private val rightImage: Path? = null,
-    val dx: Int = 0,
-    val dy: Int = 0,
-    val duration: Int = 0,
-    val soundName: String? = null,
+    private val rightImage: Path?,
+    val dx: Int,
+    val dy: Int,
+    val duration: Int,
+    val soundName: String?,
 ) {
     val imageName: String
         get() = "${leftImage ?: ""}${rightImage ?: ""}"
-
     val image: ImagePair?
         get() = ImagePairs.getImagePair(imageName)
 
     fun next(mascot: Mascot) {
-        mascot.anchor = Point(mascot.anchor.x + if (mascot.isLookRight) -dx else dx, mascot.anchor.y + dy)
+        mascot.anchor = Point(mascot.anchor.x + (if (mascot.isLookRight) -dx else dx), mascot.anchor.y + dy)
         mascot.image = ImagePairs.getImage(imageName, mascot.isLookRight)
         mascot.sound = soundName
     }
 
-    override fun toString(): String {
-        return "Pose (${image ?: ""},$dx,$dy,$duration,$soundName)"
-    }
+    override fun toString(): String = "Pose ($imageName,$dx,$dy,$duration,$soundName)"
 }

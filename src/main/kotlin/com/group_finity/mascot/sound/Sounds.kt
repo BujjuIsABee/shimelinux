@@ -23,28 +23,20 @@ object Sounds {
         }
 
     fun load(fileName: String, clip: Clip) {
-        if (!sounds.containsKey(fileName)) {
-            sounds[fileName] = clip
-        }
+        sounds.putIfAbsent(fileName, clip)
     }
 
-    fun contains(fileName: String): Boolean {
-        return sounds.containsKey(fileName)
-    }
+    fun contains(fileName: String): Boolean = sounds.containsKey(fileName)
 
-    fun getSound(fileName: String): Clip? {
-        return sounds[fileName]
-    }
+    fun getSound(fileName: String): Clip? = sounds[fileName]
 
     fun getSoundsIgnoringVolume(fileName: String): ArrayList<Clip> {
         val result = ArrayList<Clip>(5)
-
         for (key in sounds.keys) {
             if (key.startsWith(fileName)) {
                 result.add(sounds[key]!!)
             }
         }
-
         return result
     }
 }

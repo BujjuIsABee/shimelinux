@@ -13,9 +13,7 @@ import javax.sound.sampled.LineEvent
 
 object SoundLoader {
     fun load(name: String, volume: Float) {
-        if (Sounds.contains(name + volume)) {
-            return
-        }
+        if (Sounds.contains(name + volume)) return
 
         // Load clip
         val stream = AudioSystem.getAudioInputStream(File(name))

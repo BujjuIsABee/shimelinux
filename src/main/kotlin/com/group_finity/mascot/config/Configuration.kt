@@ -25,7 +25,8 @@ class Configuration {
         log.log(Level.INFO, "Reading configuration file")
 
         // Check for Japanese XML tag
-        val locale = if (configurationNode.hasChild("\u52D5\u4F5C\u30EA\u30B9\u30C8") ||
+        val locale = if (
+            configurationNode.hasChild("\u52D5\u4F5C\u30EA\u30B9\u30C8") ||
             configurationNode.hasChild("\u884C\u52D5\u30EA\u30B9\u30C8")
         ) {
             log.log(Level.INFO, "Using ja-JP schema")
@@ -38,8 +39,9 @@ class Configuration {
         schema = ResourceBundle.getBundle("conf.schema", locale)
 
         for (constant in configurationNode.selectChildren(schema.getString("Constant"))) {
-            constants[constant.getAttribute(schema.getString("Name")) ?: throw ConfigurationException("Name is null")] =
-                constant.getAttribute(schema.getString("Value")) ?: throw ConfigurationException("Value is null")
+            val key = checkNotNull(constant.getAttribute(schema.getString("Name")))
+            val value = checkNotNull(constant.getAttribute(schema.getString("Value")))
+            constants[key] = value
         }
 
         for (list in configurationNode.selectChildren(schema.getString("ActionList"))) {
@@ -82,7 +84,8 @@ class Configuration {
     }
 
     fun buildAction(name: String, params: Map<String, String>): Action {
-        val factory = actionBuilders[name] ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
+        val factory = actionBuilders[name]
+            ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
         return factory.buildAction(params)
     }
 

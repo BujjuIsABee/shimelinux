@@ -10,8 +10,7 @@ import java.awt.Rectangle
 
 class ComplexArea {
     private val areaMap = HashMap<String, Area>()
-    val areas: Collection<Area>
-        get() = areaMap.values
+    val areas: Collection<Area> get() = areaMap.values
 
     fun set(rectangles: Map<String, Rectangle>) {
         retain(rectangles.keys)
@@ -40,84 +39,68 @@ class ComplexArea {
     }
 
     fun retain(deviceNames: Collection<String>) {
-        val iterator = areaMap.keys.iterator()
-        while (iterator.hasNext()) {
-            val key = iterator.next()
-            if (!deviceNames.contains(key)) {
-                iterator.remove()
-            }
+        areaMap.entries.removeIf { entry ->
+            !deviceNames.contains(entry.key)
         }
     }
 
     fun getBottomBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
-
         for (area in areaMap.values) {
             if (area.bottomBorder.isOn(location)) {
                 result = area.bottomBorder
             }
         }
-
         for (area in areaMap.values) {
             if (area.topBorder.isOn(location)) {
                 result = null
             }
         }
-
         return result
     }
 
     fun getTopBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
-
         for (area in areaMap.values) {
             if (area.topBorder.isOn(location)) {
                 result = area.topBorder
             }
         }
-
         for (area in areaMap.values) {
             if (area.bottomBorder.isOn(location)) {
                 result = null
             }
         }
-
         return result
     }
 
     fun getLeftBorder(location: Point): Wall? {
         var result: Wall? = null
-
         for (area in areaMap.values) {
             if (area.leftBorder.isOn(location)) {
                 result = area.rightBorder // i think this should be left border but i won't mess with it
             }
         }
-
         for (area in areaMap.values) {
             if (area.rightBorder.isOn(location)) {
                 result = null
             }
         }
-
         return result
     }
 
     fun getRightBorder(location: Point): Wall? {
         var result: Wall? = null
-
         for (area in areaMap.values) {
             if (area.rightBorder.isOn(location)) {
                 result = area.rightBorder
             }
         }
-
         for (area in areaMap.values) {
             if (area.leftBorder.isOn(location)) {
                 result = null
             }
         }
-
         return result
     }
 }

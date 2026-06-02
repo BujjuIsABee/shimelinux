@@ -10,13 +10,9 @@ import java.awt.Point
 class NotOnBorder : Border {
     private constructor()
 
-    override fun isOn(location: Point): Boolean {
-        return false
-    }
+    override fun isOn(location: Point): Boolean = false
 
-    override fun move(location: Point): Point {
-        return location
-    }
+    override fun move(location: Point): Point = location
 
     companion object {
         val INSTANCE = NotOnBorder()

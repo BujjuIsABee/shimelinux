@@ -23,10 +23,8 @@ class Area {
     val rightBorder = Wall(this, true)
     val bottomBorder = FloorCeiling(this, true)
 
-    val width: Int
-        get() = right - left
-    val height: Int
-        get() = bottom - top
+    val width: Int get() = right - left
+    val height: Int get() = bottom - top
 
     fun set(value: Rectangle) {
         dleft = value.x - left
@@ -40,15 +38,9 @@ class Area {
         bottom = value.y + value.height
     }
 
-    fun contains(x: Int, y: Int): Boolean {
-        return (left <= x) && (x <= right) && (top <= y) && (y <= bottom)
-    }
+    fun contains(x: Int, y: Int): Boolean = (left <= x) && (x <= right) && (top <= y) && (y <= bottom)
 
-    fun toRectangle(): Rectangle {
-        return Rectangle(left, top, width, height)
-    }
+    fun toRectangle(): Rectangle = Rectangle(left, top, width, height)
 
-    override fun toString(): String {
-        return "Area (left=$left,top=$top,right=$right,bottom=$bottom)"
-    }
+    override fun toString(): String = "Area (left=$left,top=$top,right=$right,bottom=$bottom)"
 }

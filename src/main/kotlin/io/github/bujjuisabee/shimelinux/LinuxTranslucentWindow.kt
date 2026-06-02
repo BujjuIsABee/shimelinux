@@ -15,7 +15,6 @@ import javax.swing.JWindow
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private var image: LinuxNativeImage? = null
-
     private var gc: GraphicsConfiguration? = null
 
     init {

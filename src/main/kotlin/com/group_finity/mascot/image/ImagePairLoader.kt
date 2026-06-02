@@ -15,9 +15,7 @@ object ImagePairLoader {
     enum class Filter { NEAREST_NEIGHBOR, HQX, BICUBIC }
 
     fun load(leftPath: String, rightPath: String?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
-        if (ImagePairs.contains(leftPath + (rightPath ?: ""))) {
-            return
-        }
+        if (ImagePairs.contains(leftPath + (rightPath ?: ""))) return
 
         // Load left image
         val leftStream = this::class.java.getResourceAsStream(leftPath)
@@ -25,7 +23,7 @@ object ImagePairLoader {
 
         // Load right image
         val rightStream = if (rightPath != null) this::class.java.getResourceAsStream(leftPath) else null
-        var rightImage = if (rightPath != null) {
+        val rightImage = if (rightPath != null) {
             scale(premultiply(ImageIO.read(rightStream), opacity), scaling, filter)
         } else {
             flip(leftImage)

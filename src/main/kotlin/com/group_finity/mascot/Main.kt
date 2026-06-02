@@ -27,10 +27,8 @@ fun main() {
 }
 
 class Main {
-    lateinit var properties: Properties
-        private set
-    lateinit var languageBundle: ResourceBundle
-        private set
+    lateinit var properties: Properties private set
+    lateinit var languageBundle: ResourceBundle private set
 
     fun run() {
         // Load properties

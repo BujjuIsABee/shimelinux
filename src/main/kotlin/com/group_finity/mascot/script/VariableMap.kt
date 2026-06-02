@@ -10,13 +10,9 @@ import javax.script.Bindings
 class VariableMap : AbstractMap<String, Any?>(), Bindings {
     val rawMap = LinkedHashMap<String, Variable>()
 
-    override val keys: MutableSet<String>
-        get() = rawMap.keys
-
+    override val keys: MutableSet<String> get() = rawMap.keys
     @Suppress("UNCHECKED_CAST")
-    override val values: MutableSet<Any?>
-        get() = rawMap.values as MutableSet<Any?>
-
+    override val values: MutableSet<Any?> get() = rawMap.values as MutableSet<Any?>
     @Suppress("UNCHECKED_CAST")
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any>>
         get() = rawMap as MutableSet<MutableMap.MutableEntry<String, Any>>
@@ -37,12 +33,10 @@ class VariableMap : AbstractMap<String, Any?>(), Bindings {
         rawMap.clear()
     }
 
-    override fun put(key: String, value: Any?): Any? {
-        return if (value is Variable) {
-            rawMap.put(key, value)
-        } else {
-            rawMap.put(key, Constant(value))
-        }
+    override fun put(key: String, value: Any?): Any? = if (value is Variable) {
+        rawMap.put(key, value)
+    } else {
+        rawMap.put(key, Constant(value))
     }
 
     override fun putAll(toMerge: Map<out String, Any?>) {
@@ -51,7 +45,5 @@ class VariableMap : AbstractMap<String, Any?>(), Bindings {
         }
     }
 
-    override fun remove(key: String?): Any? {
-        return rawMap.remove(key)
-    }
+    override fun remove(key: String?): Any? = rawMap.remove(key)
 }

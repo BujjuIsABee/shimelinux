@@ -10,24 +10,21 @@ import org.w3c.dom.Element
 
 class Entry(private val element: Element) {
     private val selected = HashMap<String, List<Entry>>()
-    val name: String
-        get() = element.tagName
-    val text: String
-        get() = element.textContent
+
+    val name: String get() = element.tagName
+    val text: String get() = element.textContent
+
     val attributes: Map<String, String> by lazy {
         val result = LinkedHashMap<String, String>()
-
         val attrs = element.attributes
         for (i in 0 until attrs.length) {
             val attr = attrs.item(i) as Attr
             result[attr.name] = attr.value
         }
-
         return@lazy result
     }
     val children: List<Entry> by lazy {
         val result = ArrayList<Entry>()
-
         val childNodes = element.childNodes
         for (i in 0 until childNodes.length) {
             val childNode = childNodes.item(i)
@@ -35,7 +32,6 @@ class Entry(private val element: Element) {
                 result.add(Entry(childNode))
             }
         }
-
         return@lazy result
     }
 
@@ -66,7 +62,6 @@ class Entry(private val element: Element) {
         }
 
         selected[name] = children
-
         return children
     }
 }

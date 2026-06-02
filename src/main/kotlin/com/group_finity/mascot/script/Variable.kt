@@ -13,29 +13,21 @@ abstract class Variable {
     abstract fun get(variables: VariableMap): Any?
 
     companion object {
-        fun parse(source: String?): Variable? {
-            var result: Variable? = null
-
-            if (source != null) {
-                result = if (source.startsWith($$"${") && source.endsWith("}")) {
-                    Script(source.substring(2, source.length - 1), false)
-                } else if (source.startsWith("#{") && source.endsWith("}")) {
-                    Script(source.substring(2, source.length - 1), true)
-                } else {
-                    Constant(parseConstant(source))
-                }
-            }
-
-            return result
+        fun parse(source: String?): Variable? = if (source == null) {
+            null
+        } else if (source.startsWith($$"${") && source.endsWith("}")) {
+            Script(source.substring(2, source.length - 1), false)
+        } else if (source.startsWith("#{") && source.endsWith("}")) {
+            Script(source.substring(2, source.length - 1), true)
+        } else {
+            Constant(parseConstant(source))
         }
 
-        private fun parseConstant(source: String?): Any? {
-            return when (source) {
-                null, "null" -> null
-                "true" -> true
-                "false" -> false
-                else -> source.toDoubleOrNull() ?: source
-            }
+        private fun parseConstant(source: String?): Any? = when (source) {
+            null, "null" -> null
+            "true" -> true
+            "false" -> false
+            else -> source.toDoubleOrNull() ?: source
         }
     }
 }

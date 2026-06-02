@@ -14,15 +14,9 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     private val environment = LinuxEnvironment()
 
-    override fun getEnvironment(): Environment {
-        return environment
-    }
+    override fun getEnvironment(): Environment = environment
 
-    override fun newNativeImage(src: BufferedImage): NativeImage {
-        return LinuxNativeImage(src)
-    }
+    override fun newNativeImage(src: BufferedImage): NativeImage = LinuxNativeImage(src)
 
-    override fun newTransparentWindow(): TranslucentWindow {
-        return LinuxTranslucentWindow()
-    }
+    override fun newTransparentWindow(): TranslucentWindow = LinuxTranslucentWindow()
 }

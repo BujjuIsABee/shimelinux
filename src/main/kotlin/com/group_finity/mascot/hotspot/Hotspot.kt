@@ -10,12 +10,7 @@ import java.awt.Point
 import java.awt.Shape
 
 class Hotspot(val behavior: String?, val shape: Shape) {
-    fun contains(mascot: Mascot, point: Point): Boolean {
-        var p = point
-        if (mascot.isLookRight) {
-            p = Point(mascot.bounds.width - point.x, point.y)
-        }
-
-        return shape.contains(p)
-    }
+    fun contains(mascot: Mascot, point: Point): Boolean = shape.contains(
+        if (mascot.isLookRight) Point(mascot.bounds.width - point.x, point.y) else point
+    )
 }

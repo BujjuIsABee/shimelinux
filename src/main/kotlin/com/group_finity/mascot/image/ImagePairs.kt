@@ -12,38 +12,22 @@ object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
 
     fun load(fileName: String, imagePair: ImagePair) {
-        if (!imagePairs.containsKey(fileName)) {
-            imagePairs[fileName] = imagePair
-        }
+        imagePairs.putIfAbsent(fileName, imagePair)
     }
 
-    fun getImagePair(fileName: String): ImagePair? {
-        return if (imagePairs.containsKey(fileName)) imagePairs[fileName] else null
-    }
+    fun getImagePair(fileName: String): ImagePair? = imagePairs[fileName]
 
-    fun contains(fileName: String): Boolean {
-        return imagePairs.containsKey(fileName)
-    }
+    fun contains(fileName: String): Boolean = imagePairs.containsKey(fileName)
+
+    fun getImage(fileName: String, isLookRight: Boolean): MascotImage? = imagePairs[fileName]?.getImage(isLookRight)
 
     fun clear() {
         imagePairs.clear()
     }
 
     fun removeAll(searchTerm: String) {
-        if (imagePairs.isEmpty()) {
-            return
+        imagePairs.entries.removeIf { entry ->
+            searchTerm == Paths.get(entry.key).getName(2).toString()
         }
-
-        val iterator = imagePairs.keys.iterator()
-        while (iterator.hasNext()) {
-            val fileName = iterator.next()
-            if (searchTerm == Paths.get(fileName).getName(2).toString()) {
-                imagePairs.remove(fileName)
-            }
-        }
-    }
-
-    fun getImage(fileName: String, isLookRight: Boolean): MascotImage? {
-        return if (imagePairs.containsKey(fileName)) imagePairs[fileName]!!.getImage(isLookRight) else null
     }
 }

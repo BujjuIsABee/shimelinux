@@ -12,8 +12,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 class ActionRef(private val configuration: Configuration, refNode: Entry) : IActionBuilder {
-    private val name = refNode.getAttribute(configuration.schema.getString("Name"))
-        ?: throw ConfigurationException("Name is null")
+    private val name = checkNotNull(refNode.getAttribute(configuration.schema.getString("Name")))
     private val params = LinkedHashMap<String, String>()
 
     init {
@@ -33,9 +32,7 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
         return configuration.buildAction(name, newParams)
     }
 
-    override fun toString(): String {
-        return "Action ($name)"
-    }
+    override fun toString(): String = "Action ($name)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

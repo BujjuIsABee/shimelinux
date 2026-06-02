@@ -19,10 +19,8 @@ import java.util.logging.Logger
 
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema
-    val type = actionNode.getAttribute(schema.getString("Type"))
-        ?: throw ConfigurationException("Type is null")
-    val name = actionNode.getAttribute(schema.getString("Name"))
-        ?: throw ConfigurationException("Name is null")
+    val type = checkNotNull(actionNode.getAttribute(schema.getString("Type")))
+    val name = checkNotNull(actionNode.getAttribute(schema.getString("Name")))
     private val className = actionNode.getAttribute(schema.getString("Class"))
     private val params = LinkedHashMap<String, String>()
     private val animationBuilders = ArrayList<AnimationBuilder>()
@@ -61,7 +59,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
             val animations = createAnimations()
             val actions = createActions()
 
-            // build action
+            TODO("build action")
         } catch (e: AnimationInstantiationException) {
             throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedCreateAnimationErrorMessage") + ": $this", e)
         } catch (e: VariableException) {
@@ -77,41 +75,32 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
 
     private fun createActions(): List<Action> {
         val result = ArrayList<Action>()
-
         for (ref in actionRefs) {
             result.add(ref.buildAction(HashMap()))
         }
-
         return result
     }
 
     private fun createAnimations(): List<Animation> {
         val result = ArrayList<Animation>()
-
         for (animationFactory in animationBuilders) {
             result.add(animationFactory.buildAnimation())
         }
-
         return result
     }
 
     private fun createVariables(params: Map<String, String>): VariableMap {
         val result = VariableMap()
-
         for (param in this.params) {
             result[param.key] = Variable.parse(param.value)
         }
-
         for (param in params) {
             result[param.key] = Variable.parse(param.value)
         }
-
         return result
     }
 
-    override fun toString(): String {
-        return "Action ($name,$type,$className)"
-    }
+    override fun toString(): String = "Action ($name,$type,$className)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
