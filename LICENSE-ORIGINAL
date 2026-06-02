@@ -1,0 +1,44 @@
+ShimeLinux is an unofficial Kotlin rewrite/Linux port of Shimeji-ee by Kilkakon (https://kilkakon.com/shimeji). The
+original project incorporates work from Yuki Yamada of Group Finity and other contributors.
+
+Here are the original licenses:
+
+===== SHIMEJI-EE BY KILKAKON =====
+
+Copyright (c) Shimeji-ee Group
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+===== SHIMEJI BY YUKI YAMADA =====
+
+Copyright (c) 2009 Yuki Yamada
+
+This software is "as is" basis, and whether in explicit or implicit, is provided without warranty of any kind. For any
+damages resulting from the use of this software, the authors assume no liability.
+
+Unless subject to the following restrictions, including commercial applications, using this software for any purpose, to
+allow everyone to modify and redistribute it freely.
+
+1. To misstatements about the origin of this software must not be. Claimed to have created the original software, you
+must not. If you use this software in your product, but I hope you'll put an acknowledgment of the product
+documentation, but not required.
+2. If you change the source, must clearly indicate that. View that it is false to the
+original software will not.
+3. From a distribution of the source or remove the display, then you must change the
+contents of the display.
