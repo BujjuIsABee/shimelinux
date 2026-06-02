@@ -1,3 +1,8 @@
+/*
+ * ShimeLinux is an unofficial Linux version/Kotlin rewrite of Shimeji-ee by Kilkakon (https://kilkakon.com/shimeji)
+ * View the full license here: https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE
+ */
+
 package io.github.bujjuisabee.shimelinux
 
 import com.group_finity.mascot.image.NativeImage
@@ -31,12 +36,16 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
 
     override fun setVisible(b: Boolean) {
         super.setVisible(b)
+
+        // Store the current graphics configuration
         if (b && gc == null) {
             gc = this.graphicsConfiguration
         }
     }
 
     override fun getGraphicsConfiguration(): GraphicsConfiguration? {
+        // Use the stored graphics configuration
+        // This fixes an issue with transparency
         return gc ?: super.getGraphicsConfiguration()
     }
 
