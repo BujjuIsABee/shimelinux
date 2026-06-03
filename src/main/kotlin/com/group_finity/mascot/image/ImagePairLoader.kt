@@ -14,8 +14,6 @@ import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 
 object ImagePairLoader {
-    enum class Filter { NEAREST_NEIGHBOR, HQX, BICUBIC }
-
     fun load(leftPath: String, rightPath: String?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
         if (ImagePairs.contains(leftPath + (rightPath ?: ""))) return
 
@@ -88,4 +86,6 @@ object ImagePairLoader {
         // idk how to do this
         return source
     }
+
+    enum class Filter { NEAREST_NEIGHBOR, HQX, BICUBIC }
 }

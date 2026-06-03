@@ -61,10 +61,10 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
 
     private fun loadPose(frameNode: Entry): Pose {
         var imageText = frameNode.getAttribute(schema.getString("Image"))
-        imageText = if (imageText.isNullOrEmpty()) "/img/$imageSet/$imageText" else null
+        imageText = if (!imageText.isNullOrEmpty()) "/img/$imageSet/$imageText" else null
 
         var imageRightText = frameNode.getAttribute(schema.getString("ImageRight"))
-        imageRightText = if (imageRightText.isNullOrEmpty()) "/img/$imageSet/$imageRightText" else null
+        imageRightText = if (!imageRightText.isNullOrEmpty()) "/img/$imageSet/$imageRightText" else null
 
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
         val moveText = checkNotNull(frameNode.getAttribute(schema.getString("Velocity")))
@@ -181,7 +181,7 @@ class AnimationBuilder(private val schema: ResourceBundle, private val animation
     fun buildAnimation(): Animation {
         try {
             return Animation(
-                Variable.parse(condition)!!, // this won't return null because condition is not nullable
+                Variable.parse(condition)!!,
                 poses.toTypedArray(),
                 hotspots.toTypedArray(),
                 turn.toBoolean()

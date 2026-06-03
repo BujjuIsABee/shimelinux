@@ -23,12 +23,12 @@ class Mascot {
     var anchor = Point(0, 0)
     var image: MascotImage? = null
     var isLookRight = false
-    private var behavior: Behavior? = null
+    var behavior: Behavior? = null
     private var time = 0
     private var isAnimating = true
     private var isPaused = false
     private var isDragging = false
-    private var environment = MascotEnvironment(this)
+    var environment = MascotEnvironment(this)
     var sound: String? = null
     private var affordances = ArrayList<String>(5)
     private var hotspots = ArrayList<Hotspot>(5)

@@ -35,7 +35,7 @@ class Main {
     fun run() {
         // Load properties
         try {
-            val input = this::class.java.classLoader.getResourceAsStream("/conf/settings.properties")
+            val input = this::class.java.getResourceAsStream("/conf/settings.properties")
             properties = Properties()
             properties.load(input)
         } catch (_: Exception) {
