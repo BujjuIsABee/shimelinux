@@ -26,7 +26,8 @@ abstract class Environment {
     var complexScreen = ComplexArea()
     var screen = Area()
     var cursor = Location()
-    val screens: Collection<Area> get() = complexScreen.areas
+    val screens: Collection<Area>
+        get() = complexScreen.areas
 
     fun init() {
         timer("Update Screen Rect", true, period = 5000L) {

@@ -30,17 +30,21 @@ class MascotEnvironment(private val mascot: Mascot) {
                 impl.activeIE
             }
         }
-    val activeIETitle: String get() = impl.activeIETitle
-    val screen: Area get() = impl.screen
-    val complexScreen: ComplexArea get() = impl.complexScreen
-    val cursor: Location get() = impl.cursor
+    val activeIETitle: String
+        get() = impl.activeIETitle
+    val screen: Area
+        get() = impl.screen
+    val complexScreen: ComplexArea
+        get() = impl.complexScreen
+    val cursor: Location
+        get() = impl.cursor
 
     val ceiling: Border
         get() = getCeiling(false)
     val floor: Border
         get() = getFloor(false)
     val wall: Border
-        get()= getWall(false)
+        get() = getWall(false)
 
     val isScreenTopBottom: Boolean
         get() = impl.isScreenTopBottom(mascot.anchor)

@@ -11,9 +11,12 @@ import java.awt.Point
 import kotlin.math.abs
 
 class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
-    val y: Int get() = if (isBottom) area.bottom else area.top
-    val left: Int get() = area.left
-    val right: Int get() = area.right
+    val y: Int
+        get() = if (isBottom) area.bottom else area.top
+    val left: Int
+        get() = area.left
+    val right: Int
+        get() = area.right
     val dy: Int
         @JvmName("getDY")
         get() = if (isBottom) area.dbottom else area.dtop
@@ -23,7 +26,8 @@ class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
     val dright: Int
         @JvmName("getDRight")
         get() = area.dright
-    val width: Int get() = area.width
+    val width: Int
+        get() = area.width
 
     override fun isOn(location: Point): Boolean =
         area.isVisible && (y == location.y) && (left <= location.x) && (location.x <= right)

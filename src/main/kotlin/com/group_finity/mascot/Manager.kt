@@ -7,6 +7,12 @@
 
 package com.group_finity.mascot
 
+import com.group_finity.mascot.config.Configuration
+import com.group_finity.mascot.exception.BehaviorInstantiationException
+import com.group_finity.mascot.exception.CantBeAliveException
+import java.awt.Point
+import java.lang.ref.WeakReference
+import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.concurrent.thread
 
@@ -16,6 +22,23 @@ class Manager {
     private val removed = LinkedHashSet<Mascot>()
     var isExitOnLastRemoved = true
     private var thread: Thread? = null
+
+    val isPaused: Boolean
+        get() {
+            var isPaused = true
+            synchronized(mascots) {
+                for (mascot in mascots) {
+                    if (!mascot.isPaused) {
+                        isPaused = false
+                        break
+                    }
+                }
+            }
+            return isPaused
+        }
+
+    val count: Int
+        get() = getCount(null)
 
     init {
         thread(start = true, isDaemon = true)  {
@@ -85,11 +108,12 @@ class Manager {
 
             // Update mascots
             for (mascot in mascots) {
-                // tick
+                mascot.tick()
             }
 
+            // Animate mascots
             for (mascot in mascots) {
-                // apply
+                mascot.apply()
             }
         }
 
@@ -117,7 +141,140 @@ class Manager {
     fun setBehaviorAll(name: String) {
         synchronized(mascots) {
             for (mascot in mascots) {
+                try {
+                    val configuration = Main.instance.getConfiguration(mascot.imageSet)
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
+                } catch (e: BehaviorInstantiationException) {
+                    log.log(Level.SEVERE, "Failed to set behavior.", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    mascot.dispose()
+                } catch (e: CantBeAliveException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    mascot.dispose()
+                }
+            }
+        }
+    }
 
+    fun setBehaviorAll(configuration: Configuration, name: String, imageSet: String) {
+        synchronized(mascots) {
+            for (mascot in mascots) {
+                try {
+                    if (mascot.imageSet == imageSet) {
+                        mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
+                    }
+                } catch (e: BehaviorInstantiationException) {
+                    log.log(Level.SEVERE, "Failed to set behavior.", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    mascot.dispose()
+                } catch (e: CantBeAliveException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    mascot.dispose()
+                }
+            }
+        }
+    }
+
+    fun remainOne() {
+        synchronized(mascots) {
+            for (i in mascots.size - 1 downTo 0) {
+                mascots[i].dispose()
+            }
+        }
+    }
+
+    fun remainOne(mascot: Mascot) {
+        synchronized(mascots) {
+            for (i in mascots.size - 1 downTo 0) {
+                if (mascots[i] != mascot) {
+                    mascots[i].dispose()
+                }
+            }
+        }
+    }
+
+    fun remainOne(imageSet: String) {
+        synchronized(mascots) {
+            var isFirst = true
+            for (i in mascots.size - 1 downTo 0) {
+                val mascot = mascots[i]
+                if (mascot.imageSet == imageSet) {
+                    if (isFirst) {
+                        isFirst = false
+                    } else {
+                        mascot.dispose()
+                    }
+                }
+            }
+        }
+    }
+
+    fun remainNone(imageSet: String) {
+        synchronized(mascots) {
+            for (i in mascots.size - 1 downTo 0) {
+                val mascot = mascots[i]
+                if (mascot.imageSet == imageSet) {
+                    mascot.dispose()
+                }
+            }
+        }
+    }
+
+    fun togglePauseAll() {
+        synchronized(mascots) {
+            val isPaused = this.isPaused
+            for (mascot in mascots) {
+                mascot.isPaused = !isPaused
+            }
+        }
+    }
+
+    fun getCount(imageSet: String?): Int {
+        synchronized(mascots) {
+            if (imageSet == null) return mascots.size
+
+            var result = 0
+            for (mascot in mascots) {
+                if (mascot.imageSet == imageSet) {
+                    result++
+                }
+            }
+            return result
+        }
+    }
+
+    fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? {
+        synchronized(mascots) {
+            for (mascot in mascots) {
+                if (mascot.affordances.contains(affordance)) {
+                    return WeakReference(mascot)
+                }
+            }
+        }
+        return null
+    }
+
+    fun hasOverlappingMascotsAtPoint(anchor: Point): Boolean {
+        synchronized(mascots) {
+            var count = 0
+            for (mascot in mascots) {
+                if (mascot.anchor == anchor) {
+                    count++
+                }
+                if (count > 1) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    fun disposeAll() {
+        synchronized(mascots) {
+            for (i in mascots.size - 1 downTo 0) {
+                mascots[i].dispose()
             }
         }
     }

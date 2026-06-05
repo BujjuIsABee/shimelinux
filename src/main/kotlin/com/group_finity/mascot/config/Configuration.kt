@@ -8,13 +8,20 @@
 package com.group_finity.mascot.config
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
+import com.group_finity.mascot.behavior.Behavior
+import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.exception.ActionInstantiationException
+import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
-import java.util.Locale
-import java.util.ResourceBundle
+import com.group_finity.mascot.exception.VariableException
+import com.group_finity.mascot.script.VariableMap
+import java.awt.Point
+import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
+
 
 class Configuration {
     private val constants = LinkedHashMap<String, String>(2)
@@ -22,6 +29,9 @@ class Configuration {
     private val behaviorBuilders = LinkedHashMap<String, BehaviorBuilder>()
     private val information = LinkedHashMap<String, String>(8)
     lateinit var schema: ResourceBundle
+
+    val behaviorNames: Set<String>
+        get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {
         log.log(Level.INFO, "Reading configuration file")
@@ -55,7 +65,7 @@ class Configuration {
         for (list in configurationNode.selectChildren(schema.getString("BehaviourList"))) {
             log.log(Level.INFO, "Reading behavior list")
 
-            loadBehaviors(list, ArrayList<String>())
+            loadBehaviors(list, ArrayList())
         }
 
         for (list in configurationNode.selectChildren(schema.getString("Information"))) {
@@ -63,14 +73,6 @@ class Configuration {
 
             loadInformation(list)
         }
-    }
-
-    private fun loadInformation(list: Entry) {
-
-    }
-
-    private fun loadBehaviors(list: Entry, conditions: List<String>) {
-
     }
 
     private fun loadActions(list: Entry, imageSet: String) {
@@ -85,10 +87,194 @@ class Configuration {
         }
     }
 
+    private fun loadBehaviors(list: Entry, conditions: ArrayList<String?>) {
+        for (node in list.children) {
+            if (node.name == schema.getString("Condition")) {
+                val newConditions = ArrayList(conditions)
+                newConditions.add(node.getAttribute(schema.getString("Condition")))
+
+                loadBehaviors(node, newConditions)
+            } else if (node.name == schema.getString("Behaviour")) {
+                val behavior = BehaviorBuilder(this, node, conditions)
+                behaviorBuilders[behavior.name] = behavior
+            }
+        }
+    }
+
+    private fun loadInformation(list: Entry) {
+        for (node in list.children) {
+            if (node.name == schema.getString("Name") ||
+                node.name == schema.getString("PreviewImage") ||
+                node.name == schema.getString("SplashImage")
+            ) {
+                information[node.name] = node.text
+            } else if (
+                node.name == schema.getString("Artist") ||
+                node.name == schema.getString("Scripter") ||
+                node.name == schema.getString("Commissioner") ||
+                node.name == schema.getString("Support")
+            ) {
+                val nameText = node.getAttribute(schema.getString("Name"))
+                val linkText = node.getAttribute(schema.getString("URL"))
+
+                if (nameText != null) {
+                    information[node.name + schema.getString("Name")] = nameText
+                    if (linkText != null) {
+                        information[node.name + schema.getString("URL")] = linkText
+                    }
+                }
+            }
+        }
+    }
+
+    fun validate() {
+        for (builder in actionBuilders.values) {
+            builder.validate()
+        }
+        for (builder in behaviorBuilders.values) {
+            builder.validate()
+        }
+    }
+
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name]
             ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
         return factory.buildAction(params)
+    }
+
+    fun buildBehavior(name: String, mascot: Mascot): Behavior {
+        if (behaviorBuilders.containsKey(name)) {
+            if (isBehaviorEnabled(name, mascot)) {
+                return behaviorBuilders[name]!!.buildBehavior()
+            } else {
+                if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                    mascot.anchor = Point(
+                        (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
+                        mascot.environment.screen.top - 256
+                    )
+                } else {
+                    mascot.anchor = Point(
+                        (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
+                        mascot.environment.workArea.top - 256
+                    )
+                }
+                return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
+            }
+        } else {
+            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
+        }
+    }
+
+    fun buildBehavior(name: String): Behavior {
+        if (behaviorBuilders.containsKey(name)) {
+            return behaviorBuilders[name]!!.buildBehavior()
+        } else {
+            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
+        }
+    }
+
+    fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
+        val variables = VariableMap()
+        variables.putAll(constants)
+        variables["mascot"] = mascot
+
+        val candidates = ArrayList<BehaviorBuilder>()
+        var totalFrequency = 0L
+        for (behaviorFactory in behaviorBuilders.values) {
+            try {
+                if (behaviorFactory.isEffective(variables) && isBehaviorEnabled(behaviorFactory, mascot)) {
+                    candidates.add(behaviorFactory)
+                    totalFrequency += behaviorFactory.frequency
+                }
+            } catch (e: VariableException) {
+                log.log(Level.WARNING, "An error occurred calculating the frequency of the action", e)
+            }
+        }
+
+        if (previousName != null) {
+            val previousBehaviorFactory = checkNotNull(behaviorBuilders[previousName])
+            if (!previousBehaviorFactory.isNextAdditive) {
+                totalFrequency = 0
+                candidates.clear()
+            }
+
+            for (behaviorFactory in previousBehaviorFactory.nextBehaviorBuilders) {
+                try {
+                    if (behaviorFactory.isEffective(variables) && isBehaviorEnabled(behaviorFactory, mascot)) {
+                        candidates.add(behaviorFactory)
+                        totalFrequency += behaviorFactory.frequency
+                    }
+                } catch (e: VariableException) {
+                    log.log(Level.WARNING, "An error occurred calculating the frequency of the action", e)
+                }
+            }
+        }
+
+        if (totalFrequency == 0L) {
+            if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                mascot.anchor = Point(
+                    (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
+                    mascot.environment.screen.top - 256
+                )
+            } else {
+                mascot.anchor = Point(
+                    (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
+                    mascot.environment.workArea.top - 256
+                )
+            }
+            return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
+        }
+
+        var random = Math.random() * totalFrequency
+
+        for (behaviorFactory in candidates) {
+            random -= behaviorFactory.frequency
+            if (random < 0) {
+                return behaviorFactory.buildBehavior()
+            }
+        }
+
+        return null
+    }
+
+    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean {
+        if (builder.isToggleable) {
+            for (behavior in Main.instance.properties.getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/")) {
+                if (behavior == builder.name) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    fun isBehaviorEnabled(name: String?, mascot: Mascot): Boolean {
+        if (behaviorBuilders.containsKey(name)) {
+            return isBehaviorEnabled(behaviorBuilders[name]!!, mascot)
+        }
+        return false
+    }
+
+    fun isBehaviorHidden(name: String?): Boolean {
+        if (behaviorBuilders.containsKey(name)) {
+            return behaviorBuilders[name]!!.isHidden
+        }
+        return false
+    }
+
+    fun isBehaviorToggleable(name: String?): Boolean {
+        if (behaviorBuilders.containsKey(name)) {
+            return behaviorBuilders[name]!!.isToggleable
+        }
+        return false
+    }
+
+    fun containsInformationKey(key: String?): Boolean {
+        return information.containsKey(key)
+    }
+
+    fun getInformation(key: String): String? {
+        return information[key]
     }
 
     companion object {

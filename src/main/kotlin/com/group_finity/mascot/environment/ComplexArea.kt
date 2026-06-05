@@ -12,7 +12,8 @@ import java.awt.Rectangle
 
 class ComplexArea {
     private val areaMap = HashMap<String, Area>()
-    val areas: Collection<Area> get() = areaMap.values
+    val areas: Collection<Area>
+        get() = areaMap.values
 
     fun set(rectangles: Map<String, Rectangle>) {
         retain(rectangles.keys)

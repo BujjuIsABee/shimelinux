@@ -7,6 +7,7 @@
 
 package com.group_finity.mascot
 
+import com.group_finity.mascot.config.Configuration
 import org.xml.sax.SAXParseException
 import java.util.Locale
 import java.util.Properties
@@ -29,8 +30,10 @@ fun main() {
 }
 
 class Main {
-    lateinit var properties: Properties private set
-    lateinit var languageBundle: ResourceBundle private set
+    lateinit var properties: Properties
+        private set
+    lateinit var languageBundle: ResourceBundle
+        private set
 
     fun run() {
         // Load properties
@@ -50,6 +53,10 @@ class Main {
             showError("The default language file could not be loaded.")
             exit()
         }
+    }
+
+    fun getConfiguration(imageSet: String): Configuration {
+        TODO()
     }
 
     fun exit() {

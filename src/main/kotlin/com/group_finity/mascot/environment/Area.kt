@@ -25,8 +25,10 @@ class Area {
     val rightBorder = Wall(this, true)
     val bottomBorder = FloorCeiling(this, true)
 
-    val width: Int get() = right - left
-    val height: Int get() = bottom - top
+    val width: Int
+        get() = right - left
+    val height: Int
+        get() = bottom - top
 
     fun set(value: Rectangle) {
         dleft = value.x - left

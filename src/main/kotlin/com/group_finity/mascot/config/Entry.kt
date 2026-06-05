@@ -13,8 +13,10 @@ import org.w3c.dom.Element
 class Entry(private val element: Element) {
     private val selected = HashMap<String, List<Entry>>()
 
-    val name: String get() = element.tagName
-    val text: String get() = element.textContent
+    val name: String
+        get() = element.tagName
+    val text: String
+        get() = element.textContent
 
     val attributes: Map<String, String> by lazy {
         val result = LinkedHashMap<String, String>()

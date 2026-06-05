@@ -32,9 +32,9 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
         isToggleable = if (
-            name == UserBehavior.BEHAVIORNAME_FALL ||
-            name == UserBehavior.BEHAVIORNAME_THROWN ||
-            name == UserBehavior.BEHAVIORNAME_DRAGGED
+            name == UserBehavior.BEHAVIOURNAME_FALL ||
+            name == UserBehavior.BEHAVIOURNAME_THROWN ||
+            name == UserBehavior.BEHAVIOURNAME_DRAGGED
         ) {
             false
         } else {
@@ -87,7 +87,7 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
     fun buildBehavior(): Behavior {
         try {
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
-        } catch (e: ActionInstantiationException) {
+        } catch (_: ActionInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)")
             throw BehaviorInstantiationException(Main.instance.languageBundle.getString("FailedInitialiseCorrespondingActionErrorMessage") + " ($this)")
         }
