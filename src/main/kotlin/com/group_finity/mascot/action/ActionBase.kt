@@ -17,7 +17,7 @@ import java.util.logging.Logger
 
 abstract class ActionBase(
     internal val schema: ResourceBundle,
-    internal val animations: List<Animation>,
+    internal val animations: ArrayList<Animation>,
     internal val variables: VariableMap,
 ) : Action {
     internal lateinit var mascot: Mascot
@@ -72,7 +72,6 @@ abstract class ActionBase(
     override fun hasNext(): Boolean {
         val isEffective = this.isEffective
         val isInTime = time < duration
-
         return isEffective && isInTime
     }
 

@@ -55,7 +55,7 @@ class Main {
         }
     }
 
-    fun getConfiguration(imageSet: String): Configuration {
+    fun getConfiguration(imageSet: String): Configuration? {
         TODO()
     }
 

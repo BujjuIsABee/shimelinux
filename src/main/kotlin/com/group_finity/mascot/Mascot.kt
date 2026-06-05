@@ -29,9 +29,8 @@ import javax.swing.SwingUtilities
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 
-class Mascot {
+class Mascot(var imageSet: String) {
     private val id = lastId.incrementAndGet()
-    var imageSet = ""
     private val window = NativeFactory.instance.newTransparentWindow()
     var manager: Manager? = null
     var anchor = Point(0, 0)
@@ -174,7 +173,7 @@ class Mascot {
 
         val followCursorMenu = JMenuItem(lang.getString("FollowCursor"))
         followCursorMenu.addActionListener {
-            manager?.setBehaviorAll(Main.instance.getConfiguration(imageSet), "ChaseMouse", imageSet)
+            manager?.setBehaviorAll(checkNotNull(Main.instance.getConfiguration(imageSet)), "ChaseMouse", imageSet)
         }
 
         val restoreWindowsMenu = JMenuItem(lang.getString("RestoreWindows"))
@@ -284,7 +283,7 @@ class Mascot {
         var useHand = false
         for (hotspot in hotspots) {
             if (hotspot.contains(this, position) &&
-                Main.instance.getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)
+                checkNotNull(Main.instance.getConfiguration(imageSet)).isBehaviorEnabled(hotspot.behavior, this)
             ) {
                 useHand = true
                 break

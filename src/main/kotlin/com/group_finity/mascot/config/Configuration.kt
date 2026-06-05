@@ -174,15 +174,15 @@ class Configuration {
     }
 
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
-        val variables = VariableMap()
-        variables.putAll(constants)
-        variables["mascot"] = mascot
+        val context = VariableMap()
+        context.putAll(constants)
+        context["mascot"] = mascot
 
         val candidates = ArrayList<BehaviorBuilder>()
         var totalFrequency = 0L
         for (behaviorFactory in behaviorBuilders.values) {
             try {
-                if (behaviorFactory.isEffective(variables) && isBehaviorEnabled(behaviorFactory, mascot)) {
+                if (behaviorFactory.isEffective(context) && isBehaviorEnabled(behaviorFactory, mascot)) {
                     candidates.add(behaviorFactory)
                     totalFrequency += behaviorFactory.frequency
                 }
@@ -200,7 +200,7 @@ class Configuration {
 
             for (behaviorFactory in previousBehaviorFactory.nextBehaviorBuilders) {
                 try {
-                    if (behaviorFactory.isEffective(variables) && isBehaviorEnabled(behaviorFactory, mascot)) {
+                    if (behaviorFactory.isEffective(context) && isBehaviorEnabled(behaviorFactory, mascot)) {
                         candidates.add(behaviorFactory)
                         totalFrequency += behaviorFactory.frequency
                     }

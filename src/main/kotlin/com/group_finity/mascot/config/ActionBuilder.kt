@@ -9,6 +9,11 @@ package com.group_finity.mascot.config
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.action.Action
+import com.group_finity.mascot.action.Animate
+import com.group_finity.mascot.action.Move
+import com.group_finity.mascot.action.Select
+import com.group_finity.mascot.action.Sequence
+import com.group_finity.mascot.action.Stay
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.AnimationInstantiationException
@@ -16,6 +21,7 @@ import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
+import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -61,7 +67,40 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
             val animations = createAnimations()
             val actions = createActions()
 
-            TODO("build action")
+            if (type == "Embedded") {
+                try {
+                    val cls = Class.forName(className) as Class<out Action>
+                    try {
+                        try {
+                            return cls.getConstructor(ResourceBundle::class.java, ArrayList::class.java, VariableMap::class.java).newInstance(schema, animations, variables)
+                        } catch (_: Exception) {
+                        }
+
+                        return cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java).newInstance(schema, variables)
+                    } catch (_: Exception) {
+                    }
+
+                    return cls.getConstructor().newInstance()
+                } catch (e: InstantiationException) {
+                    throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedClassActionInitialiseErrorMessage") + " ($this)", e)
+                } catch (e: IllegalAccessException) {
+                    throw ActionInstantiationException(Main.instance.languageBundle.getString("CannotAccessClassActionErrorMessage") + " ($this)", e)
+                } catch (e: ClassNotFoundException) {
+                    throw ActionInstantiationException(Main.instance.languageBundle.getString("ClassNotFoundErrorMessage") + " ($this)", e)
+                }
+            } else if (type == "Move") {
+                return Move(schema, animations, variables)
+            } else if (type == "Stay") {
+                return Stay(schema, animations, variables)
+            } else if (type == "Animate") {
+                return Animate(schema, animations, variables)
+            } else if (type == "Sequence") {
+                return Sequence(schema, variables, *actions.toTypedArray())
+            } else if (type == "Select") {
+                return Select(schema, variables, *actions.toTypedArray())
+            } else {
+                throw ActionInstantiationException(Main.instance.languageBundle.getString("UnknownActionTypeErrorMessage") + " ($this)")
+            }
         } catch (e: AnimationInstantiationException) {
             throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedCreateAnimationErrorMessage") + ": $this", e)
         } catch (e: VariableException) {
@@ -83,7 +122,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
         return result
     }
 
-    private fun createAnimations(): List<Animation> {
+    private fun createAnimations(): ArrayList<Animation> {
         val result = ArrayList<Animation>()
         for (animationFactory in animationBuilders) {
             result.add(animationFactory.buildAnimation())
