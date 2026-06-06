@@ -33,9 +33,9 @@ open class Move(
     }
 
     private val targetX: Int
-        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class.java, DEFAULT_TARGETX).toInt()
+        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
     private val targetY: Int
-        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class.java, DEFAULT_TARGETY).toInt()
+        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
 
     override val animation: Animation?
         get() {

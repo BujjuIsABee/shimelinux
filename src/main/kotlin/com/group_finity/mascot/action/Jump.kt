@@ -12,7 +12,6 @@ import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
 import kotlin.math.abs
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 open class Jump(
@@ -21,11 +20,11 @@ open class Jump(
     context: VariableMap,
 ) : ActionBase(schema, animations, context) {
     private val velocity: Double
-        get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class.java, DEFAULT_VELOCITY).toDouble()
+        get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()
     private val targetX: Int
-        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class.java, DEFAULT_TARGETX).toInt()
+        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
     private val targetY: Int
-        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class.java, DEFAULT_TARGETY).toInt()
+        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
 
     override fun hasNext(): Boolean {
         val distanceX = targetX - mascot.anchor.x

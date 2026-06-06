@@ -81,7 +81,8 @@ class UserBehavior(private val name: String, private val action: Action, private
                 if (action.hasNext()) {
                     if ((mascot.bounds.x + mascot.bounds.width <= environment.screen.left) ||
                         (environment.screen.right <= mascot.bounds.x) ||
-                        (environment.screen.bottom <= mascot.bounds.y)) {
+                        (environment.screen.bottom <= mascot.bounds.y)
+                    ) {
                         log.log(Level.INFO, "Out of the screen bounds ($mascot,$this)")
 
                         if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
@@ -134,7 +135,7 @@ class UserBehavior(private val name: String, private val action: Action, private
 
             for (hotspot in mascot.hotspots) {
                 if (hotspot.contains(mascot, e.point) &&
-                    Main.instance.getConfiguration(mascot.imageSet).isBehaviorEnabled(hotspot.behavior, mascot)
+                    checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).isBehaviorEnabled(hotspot.behavior, mascot)
                 ) {
                     handled = true
                     try {

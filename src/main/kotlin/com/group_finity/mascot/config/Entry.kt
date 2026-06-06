@@ -11,7 +11,7 @@ import org.w3c.dom.Attr
 import org.w3c.dom.Element
 
 class Entry(private val element: Element) {
-    private val selected = HashMap<String, List<Entry>>()
+    private val selected = HashMap<String, ArrayList<Entry>>()
 
     val name: String
         get() = element.tagName
@@ -27,7 +27,7 @@ class Entry(private val element: Element) {
         }
         return@lazy result
     }
-    val children: List<Entry> by lazy {
+    val children: ArrayList<Entry> by lazy {
         val result = ArrayList<Entry>()
         val childNodes = element.childNodes
         for (i in 0 until childNodes.length) {
@@ -52,20 +52,20 @@ class Entry(private val element: Element) {
         return false
     }
 
-    fun selectChildren(name: String): List<Entry> {
-        var children = selected[name]
-        if (children != null) {
-            return children
+    fun selectChildren(name: String): ArrayList<Entry> {
+        var result = selected[name]
+        if (result != null) {
+            return result
         }
 
-        children = ArrayList()
+        result = ArrayList()
         for (child in children) {
             if (child.name == name) {
-                children.add(child)
+                result.add(child)
             }
         }
 
-        selected[name] = children
-        return children
+        selected[name] = result
+        return result
     }
 }

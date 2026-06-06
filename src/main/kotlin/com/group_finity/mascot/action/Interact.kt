@@ -21,9 +21,11 @@ class Interact(
     animations: ArrayList<Animation>,
     context: VariableMap,
 ) : Animate(schema, animations, context) {
-    @Suppress("UNCHECKED_CAST")
     private val behavior: String?
-        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class.java as Class<String?>, DEFAULT_BEHAVIOUR)
+        get() {
+            val result = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
+            return if (result == "null") null else result
+        }
 
     override fun hasNext(): Boolean {
         return super.hasNext() && checkNotNull(mascot.manager).hasOverlappingMascotsAtPoint(mascot.anchor)
@@ -49,6 +51,6 @@ class Interact(
         private val log = Logger.getLogger(this::class.java.name)
 
         const val PARAMETER_BEHAVIOUR = "Behaviour"
-        private val DEFAULT_BEHAVIOUR: String? = null
+        private const val DEFAULT_BEHAVIOUR: String = "null"
     }
 }

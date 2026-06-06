@@ -10,21 +10,20 @@ package com.group_finity.mascot.image
 import java.awt.Color
 import java.awt.Point
 import java.awt.image.BufferedImage
+import java.nio.file.Path
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
 
 object ImagePairLoader {
-    fun load(leftPath: String, rightPath: String?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
-        if (ImagePairs.contains(leftPath + (rightPath ?: ""))) return
+    fun load(leftPath: Path, rightPath: Path?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
+        if (ImagePairs.contains(leftPath.toString() + (rightPath?.toString() ?: ""))) return
 
         // Load left image
-        val leftStream = this::class.java.getResourceAsStream(leftPath)
-        val leftImage = scale(premultiply(ImageIO.read(leftStream), opacity), scaling, filter)
+        val leftImage = scale(premultiply(ImageIO.read(this::class.java.getResourceAsStream(leftPath.toString())), opacity), scaling, filter)
 
         // Load right image
-        val rightStream = if (rightPath != null) this::class.java.getResourceAsStream(leftPath) else null
         val rightImage = if (rightPath != null) {
-            scale(premultiply(ImageIO.read(rightStream), opacity), scaling, filter)
+            scale(premultiply(ImageIO.read(this::class.java.getResourceAsStream(rightPath.toString())), opacity), scaling, filter)
         } else {
             flip(leftImage)
         }
@@ -32,7 +31,7 @@ object ImagePairLoader {
         val leftCenter = Point((center.x * scaling).roundToInt(), (center.y * scaling).roundToInt())
         val rightCenter = Point(rightImage.width - (center.x * scaling).roundToInt(), (center.y * scaling).roundToInt())
         val imagePair = ImagePair(MascotImage(leftImage, leftCenter), MascotImage(rightImage, rightCenter))
-        ImagePairs.load(leftPath + (rightPath ?: ""), imagePair)
+        ImagePairs.load(leftPath.toString() + (rightPath?.toString() ?: ""), imagePair)
     }
 
     private fun flip(source: BufferedImage): BufferedImage {

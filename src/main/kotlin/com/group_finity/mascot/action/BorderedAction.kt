@@ -22,7 +22,7 @@ abstract class BorderedAction(
         private set
 
     private val borderType: String
-        get() = eval(schema.getString(PARAMETER_BORDERTYPE), String::class.java, DEFAULT_BORDERTYPE)
+        get() = eval(schema.getString(PARAMETER_BORDERTYPE), String::class, DEFAULT_BORDERTYPE)
 
 
     override fun init(mascot: Mascot) {

@@ -16,7 +16,7 @@ class Sequence(
     vararg actions: Action,
 ) : ComplexAction(schema, params, *actions) {
     private val isLoop: Boolean
-        get() = eval(schema.getString(PARAMETER_LOOP), Boolean::class.java, DEFAULT_LOOP)
+        get() = eval(schema.getString(PARAMETER_LOOP), Boolean::class, DEFAULT_LOOP)
 
     override var currentAction: Int
         get() = super.currentAction

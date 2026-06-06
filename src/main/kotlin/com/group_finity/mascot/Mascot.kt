@@ -39,7 +39,7 @@ class Mascot(var imageSet: String) {
     var behavior: Behavior? = null
         set(value) {
             field = value
-            field!!.init(this)
+            value?.init(this)
         }
     var time = 0
         private set

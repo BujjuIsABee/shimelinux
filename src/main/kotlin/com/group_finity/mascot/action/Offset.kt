@@ -16,9 +16,9 @@ class Offset(
     params: VariableMap,
 ) : InstantAction(schema, params) {
     private val offsetX: Int
-        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class.java, DEFAULT_OFFSETX).toInt()
+        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
     private val offsetY: Int
-        get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class.java, DEFAULT_OFFSETY).toInt()
+        get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class, DEFAULT_OFFSETY).toInt()
 
     override fun apply() {
         mascot.anchor = Point(

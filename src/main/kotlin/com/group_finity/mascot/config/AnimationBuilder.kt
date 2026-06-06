@@ -21,6 +21,7 @@ import java.awt.Dimension
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.geom.Ellipse2D
+import java.nio.file.Path
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -60,11 +61,13 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
     }
 
     private fun loadPose(frameNode: Entry): Pose {
-        var imageText = frameNode.getAttribute(schema.getString("Image"))
-        imageText = if (!imageText.isNullOrEmpty()) "/img/$imageSet/$imageText" else null
+        val imageText = if (!frameNode.getAttribute(schema.getString("Image")).isNullOrEmpty()) {
+            Path("/img/$imageSet/${frameNode.getAttribute(schema.getString("Image"))}")
+        } else null
 
-        var imageRightText = frameNode.getAttribute(schema.getString("ImageRight"))
-        imageRightText = if (!imageRightText.isNullOrEmpty()) "/img/$imageSet/$imageRightText" else null
+        val imageRightText = if (!frameNode.getAttribute(schema.getString("ImageRight")).isNullOrEmpty()) {
+            Path("/img/$imageSet/${frameNode.getAttribute(schema.getString("ImageRight"))}")
+        } else null
 
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
         val moveText = checkNotNull(frameNode.getAttribute(schema.getString("Velocity")))
@@ -112,7 +115,7 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
             try {
                 soundText = if (Path("/sound/$soundText").exists()) {
                     "/sound/$soundText"
-                } else if (Path("/sound/$imageSet/$soundText").exists()) {
+                } else if (Path("sound/$imageSet/$soundText").exists()) {
                     "/sound/$imageSet/$soundText"
                 } else {
                     "/img/$imageSet/sound/$soundText"
@@ -126,11 +129,7 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
             }
         }
 
-        val pose = Pose(
-            if (imageText != null) Path(imageText) else null,
-            if (imageRightText != null) Path(imageRightText) else null,
-            moveX, moveY, duration, soundText
-        )
+        val pose = Pose(imageText, imageRightText, moveX, moveY, duration, soundText)
 
         log.log(Level.INFO, "Loaded pose: $pose")
 

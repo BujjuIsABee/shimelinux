@@ -14,6 +14,8 @@ import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
+import kotlin.reflect.KClass
+import kotlin.reflect.cast
 
 abstract class ActionBase(
     internal val schema: ResourceBundle,
@@ -31,17 +33,19 @@ abstract class ActionBase(
         }
 
     open val isDraggable: Boolean
-        get() = eval(schema.getString(PARAMETER_DRAGGABLE), Boolean::class.java, DEFAULT_DRAGGABLE)
+        get() = eval(schema.getString(PARAMETER_DRAGGABLE), Boolean::class, DEFAULT_DRAGGABLE)
     private val isEffective: Boolean
-        get() = eval(schema.getString(PARAMETER_CONDITION), Boolean::class.java, DEFAULT_CONDITION)
+        get() = eval(schema.getString(PARAMETER_CONDITION), Boolean::class, DEFAULT_CONDITION)
     private val duration: Int
-        get() = eval(schema.getString(PARAMETER_DURATION), Number::class.java, DEFAULT_DURATION).toInt()
+        get() = eval(schema.getString(PARAMETER_DURATION), Number::class, DEFAULT_DURATION).toInt()
     private val affordance: String
-        get() = eval(schema.getString(PARAMETER_AFFORDANCE), String::class.java, DEFAULT_AFFORDANCE)
+        get() = eval(schema.getString(PARAMETER_AFFORDANCE), String::class, DEFAULT_AFFORDANCE)
 
-    @Suppress("UNCHECKED_CAST")
     private val name: String?
-        get() = eval(schema.getString("Name"), String::class.java as Class<String?>, null)
+        get() {
+            val result = eval(schema.getString("Name"), String::class, "null")
+            return if (result == "null") null else result
+        }
 
     internal open val animation: Animation?
         get() {
@@ -116,7 +120,7 @@ abstract class ActionBase(
         }
     }
 
-    internal fun <T> eval(name: String, type: Class<T>, defaultValue: T) : T {
+    internal fun <T : Any> eval(name: String, type: KClass<T>, defaultValue: T) : T {
         synchronized(variables) {
             val variable = variables.rawMap[name]
             if (variable != null) {

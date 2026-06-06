@@ -7,19 +7,11 @@
 
 package com.group_finity.mascot.script
 
+import java.util.AbstractMap
 import javax.script.Bindings
 
-class VariableMap : AbstractMap<String, Any?>(), Bindings {
+class VariableMap : Bindings {
     val rawMap = LinkedHashMap<String, Variable>()
-
-    override val keys: MutableSet<String>
-        get() = rawMap.keys
-    @Suppress("UNCHECKED_CAST")
-    override val values: MutableSet<Any?>
-        get() = rawMap.values as MutableSet<Any?>
-    @Suppress("UNCHECKED_CAST")
-    override val entries: MutableSet<MutableMap.MutableEntry<String, Any>>
-        get() = rawMap as MutableSet<MutableMap.MutableEntry<String, Any>>
 
     fun init() {
         for (variable in rawMap.values) {
@@ -33,6 +25,27 @@ class VariableMap : AbstractMap<String, Any?>(), Bindings {
         }
     }
 
+    //region Bindings Implementation
+    override val keys: MutableSet<String>
+        get() = rawMap.keys
+    override val values: MutableSet<Any?>
+        get() = rawMap.keys.mapTo(mutableSetOf()) { key -> get(key) }
+    override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
+        get() = rawMap.entries.mapTo(mutableSetOf()) { entry -> AbstractMap.SimpleEntry(entry.key, get(entry.key)) }
+
+    override val size: Int
+        get() = rawMap.size
+
+    override fun isEmpty(): Boolean = rawMap.isEmpty()
+
+    override fun containsValue(value: Any?): Boolean = rawMap.containsValue(value)
+
+    override fun containsKey(key: String): Boolean = rawMap.containsKey(key)
+
+    override fun get(key: String): Any? = rawMap[key]?.get(this)
+
+    override fun remove(key: String): Any? = rawMap.remove(key)
+
     override fun clear() {
         rawMap.clear()
     }
@@ -43,11 +56,14 @@ class VariableMap : AbstractMap<String, Any?>(), Bindings {
         rawMap.put(key, Constant(value))
     }
 
-    override fun putAll(toMerge: Map<out String, Any?>) {
-        for (entry in toMerge) {
+    override fun putAll(entries: Map<out String, Any?>) {
+        for (entry in entries) {
             put(entry.key, entry.value)
         }
     }
 
-    override fun remove(key: String?): Any? = rawMap.remove(key)
+    operator fun set(key: String, value: Any?) {
+        put(key, value)
+    }
+    //endregion
 }

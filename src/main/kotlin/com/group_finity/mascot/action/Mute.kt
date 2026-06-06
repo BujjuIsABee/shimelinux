@@ -15,9 +15,11 @@ class Mute(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
-    @Suppress("UNCHECKED_CAST")
     private val sound: String?
-        get() = eval(schema.getString(PARAMETER_SOUND), String::class.java as Class<String?>, DEFAULT_SOUND)
+        get() {
+            val result = eval(schema.getString(PARAMETER_SOUND), String::class, DEFAULT_SOUND)
+            return if (result == "null") null else result
+        }
 
     override fun apply() {
         if (sound != null) {
@@ -55,6 +57,6 @@ class Mute(
 
     companion object {
         const val PARAMETER_SOUND = "Sound"
-        private val DEFAULT_SOUND: String? = null
+        private const val DEFAULT_SOUND: String = "null"
     }
 }

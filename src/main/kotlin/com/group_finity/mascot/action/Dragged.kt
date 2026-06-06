@@ -27,11 +27,11 @@ class Dragged(
     var timeToRegist = 0
 
     private val offsetX: Int
-        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class.java, DEFAULT_OFFSETX).toInt()
+        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
     private val offsetY: Int
-        get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class.java, DEFAULT_OFFSETY).toInt()
+        get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class, DEFAULT_OFFSETY).toInt()
     private val offsetType: String
-        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class.java, DEFAULT_OFFSETTYPE)
+        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class, DEFAULT_OFFSETTYPE)
 
     override fun init(mascot: Mascot) {
         super.init(mascot)

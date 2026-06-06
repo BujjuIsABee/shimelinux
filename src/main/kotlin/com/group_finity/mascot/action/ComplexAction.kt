@@ -16,8 +16,16 @@ abstract class ComplexAction(
     schema: ResourceBundle,
     params: VariableMap,
     internal vararg val actions: Action
-) : ActionBase(schema, ArrayList<Animation>(), params) {
+) : ActionBase(schema, ArrayList(), params) {
     internal open var currentAction = 0
+        set (value) {
+            field = value
+            if (super.hasNext()) {
+                if (field < actions.size) {
+                    action.init(mascot)
+                }
+            }
+        }
     internal val action: Action
         get() = actions[currentAction]
 

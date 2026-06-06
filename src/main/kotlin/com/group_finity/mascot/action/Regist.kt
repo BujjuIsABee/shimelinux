@@ -26,9 +26,9 @@ class Regist(
     private var scaling = 0.0
 
     private val offsetX: Int
-        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class.java, DEFAULT_OFFSETX).toInt()
+        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
     private val offsetType: String
-        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class.java, DEFAULT_OFFSETTYPE)
+        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class, DEFAULT_OFFSETTYPE)
 
     override fun init(mascot: Mascot) {
         super.init(mascot)

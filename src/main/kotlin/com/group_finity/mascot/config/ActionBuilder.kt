@@ -28,7 +28,7 @@ import java.util.logging.Logger
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema
     val type = checkNotNull(actionNode.getAttribute(schema.getString("Type")))
-    val name = checkNotNull(actionNode.getAttribute(schema.getString("Name")))
+    val name = actionNode.getAttribute(schema.getString("Name"))
     private val className = actionNode.getAttribute(schema.getString("Class"))
     private val params = LinkedHashMap<String, String>()
     private val animationBuilders = ArrayList<AnimationBuilder>()

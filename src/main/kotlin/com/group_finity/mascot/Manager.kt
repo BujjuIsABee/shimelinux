@@ -142,7 +142,7 @@ class Manager {
         synchronized(mascots) {
             for (mascot in mascots) {
                 try {
-                    val configuration = Main.instance.getConfiguration(mascot.imageSet)
+                    val configuration = checkNotNull(Main.instance.getConfiguration(mascot.imageSet))
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Failed to set behavior.", e)

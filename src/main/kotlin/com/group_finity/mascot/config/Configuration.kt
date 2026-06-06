@@ -83,7 +83,7 @@ class Configuration {
                 throw ConfigurationException(Main.instance.languageBundle.getString("DuplicateActionErrorMessage") + ": ${action.name}")
             }
 
-            actionBuilders[action.name] = action
+            actionBuilders[checkNotNull(action.name)] = action
         }
     }
 

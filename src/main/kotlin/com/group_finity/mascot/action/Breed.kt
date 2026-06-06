@@ -29,19 +29,19 @@ class Breed(
         private val log = Logger.getLogger(this::class.java.name)
 
         private val bornX: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class.java, DEFAULT_BORNX).toInt()
+            get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class, DEFAULT_BORNX).toInt()
         private val bornY: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class.java, DEFAULT_BORNX).toInt()
+            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class, DEFAULT_BORNX).toInt()
         private val bornBehavior: String
-            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), String::class.java, DEFAULT_BORNBEHAVIOUR)
+            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), String::class, DEFAULT_BORNBEHAVIOUR)
         private val bornMascot: String
-            get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), String::class.java, DEFAULT_BORNMASCOT)
+            get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), String::class, DEFAULT_BORNMASCOT)
         private val bornTransient: Boolean
-            get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), Boolean::class.java, DEFAULT_BORNTRANSIENT)
+            get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), Boolean::class, DEFAULT_BORNTRANSIENT)
         private val bornInterval: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNINTERVAL), Number::class.java, DEFAULT_BORNINTERVAL).toInt()
+            get() = action.eval(action.schema.getString(PARAMETER_BORNINTERVAL), Number::class, DEFAULT_BORNINTERVAL).toInt()
         private val bornCount: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNCOUNT), Number::class.java, DEFAULT_BORNCOUNT).toInt()
+            get() = action.eval(action.schema.getString(PARAMETER_BORNCOUNT), Number::class, DEFAULT_BORNCOUNT).toInt()
         val isEnabled: Boolean
             get() = if (bornTransient) {
                 Main.instance.properties.getProperty("Transients", "true").toBoolean()

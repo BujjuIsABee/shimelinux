@@ -22,7 +22,7 @@ class Turn(
     private var isTurning = false
 
     private val isLookRight: Boolean
-        get() = eval(schema.getString(PARAMETER_LOOKRIGHT), Boolean::class.java, !mascot.isLookRight)
+        get() = eval(schema.getString(PARAMETER_LOOKRIGHT), Boolean::class, !mascot.isLookRight)
 
     override fun tick() {
         mascot.isLookRight = isLookRight

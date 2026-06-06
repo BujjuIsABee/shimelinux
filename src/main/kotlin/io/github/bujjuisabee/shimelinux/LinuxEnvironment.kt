@@ -13,25 +13,23 @@ import java.awt.Point
 
 class LinuxEnvironment : Environment() {
     override val workArea: Area
-        get() = TODO("Not yet implemented")
-    override val activeIE: Area
-        get() = TODO("Not yet implemented")
+        get() = screen
+    override val activeIE = Area()
     override val activeIETitle: String
-        get() = TODO("Not yet implemented")
+        get() = "" // TODO: not implemented
 
     override fun moveActiveIE(point: Point) {
-        TODO("Not yet implemented")
+        // TODO: not implemented
     }
 
     override fun restoreIE() {
-        TODO("Not yet implemented")
+        // TODO: not implemented
     }
 
     override fun refreshCache() {
-        TODO("Not yet implemented")
+        // i feel so refreshed!!!
     }
 
     override fun dispose() {
-        TODO("Not yet implemented")
     }
 }
