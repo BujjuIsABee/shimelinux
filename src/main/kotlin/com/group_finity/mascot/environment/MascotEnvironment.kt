@@ -101,7 +101,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     fun getFloor(ignoreSeparator: Boolean): Border = if (activeIE.topBorder.isOn(mascot.anchor)) {
         activeIE.topBorder
     } else if (workArea.bottomBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
-        workArea.topBorder
+        workArea.bottomBorder
     } else {
         NotOnBorder.INSTANCE
     }

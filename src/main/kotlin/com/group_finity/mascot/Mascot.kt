@@ -39,7 +39,7 @@ class Mascot(var imageSet: String) {
     var behavior: Behavior? = null
         set(value) {
             field = value
-            value?.init(this)
+            field?.init(this)
         }
     var time = 0
         private set
@@ -48,6 +48,7 @@ class Mascot(var imageSet: String) {
     val totalCount: Int
         get() = manager?.count ?: 0
     private var isAnimating = true
+        get() = field && !isPaused
     var isPaused = false
     var isDragging = false
     val environment = MascotEnvironment(this)
@@ -167,8 +168,7 @@ class Mascot(var imageSet: String) {
 
         val callAnotherMenu = JMenuItem(lang.getString("CallAnother"))
         callAnotherMenu.addActionListener {
-            // TODO: uncomment this
-            // Main.instance.createMascot(imageSet)
+            Main.instance.createMascot(imageSet)
         }
 
         val followCursorMenu = JMenuItem(lang.getString("FollowCursor"))

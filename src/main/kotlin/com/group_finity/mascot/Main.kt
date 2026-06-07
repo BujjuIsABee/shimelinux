@@ -247,7 +247,11 @@ class Main {
         log.log(Level.INFO, "Creating a mascot ($imageSet)")
 
         val mascot = Mascot(imageSet)
+
+        // Create the mascot outside the screen bounds so its position gets reset
         mascot.anchor = Point(-4000, -4000)
+
+        // Randomize the initial direction
         mascot.isLookRight = Math.random() < 0.5
 
         try {

@@ -54,7 +54,7 @@ open class Fall(
         }
 
         velocityX -= velocityX * resistanceX
-        velocityY -= velocityY * resistanceY + gravity
+        velocityY -= (velocityY * resistanceY) - gravity
 
         putVariable(schema.getString(VARIABLE_VELOCITYX), velocityX)
         putVariable(schema.getString(VARIABLE_VELOCITYY), velocityY)

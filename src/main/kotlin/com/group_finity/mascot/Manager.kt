@@ -12,16 +12,17 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import java.awt.Point
 import java.lang.ref.WeakReference
+import java.util.Timer
 import java.util.logging.Level
 import java.util.logging.Logger
-import kotlin.concurrent.thread
+import kotlin.concurrent.timer
 
 class Manager {
     private val mascots = ArrayList<Mascot>()
     private val added = LinkedHashSet<Mascot>()
     private val removed = LinkedHashSet<Mascot>()
     var isExitOnLastRemoved = true
-    private var thread: Thread? = null
+    private var timer: Timer? = null
 
     val isPaused: Boolean
         get() {
@@ -40,54 +41,17 @@ class Manager {
     val count: Int
         get() = getCount(null)
 
-    init {
-        thread(start = true, isDaemon = true)  {
-            while (true) {
-                try {
-                    Thread.sleep(Long.MAX_VALUE)
-                } catch (_: InterruptedException) {
-                }
-            }
-        }
-    }
-
     fun start() {
-        if (thread != null && thread!!.isAlive) return
+        if (timer != null) return
 
-        thread = Thread {
-            var prev = System.nanoTime() / 1000000
-            try {
-                while (true) {
-                    while (true) {
-                        val cur = System.nanoTime() / 1000000
-                        if (cur - prev >= TICK_INTERVAL) {
-                            if (cur > prev + TICK_INTERVAL * 2) {
-                                prev = cur
-                            } else {
-                                prev += TICK_INTERVAL
-                            }
-                            break
-                        }
-                        Thread.sleep(1, 0)
-                    }
-                    tick()
-                }
-            } catch (_: InterruptedException) {
-            }
+        timer = timer("Update Mascots", false, period = TICK_INTERVAL) {
+            tick()
         }
-
-        thread!!.isDaemon = false
-        thread!!.start()
     }
 
     fun stop() {
-        if (thread == null || !thread!!.isAlive) return
-
-        thread!!.interrupt()
-        try {
-            thread!!.join()
-        } catch (_: InterruptedException) {
-        }
+        timer?.cancel()
+        timer = null
     }
 
     fun tick() {
@@ -102,7 +66,7 @@ class Manager {
 
             // Remove removed mascots
             for (mascot in removed) {
-                mascots.add(mascot)
+                mascots.remove(mascot)
             }
             removed.clear()
 
@@ -281,6 +245,6 @@ class Manager {
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
-        const val TICK_INTERVAL = 40
+        const val TICK_INTERVAL = 40L
     }
 }

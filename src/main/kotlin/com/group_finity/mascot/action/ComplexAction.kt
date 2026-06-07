@@ -8,7 +8,6 @@
 package com.group_finity.mascot.action
 
 import com.group_finity.mascot.Mascot
-import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 

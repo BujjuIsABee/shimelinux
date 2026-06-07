@@ -22,7 +22,7 @@ open class Stay(
     override fun tick() {
         super.tick()
 
-        if (border != null && border!!.isOn(mascot.anchor)) {
+        if (border != null && !border!!.isOn(mascot.anchor)) {
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
             throw LostGroundException()
         }

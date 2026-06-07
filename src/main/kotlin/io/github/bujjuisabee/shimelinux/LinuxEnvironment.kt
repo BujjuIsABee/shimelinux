@@ -16,14 +16,12 @@ class LinuxEnvironment : Environment() {
         get() = screen
     override val activeIE = Area()
     override val activeIETitle: String
-        get() = "" // TODO: not implemented
+        get() = ""
 
     override fun moveActiveIE(point: Point) {
-        // TODO: not implemented
     }
 
     override fun restoreIE() {
-        // TODO: not implemented
     }
 
     override fun refreshCache() {
