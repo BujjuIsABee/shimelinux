@@ -12,17 +12,15 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import java.awt.Point
 import java.lang.ref.WeakReference
-import java.util.Timer
 import java.util.logging.Level
 import java.util.logging.Logger
-import kotlin.concurrent.timer
+import javax.swing.Timer
 
 class Manager {
     private val mascots = ArrayList<Mascot>()
     private val added = LinkedHashSet<Mascot>()
     private val removed = LinkedHashSet<Mascot>()
     var isExitOnLastRemoved = true
-    private var timer: Timer? = null
 
     val isPaused: Boolean
         get() {
@@ -42,16 +40,10 @@ class Manager {
         get() = getCount(null)
 
     fun start() {
-        if (timer != null) return
-
-        timer = timer("Update Mascots", false, period = TICK_INTERVAL) {
+        val timer = Timer(TICK_INTERVAL) {
             tick()
         }
-    }
-
-    fun stop() {
-        timer?.cancel()
-        timer = null
+        timer.start()
     }
 
     fun tick() {
@@ -245,6 +237,6 @@ class Manager {
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
-        const val TICK_INTERVAL = 40L
+        const val TICK_INTERVAL = 40
     }
 }

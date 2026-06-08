@@ -18,6 +18,10 @@ class LinuxEnvironment : Environment() {
     override val activeIETitle: String
         get() = ""
 
+    init {
+        activeIE.isVisible = false
+    }
+
     override fun moveActiveIE(point: Point) {
     }
 

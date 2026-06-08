@@ -23,6 +23,8 @@ import java.awt.event.MouseMotionListener
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 import java.util.logging.Logger
+import javax.swing.JCheckBoxMenuItem
+import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
@@ -210,14 +212,48 @@ class Mascot(var imageSet: String) {
             isPaused = !isPaused
         }
 
-        // TODO: Implement behaviors submenu
+        val behaviorsSubmenu = JMenu(lang.getString("SetBehaviour"))
+        val allowedSubmenu = JMenu(lang.getString("AllowedBehaviours"))
+        val config = checkNotNull(Main.instance.getConfiguration(imageSet))
+        for (behaviorName in config.behaviorNames) {
+            try {
+                if (!config.isBehaviorHidden(behaviorName)) {
+                    val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ");
+                    if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
+                        val item = JMenuItem(if (lang.containsKey(behaviorName)) lang.getString(behaviorName) else caption)
+                        item.addActionListener {
+                            try {
+                                behavior = config.buildBehavior(behaviorName)
+                            } catch (e: Exception) {
+                                log.log(Level.SEVERE, "Failed to set behavior ($this)")
+                                Main.showError(lang.getString("CouldNotSetBehaviourErrorMessage"), e)
+                            }
+                        }
+                        behaviorsSubmenu.add(item)
+                    }
+                    if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains('/')) {
+                        val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
+                        toggleItem.addActionListener {
+                            Main.instance.setMascotBehaviorEnabled(behaviorName, this, !config.isBehaviorEnabled(behaviorName, this))
+                        }
+                        allowedSubmenu.add(toggleItem)
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
 
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
         popup.add(restoreWindowsMenu)
         popup.addSeparator()
-        // add submenu
+        if (behaviorsSubmenu.menuComponentCount > 0) {
+            popup.add(behaviorsSubmenu)
+        }
+        if (allowedSubmenu.menuComponentCount > 0) {
+            popup.add(allowedSubmenu)
+        }
         popup.addSeparator()
         popup.add(pauseMenu)
         popup.addSeparator()

@@ -29,9 +29,9 @@ class VariableMap : Bindings {
     override val keys: MutableSet<String>
         get() = rawMap.keys
     override val values: MutableSet<Any?>
-        get() = rawMap.keys.mapTo(mutableSetOf()) { key -> get(key) }
+        get() = rawMap.keys.mapTo(mutableSetOf()) { get(it) }
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
-        get() = rawMap.entries.mapTo(mutableSetOf()) { entry -> AbstractMap.SimpleEntry(entry.key, get(entry.key)) }
+        get() = rawMap.entries.mapTo(mutableSetOf()) { AbstractMap.SimpleEntry(it.key, get(it.key)) }
 
     override val size: Int
         get() = rawMap.size

@@ -14,31 +14,33 @@ import java.awt.Color
 import java.awt.Component
 import java.awt.Graphics
 import java.awt.GraphicsConfiguration
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 import javax.swing.JPanel
 import javax.swing.JWindow
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
+    private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
+
     private var image: LinuxNativeImage? = null
-    private var gc: GraphicsConfiguration? = null
     private var offset: Point = Point(0, 0)
 
     init {
-        val panel = object : JPanel() {
-            init {
-                background = Color(0, 0, 0, 0)
-            }
+        System.setProperty("sun.java2d.noddraw", "true");
+        System.setProperty("sun.java2d.opengl", "true");
 
-            override fun paintComponent(g: Graphics?) {
+        background = Color(0, 0, 0, 0)
+
+        val panel = object : JPanel() {
+            override fun paintComponent(g: Graphics) {
                 if (image != null) {
-                    g?.drawImage(image!!.managedImage, offset.x, offset.y, null)
+                    g.drawImage(image!!.managedImage, offset.x, offset.y, null)
                 }
             }
         }
 
         contentPane = panel
-        background = panel.background
     }
 
     override fun asComponent(): Component {
@@ -65,16 +67,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
 
     override fun setVisible(b: Boolean) {
         super.setVisible(b)
-
-        // Store the current graphics configuration
-        if (b && gc == null) {
-            gc = this.graphicsConfiguration
-        }
     }
 
-    override fun getGraphicsConfiguration(): GraphicsConfiguration? {
-        // Use the stored graphics configuration
-        // This fixes an issue with transparency
-        return gc ?: super.getGraphicsConfiguration()
-    }
+    override fun getGraphicsConfiguration(): GraphicsConfiguration = gc
 }

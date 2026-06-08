@@ -16,6 +16,26 @@ class MoveWithTurn(
     schema: ResourceBundle,
     animations: ArrayList<Animation>,
     params: VariableMap,
-) : Move(schema, animations, params)
+) : Move(schema, animations, params) {
+    override val animation: Animation?
+        get() {
+            if (isTurning) {
+                return animations[animations.size - 1]
+            } else {
+                for (index in 0 until animations.size - 1) {
+                    if (animations[index].isEffective(variables)) {
+                        return animations[index]
+                    }
+                }
+            }
+            return null
+        }
+    override val hasTurningAnimation: Boolean
+        get() = true
 
-// TODO: implement this action
+    init {
+        if (animations.size < 2) {
+            throw IllegalArgumentException("Not enough animations")
+        }
+    }
+}

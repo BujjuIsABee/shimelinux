@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.swing.JOptionPane
+import javax.swing.SwingUtilities
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -27,7 +28,9 @@ import kotlin.system.exitProcess
 
 fun main() {
     try {
-        Main.instance.run()
+        SwingUtilities.invokeLater {
+            Main.instance.run()
+        }
     } catch (_: OutOfMemoryError) {
         Main.showError(
             "Out of Memory. There are probably too many\n" +
@@ -271,6 +274,32 @@ class Main {
             mascot.dispose()
         }
     }
+
+    fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
+        val list = ArrayList<String>()
+        val data = properties.getProperty("DisabledBehaviours.${mascot.imageSet}", "").split('/')
+
+        if (data.isNotEmpty() && data[0] != "") {
+            list.addAll(data)
+        }
+
+        if (list.contains(name) && enabled) {
+            list.remove(name)
+        } else if (!list.contains(name) && !enabled) {
+            list.add(name)
+        }
+
+        if (list.isNotEmpty()) {
+            properties.setProperty("DisabledBehaviours.${mascot.imageSet}", list.toString().replace("[", "").replace("]", "").replace(", ", "/"))
+        } else {
+            properties.remove("DisabledBehaviours.${mascot.imageSet}")
+        }
+
+        // TODO
+        // updateConfigFile()
+    }
+
+
 
     fun getConfiguration(imageSet: String): Configuration? {
         return configurations[imageSet]

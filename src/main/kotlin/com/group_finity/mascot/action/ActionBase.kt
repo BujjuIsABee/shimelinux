@@ -38,7 +38,7 @@ abstract class ActionBase(
         get() = eval(schema.getString(PARAMETER_CONDITION), Boolean::class, DEFAULT_CONDITION)
     private val duration: Int
         get() = eval(schema.getString(PARAMETER_DURATION), Number::class, DEFAULT_DURATION).toInt()
-    private val affordance: String
+    internal val affordance: String
         get() = eval(schema.getString(PARAMETER_AFFORDANCE), String::class, DEFAULT_AFFORDANCE)
 
     private val name: String?

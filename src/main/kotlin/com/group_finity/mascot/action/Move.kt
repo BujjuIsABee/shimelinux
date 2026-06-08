@@ -21,7 +21,7 @@ open class Move(
     context: VariableMap,
 ) : BorderedAction(schema, animations, context) {
     internal var isTurning = false
-    internal val hasTurningAnimation: Boolean by lazy {
+    internal open val hasTurningAnimation: Boolean by lazy {
         var result = false
         for (animation in super.animations) {
             if (animation.isTurn) {

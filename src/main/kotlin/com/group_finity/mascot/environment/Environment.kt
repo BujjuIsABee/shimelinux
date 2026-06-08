@@ -30,7 +30,7 @@ abstract class Environment {
         get() = complexScreen.areas
 
     fun init() {
-        timer("Update Screen Rect", true, period = 5000L) {
+        timer("UpdateScreenRect", true, period = 5000L) {
             updateScreenRect()
         }
 
