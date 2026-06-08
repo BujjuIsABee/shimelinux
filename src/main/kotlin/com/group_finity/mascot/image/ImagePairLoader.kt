@@ -12,6 +12,7 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 import javax.imageio.ImageIO
+import kotlin.io.path.inputStream
 import kotlin.math.roundToInt
 
 object ImagePairLoader {
@@ -19,11 +20,11 @@ object ImagePairLoader {
         if (ImagePairs.contains(leftPath.toString() + (rightPath?.toString() ?: ""))) return
 
         // Load left image
-        val leftImage = scale(premultiply(ImageIO.read(this::class.java.getResourceAsStream(leftPath.toString())), opacity), scaling, filter)
+        val leftImage = scale(premultiply(ImageIO.read(leftPath.inputStream()), opacity), scaling, filter)
 
         // Load right image
         val rightImage = if (rightPath != null) {
-            scale(premultiply(ImageIO.read(this::class.java.getResourceAsStream(rightPath.toString())), opacity), scaling, filter)
+            scale(premultiply(ImageIO.read(rightPath.inputStream()), opacity), scaling, filter)
         } else {
             flip(leftImage)
         }

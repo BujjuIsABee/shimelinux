@@ -17,19 +17,23 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
+import java.nio.file.Path
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.Logger
-import javax.swing.JMenu
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.SwingUtilities
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
+import kotlin.io.path.inputStream
+import kotlin.io.path.isDirectory
+import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
 fun main() {
@@ -60,9 +64,11 @@ class Main {
         private set
 
     fun run() {
+        createConfigDirectory()
+
         // Load properties
         try {
-            val input = this::class.java.getResourceAsStream("/conf/settings.properties")
+            val input = getConfigFile("conf", "settings.properties").inputStream()
             properties = Properties()
             properties.load(input)
         } catch (_: Exception) {
@@ -105,15 +111,60 @@ class Main {
         manager.start()
     }
 
+    private fun createConfigDirectory() {
+        try {
+            // Create conf directory
+            val confDir = getConfigFile("conf")
+            if (!confDir.exists() || !confDir.isDirectory()) {
+                confDir.createDirectories()
+
+                // Copy actions.xml
+                Path(confDir.toString(), "actions.xml").outputStream().use {
+                    this::class.java.getResourceAsStream("/conf/actions.xml")?.copyTo(it)
+                }
+
+                // Copy behaviors.xml
+                Path(confDir.toString(), "behaviors.xml").outputStream().use {
+                    this::class.java.getResourceAsStream("/conf/behaviors.xml")?.copyTo(it)
+                }
+
+                // Copy settings.properties
+                Path(confDir.toString(), "settings.properties").outputStream().use {
+                    this::class.java.getResourceAsStream("/conf/settings.properties")?.copyTo(it)
+                }
+            }
+
+            // Create img directory
+            val imgDir = getConfigFile("img")
+            if (!imgDir.exists() || !imgDir.isDirectory()) {
+                // Create unused directory
+                val unusedDir = Path(imgDir.toString(), "unused")
+                unusedDir.createDirectories()
+
+                // Copy default mascot
+                val defaultMascotDir = Path(imgDir.toString(), "Shimeji")
+                defaultMascotDir.createDirectories()
+                for (i in 1 until 47) {
+                    Path(defaultMascotDir.toString(), "shime$i.png").outputStream().use {
+                        this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.copyTo(it)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            showError("Failed to create the config directory.", e)
+            exitProcess(0)
+        }
+    }
+
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
-            var filePath = Path("/conf")
+            var filePath = getConfigFile("conf")
             var actionsPath = filePath.resolve("actions.xml")
             if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
                 actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
             }
 
-            filePath = Path("/conf/$imageSet")
+            filePath = getConfigFile("conf", imageSet)
             if (filePath.resolve("actions.xml").exists()) {
                 actionsPath = filePath.resolve("actions.xml")
             } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -130,7 +181,7 @@ class Main {
                 actionsPath = filePath.resolve("1.xml")
             }
 
-            filePath = Path("/img/$imageSet/conf")
+            filePath = getConfigFile("img", imageSet, "conf")
             if (filePath.resolve("actions.xml").exists()) {
                 actionsPath = filePath.resolve("actions.xml")
             } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -149,19 +200,19 @@ class Main {
 
             log.log(Level.INFO, "Reading action file ($actionsPath)")
 
-            val actions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this::class.java.getResourceAsStream(actionsPath.toString()))
+            val actions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(actionsPath.inputStream())
 
             val configuration = Configuration()
 
             configuration.load(Entry(actions.documentElement), imageSet)
 
-            filePath = Path("/conf")
+            filePath = getConfigFile("conf")
             var behaviorsPath = filePath.resolve("behaviors.xml")
             if (filePath.resolve("\u884C\u52D5.xml").exists()) {
                 behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
             }
 
-            filePath = Path("/conf/$imageSet")
+            filePath = getConfigFile("conf", imageSet)
             if (filePath.resolve("behaviors.xml").exists()) {
                 behaviorsPath = filePath.resolve("behaviors.xml")
             } else if (filePath.resolve("behavior.xml").exists()) {
@@ -180,7 +231,7 @@ class Main {
                 behaviorsPath = filePath.resolve("2.xml")
             }
 
-            filePath = Path("/img/$imageSet/conf")
+            filePath = getConfigFile("img", imageSet, "conf")
             if (filePath.resolve("behaviors.xml").exists()) {
                 behaviorsPath = filePath.resolve("behaviors.xml")
             } else if (filePath.resolve("behavior.xml").exists()) {
@@ -201,7 +252,7 @@ class Main {
 
             log.log(Level.INFO, "Reading behavior file ($behaviorsPath)")
 
-            val behaviors = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this::class.java.getResourceAsStream(behaviorsPath.toString()))
+            val behaviors = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(behaviorsPath.inputStream())
 
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
@@ -593,7 +644,12 @@ class Main {
     }
 
     private fun updateConfigFile() {
-        // TODO Implement this
+        try {
+            getConfigFile("conf", "settings.properties").outputStream().use {
+                properties.store(it, "ShimeLinux Configuration Options")
+            }
+        } catch (_: Exception) {
+        }
     }
 
     fun getConfiguration(imageSet: String): Configuration? {
@@ -624,6 +680,11 @@ class Main {
             }
 
             showError(m)
+        }
+
+        fun getConfigFile(vararg paths: String): Path {
+            val shimelinuxDir = Path(System.getProperty("user.home"), ".config", "shimelinux")
+            return Path(shimelinuxDir.toString(), *paths)
         }
     }
 }

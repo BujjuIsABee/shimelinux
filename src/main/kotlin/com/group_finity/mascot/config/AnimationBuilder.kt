@@ -21,11 +21,9 @@ import java.awt.Dimension
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.geom.Ellipse2D
-import java.nio.file.Path
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
-import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -62,11 +60,11 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
 
     private fun loadPose(frameNode: Entry): Pose {
         val imageText = if (!frameNode.getAttribute(schema.getString("Image")).isNullOrEmpty()) {
-            Path("/img/$imageSet/${frameNode.getAttribute(schema.getString("Image"))}")
+            Main.getConfigFile("img", imageSet, frameNode.getAttribute(schema.getString("Image"))!!)
         } else null
 
         val imageRightText = if (!frameNode.getAttribute(schema.getString("ImageRight")).isNullOrEmpty()) {
-            Path("/img/$imageSet/${frameNode.getAttribute(schema.getString("ImageRight"))}")
+            Main.getConfigFile("img", imageSet, frameNode.getAttribute(schema.getString("ImageRight"))!!)
         } else null
 
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
@@ -113,12 +111,12 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
 
         if (soundText != null) {
             try {
-                soundText = if (Path("/sound/$soundText").exists()) {
-                    "/sound/$soundText"
-                } else if (Path("sound/$imageSet/$soundText").exists()) {
-                    "/sound/$imageSet/$soundText"
+                soundText = if (Main.getConfigFile("sound", soundText).exists()) {
+                    Main.getConfigFile("sound", soundText).toString()
+                } else if (Main.getConfigFile("sound", imageSet, soundText).exists()) {
+                    Main.getConfigFile("sound", imageSet, soundText).toString()
                 } else {
-                    "/img/$imageSet/sound/$soundText"
+                    Main.getConfigFile("img", imageSet, "sound", soundText).toString()
                 }
 
                 SoundLoader.load(soundText, volumeText.toFloat())
