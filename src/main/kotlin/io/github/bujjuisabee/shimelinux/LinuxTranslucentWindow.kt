@@ -17,13 +17,15 @@ import java.awt.GraphicsConfiguration
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
+import java.awt.image.BufferedImage
 import javax.swing.JPanel
 import javax.swing.JWindow
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
 
-    private var image: LinuxNativeImage? = null
+    private var image: BufferedImage? = null
+    private var prev: BufferedImage? = null
     private var offset: Point = Point(0, 0)
 
     init {
@@ -35,7 +37,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         val panel = object : JPanel() {
             override fun paintComponent(g: Graphics) {
                 if (image != null) {
-                    g.drawImage(image!!.managedImage, offset.x, offset.y, null)
+                    g.drawImage(image!!, offset.x, offset.y, null)
                 }
             }
         }
@@ -58,11 +60,14 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     override fun setImage(image: NativeImage) {
-        this.image = image as LinuxNativeImage
+        this.image = (image as LinuxNativeImage).managedImage
     }
 
     override fun updateImage() {
-        repaint()
+        if (image != prev) {
+            repaint()
+        }
+        prev = image
     }
 
     override fun setVisible(b: Boolean) {
