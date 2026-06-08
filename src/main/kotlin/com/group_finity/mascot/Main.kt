@@ -11,6 +11,10 @@ import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
+import dorkbox.systemTray.Checkbox
+import dorkbox.systemTray.Menu
+import dorkbox.systemTray.MenuItem
+import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.util.Locale
@@ -19,7 +23,9 @@ import java.util.ResourceBundle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.Logger
+import javax.swing.JMenu
 import javax.swing.JOptionPane
+import javax.swing.JSeparator
 import javax.swing.SwingUtilities
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
@@ -87,7 +93,8 @@ class Main {
             index++
         }
 
-        // TODO: add tray icon
+        // Create the tray icon
+        createTrayIcon()
 
         // Create the first mascot
         for (imageSet in imageSets) {
@@ -240,6 +247,244 @@ class Main {
         return false
     }
 
+    private fun createTrayIcon() {
+        log.log(Level.INFO, "Creating the tray icon")
+
+        val icon = SystemTray.get()
+        if (icon != null) {
+            icon.setImage(this::class.java.getResourceAsStream("/img/icon.png"))
+            icon.setStatus("ShimeLinux")
+        } else {
+            log.log(Level.SEVERE, "Failed to create tray icon")
+            showError(languageBundle.getString("FailedDisplaySystemTrayErrorMessage"))
+        }
+
+        val callShimejiMenu = MenuItem(languageBundle.getString("CallShimeji")) {
+            createMascot()
+        }
+
+        val followCursorMenu = MenuItem(languageBundle.getString("FollowCursor")) {
+            manager.setBehaviorAll("ChaseMouse")
+        }
+
+        val reduceToOneMenu = MenuItem(languageBundle.getString("ReduceToOne")) {
+            manager.remainOne()
+        }
+
+        val restoreWindowsMenu = MenuItem(languageBundle.getString("RestoreWindows")) {
+            NativeFactory.instance.getEnvironment().restoreIE()
+        }
+
+        // Allowed behaviors submenu
+
+        val breedingMenu = Checkbox(languageBundle.getString("BreedingCloning")) {
+            toggleBooleanSetting("Breeding", true)
+            updateConfigFile()
+        }
+        breedingMenu.checked = properties.getProperty("Breeding", "true").toBoolean()
+
+        val transientMenu = Checkbox(languageBundle.getString("BreedingTransient")) {
+            toggleBooleanSetting("Transients", true)
+            updateConfigFile()
+        }
+        transientMenu.checked = properties.getProperty("Transients", "true").toBoolean()
+
+        val transformationMenu = Checkbox(languageBundle.getString("Transformation")) {
+            toggleBooleanSetting("Transformation", true)
+            updateConfigFile()
+        }
+        transformationMenu.checked = properties.getProperty("Transformation", "true").toBoolean()
+
+        val throwingMenu = Checkbox(languageBundle.getString("ThrowingWindows")) {
+            toggleBooleanSetting("Throwing", true)
+            updateConfigFile()
+        }
+        throwingMenu.checked = properties.getProperty("Throwing", "true").toBoolean()
+
+        val soundsMenu = Checkbox(languageBundle.getString("SoundEffects")) {
+            toggleBooleanSetting("Sounds", true)
+            updateConfigFile()
+        }
+        soundsMenu.checked = properties.getProperty("Sounds", "true").toBoolean()
+
+        val multiscreenMenu = Checkbox(languageBundle.getString("Multiscreen")) {
+            toggleBooleanSetting("Multiscreen", true)
+            updateConfigFile()
+        }
+        multiscreenMenu.checked = properties.getProperty("Multiscreen", "true").toBoolean()
+
+        val allowedBehaviorsSubmenu = Menu(languageBundle.getString("AllowedBehaviours"))
+        allowedBehaviorsSubmenu.add(breedingMenu)
+        allowedBehaviorsSubmenu.add(transientMenu)
+        allowedBehaviorsSubmenu.add(transformationMenu)
+        allowedBehaviorsSubmenu.add(throwingMenu)
+        allowedBehaviorsSubmenu.add(soundsMenu)
+        allowedBehaviorsSubmenu.add(multiscreenMenu)
+
+        val chooseShimejiMenu = MenuItem(languageBundle.getString("ChooseShimeji")) {
+            // TODO Implement image set chooser
+        }
+
+        val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
+            // TODO Implement settings menu
+        }
+
+        // Language submenu
+
+        val englishMenu = MenuItem("English") {
+            updateLanguage("en-GB")
+            updateConfigFile()
+        }
+
+        val arabicMenu = MenuItem("\u0639\u0631\u0628\u064A") {
+            updateLanguage("ar-SA")
+            updateConfigFile()
+        }
+
+        val catalanMenu = MenuItem("Catal\u00E0") {
+            updateLanguage("ca-ES")
+            updateConfigFile()
+        }
+
+        val germanMenu = MenuItem("Deutsch") {
+            updateLanguage("de-DE")
+            updateConfigFile()
+        }
+
+        val spanishMenu = MenuItem("Espa\u00F1ol") {
+            updateLanguage("es-ES")
+            updateConfigFile()
+        }
+
+        val frenchMenu = MenuItem("Fran\u00E7ais") {
+            updateLanguage("fr-FR")
+            updateConfigFile()
+        }
+
+        val croatianMenu = MenuItem("Hrvatski") {
+            updateLanguage("hr-HR")
+            updateConfigFile()
+        }
+
+        val italianMenu = MenuItem("Italiano") {
+            updateLanguage("it-IT")
+            updateConfigFile()
+        }
+
+        val dutchMenu = MenuItem("Nederlands") {
+            updateLanguage("nl-NL")
+            updateConfigFile()
+        }
+
+        val polishMenu = MenuItem("Polski") {
+            updateLanguage("pl-PL")
+            updateConfigFile()
+        }
+
+        val portugueseMenu = MenuItem("Portugu\u00eas") {
+            updateLanguage("pt-PT")
+            updateConfigFile()
+        }
+
+        val brazilianPortugueseMenu = MenuItem("Portugu\u00eas Brasileiro") {
+            updateLanguage("pt-BR")
+            updateConfigFile()
+        }
+
+        val russianMenu = MenuItem("\u0440\u0443\u0301\u0441\u0441\u043a\u0438\u0439 \u044f\u0437\u044b\u0301\u043a") {
+            updateLanguage("ru-RU")
+            updateConfigFile()
+        }
+
+        val romanianMenu = MenuItem("Rom\u00e2n\u0103") {
+            updateLanguage("ro-RO")
+            updateConfigFile()
+        }
+
+        val serbianMenu = MenuItem("Srpski") {
+            updateLanguage("sr-RS")
+            updateConfigFile()
+        }
+
+        val finnishMenu = MenuItem("Suomi") {
+            updateLanguage("fi-FI")
+            updateConfigFile()
+        }
+
+        val vietnameseMenu = MenuItem("ti\u1ebfng Vi\u1ec7t") {
+            updateLanguage("vi-VN")
+            updateConfigFile()
+        }
+
+        val chineseMenu = MenuItem("\u7b80\u4f53\u4e2d\u6587") {
+            updateLanguage("zh-CN")
+            updateConfigFile()
+        }
+
+        val chineseTraditionalMenu = MenuItem("\u7E41\u9AD4\u4E2D\u6587") {
+            updateLanguage("zh-TW")
+            updateConfigFile()
+        }
+
+        val koreanMenu = MenuItem("\ud55c\uad6d\uc5b4") {
+            updateLanguage("ko-KR")
+            updateConfigFile()
+        }
+
+        val japaneseMenu = MenuItem("\u65E5\u672C\u8A9E") {
+            updateLanguage("ja-JP")
+            updateConfigFile()
+        }
+
+        val languageSubmenu = Menu(languageBundle.getString("Language"))
+        languageSubmenu.add(englishMenu)
+        languageSubmenu.add(arabicMenu)
+        languageSubmenu.add(catalanMenu)
+        languageSubmenu.add(germanMenu)
+        languageSubmenu.add(spanishMenu)
+        languageSubmenu.add(frenchMenu)
+        languageSubmenu.add(croatianMenu)
+        languageSubmenu.add(italianMenu)
+        languageSubmenu.add(dutchMenu)
+        languageSubmenu.add(polishMenu)
+        languageSubmenu.add(portugueseMenu)
+        languageSubmenu.add(brazilianPortugueseMenu)
+        languageSubmenu.add(russianMenu)
+        languageSubmenu.add(romanianMenu)
+        languageSubmenu.add(serbianMenu)
+        languageSubmenu.add(finnishMenu)
+        languageSubmenu.add(vietnameseMenu)
+        languageSubmenu.add(chineseMenu)
+        languageSubmenu.add(chineseTraditionalMenu)
+        languageSubmenu.add(koreanMenu)
+        languageSubmenu.add(japaneseMenu)
+
+        val pauseAllMenu = MenuItem(if (manager.isPaused) {
+            languageBundle.getString("ResumeAnimations")
+        } else {
+            languageBundle.getString("PauseAnimations")
+        }) {
+            manager.togglePauseAll()
+        }
+
+        val dismissAllMenu = MenuItem(languageBundle.getString("DismissAll")) {
+            exit()
+        }
+
+        icon.menu.add(callShimejiMenu)
+        icon.menu.add(followCursorMenu)
+        icon.menu.add(reduceToOneMenu)
+        icon.menu.add(restoreWindowsMenu)
+        icon.menu.add(JSeparator())
+        icon.menu.add(allowedBehaviorsSubmenu)
+        icon.menu.add(chooseShimejiMenu)
+        icon.menu.add(settingsMenu)
+        icon.menu.add(languageSubmenu)
+        icon.menu.add(JSeparator())
+        icon.menu.add(pauseAllMenu)
+        icon.menu.add(dismissAllMenu)
+    }
+
     private fun createMascot() {
         val length = imageSets.size
         val random = (length * Math.random()).toInt()
@@ -275,6 +520,47 @@ class Main {
         }
     }
 
+    private fun updateLanguage(language: String) {
+        if (properties.getProperty("Language", "en-GB") != language) {
+            properties.setProperty("Language", language)
+            refreshLanguage()
+        }
+    }
+
+    private fun refreshLanguage() {
+        try {
+            // Refresh the language bundle
+            val systemLocale = Locale.getDefault().toLanguageTag()
+            val locale = Locale.forLanguageTag(properties.getProperty("Language", systemLocale))
+            languageBundle = ResourceBundle.getBundle("conf.language", locale)
+
+            // Refresh the mascots
+            val isExitOnLastRemoved = manager.isExitOnLastRemoved
+            manager.isExitOnLastRemoved = false
+            manager.disposeAll()
+
+            for (imageSet in imageSets) {
+                loadConfiguration(imageSet)
+            }
+
+            for (imageSet in imageSets) {
+                createMascot(imageSet)
+            }
+
+            manager.isExitOnLastRemoved = isExitOnLastRemoved
+
+            // Refresh the tray icon
+            val icon = SystemTray.get()
+            for (entry in icon.menu.entries) {
+                icon.menu.remove(entry)
+            }
+            createTrayIcon()
+        } catch (_: Exception) {
+            showError("Failed to set the new language.")
+            exit()
+        }
+    }
+
     fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
         val list = ArrayList<String>()
         val data = properties.getProperty("DisabledBehaviours.${mascot.imageSet}", "").split('/')
@@ -295,11 +581,20 @@ class Main {
             properties.remove("DisabledBehaviours.${mascot.imageSet}")
         }
 
-        // TODO
-        // updateConfigFile()
+        updateConfigFile()
     }
 
+    private fun toggleBooleanSetting(propertyName: String, defaultValue: Boolean) {
+        if (properties.getProperty(propertyName, defaultValue.toString()).toBoolean()) {
+            properties.setProperty(propertyName, "false")
+        } else {
+            properties.setProperty(propertyName, "true")
+        }
+    }
 
+    private fun updateConfigFile() {
+        // TODO Implement this
+    }
 
     fun getConfiguration(imageSet: String): Configuration? {
         return configurations[imageSet]

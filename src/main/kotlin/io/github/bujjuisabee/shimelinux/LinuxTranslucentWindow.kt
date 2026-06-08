@@ -25,7 +25,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
 
     private var image: BufferedImage? = null
-    private var prev: BufferedImage? = null
+    private var imageChanged: Boolean = false
     private var offset: Point = Point(0, 0)
 
     init {
@@ -60,14 +60,18 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     override fun setImage(image: NativeImage) {
-        this.image = (image as LinuxNativeImage).managedImage
+        val newImage = (image as LinuxNativeImage).managedImage
+        if (this.image != newImage) {
+            imageChanged = true
+            this.image = newImage
+        }
     }
 
     override fun updateImage() {
-        if (image != prev) {
+        if (imageChanged) {
             repaint()
+            imageChanged = false
         }
-        prev = image
     }
 
     override fun setVisible(b: Boolean) {
