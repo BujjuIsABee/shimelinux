@@ -44,8 +44,7 @@ abstract class ComplexAction(
     }
 
     override fun hasNext(): Boolean {
-        val isInRange = currentAction < actions.size
-        return super.hasNext() && isInRange && action.hasNext()
+        return super.hasNext() && currentAction < actions.size && action.hasNext()
     }
 
     override fun tick() {

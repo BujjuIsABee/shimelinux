@@ -19,8 +19,8 @@ import kotlin.math.roundToInt
 class Dragged(
     schema: ResourceBundle,
     animations: ArrayList<Animation>,
-    params: VariableMap
-) : ActionBase(schema, animations, params) {
+    context: VariableMap
+) : ActionBase(schema, animations, context) {
     private var footX = 0.0
     private var footDx = 0.0
     private var scaling = 0.0
@@ -85,13 +85,11 @@ class Dragged(
     }
 
     override fun refreshHotspots() {
+        // Action does not support hotspots
         mascot.hotspots.clear()
     }
 
     companion object {
-        private const val VARIABLE_FOOTX = "FootX"
-        private const val VARIABLE_FOOTDX = "FootDX"
-
         const val PARAMETER_OFFSETX = "OffsetX"
         private const val DEFAULT_OFFSETX = 0
 
@@ -100,5 +98,8 @@ class Dragged(
 
         const val PARAMETER_OFFSETTYPE = "OffsetType"
         private const val DEFAULT_OFFSETTYPE = "ImageAnchor"
+
+        const val VARIABLE_FOOTX = "FootX"
+        const val VARIABLE_FOOTDX = "FootDX"
     }
 }

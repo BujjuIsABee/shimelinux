@@ -27,7 +27,7 @@ open class Stay(
             throw LostGroundException()
         }
 
-        checkNotNull(animation).next(mascot, time)
+        animation?.next(mascot, time)
     }
 
     companion object {

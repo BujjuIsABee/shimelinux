@@ -27,10 +27,7 @@ class ThrowIE(
         get() = eval(schema.getString(PARAMETER_GRAVITY), Number::class, DEFAULT_GRAVITY).toDouble()
 
     override fun hasNext(): Boolean {
-        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) {
-            return false
-        }
-
+        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) return false
         return super.hasNext() && environment.activeIE.isVisible
     }
 
@@ -55,8 +52,6 @@ class ThrowIE(
     }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val PARAMETER_INITIALVX = "InitialVX"
         private const val DEFAULT_INITIALVX = 32
 

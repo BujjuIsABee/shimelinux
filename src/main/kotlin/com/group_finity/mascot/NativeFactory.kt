@@ -20,12 +20,14 @@ abstract class NativeFactory {
     abstract fun newTransparentWindow(): TranslucentWindow
 
     companion object {
+        @JvmStatic
         lateinit var instance: NativeFactory
 
         init {
             resetInstance()
         }
 
+        @JvmStatic
         fun resetInstance() {
             instance = io.github.bujjuisabee.shimelinux.NativeFactoryImpl()
         }

@@ -14,7 +14,6 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
-import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -26,7 +25,7 @@ class ScanJump(
     animations: ArrayList<Animation>,
     params: VariableMap,
 ) : ActionBase(schema, animations, params) {
-    private var target: WeakReference<Mascot>? = null
+    private var target: Mascot? = null
 
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
@@ -40,32 +39,32 @@ class ScanJump(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
+        // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
         if (mascot.manager != null) {
-            target = mascot.manager!!.getMascotWithAffordance(affordance)
+            target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
         }
 
-        putVariable(schema.getString(VARIABLE_VELOCITYX), target?.get()?.anchor?.x)
-        putVariable(schema.getString(VARIABLE_VELOCITYY), target?.get()?.anchor?.y)
+        putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
+        putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
     }
 
     override fun hasNext(): Boolean {
         if (mascot.manager == null) return super.hasNext()
-
-        return super.hasNext() && (target?.get()?.affordances?.contains(affordance) ?: false)
+        return super.hasNext() && target?.affordances?.contains(affordance) ?: false
     }
 
     override fun tick() {
+        // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        val target = checkNotNull(target?.get())
-
+        val target = checkNotNull(target)
         val targetX = target.anchor.x
         val targetY = target.anchor.y
 
-        putVariable(schema.getString("TargetX"), targetX)
-        putVariable(schema.getString("TargetY"), targetY)
+        putVariable(schema.getString(VARIABLE_TARGETX), targetX)
+        putVariable(schema.getString(VARIABLE_TARGETY), targetY)
 
         if (mascot.anchor.x != targetX) {
             mascot.isLookRight = mascot.anchor.x < targetX
@@ -79,8 +78,8 @@ class ScanJump(
             val velocityX = (velocity * distanceX / distance).toInt()
             val velocityY = (velocity * distanceY / distance).toInt()
 
-            putVariable(schema.getString(ComplexJump.VARIABLE_VELOCITYX), velocityX)
-            putVariable(schema.getString(ComplexJump.VARIABLE_VELOCITYY), velocityY)
+            putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
+            putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
 
             mascot.anchor = Point(
                 mascot.anchor.x + velocityX,
@@ -99,6 +98,9 @@ class ScanJump(
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
+            } catch (e: IllegalStateException) {
+                log.log(Level.SEVERE, "Fatal Error", e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
@@ -126,5 +128,7 @@ class ScanJump(
 
         const val VARIABLE_VELOCITYX = "VelocityX"
         const val VARIABLE_VELOCITYY = "VelocityY"
+        const val VARIABLE_TARGETX = "TargetX"
+        const val VARIABLE_TARGETY = "TargetY"
     }
 }

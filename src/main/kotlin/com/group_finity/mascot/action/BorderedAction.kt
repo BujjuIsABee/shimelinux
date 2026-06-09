@@ -21,9 +21,8 @@ abstract class BorderedAction(
     internal var border: Border? = null
         private set
 
-    private val borderType: String
-        get() = eval(schema.getString(PARAMETER_BORDERTYPE), String::class, DEFAULT_BORDERTYPE)
-
+    private val borderType: String?
+        get() = eval(schema.getString(PARAMETER_BORDERTYPE), String::class, DEFAULT_BORDERTYPE).takeUnless { it == DEFAULT_BORDERTYPE }
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -44,7 +43,7 @@ abstract class BorderedAction(
 
     companion object {
         const val PARAMETER_BORDERTYPE = "BorderType"
-        private const val DEFAULT_BORDERTYPE: String = ""
+        private const val DEFAULT_BORDERTYPE: String = "null"
 
         const val BORDERTYPE_CEILING = "Ceiling"
         const val BORDERTYPE_WALL = "Wall"

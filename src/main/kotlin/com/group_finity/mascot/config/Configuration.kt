@@ -22,7 +22,6 @@ import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 
-
 class Configuration {
     private val constants = LinkedHashMap<String, String>(2)
     val actionBuilders = LinkedHashMap<String, ActionBuilder>()
@@ -137,8 +136,7 @@ class Configuration {
     }
 
     fun buildAction(name: String, params: Map<String, String>): Action {
-        val factory = actionBuilders[name]
-            ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
+        val factory = actionBuilders[name] ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
         return factory.buildAction(params)
     }
 

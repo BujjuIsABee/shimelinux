@@ -20,8 +20,6 @@ import java.awt.Rectangle
 import java.awt.image.BufferedImage
 import javax.swing.JPanel
 import javax.swing.JWindow
-import javax.swing.SwingUtilities
-import javax.swing.UIManager
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }

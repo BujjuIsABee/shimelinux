@@ -27,15 +27,13 @@ class WalkWithIE(
         get() = eval(schema.getString(PARAMETER_IEOFFSETY), Number::class, DEFAULT_IEOFFSETY).toInt()
 
     override fun hasNext(): Boolean {
-        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) {
-            return false
-        }
-
+        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) return false
         return super.hasNext()
     }
 
     override fun tick() {
         val activeIE = environment.activeIE
+
         if (!activeIE.isVisible) {
             log.log(Level.INFO, "IE not visible ($mascot,$this)")
             throw LostGroundException()

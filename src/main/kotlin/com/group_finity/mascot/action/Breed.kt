@@ -31,7 +31,7 @@ class Breed(
         private val bornX: Int
             get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class, DEFAULT_BORNX).toInt()
         private val bornY: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class, DEFAULT_BORNX).toInt()
+            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class, DEFAULT_BORNY).toInt()
         private val bornBehavior: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), String::class, DEFAULT_BORNBEHAVIOUR)
         private val bornMascot: String
@@ -60,7 +60,7 @@ class Breed(
             val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
             val childType = if (Main.instance.getConfiguration(bornMascot) != null) bornMascot else action.mascot.imageSet
 
-            for (i in 0 until bornCount) {
+            repeat(bornCount) {
                 val mascot = Mascot(childType)
 
                 log.log(Level.INFO, "Mascot breeding (${action.mascot},$action,$mascot)")
@@ -79,7 +79,7 @@ class Breed(
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {
-                    mascot.behavior = Main.instance.getConfiguration(childType)!!.buildBehavior(bornBehavior, action.mascot)
+                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(bornBehavior, action.mascot)
                     action.mascot.manager?.add(mascot)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)

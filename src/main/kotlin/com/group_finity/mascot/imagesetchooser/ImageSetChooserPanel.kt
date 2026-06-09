@@ -7,7 +7,6 @@
 
 package com.group_finity.mascot.imagesetchooser
 
-import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Image
@@ -31,10 +30,6 @@ class ImageSetChooserPanel : JPanel {
 
     var imageSetName: String? = null
         private set
-
-    constructor() {
-        initComponents()
-    }
 
     constructor(imageSet: String, actions: String, behaviors: String, imageLocation: String, captionText: String) {
         initComponents()

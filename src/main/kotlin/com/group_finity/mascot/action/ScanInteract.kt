@@ -14,7 +14,6 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
-import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -24,7 +23,7 @@ class ScanInteract(
     animations: ArrayList<Animation>,
     context: VariableMap,
 ) : BorderedAction(schema, animations, context) {
-    private var target: WeakReference<Mascot>? = null
+    private var target: Mascot? = null
     internal var isTurning = false
         private set
     internal val hasTurningAnimation: Boolean by lazy {
@@ -46,7 +45,7 @@ class ScanInteract(
     override val animation: Animation?
         get() {
             for (animation in animations) {
-                if (animation.isEffective(variables) && isTurning != animation.isTurn) {
+                if (animation.isEffective(variables) && isTurning == animation.isTurn) {
                     return animation
                 }
             }
@@ -56,21 +55,21 @@ class ScanInteract(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
+        // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        putVariable(schema.getString("TargetX"), null)
-        putVariable(schema.getString("TargetY"), null)
+        putVariable(schema.getString(VARIABLE_TARGETX), null)
+        putVariable(schema.getString(VARIABLE_TARGETY), null)
     }
 
     override fun hasNext(): Boolean {
-        val isInTime = time < checkNotNull(animation).duration
-
-        return super.hasNext() && isTurning || isInTime
+        return super.hasNext() && isTurning || time < checkNotNull(animation).duration
     }
 
     override fun tick() {
         super.tick()
 
+        // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
         if ((border != null) && !border!!.isOn(mascot.anchor)) {
@@ -78,30 +77,30 @@ class ScanInteract(
             throw LostGroundException()
         }
 
-        if (mascot.manager != null && !(target?.get()?.affordances?.contains(affordance) ?: false)) {
-            target = mascot.manager!!.getMascotWithAffordance(affordance)
+        if (mascot.manager != null && !(target?.affordances?.contains(affordance) ?: false)) {
+            target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
         }
 
-        putVariable(schema.getString("TargetX"), target?.get()?.anchor?.x)
-        putVariable(schema.getString("TargetY"), target?.get()?.anchor?.y)
+        putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
+        putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
 
-        if (target?.get()?.affordances?.contains(affordance) ?: false) {
-            val target = checkNotNull(target?.get())
+        if (target?.affordances?.contains(affordance) ?: false) {
+            val target = checkNotNull(target)
+            val animation = checkNotNull(animation)
+
             if (mascot.anchor.x != target.anchor.x) {
                 isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
                 mascot.isLookRight = mascot.anchor.x < target.anchor.x
             }
 
-            val animation = checkNotNull(animation)
-
-            if (isTurning && time < animation.duration) {
+            if (isTurning && time >= animation.duration) {
                 time -= animation.duration
                 isTurning = false
             }
 
             animation.next(mascot, time)
 
-            if (!isTurning && (time < animation.duration - 1 || animation.duration == 1) && !behavior.trim().isEmpty()) {
+            if (!isTurning && (time == animation.duration - 1 || animation.duration == 1) && !behavior.trim().isEmpty()) {
                 try {
                     mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
                     if (!targetBehavior.trim().isEmpty()) {
@@ -110,6 +109,9 @@ class ScanInteract(
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
+                } catch (e: IllegalStateException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
                     Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
@@ -132,5 +134,8 @@ class ScanInteract(
 
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false
+
+        const val VARIABLE_TARGETX = "TargetX"
+        const val VARIABLE_TARGETY = "TargetY"
     }
 }

@@ -29,13 +29,15 @@ class Transform(
     override fun tick() {
         super.tick()
 
-        if ((time == checkNotNull(animation).duration - 1 || checkNotNull(animation).duration == 1) && Main.instance.properties.getProperty("Transformation", "true").toBoolean()) {
+        val animation = checkNotNull(animation)
+        val canTransform = Main.instance.properties.getProperty("Transformation", "true").toBoolean()
+        if ((time == animation.duration - 1 || animation.duration == 1) && canTransform) {
             transform()
         }
     }
 
     private fun transform() {
-        val childType = if (Main.instance.getConfiguration(transformMascot) != null) transformMascot else mascot.imageSet
+        val childType = transformMascot.takeUnless { Main.instance.getConfiguration(it) == null } ?: mascot.imageSet
 
         try {
             mascot.imageSet = childType

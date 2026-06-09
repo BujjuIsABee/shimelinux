@@ -62,44 +62,43 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
 
     @Suppress("UNCHECKED_CAST")
     override fun buildAction(params: Map<String, String>): Action {
-        try {
+        return try {
             val variables = createVariables(params)
             val animations = createAnimations()
             val actions = createActions()
 
-            if (type == "Embedded") {
-                try {
-                    val cls = Class.forName(className) as Class<out Action>
+            when (type) {
+                "Embedded" -> {
                     try {
+                        val cls = Class.forName(className) as Class<out Action>
                         try {
-                            return cls.getConstructor(ResourceBundle::class.java, ArrayList::class.java, VariableMap::class.java).newInstance(schema, animations, variables)
+                            try {
+                                return cls.getConstructor(
+                                    ResourceBundle::class.java,
+                                    ArrayList::class.java,
+                                    VariableMap::class.java
+                                ).newInstance(schema, animations, variables)
+                            } catch (_: Exception) {
+                            }
+                            return cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java)
+                                .newInstance(schema, variables)
                         } catch (_: Exception) {
                         }
-
-                        return cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java).newInstance(schema, variables)
-                    } catch (_: Exception) {
+                        return cls.getConstructor().newInstance()
+                    } catch (e: InstantiationException) {
+                        throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedClassActionInitialiseErrorMessage") + " ($this)", e)
+                    } catch (e: IllegalAccessException) {
+                        throw ActionInstantiationException(Main.instance.languageBundle.getString("CannotAccessClassActionErrorMessage") + " ($this)", e)
+                    } catch (e: ClassNotFoundException) {
+                        throw ActionInstantiationException(Main.instance.languageBundle.getString("ClassNotFoundErrorMessage") + " ($this)", e)
                     }
-
-                    return cls.getConstructor().newInstance()
-                } catch (e: InstantiationException) {
-                    throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedClassActionInitialiseErrorMessage") + " ($this)", e)
-                } catch (e: IllegalAccessException) {
-                    throw ActionInstantiationException(Main.instance.languageBundle.getString("CannotAccessClassActionErrorMessage") + " ($this)", e)
-                } catch (e: ClassNotFoundException) {
-                    throw ActionInstantiationException(Main.instance.languageBundle.getString("ClassNotFoundErrorMessage") + " ($this)", e)
                 }
-            } else if (type == "Move") {
-                return Move(schema, animations, variables)
-            } else if (type == "Stay") {
-                return Stay(schema, animations, variables)
-            } else if (type == "Animate") {
-                return Animate(schema, animations, variables)
-            } else if (type == "Sequence") {
-                return Sequence(schema, variables, *actions.toTypedArray())
-            } else if (type == "Select") {
-                return Select(schema, variables, *actions.toTypedArray())
-            } else {
-                throw ActionInstantiationException(Main.instance.languageBundle.getString("UnknownActionTypeErrorMessage") + " ($this)")
+                "Move" -> Move(schema, animations, variables)
+                "Stay" -> Stay(schema, animations, variables)
+                "Animate" -> Animate(schema, animations, variables)
+                "Sequence" -> Sequence(schema, variables, *actions.toTypedArray())
+                "Select" -> Select(schema, variables, *actions.toTypedArray())
+                else -> throw ActionInstantiationException(Main.instance.languageBundle.getString("UnknownActionTypeErrorMessage") + " ($this)")
             }
         } catch (e: AnimationInstantiationException) {
             throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedCreateAnimationErrorMessage") + ": $this", e)

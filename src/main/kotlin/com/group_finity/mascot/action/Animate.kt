@@ -29,7 +29,6 @@ open class Animate(
 
     override fun hasNext(): Boolean {
         if (animation == null) return false
-        val isInTime = time < animation!!.duration
-        return super.hasNext() && isInTime
+        return super.hasNext() && time < checkNotNull(animation).duration
     }
 }

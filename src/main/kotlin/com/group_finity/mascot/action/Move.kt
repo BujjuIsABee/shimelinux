@@ -22,14 +22,12 @@ open class Move(
 ) : BorderedAction(schema, animations, context) {
     internal var isTurning = false
     internal open val hasTurningAnimation: Boolean by lazy {
-        var result = false
         for (animation in super.animations) {
             if (animation.isTurn) {
-                result = true
-                break
+                return@lazy true
             }
         }
-        return@lazy result
+        return@lazy false
     }
 
     private val targetX: Int
@@ -63,6 +61,7 @@ open class Move(
         }
 
         var isDown = false
+
         if (targetX != DEFAULT_TARGETX && mascot.anchor.x != targetX) {
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
             mascot.isLookRight = mascot.anchor.x < targetX
@@ -75,7 +74,7 @@ open class Move(
             isTurning = false
         }
 
-        checkNotNull(animation).next(mascot, time)
+        animation?.next(mascot, time)
 
         if (targetX != DEFAULT_TARGETX) {
             if ((mascot.isLookRight && (mascot.anchor.x >= targetX)) ||

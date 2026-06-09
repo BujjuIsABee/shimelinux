@@ -10,7 +10,6 @@ package com.group_finity.mascot.imagesetchooser
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import java.awt.BorderLayout
-import java.awt.Component
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.FlowLayout
@@ -20,7 +19,6 @@ import java.awt.GridLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.imageio.ImageIO
-import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.DefaultListModel
 import javax.swing.DefaultListSelectionModel
@@ -163,15 +161,16 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 behaviorsPath = filePath.resolve("2.xml")
             }
 
-            // TODO Implement information
+            // TODO: Implement information
 
             var imageFile: String
             var caption: String
             try {
                 val configuration = Configuration()
 
-                // TODO Implement information
-                throw Exception()
+                // TODO: Implement information
+
+                throw Exception("Ignore me!")
             } catch (_: Exception) {
                 imageFile = topDir.resolve(Path(imageSet, "shime1.png")).toString()
                 caption = imageSet

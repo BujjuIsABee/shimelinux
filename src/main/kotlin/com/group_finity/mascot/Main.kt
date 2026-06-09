@@ -132,7 +132,7 @@ class Main {
 
         // Create the first mascot
         for (imageSet in imageSets) {
-            // TODO: add information
+            // TODO: Implement information
             createMascot(imageSet)
         }
 
@@ -284,7 +284,7 @@ class Main {
 
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
-            // TODO load info
+            // TODO: Implement information
 
             configuration.validate()
 
@@ -354,8 +354,7 @@ class Main {
             NativeFactory.instance.getEnvironment().restoreIE()
         }
 
-        // Allowed behaviors submenu
-
+        //region Allowed behaviors submenu
         val breedingMenu = Checkbox(languageBundle.getString("BreedingCloning")) {
             toggleBooleanSetting("Breeding", true)
             updateConfigFile()
@@ -391,6 +390,7 @@ class Main {
             updateConfigFile()
         }
         multiscreenMenu.checked = properties.getProperty("Multiscreen", "true").toBoolean()
+        //endregion
 
         val allowedBehaviorsSubmenu = Menu(languageBundle.getString("AllowedBehaviours"))
         allowedBehaviorsSubmenu.add(breedingMenu)
@@ -406,11 +406,11 @@ class Main {
         }
 
         val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
-            // TODO Implement settings menu
+            // TODO: Implement settings
+            JOptionPane.showMessageDialog(frame, "The settings menu has not been implemented yet.", "Settings", JOptionPane.INFORMATION_MESSAGE)
         }
 
-        // Language submenu
-
+        //region Language submenu
         val englishMenu = MenuItem("English") {
             updateLanguage("en-GB")
             updateConfigFile()
@@ -515,6 +515,7 @@ class Main {
             updateLanguage("ja-JP")
             updateConfigFile()
         }
+        //endregion
 
         val languageSubmenu = Menu(languageBundle.getString("Language"))
         languageSubmenu.add(englishMenu)
@@ -757,7 +758,7 @@ class Main {
         } else {
             if (loadConfiguration(imageSet)) {
                 imageSets.add(imageSet)
-                // TODO add information
+                // TODO: Implement information
                 createMascot(imageSet)
             } else {
                 // Failed to load

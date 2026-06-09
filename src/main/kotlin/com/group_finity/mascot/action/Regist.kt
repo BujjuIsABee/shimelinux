@@ -42,16 +42,15 @@ class Regist(
         } else {
             (offsetX * scaling).roundToInt()
         }
-        val hasNotMoved = abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
-        return super.hasNext() && hasNotMoved
+        return super.hasNext() && abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
     }
 
     override fun tick() {
         mascot.isDragging = true
 
-        checkNotNull(animation).next(mascot, time)
+        animation?.next(mascot, time)
 
-        if (time + 1 >= animation!!.duration) {
+        if (time + 1 >= checkNotNull(animation).duration) {
             mascot.isLookRight = Math.random() < 0.5
 
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
@@ -60,6 +59,7 @@ class Regist(
     }
 
     override fun refreshHotspots() {
+        // Action does not support hotspots
         mascot.hotspots.clear()
     }
 

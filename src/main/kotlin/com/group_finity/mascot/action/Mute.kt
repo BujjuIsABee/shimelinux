@@ -7,6 +7,7 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
 import java.util.ResourceBundle
@@ -16,14 +17,11 @@ class Mute(
     params: VariableMap
 ) : InstantAction(schema, params) {
     private val sound: String?
-        get() {
-            val result = eval(schema.getString(PARAMETER_SOUND), String::class, DEFAULT_SOUND)
-            return if (result == "null") null else result
-        }
+        get() = eval(schema.getString(PARAMETER_SOUND), String::class, DEFAULT_SOUND).takeUnless { it == DEFAULT_SOUND }
 
     override fun apply() {
         if (sound != null) {
-            var clips = Sounds.getSoundsIgnoringVolume("/sound/$sound")
+            var clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", sound!!).toString())
             if (clips.isNotEmpty()) {
                 for (clip in clips) {
                     if (clip.isRunning) {
@@ -31,7 +29,7 @@ class Mute(
                     }
                 }
             } else {
-                clips = Sounds.getSoundsIgnoringVolume("/sound/${mascot.imageSet}/$sound")
+                clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", mascot.imageSet, sound!!).toString())
                 if (clips.isNotEmpty()) {
                     for (clip in clips) {
                         if (clip.isRunning) {
@@ -39,7 +37,7 @@ class Mute(
                         }
                     }
                 } else {
-                    clips = Sounds.getSoundsIgnoringVolume("/img/${mascot.imageSet}/sound/$sound")
+                    clips = Sounds.getSoundsIgnoringVolume(Main.getPath("img", mascot.imageSet, "sound", sound!!).toString())
                     for (clip in clips) {
                         if (clip.isRunning) {
                             clip.stop()
@@ -57,6 +55,6 @@ class Mute(
 
     companion object {
         const val PARAMETER_SOUND = "Sound"
-        private const val DEFAULT_SOUND: String = "null"
+        private const val DEFAULT_SOUND = "null"
     }
 }

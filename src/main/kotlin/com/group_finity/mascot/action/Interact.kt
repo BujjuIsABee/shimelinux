@@ -21,11 +21,8 @@ class Interact(
     animations: ArrayList<Animation>,
     context: VariableMap,
 ) : Animate(schema, animations, context) {
-    private val behavior: String?
-        get() {
-            val result = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-            return if (result == "null") null else result
-        }
+    private val behavior: String
+        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
 
     override fun hasNext(): Boolean {
         return super.hasNext() && checkNotNull(mascot.manager).hasOverlappingMascotsAtPoint(mascot.anchor)
@@ -34,9 +31,9 @@ class Interact(
     override fun tick() {
         super.tick()
 
-        if ((time == checkNotNull(animation).duration - 1 || checkNotNull(animation).duration == 1) && (!checkNotNull(behavior).trim().isEmpty())) {
+        if ((time == checkNotNull(animation).duration - 1 || checkNotNull(animation).duration == 1) && (!behavior.trim().isEmpty())) {
             try {
-                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior!!, mascot)
+                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
@@ -51,6 +48,6 @@ class Interact(
         private val log = Logger.getLogger(this::class.java.name)
 
         const val PARAMETER_BEHAVIOUR = "Behaviour"
-        private const val DEFAULT_BEHAVIOUR: String = "null"
+        private const val DEFAULT_BEHAVIOUR = ""
     }
 }

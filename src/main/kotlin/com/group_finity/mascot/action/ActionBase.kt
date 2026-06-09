@@ -13,7 +13,6 @@ import com.group_finity.mascot.environment.MascotEnvironment
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
-import java.util.logging.Logger
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -74,9 +73,7 @@ abstract class ActionBase(
     }
 
     override fun hasNext(): Boolean {
-        val isEffective = this.isEffective
-        val isInTime = time < duration
-        return isEffective && isInTime
+        return isEffective && time < duration
     }
 
     override fun next() {

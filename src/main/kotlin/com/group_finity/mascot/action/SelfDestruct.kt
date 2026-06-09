@@ -19,8 +19,8 @@ class SelfDestruct(
     override fun tick() {
         super.tick()
 
-        if (time == checkNotNull(animation).duration - 1 ||
-            checkNotNull(animation).duration == 1) {
+        val animation = checkNotNull(animation)
+        if (time == animation.duration - 1 || animation.duration == 1) {
             mascot.dispose()
         }
     }

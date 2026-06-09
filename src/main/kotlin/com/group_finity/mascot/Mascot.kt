@@ -330,7 +330,10 @@ class Mascot(var imageSet: String) {
 
     private fun refreshCursor(useHand: Boolean) {
         window.asComponent().cursor =
-            Cursor.getPredefinedCursor(if (useHand) Cursor.HAND_CURSOR else Cursor.DEFAULT_CURSOR)
+            Cursor.getPredefinedCursor(
+                if (useHand) Cursor.HAND_CURSOR
+                else Cursor.DEFAULT_CURSOR
+            )
     }
 
     override fun toString(): String = "Mascot ($id,$imageSet)"

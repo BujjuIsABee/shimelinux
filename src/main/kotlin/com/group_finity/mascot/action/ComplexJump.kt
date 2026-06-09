@@ -14,7 +14,6 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
-import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -27,7 +26,7 @@ class ComplexJump(
     params: VariableMap
 ) : ActionBase(schema, animations, params) {
     private val delegate = Breed.Delegate(this)
-    private var target: WeakReference<Mascot>? = null
+    private var target: Mascot? = null
     private var isBreedEnabled = false
     private var isScanEnabled = false
 
@@ -64,13 +63,15 @@ class ComplexJump(
         }
 
         if (isScanEnabled) {
+            // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
             if (mascot.manager != null) {
-                target = mascot.manager!!.getMascotWithAffordance(affordance)
-                putVariable(schema.getString("TargetX"), target?.get()?.anchor?.x)
-                putVariable(schema.getString("TargetY"), target?.get()?.anchor?.y)
+                target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
             }
+
+            putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
+            putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
         }
     }
 
@@ -78,7 +79,7 @@ class ComplexJump(
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
 
-            return super.hasNext() && (target?.get()?.affordances?.contains(affordance) ?: false)
+            return super.hasNext() && (target?.affordances?.contains(affordance) ?: false)
         } else {
             val distanceX = (targetX - mascot.anchor.x).toDouble()
             val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2
@@ -93,14 +94,15 @@ class ComplexJump(
         var targetY: Int
 
         if (isScanEnabled) {
+            // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
-            val target = checkNotNull(target?.get())
+            val target = checkNotNull(target)
             targetX = target.anchor.x
             targetY = target.anchor.y
 
-            putVariable(schema.getString("TargetX"), targetX)
-            putVariable(schema.getString("TargetY"), targetY)
+            putVariable(schema.getString(VARIABLE_TARGETX), targetX)
+            putVariable(schema.getString(VARIABLE_TARGETY), targetY)
 
             if (mascot.anchor.x != targetX) {
                 mascot.isLookRight = mascot.anchor.x < targetX
@@ -136,12 +138,15 @@ class ComplexJump(
 
             if (isScanEnabled) {
                 try {
-                    val target = checkNotNull(target?.get())
+                    val target = checkNotNull(target)
                     mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
                     target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
+                } catch (e: IllegalStateException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
                     Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
@@ -183,5 +188,7 @@ class ComplexJump(
 
         const val VARIABLE_VELOCITYX = "VelocityX"
         const val VARIABLE_VELOCITYY = "VelocityY"
+        const val VARIABLE_TARGETX = "TargetX"
+        const val VARIABLE_TARGETY = "TargetY"
     }
 }

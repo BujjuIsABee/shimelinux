@@ -17,14 +17,14 @@ class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
         get() = area.left
     val right: Int
         get() = area.right
-    @get:JvmName("getDY")
     val dy: Int
+        @JvmName("getDY")
         get() = if (isBottom) area.dbottom else area.dtop
-    @get:JvmName("getDLeft")
     val dleft: Int
+        @JvmName("getDLeft")
         get() = area.dleft
-    @get:JvmName("getDRight")
     val dright: Int
+        @JvmName("getDRight")
         get() = area.dright
     val width: Int
         get() = area.width

@@ -15,7 +15,6 @@ import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
-import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -26,7 +25,7 @@ class ComplexMove(
     params: VariableMap
 ) : BorderedAction(schema, animations, params) {
     private val delegate = Breed.Delegate(this)
-    private var target: WeakReference<Mascot>? = null
+    private var target: Mascot? = null
     internal var isTurning = false
         private set
     internal val hasTurningAnimation: Boolean by lazy {
@@ -81,26 +80,26 @@ class ComplexMove(
         }
 
         if (isScanEnabled) {
+            // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
             if (mascot.manager != null) {
-                target = mascot.manager!!.getMascotWithAffordance(affordance)
+                target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
             }
 
-            putVariable(schema.getString("TargetX"), target?.get()?.anchor?.x)
-            putVariable(schema.getString("TargetY"), target?.get()?.anchor?.y)
+            putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
+            putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
         }
     }
 
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
-
-            return super.hasNext() && (target?.get()?.affordances?.contains(affordance) ?: false)
+            return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) ?: false)
         } else {
-            val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
+            val hasNotReached =
+                (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
                 (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
-
             return super.hasNext() && hasNotReached
         }
     }
@@ -109,6 +108,7 @@ class ComplexMove(
         super.tick()
 
         if (isScanEnabled) {
+            // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
         }
 
@@ -117,12 +117,12 @@ class ComplexMove(
             throw LostGroundException()
         }
 
-        val targetX = if (isScanEnabled) checkNotNull(target?.get()?.anchor?.x) else targetX
-        val targetY = if (isScanEnabled) checkNotNull(target?.get()?.anchor?.y) else targetY
+        val targetX = if (isScanEnabled) checkNotNull(target?.anchor?.x) else targetX
+        val targetY = if (isScanEnabled) checkNotNull(target?.anchor?.y) else targetY
 
         if (isScanEnabled) {
-            putVariable(schema.getString("TargetX"), targetX)
-            putVariable(schema.getString("TargetY"), targetY)
+            putVariable(schema.getString(VARIABLE_TARGETX), targetX)
+            putVariable(schema.getString(VARIABLE_TARGETY), targetY)
         }
 
         if (mascot.anchor.x != targetX) {
@@ -160,12 +160,15 @@ class ComplexMove(
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                val target = checkNotNull(target?.get())
+                val target = checkNotNull(target)
                 mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
                 target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
+            } catch (e: IllegalStateException) {
+                log.log(Level.SEVERE, "Fatal Error", e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
@@ -196,5 +199,8 @@ class ComplexMove(
 
         const val PARAMETER_TARGETY = "TargetY"
         private const val DEFAULT_TARGETY = 0
+
+        const val VARIABLE_TARGETX = "TargetX"
+        const val VARIABLE_TARGETY = "TargetY"
     }
 }

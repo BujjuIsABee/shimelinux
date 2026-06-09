@@ -15,19 +15,16 @@ import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
-import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 class ScanMove(
     schema: ResourceBundle,
     animations: ArrayList<Animation>,
     params: VariableMap,
 ) : BorderedAction(schema, animations, params) {
-    private var target: WeakReference<Mascot>? = null
+    private var target: Mascot? = null
     internal var isTurning = false
     internal val hasTurningAnimation: Boolean by lazy {
         for (animation in animations) {
@@ -48,7 +45,7 @@ class ScanMove(
     override val animation: Animation?
         get() {
             for (animation in animations) {
-                if (animation.isEffective(variables) && isTurning != animation.isTurn) {
+                if (animation.isEffective(variables) && isTurning == animation.isTurn) {
                     return animation
                 }
             }
@@ -58,25 +55,26 @@ class ScanMove(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
+        // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
         if (mascot.manager != null) {
-            target = mascot.manager!!.getMascotWithAffordance(affordance)
+            target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
         }
 
-        putVariable(schema.getString("TargetX"), target?.get()?.anchor?.x)
-        putVariable(schema.getString("TargetY"), target?.get()?.anchor?.y)
+        putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
+        putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
     }
 
     override fun hasNext(): Boolean {
         if (mascot.manager == null) return super.hasNext()
-
-        return super.hasNext() && (target?.get()?.affordances?.contains(affordance) ?: false)
+        return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) ?: false)
     }
 
     override fun tick() {
         super.tick()
 
+        // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
         if ((border != null) && !border!!.isOn(mascot.anchor)) {
@@ -84,12 +82,12 @@ class ScanMove(
             throw LostGroundException()
         }
 
-        val target = checkNotNull(target?.get())
+        val target = checkNotNull(target)
         val targetX = target.anchor.x
         val targetY = target.anchor.y
 
-        putVariable(schema.getString("TargetX"), targetX)
-        putVariable(schema.getString("TargetY"), targetY)
+        putVariable(schema.getString(VARIABLE_TARGETX), targetX)
+        putVariable(schema.getString(VARIABLE_TARGETY), targetY)
 
         if (mascot.anchor.x != targetX) {
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
@@ -109,7 +107,6 @@ class ScanMove(
         ) {
             mascot.anchor = Point(targetX, mascot.anchor.y)
         }
-
         if ((down && (mascot.anchor.y >= targetY)) ||
             (!down && (mascot.anchor.y <= targetY))
         ) {
@@ -123,6 +120,9 @@ class ScanMove(
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
+            } catch (e: IllegalStateException) {
+                log.log(Level.SEVERE, "Fatal Error", e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
@@ -144,5 +144,8 @@ class ScanMove(
 
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false
+
+        const val VARIABLE_TARGETX = "TargetX"
+        const val VARIABLE_TARGETY = "TargetY"
     }
 }

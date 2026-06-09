@@ -24,6 +24,11 @@ class Turn(
     private val isLookRight: Boolean
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), Boolean::class, !mascot.isLookRight)
 
+    override fun hasNext(): Boolean {
+        isTurning = isTurning || isLookRight != mascot.isLookRight
+        return super.hasNext() && time < checkNotNull(animation).duration && isTurning
+    }
+
     override fun tick() {
         mascot.isLookRight = isLookRight
 
@@ -34,7 +39,7 @@ class Turn(
             throw LostGroundException()
         }
 
-        checkNotNull(animation).next(mascot, time)
+        animation?.next(mascot, time)
     }
 
     companion object {
