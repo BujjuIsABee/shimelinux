@@ -146,7 +146,8 @@ class Manager {
 
     fun remainOne() {
         synchronized(mascots) {
-            for (i in mascots.size - 1 downTo 0) {
+            val totalMascots = mascots.size
+            for (i in totalMascots - 1 downTo 0) {
                 mascots[i].dispose()
             }
         }
@@ -154,7 +155,8 @@ class Manager {
 
     fun remainOne(mascot: Mascot) {
         synchronized(mascots) {
-            for (i in mascots.size - 1 downTo 0) {
+            val totalMascots = mascots.size
+            for (i in totalMascots - 1 downTo 0) {
                 if (mascots[i] != mascot) {
                     mascots[i].dispose()
                 }
@@ -165,7 +167,8 @@ class Manager {
     fun remainOne(imageSet: String) {
         synchronized(mascots) {
             var isFirst = true
-            for (i in mascots.size - 1 downTo 0) {
+            val totalMascots = mascots.size
+            for (i in totalMascots - 1 downTo 0) {
                 val mascot = mascots[i]
                 if (mascot.imageSet == imageSet) {
                     if (isFirst) {
@@ -180,7 +183,8 @@ class Manager {
 
     fun remainNone(imageSet: String) {
         synchronized(mascots) {
-            for (i in mascots.size - 1 downTo 0) {
+            val totalMascots = mascots.size
+            for (i in totalMascots - 1 downTo 0) {
                 val mascot = mascots[i]
                 if (mascot.imageSet == imageSet) {
                     mascot.dispose()
@@ -240,7 +244,8 @@ class Manager {
 
     fun disposeAll() {
         synchronized(mascots) {
-            for (i in mascots.size - 1 downTo 0) {
+            val totalMascots = mascots.size
+            for (i in totalMascots - 1 downTo 0) {
                 mascots[i].dispose()
             }
         }

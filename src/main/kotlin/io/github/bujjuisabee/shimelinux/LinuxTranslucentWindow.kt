@@ -20,6 +20,8 @@ import java.awt.Rectangle
 import java.awt.image.BufferedImage
 import javax.swing.JPanel
 import javax.swing.JWindow
+import javax.swing.SwingUtilities
+import javax.swing.UIManager
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
@@ -29,20 +31,14 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private var offset: Point = Point(0, 0)
 
     init {
-        System.setProperty("sun.java2d.noddraw", "true");
-        System.setProperty("sun.java2d.opengl", "true");
-
         background = Color(0, 0, 0, 0)
-
-        val panel = object : JPanel() {
+        contentPane = object : JPanel() {
             override fun paintComponent(g: Graphics) {
                 if (image != null) {
                     g.drawImage(image!!, offset.x, offset.y, null)
                 }
             }
         }
-
-        contentPane = panel
     }
 
     override fun asComponent(): Component {

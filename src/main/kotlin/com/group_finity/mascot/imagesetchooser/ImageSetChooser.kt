@@ -1,0 +1,348 @@
+/*
+ * Copyright (c) 2026, Bujju
+ * All rights reserved.
+ * License: https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE
+ * Original License: https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE-ORIGINAL
+ */
+
+package com.group_finity.mascot.imagesetchooser
+
+import com.group_finity.mascot.Main
+import com.group_finity.mascot.config.Configuration
+import java.awt.BorderLayout
+import java.awt.Cursor
+import java.awt.Dimension
+import java.awt.Frame
+import java.awt.GridLayout
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import javax.imageio.ImageIO
+import javax.swing.BoxLayout
+import javax.swing.DefaultListModel
+import javax.swing.DefaultListSelectionModel
+import javax.swing.JButton
+import javax.swing.JDialog
+import javax.swing.JLabel
+import javax.swing.JList
+import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.UIManager
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.outputStream
+
+class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
+    private val configPath = Main.getPath("conf", "settings.properties")
+    private val topDir = Main.getPath("img")
+    private var imageSets = ArrayList<String>()
+    private var selectAllSets = false
+    private var cancelled = false
+
+    private lateinit var label: JLabel
+    private lateinit var clearAllLabel: JLabel
+    private lateinit var slashLabel: JLabel
+    private lateinit var selectAllLabel: JLabel
+    private lateinit var list1: ShimejiList
+    private lateinit var list2: ShimejiList
+    private lateinit var scrollPane: JScrollPane
+    private lateinit var useSelectedButton: JButton
+    private lateinit var useAllButton: JButton
+    private lateinit var cancelButton: JButton
+
+    init {
+        initComponents()
+
+        try {
+            val icon = ImageIO.read(this::class.java.getResourceAsStream("/img/icon.png"))
+            setIconImage(icon)
+        } catch (_: Exception) {
+        }
+
+        title = Main.instance.languageBundle.getString("ShimejiImageSetChooser")
+
+        val activeImageSets = readConfigFile()
+
+        val children = topDir.toFile().listFiles().filter {
+            it.isDirectory &&
+            !it.absolutePath.contains("unused", true)
+        }.map { it.name }
+
+        var onList1 = true
+        var row = 0
+        val si1 = ArrayList<Int>()
+        val si2 = ArrayList<Int>()
+
+        for (imageSet in children) {
+            // Determine actions file
+            var filePath = Main.getPath("conf")
+            var actionsPath = filePath.resolve("actions.xml")
+            if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
+                actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
+            }
+
+            filePath = Main.getPath("conf", imageSet)
+            if (filePath.resolve("actions.xml").exists()) {
+                actionsPath = filePath.resolve("actions.xml")
+            } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
+                actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
+            } else if (filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml").exists()) {
+                actionsPath = filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml")
+            } else if (filePath.resolve("\u00A6-\u00BA@.xml").exists()) {
+                actionsPath = filePath.resolve("\u00A6-\u00BA@.xml")
+            } else if (filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml").exists()) {
+                actionsPath = filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml")
+            } else if (filePath.resolve("one.xml").exists()) {
+                actionsPath = filePath.resolve("one.xml")
+            } else if (filePath.resolve("1.xml").exists()) {
+                actionsPath = filePath.resolve("1.xml")
+            }
+
+            filePath = Main.getPath("img", imageSet, "conf")
+            if (filePath.resolve("actions.xml").exists()) {
+                actionsPath = filePath.resolve("actions.xml")
+            } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
+                actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
+            } else if (filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml").exists()) {
+                actionsPath = filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml")
+            } else if (filePath.resolve("\u00A6-\u00BA@.xml").exists()) {
+                actionsPath = filePath.resolve("\u00A6-\u00BA@.xml")
+            } else if (filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml").exists()) {
+                actionsPath = filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml")
+            } else if (filePath.resolve("one.xml").exists()) {
+                actionsPath = filePath.resolve("one.xml")
+            } else if (filePath.resolve("1.xml").exists()) {
+                actionsPath = filePath.resolve("1.xml")
+            }
+
+            // Determine behaviors file
+            filePath = Main.getPath("conf")
+            var behaviorsPath = filePath.resolve("behaviors.xml")
+            if (filePath.resolve("\u884C\u52D5.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
+            }
+
+            filePath = Main.getPath("conf", imageSet)
+            if (filePath.resolve("behaviors.xml").exists()) {
+                behaviorsPath = filePath.resolve("behaviors.xml")
+            } else if (filePath.resolve("behavior.xml").exists()) {
+                behaviorsPath = filePath.resolve("behavior.xml")
+            } else if (filePath.resolve("\u884C\u52D5.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
+            } else if (filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml")
+            } else if (filePath.resolve("\u00AA\u00B5\u00A6-.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u00AA\u00B5\u00A6-.xml")
+            } else if (filePath.resolve("\u00ECs\u00F4\u00AB.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u00ECs\u00F4\u00AB.xml")
+            } else if (filePath.resolve("two.xml").exists()) {
+                behaviorsPath = filePath.resolve("two.xml")
+            } else if (filePath.resolve("2.xml").exists()) {
+                behaviorsPath = filePath.resolve("2.xml")
+            }
+
+            filePath = Main.getPath("img", imageSet, "conf")
+            if (filePath.resolve("behaviors.xml").exists()) {
+                behaviorsPath = filePath.resolve("behaviors.xml")
+            } else if (filePath.resolve("behavior.xml").exists()) {
+                behaviorsPath = filePath.resolve("behavior.xml")
+            } else if (filePath.resolve("\u884C\u52D5.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
+            } else if (filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml")
+            } else if (filePath.resolve("\u00AA\u00B5\u00A6-.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u00AA\u00B5\u00A6-.xml")
+            } else if (filePath.resolve("\u00ECs\u00F4\u00AB.xml").exists()) {
+                behaviorsPath = filePath.resolve("\u00ECs\u00F4\u00AB.xml")
+            } else if (filePath.resolve("two.xml").exists()) {
+                behaviorsPath = filePath.resolve("two.xml")
+            } else if (filePath.resolve("2.xml").exists()) {
+                behaviorsPath = filePath.resolve("2.xml")
+            }
+
+            // TODO Implement information
+
+            var imageFile: String
+            var caption: String
+            try {
+                val configuration = Configuration()
+
+                // TODO Implement information
+                throw Exception()
+            } catch (_: Exception) {
+                imageFile = topDir.resolve(Path(imageSet, "shime1.png")).toString()
+                caption = imageSet
+            }
+
+            if (onList1) {
+                onList1 = false
+                list1.addShimeji(
+                    imageSet,
+                    actionsPath.toString(),
+                    behaviorsPath.toString(),
+                    imageFile,
+                    caption
+                )
+
+                if (activeImageSets.contains(imageSet) || selectAllSets) {
+                    si1.add(row)
+                }
+            } else {
+                onList1 = true
+                list2.addShimeji(
+                    imageSet,
+                    actionsPath.toString(),
+                    behaviorsPath.toString(),
+                    imageFile,
+                    caption
+                )
+
+                if (activeImageSets.contains(imageSet) || selectAllSets) {
+                    si2.add(row)
+                }
+                row++
+            }
+            imageSets.add(imageSet)
+        }
+
+        setUpList(list1)
+        list1.selectedIndices = si1.toIntArray()
+
+        setUpList(list2)
+        list2.selectedIndices = si2.toIntArray()
+    }
+
+    fun display(): ArrayList<String>? {
+        isVisible = true
+        return if (cancelled) null else imageSets
+    }
+
+    private fun initComponents() {
+        defaultCloseOperation = DISPOSE_ON_CLOSE
+        minimumSize = Dimension(670, 495)
+
+        val panel = JPanel(BorderLayout())
+
+        list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        val listPanel = JPanel(GridLayout(1, 2, 0, 0))
+        listPanel.add(list1)
+        listPanel.add(list2)
+
+        scrollPane = JScrollPane(listPanel)
+        scrollPane.preferredSize = Dimension(518, 100)
+
+        label = JLabel(Main.instance.languageBundle.getString("SelectImageSetsToUse"))
+
+        clearAllLabel = JLabel(Main.instance.languageBundle.getString("ClearAll"))
+        clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
+        clearAllLabel.foreground = UIManager.getColor("Button.focus")
+        clearAllLabel.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                list1.clearSelection()
+                list2.clearSelection()
+            }
+        })
+
+        slashLabel = JLabel(" / ")
+
+        selectAllLabel = JLabel(Main.instance.languageBundle.getString("SelectAll"))
+        selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
+        selectAllLabel.foreground = UIManager.getColor("Button.focus")
+        selectAllLabel.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                list1.setSelectionInterval(0, list1.model.size - 1)
+                list2.setSelectionInterval(0, list2.model.size - 1)
+            }
+        })
+
+        val selectAndClearAllPanel = JPanel()
+        selectAndClearAllPanel.layout = BoxLayout(selectAndClearAllPanel, BoxLayout.X_AXIS)
+        selectAndClearAllPanel.add(clearAllLabel)
+        selectAndClearAllPanel.add(slashLabel)
+        selectAndClearAllPanel.add(selectAllLabel)
+
+        val topLabelsPanel = JPanel(BorderLayout())
+        topLabelsPanel.add(label, BorderLayout.WEST)
+        topLabelsPanel.add(selectAndClearAllPanel, BorderLayout.EAST)
+
+        useSelectedButton = JButton(Main.instance.languageBundle.getString("UseSelected"))
+        useSelectedButton.addActionListener {
+            imageSets.clear()
+
+            for (selection in list1.selectedValuesList) {
+                if (selection is ImageSetChooserPanel) {
+                    imageSets.add(checkNotNull(selection.imageSetName))
+                }
+            }
+
+            for (selection in list2.selectedValuesList) {
+                if (selection is ImageSetChooserPanel) {
+                    imageSets.add(checkNotNull(selection.imageSetName))
+                }
+            }
+
+            updateConfigFile()
+            dispose()
+        }
+
+        useAllButton = JButton(Main.instance.languageBundle.getString("UseAll"))
+        useAllButton.addActionListener {
+            dispose()
+        }
+
+        cancelButton = JButton(Main.instance.languageBundle.getString("Cancel"))
+        cancelButton.addActionListener {
+            cancelled = true
+            dispose()
+        }
+
+        val bottonButtonsPanel = JPanel()
+        bottonButtonsPanel.layout = BoxLayout(bottonButtonsPanel, BoxLayout.X_AXIS)
+        bottonButtonsPanel.add(useSelectedButton)
+        bottonButtonsPanel.add(useAllButton)
+        bottonButtonsPanel.add(cancelButton)
+
+        panel.add(topLabelsPanel, BorderLayout.NORTH)
+        panel.add(scrollPane, BorderLayout.CENTER)
+        panel.add(bottonButtonsPanel, BorderLayout.SOUTH)
+
+        contentPane = panel
+    }
+
+    private fun readConfigFile(): ArrayList<String> {
+        val activeImageSets = ArrayList<String>()
+        activeImageSets.addAll(Main.instance.properties.getProperty("ActiveShimeji", "").split('/'))
+        selectAllSets = activeImageSets[0].trim().isEmpty()
+        return activeImageSets
+    }
+
+    private fun updateConfigFile() {
+        try {
+            val value = StringBuilder()
+            for (imageSet in imageSets) {
+                if (!value.isEmpty()) {
+                    value.append('/')
+                }
+                value.append(imageSet)
+            }
+
+            configPath.outputStream().use { stream ->
+                Main.instance.properties.setProperty("ActiveShimeji", value.toString())
+                Main.instance.properties.store(stream, "ShimeLinux Configuration Options")
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun setUpList(list: JList<ImageSetChooserPanel>) {
+        list.selectionModel = object : DefaultListSelectionModel() {
+            override fun setSelectionInterval(index0: Int, index1: Int) {
+                if (isSelectedIndex(index0)) {
+                    super.removeSelectionInterval(index0, index1)
+                } else {
+                    super.addSelectionInterval(index0, index1)
+                }
+            }
+        }
+    }
+}

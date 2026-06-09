@@ -12,6 +12,7 @@ import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
+import javax.swing.UIManager
 
 class NativeFactoryImpl : NativeFactory() {
     private val environment = LinuxEnvironment()
@@ -20,5 +21,12 @@ class NativeFactoryImpl : NativeFactory() {
 
     override fun newNativeImage(src: BufferedImage): NativeImage = LinuxNativeImage(src)
 
-    override fun newTransparentWindow(): TranslucentWindow = LinuxTranslucentWindow()
+    override fun newTransparentWindow(): TranslucentWindow {
+        // Create the window using the default look and feel to fix transparency
+        val previousLaf = UIManager.getLookAndFeel()
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        val window = LinuxTranslucentWindow()
+        UIManager.setLookAndFeel(previousLaf)
+        return window
+    }
 }

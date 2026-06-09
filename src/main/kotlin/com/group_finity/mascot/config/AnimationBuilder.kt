@@ -60,11 +60,11 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
 
     private fun loadPose(frameNode: Entry): Pose {
         val imageText = if (!frameNode.getAttribute(schema.getString("Image")).isNullOrEmpty()) {
-            Main.getConfigFile("img", imageSet, frameNode.getAttribute(schema.getString("Image"))!!)
+            Main.getPath("img", imageSet, frameNode.getAttribute(schema.getString("Image"))!!)
         } else null
 
         val imageRightText = if (!frameNode.getAttribute(schema.getString("ImageRight")).isNullOrEmpty()) {
-            Main.getConfigFile("img", imageSet, frameNode.getAttribute(schema.getString("ImageRight"))!!)
+            Main.getPath("img", imageSet, frameNode.getAttribute(schema.getString("ImageRight"))!!)
         } else null
 
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
@@ -111,12 +111,12 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
 
         if (soundText != null) {
             try {
-                soundText = if (Main.getConfigFile("sound", soundText).exists()) {
-                    Main.getConfigFile("sound", soundText).toString()
-                } else if (Main.getConfigFile("sound", imageSet, soundText).exists()) {
-                    Main.getConfigFile("sound", imageSet, soundText).toString()
+                soundText = if (Main.getPath("sound", soundText).exists()) {
+                    Main.getPath("sound", soundText).toString()
+                } else if (Main.getPath("sound", imageSet, soundText).exists()) {
+                    Main.getPath("sound", imageSet, soundText).toString()
                 } else {
-                    Main.getConfigFile("img", imageSet, "sound", soundText).toString()
+                    Main.getPath("img", imageSet, "sound", soundText).toString()
                 }
 
                 SoundLoader.load(soundText, volumeText.toFloat())

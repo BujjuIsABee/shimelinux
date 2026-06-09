@@ -11,6 +11,8 @@ import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
+import com.group_finity.mascot.image.ImagePairs
+import com.group_finity.mascot.imagesetchooser.ImageSetChooser
 import dorkbox.systemTray.Checkbox
 import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
@@ -24,9 +26,11 @@ import java.util.ResourceBundle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.Logger
+import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.SwingUtilities
+import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -54,7 +58,7 @@ fun main() {
 
 class Main {
     private val manager = Manager()
-    private val imageSets = ArrayList<String>()
+    private var imageSets = ArrayList<String>()
     private val configurations = ConcurrentHashMap<String, Configuration>()
     private val childImageSets = ConcurrentHashMap<String, ArrayList<String>>()
 
@@ -66,9 +70,17 @@ class Main {
     fun run() {
         createConfigDirectory()
 
+        // Set theme
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+        } catch (_: Exception) {
+            log.log(Level.WARNING, "Failed to set theme.")
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        }
+
         // Load properties
         try {
-            val input = getConfigFile("conf", "settings.properties").inputStream()
+            val input = getPath("conf", "settings.properties").inputStream()
             properties = Properties()
             properties.load(input)
         } catch (_: Exception) {
@@ -84,20 +96,36 @@ class Main {
             exit()
         }
 
-        // TODO: add image set chooser
-        imageSets.add("Shimeji")
-
-        // Load mascots
-        var index = 0
-        while (index < imageSets.size) {
-            if (!loadConfiguration(imageSets[index])) {
-                // Failed to load
-                configurations.remove(imageSets[index])
-                imageSets.remove(imageSets[index])
-                index--
+        // Get the image sets to use
+        if (!properties.getProperty("AlwaysShowShimejiChooser", "false").toBoolean()) {
+            for (set in properties.getProperty("ActiveShimeji", "").split('/')) {
+                if (set.trim().isNotEmpty()) {
+                    imageSets.add(set.trim())
+                }
             }
-            index++
         }
+        do {
+            if (imageSets.isEmpty()) {
+                val selectedImageSets = ImageSetChooser(frame, true).display()
+                if (selectedImageSets != null) {
+                    imageSets = selectedImageSets
+                } else {
+                    exit()
+                }
+            }
+
+            // Load mascots
+            var index = 0
+            while (index < imageSets.size) {
+                if (!loadConfiguration(imageSets[index])) {
+                    // Failed to load
+                    configurations.remove(imageSets[index])
+                    imageSets.remove(imageSets[index])
+                    index--
+                }
+                index++
+            }
+        } while (imageSets.isEmpty())
 
         // Create the tray icon
         createTrayIcon()
@@ -114,38 +142,38 @@ class Main {
     private fun createConfigDirectory() {
         try {
             // Create conf directory
-            val confDir = getConfigFile("conf")
+            val confDir = getPath("conf")
             if (!confDir.exists() || !confDir.isDirectory()) {
                 confDir.createDirectories()
 
                 // Copy actions.xml
-                Path(confDir.toString(), "actions.xml").outputStream().use {
+                confDir.resolve("actions.xml").outputStream().use {
                     this::class.java.getResourceAsStream("/conf/actions.xml")?.copyTo(it)
                 }
 
                 // Copy behaviors.xml
-                Path(confDir.toString(), "behaviors.xml").outputStream().use {
+                confDir.resolve("behaviors.xml").outputStream().use {
                     this::class.java.getResourceAsStream("/conf/behaviors.xml")?.copyTo(it)
                 }
 
                 // Copy settings.properties
-                Path(confDir.toString(), "settings.properties").outputStream().use {
+                confDir.resolve("settings.properties").outputStream().use {
                     this::class.java.getResourceAsStream("/conf/settings.properties")?.copyTo(it)
                 }
             }
 
             // Create img directory
-            val imgDir = getConfigFile("img")
+            val imgDir = getPath("img")
             if (!imgDir.exists() || !imgDir.isDirectory()) {
                 // Create unused directory
-                val unusedDir = Path(imgDir.toString(), "unused")
+                val unusedDir = imgDir.resolve("unused")
                 unusedDir.createDirectories()
 
                 // Copy default mascot
-                val defaultMascotDir = Path(imgDir.toString(), "Shimeji")
+                val defaultMascotDir = imgDir.resolve("Shimeji")
                 defaultMascotDir.createDirectories()
                 for (i in 1 until 47) {
-                    Path(defaultMascotDir.toString(), "shime$i.png").outputStream().use {
+                    getPath("img", "Shimeji", "shime$i.png").outputStream().use {
                         this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.copyTo(it)
                     }
                 }
@@ -158,13 +186,13 @@ class Main {
 
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
-            var filePath = getConfigFile("conf")
+            var filePath = getPath("conf")
             var actionsPath = filePath.resolve("actions.xml")
             if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
                 actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
             }
 
-            filePath = getConfigFile("conf", imageSet)
+            filePath = getPath("conf", imageSet)
             if (filePath.resolve("actions.xml").exists()) {
                 actionsPath = filePath.resolve("actions.xml")
             } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -181,7 +209,7 @@ class Main {
                 actionsPath = filePath.resolve("1.xml")
             }
 
-            filePath = getConfigFile("img", imageSet, "conf")
+            filePath = getPath("img", imageSet, "conf")
             if (filePath.resolve("actions.xml").exists()) {
                 actionsPath = filePath.resolve("actions.xml")
             } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -206,13 +234,13 @@ class Main {
 
             configuration.load(Entry(actions.documentElement), imageSet)
 
-            filePath = getConfigFile("conf")
+            filePath = getPath("conf")
             var behaviorsPath = filePath.resolve("behaviors.xml")
             if (filePath.resolve("\u884C\u52D5.xml").exists()) {
                 behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
             }
 
-            filePath = getConfigFile("conf", imageSet)
+            filePath = getPath("conf", imageSet)
             if (filePath.resolve("behaviors.xml").exists()) {
                 behaviorsPath = filePath.resolve("behaviors.xml")
             } else if (filePath.resolve("behavior.xml").exists()) {
@@ -231,7 +259,7 @@ class Main {
                 behaviorsPath = filePath.resolve("2.xml")
             }
 
-            filePath = getConfigFile("img", imageSet, "conf")
+            filePath = getPath("img", imageSet, "conf")
             if (filePath.resolve("behaviors.xml").exists()) {
                 behaviorsPath = filePath.resolve("behaviors.xml")
             } else if (filePath.resolve("behavior.xml").exists()) {
@@ -373,7 +401,8 @@ class Main {
         allowedBehaviorsSubmenu.add(multiscreenMenu)
 
         val chooseShimejiMenu = MenuItem(languageBundle.getString("ChooseShimeji")) {
-            // TODO Implement image set chooser
+            val chooser = ImageSetChooser(frame, true)
+            setActiveImageSets(chooser.display())
         }
 
         val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
@@ -645,10 +674,95 @@ class Main {
 
     private fun updateConfigFile() {
         try {
-            getConfigFile("conf", "settings.properties").outputStream().use {
+            getPath("conf", "settings.properties").outputStream().use {
                 properties.store(it, "ShimeLinux Configuration Options")
             }
         } catch (_: Exception) {
+        }
+    }
+
+    private fun setActiveImageSets(newImageSets: ArrayList<String>?) {
+        if (newImageSets == null) return
+
+        val toRemove = ArrayList(imageSets)
+
+        for (imageSet in toRemove) {
+            log.log(Level.INFO, imageSet)
+        }
+
+        val toAdd = ArrayList<String>()
+        val toRetain = ArrayList<String>()
+
+        for (set in newImageSets) {
+            if (!imageSets.contains(set)) {
+                toAdd.add(set)
+            }
+            if (!toRetain.contains(set)) {
+                toRetain.add(set)
+            }
+            populateArrayListWithChildSets(set, toRetain)
+        }
+
+        val isExitOnLastRemoved = manager.isExitOnLastRemoved
+        manager.isExitOnLastRemoved = false
+
+        for (removed in toRemove) {
+            removeLoadedImageSet(removed, toRetain)
+        }
+
+        for (added in toAdd) {
+            addImageSet(added)
+        }
+
+        manager.isExitOnLastRemoved = isExitOnLastRemoved
+    }
+
+    private fun populateArrayListWithChildSets(imageSet: String, childList: ArrayList<String>) {
+        if (childImageSets.containsKey(imageSet)) {
+            for (set in childImageSets[imageSet]!!) {
+                if (!childList.contains(set)) {
+                    populateArrayListWithChildSets(set, childList)
+                    childList.add(set)
+                }
+            }
+        }
+    }
+
+    private fun removeLoadedImageSet(imageSet: String, setsToIgnore: ArrayList<String>) {
+        if (childImageSets.containsKey(imageSet)) {
+            for (set in childImageSets[imageSet]!!) {
+                if (!setsToIgnore.contains(set)) {
+                    setsToIgnore.add(set)
+                    imageSets.remove(imageSet)
+                    manager.remainNone(imageSet)
+                    configurations.remove(imageSet)
+                    ImagePairs.removeAll(imageSet)
+                    removeLoadedImageSet(set, setsToIgnore)
+                }
+            }
+        }
+
+        if (!setsToIgnore.contains(imageSet)) {
+            imageSets.remove(imageSet)
+            manager.remainNone(imageSet)
+            configurations.remove(imageSet)
+            ImagePairs.removeAll(imageSet)
+        }
+    }
+
+    private fun addImageSet(imageSet: String) {
+        if (configurations.containsKey(imageSet)) {
+            imageSets.add(imageSet)
+            createMascot(imageSet)
+        } else {
+            if (loadConfiguration(imageSet)) {
+                imageSets.add(imageSet)
+                // TODO add information
+                createMascot(imageSet)
+            } else {
+                // Failed to load
+                configurations.remove(imageSet)
+            }
         }
     }
 
@@ -666,9 +780,11 @@ class Main {
 
         private val log = Logger.getLogger(this::class.java.name)
 
+        private val frame = JFrame()
+
         @JvmStatic
         fun showError(message: String) {
-            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
+            JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE)
         }
 
         @JvmStatic
@@ -682,7 +798,7 @@ class Main {
             showError(m)
         }
 
-        fun getConfigFile(vararg paths: String): Path {
+        fun getPath(vararg paths: String): Path {
             val shimelinuxDir = Path(System.getProperty("user.home"), ".config", "shimelinux")
             return Path(shimelinuxDir.toString(), *paths)
         }
