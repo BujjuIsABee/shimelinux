@@ -10,13 +10,17 @@ package com.group_finity.mascot.imagesetchooser
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import java.awt.BorderLayout
+import java.awt.Component
 import java.awt.Cursor
 import java.awt.Dimension
+import java.awt.FlowLayout
+import java.awt.Font
 import java.awt.Frame
 import java.awt.GridLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.imageio.ImageIO
+import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.DefaultListModel
 import javax.swing.DefaultListSelectionModel
@@ -36,7 +40,7 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private val topDir = Main.getPath("img")
     private var imageSets = ArrayList<String>()
     private var selectAllSets = false
-    private var cancelled = false
+    private var cancelled = true
 
     private lateinit var label: JLabel
     private lateinit var clearAllLabel: JLabel
@@ -177,8 +181,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 onList1 = false
                 list1.addShimeji(
                     imageSet,
-                    actionsPath.toString(),
-                    behaviorsPath.toString(),
+                    "~/" + actionsPath.subpath(2, actionsPath.nameCount).toString(),
+                    "~/" + behaviorsPath.subpath(2, behaviorsPath.nameCount).toString(),
                     imageFile,
                     caption
                 )
@@ -190,8 +194,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 onList1 = true
                 list2.addShimeji(
                     imageSet,
-                    actionsPath.toString(),
-                    behaviorsPath.toString(),
+                    "~/" + actionsPath.subpath(2, actionsPath.nameCount).toString(),
+                    "~/" + behaviorsPath.subpath(2, behaviorsPath.nameCount).toString(),
                     imageFile,
                     caption
                 )
@@ -235,7 +239,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
         clearAllLabel = JLabel(Main.instance.languageBundle.getString("ClearAll"))
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
-        clearAllLabel.foreground = UIManager.getColor("Button.focus")
+        clearAllLabel.foreground = UIManager.getColor("textHighlight")
+        clearAllLabel.font = clearAllLabel.font.deriveFont(Font.BOLD)
         clearAllLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
                 list1.clearSelection()
@@ -247,7 +252,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
         selectAllLabel = JLabel(Main.instance.languageBundle.getString("SelectAll"))
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
-        selectAllLabel.foreground = UIManager.getColor("Button.focus")
+        selectAllLabel.foreground = UIManager.getColor("textHighlight")
+        selectAllLabel.font = selectAllLabel.font.deriveFont(Font.BOLD)
         selectAllLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
                 list1.setSelectionInterval(0, list1.model.size - 1)
@@ -282,22 +288,22 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             }
 
             updateConfigFile()
+            cancelled = false
             dispose()
         }
 
         useAllButton = JButton(Main.instance.languageBundle.getString("UseAll"))
         useAllButton.addActionListener {
+            cancelled = false
             dispose()
         }
 
         cancelButton = JButton(Main.instance.languageBundle.getString("Cancel"))
         cancelButton.addActionListener {
-            cancelled = true
             dispose()
         }
 
-        val bottonButtonsPanel = JPanel()
-        bottonButtonsPanel.layout = BoxLayout(bottonButtonsPanel, BoxLayout.X_AXIS)
+        val bottonButtonsPanel = JPanel(FlowLayout(FlowLayout.CENTER))
         bottonButtonsPanel.add(useSelectedButton)
         bottonButtonsPanel.add(useAllButton)
         bottonButtonsPanel.add(cancelButton)

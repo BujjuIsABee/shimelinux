@@ -10,6 +10,8 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
+import com.group_finity.mascot.exception.BehaviorInstantiationException
+import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
 import java.lang.ref.WeakReference
@@ -108,7 +110,10 @@ class ScanInteract(
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
-                } catch (e: Exception) {
+                } catch (e: BehaviorInstantiationException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
                     Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
                 }

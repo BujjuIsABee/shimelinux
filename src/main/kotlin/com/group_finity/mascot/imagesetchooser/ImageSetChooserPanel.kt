@@ -13,11 +13,14 @@ import java.awt.Font
 import java.awt.Image
 import java.io.File
 import javax.imageio.ImageIO
+import javax.swing.BorderFactory
+import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ImageIcon
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.UIManager
 
 class ImageSetChooserPanel : JPanel {
     private lateinit var checkbox: JCheckBox
@@ -63,6 +66,8 @@ class ImageSetChooserPanel : JPanel {
         actionsFile = JLabel()
         behaviorsFile = JLabel()
 
+        image.border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
+
         val textPanel = JPanel()
         textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
         textPanel.add(caption)
@@ -71,6 +76,7 @@ class ImageSetChooserPanel : JPanel {
 
         add(checkbox)
         add(image)
+        add(Box.createRigidArea(Dimension(4, 0)))
         add(textPanel)
     }
 }
