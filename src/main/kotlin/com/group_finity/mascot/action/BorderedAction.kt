@@ -15,13 +15,13 @@ import java.util.ResourceBundle
 
 abstract class BorderedAction(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : ActionBase(schema, animations, context) {
     internal var border: Border? = null
         private set
 
-    private val borderType: String?
+    private val borderType
         get() = eval(schema.getString(PARAMETER_BORDERTYPE), String::class, DEFAULT_BORDERTYPE).takeUnless { it == DEFAULT_BORDERTYPE }
 
     override fun init(mascot: Mascot) {
@@ -43,7 +43,7 @@ abstract class BorderedAction(
 
     companion object {
         const val PARAMETER_BORDERTYPE = "BorderType"
-        private const val DEFAULT_BORDERTYPE: String = "null"
+        private const val DEFAULT_BORDERTYPE = "null"
 
         const val BORDERTYPE_CEILING = "Ceiling"
         const val BORDERTYPE_WALL = "Wall"

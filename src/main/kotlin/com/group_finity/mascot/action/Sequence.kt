@@ -15,10 +15,10 @@ class Sequence(
     params: VariableMap,
     vararg actions: Action,
 ) : ComplexAction(schema, params, *actions) {
-    private val isLoop: Boolean
+    private val isLoop
         get() = eval(schema.getString(PARAMETER_LOOP), Boolean::class, DEFAULT_LOOP)
 
-    override var currentAction: Int
+    override var currentAction
         get() = super.currentAction
         set(value) {
             super.currentAction = if (isLoop) value % actions.size else value
@@ -26,7 +26,6 @@ class Sequence(
 
     override fun hasNext(): Boolean {
         seek()
-
         return super.hasNext()
     }
 

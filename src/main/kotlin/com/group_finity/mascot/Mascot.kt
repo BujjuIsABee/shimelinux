@@ -45,9 +45,9 @@ class Mascot(var imageSet: String) {
         }
     var time = 0
         private set
-    val count: Int
+    val count
         get() = manager?.getCount(imageSet) ?: 0
-    val totalCount: Int
+    val totalCount
         get() = manager?.count ?: 0
     private var isAnimating = true
         get() = field && !isPaused
@@ -55,8 +55,8 @@ class Mascot(var imageSet: String) {
     var isDragging = false
     val environment = MascotEnvironment(this)
     var sound: String? = null
-    val affordances = ArrayList<String>(5)
-    val hotspots = ArrayList<Hotspot>(5)
+    val affordances = mutableListOf<String>()
+    val hotspots = mutableListOf<Hotspot>()
     val isHotspotClicked
         get() = cursorPosition != null
     val bounds: Rectangle
@@ -79,7 +79,7 @@ class Mascot(var imageSet: String) {
                 refreshCursor(value)
             }
         }
-    val variables: VariableMap? by lazy {
+    val variables by lazy {
         return@lazy VariableMap()
     }
 
@@ -218,7 +218,7 @@ class Mascot(var imageSet: String) {
         for (behaviorName in config.behaviorNames) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
-                    val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ");
+                    val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
                     if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
                         val item = JMenuItem(if (lang.containsKey(behaviorName)) lang.getString(behaviorName) else caption)
                         item.addActionListener {
@@ -336,7 +336,7 @@ class Mascot(var imageSet: String) {
             )
     }
 
-    override fun toString(): String = "Mascot ($id,$imageSet)"
+    override fun toString() = "Mascot ($id,$imageSet)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

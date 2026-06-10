@@ -8,13 +8,11 @@
 package com.group_finity.mascot.script
 
 class Constant(private val value: Any?) : Variable() {
-    override fun init() {
-    }
+    override fun init() {}
 
-    override fun initFrame() {
-    }
+    override fun initFrame() {}
 
-    override fun get(variables: VariableMap): Any? = value
+    override fun get(variables: VariableMap) = value
 
-    override fun toString(): String = value?.toString() ?: "null"
+    override fun toString() = value?.toString() ?: "null"
 }

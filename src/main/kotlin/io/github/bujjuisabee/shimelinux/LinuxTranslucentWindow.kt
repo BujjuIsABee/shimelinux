@@ -11,7 +11,6 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.Color
-import java.awt.Component
 import java.awt.Graphics
 import java.awt.GraphicsConfiguration
 import java.awt.GraphicsEnvironment
@@ -25,8 +24,8 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
 
     private var image: BufferedImage? = null
-    private var imageChanged: Boolean = false
-    private var offset: Point = Point(0, 0)
+    private var imageChanged = false
+    private var offset = Point(0, 0)
 
     init {
         background = Color(0, 0, 0, 0)
@@ -39,9 +38,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         }
     }
 
-    override fun asComponent(): Component {
-        return this
-    }
+    override fun asComponent() = this
 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
         val screenBounds = NativeFactory.instance.getEnvironment().screen.toRectangle()
@@ -72,5 +69,5 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         super.setVisible(b)
     }
 
-    override fun getGraphicsConfiguration(): GraphicsConfiguration = gc
+    override fun getGraphicsConfiguration() = gc
 }

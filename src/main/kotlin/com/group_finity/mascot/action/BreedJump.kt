@@ -12,9 +12,10 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+@Suppress("UNUSED")
 class BreedJump(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : Jump(schema, animations, context) {
     private val delegate = Breed.Delegate(this)

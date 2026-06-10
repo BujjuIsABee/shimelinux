@@ -17,33 +17,20 @@ import java.util.logging.Logger
 
 open class Move(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : BorderedAction(schema, animations, context) {
     internal var isTurning = false
-    internal open val hasTurningAnimation: Boolean by lazy {
-        for (animation in super.animations) {
-            if (animation.isTurn) {
-                return@lazy true
-            }
-        }
-        return@lazy false
+    override val animation
+        get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
+    internal open val hasTurningAnimation by lazy {
+        return@lazy animations.any { it.isTurn }
     }
 
-    private val targetX: Int
+    private val targetX
         get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY: Int
+    private val targetY
         get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
-
-    override val animation: Animation?
-        get() {
-            for (animation in super.animations) {
-                if (animation.isEffective(variables) && isTurning == animation.isTurn) {
-                    return animation
-                }
-            }
-            return null
-        }
 
     override fun hasNext(): Boolean {
         val hasNotReached =

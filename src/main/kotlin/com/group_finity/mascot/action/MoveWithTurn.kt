@@ -14,7 +14,7 @@ import java.util.ResourceBundle
 @Deprecated("Deprecated in Shimeji-ee")
 class MoveWithTurn(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : Move(schema, animations, params) {
     override val animation: Animation?
@@ -30,7 +30,7 @@ class MoveWithTurn(
             }
             return null
         }
-    override val hasTurningAnimation: Boolean
+    override val hasTurningAnimation
         get() = true
 
     init {

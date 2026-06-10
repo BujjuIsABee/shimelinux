@@ -8,7 +8,6 @@
 package com.group_finity.mascot.animation
 
 import com.group_finity.mascot.Mascot
-import com.group_finity.mascot.image.ImagePair
 import com.group_finity.mascot.image.ImagePairs
 import java.awt.Point
 import java.nio.file.Path
@@ -21,9 +20,9 @@ class Pose(
     val duration: Int,
     val soundName: String?,
 ) {
-    val imageName: String
+    val imageName
         get() = "${leftImage ?: ""}${rightImage ?: ""}"
-    val image: ImagePair?
+    val image
         get() = ImagePairs.getImagePair(imageName)
 
     fun next(mascot: Mascot) {
@@ -32,5 +31,5 @@ class Pose(
         mascot.sound = soundName
     }
 
-    override fun toString(): String = "Pose ($imageName,$dx,$dy,$duration,$soundName)"
+    override fun toString() = "Pose ($imageName,$dx,$dy,$duration,$soundName)"
 }

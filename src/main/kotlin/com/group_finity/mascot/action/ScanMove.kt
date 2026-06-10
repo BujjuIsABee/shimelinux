@@ -19,38 +19,26 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("UNUSED")
 class ScanMove(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : BorderedAction(schema, animations, params) {
     private var target: Mascot? = null
     internal var isTurning = false
-    internal val hasTurningAnimation: Boolean by lazy {
-        for (animation in animations) {
-            if (animation.isTurn) {
-                return@lazy true
-            }
-        }
-        return@lazy false
+    override val animation
+        get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
+    internal val hasTurningAnimation by lazy {
+        return@lazy animations.any { it.isTurn }
     }
 
-    private val behavior: String
+    private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior: String
+    private val targetBehavior
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook: Boolean
+    private val targetLook
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
-
-    override val animation: Animation?
-        get() {
-            for (animation in animations) {
-                if (animation.isEffective(variables) && isTurning == animation.isTurn) {
-                    return animation
-                }
-            }
-            return null
-        }
 
     override fun init(mascot: Mascot) {
         super.init(mascot)

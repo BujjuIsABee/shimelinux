@@ -30,8 +30,8 @@ import kotlin.math.roundToInt
 
 class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry, private val imageSet: String) {
     private val condition = animationNode.getAttribute(schema.getString("Condition")) ?: "true"
-    private val poses = ArrayList<Pose>()
-    private val hotspots = ArrayList<Hotspot>()
+    private val poses = mutableListOf<Pose>()
+    private val hotspots = mutableListOf<Hotspot>()
     private val turn = animationNode.getAttribute(schema.getString("IsTurn")) ?: "false"
 
     init {
@@ -178,7 +178,7 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
     fun buildAnimation(): Animation {
         try {
             return Animation(
-                Variable.parse(condition)!!,
+                checkNotNull(Variable.parse(condition)),
                 poses.toTypedArray(),
                 hotspots.toTypedArray(),
                 turn.toBoolean()

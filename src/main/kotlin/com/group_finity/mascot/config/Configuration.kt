@@ -23,13 +23,13 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 class Configuration {
-    private val constants = LinkedHashMap<String, String>(2)
-    val actionBuilders = LinkedHashMap<String, ActionBuilder>()
-    private val behaviorBuilders = LinkedHashMap<String, BehaviorBuilder>()
-    private val information = LinkedHashMap<String, String>(8)
+    private val constants = linkedMapOf<String, String>()
+    val actionBuilders = linkedMapOf<String, ActionBuilder>()
+    private val behaviorBuilders = linkedMapOf<String, BehaviorBuilder>()
+    private val information = linkedMapOf<String, String>()
     lateinit var schema: ResourceBundle
 
-    val behaviorNames: Set<String>
+    val behaviorNames
         get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {
@@ -86,10 +86,10 @@ class Configuration {
         }
     }
 
-    private fun loadBehaviors(list: Entry, conditions: ArrayList<String?>) {
+    private fun loadBehaviors(list: Entry, conditions: MutableList<String?>) {
         for (node in list.children) {
             if (node.name == schema.getString("Condition")) {
-                val newConditions = ArrayList(conditions)
+                val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(schema.getString("Condition")))
 
                 loadBehaviors(node, newConditions)
@@ -147,12 +147,12 @@ class Configuration {
             } else {
                 if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
                     mascot.anchor = Point(
-                        (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
+                        (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                         mascot.environment.screen.top - 256
                     )
                 } else {
                     mascot.anchor = Point(
-                        (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
+                        (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
                         mascot.environment.workArea.top - 256
                     )
                 }
@@ -176,7 +176,7 @@ class Configuration {
         context.putAll(constants)
         context["mascot"] = mascot
 
-        val candidates = ArrayList<BehaviorBuilder>()
+        val candidates = mutableListOf<BehaviorBuilder>()
         var totalFrequency = 0L
         for (behaviorFactory in behaviorBuilders.values) {
             try {
@@ -267,13 +267,9 @@ class Configuration {
         return false
     }
 
-    fun containsInformationKey(key: String?): Boolean {
-        return information.containsKey(key)
-    }
+    fun containsInformationKey(key: String?) = information.containsKey(key)
 
-    fun getInformation(key: String): String? {
-        return information[key]
-    }
+    fun getInformation(key: String) = information[key]
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

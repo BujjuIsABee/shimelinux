@@ -12,18 +12,17 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
-import java.util.logging.Logger
 
 class ThrowIE(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : Animate(schema, animations, params) {
-    private val initialVx: Int
+    private val initialVx
         get() = eval(schema.getString(PARAMETER_INITIALVX), Number::class, DEFAULT_INITIALVX).toInt()
-    private val initialVy: Int
+    private val initialVy
         get() = eval(schema.getString(PARAMETER_INITIALVY), Number::class, DEFAULT_INITIALVY).toInt()
-    private val gravity: Double
+    private val gravity
         get() = eval(schema.getString(PARAMETER_GRAVITY), Number::class, DEFAULT_GRAVITY).toDouble()
 
     override fun hasNext(): Boolean {

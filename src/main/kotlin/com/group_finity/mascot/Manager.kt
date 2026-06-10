@@ -18,9 +18,9 @@ import java.util.logging.Logger
 import kotlin.concurrent.timer
 
 class Manager {
-    private val mascots = ArrayList<Mascot>()
-    private val added = LinkedHashSet<Mascot>()
-    private val removed = LinkedHashSet<Mascot>()
+    private val mascots = mutableListOf<Mascot>()
+    private val added = linkedSetOf<Mascot>()
+    private val removed = linkedSetOf<Mascot>()
     var isExitOnLastRemoved = true
 
     val isPaused: Boolean
@@ -37,7 +37,7 @@ class Manager {
             return isPaused
         }
 
-    val count: Int
+    val count
         get() = getCount(null)
 
     private var timer: Timer? = null

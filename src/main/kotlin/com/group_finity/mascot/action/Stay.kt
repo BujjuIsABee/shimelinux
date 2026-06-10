@@ -16,7 +16,7 @@ import java.util.logging.Logger
 
 open class Stay(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : BorderedAction(schema, animations, params) {
     override fun tick() {

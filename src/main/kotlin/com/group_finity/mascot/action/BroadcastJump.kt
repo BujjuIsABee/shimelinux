@@ -14,6 +14,6 @@ import java.util.ResourceBundle
 @Deprecated("Deprecated in Shimeji-ee")
 class BroadcastJump(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap
 ) : Jump(schema, animations, context)

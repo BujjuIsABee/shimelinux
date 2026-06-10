@@ -11,8 +11,8 @@ import java.awt.Point
 import java.awt.Rectangle
 
 class ComplexArea {
-    private val areaMap = HashMap<String, Area>()
-    val areas: Collection<Area>
+    private val areaMap = hashMapOf<String, Area>()
+    val areas
         get() = areaMap.values
 
     fun set(rectangles: Map<String, Rectangle>) {
@@ -47,6 +47,7 @@ class ComplexArea {
         }
     }
 
+    @Suppress("UNUSED")
     fun getBottomBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
         for (area in areaMap.values) {
@@ -62,6 +63,7 @@ class ComplexArea {
         return result
     }
 
+    @Suppress("UNUSED")
     fun getTopBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
         for (area in areaMap.values) {
@@ -77,6 +79,7 @@ class ComplexArea {
         return result
     }
 
+    @Suppress("UNUSED")
     fun getLeftBorder(location: Point): Wall? {
         var result: Wall? = null
         for (area in areaMap.values) {
@@ -92,6 +95,7 @@ class ComplexArea {
         return result
     }
 
+    @Suppress("UNUSED")
     fun getRightBorder(location: Point): Wall? {
         var result: Wall? = null
         for (area in areaMap.values) {

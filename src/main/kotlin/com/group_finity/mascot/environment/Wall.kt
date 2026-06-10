@@ -11,25 +11,25 @@ import java.awt.Point
 import kotlin.math.abs
 
 class Wall(val area: Area, val isRight: Boolean) : Border {
-    val x: Int
+    val x
         get() = if (isRight) area.right else area.left
-    val top: Int
+    val top
         get() = area.top
-    val bottom: Int
+    val bottom
         get() = area.bottom
-    val dx: Int
+    val dx
         @JvmName("getDX")
         get() = if (isRight) area.dright else area.dleft
-    val dtop: Int
+    val dtop
         @JvmName("getDTop")
         get() = area.dtop
-    val dbottom: Int
+    val dbottom
         @JvmName("getDBottom")
         get() = area.dbottom
-    val height: Int
+    val height
         get() = area.height
 
-    override fun isOn(location: Point): Boolean =
+    override fun isOn(location: Point) =
         area.isVisible && (x == location.x) && (top <= location.y) && (location.y <= bottom)
 
     override fun move(location: Point): Point {

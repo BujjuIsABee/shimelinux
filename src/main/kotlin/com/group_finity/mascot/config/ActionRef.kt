@@ -15,7 +15,7 @@ import java.util.logging.Logger
 
 class ActionRef(private val configuration: Configuration, refNode: Entry) : IActionBuilder {
     private val name = checkNotNull(refNode.getAttribute(configuration.schema.getString("Name")))
-    private val params = LinkedHashMap<String, String>()
+    private val params = linkedMapOf<String, String>()
 
     init {
         params.putAll(refNode.attributes)
@@ -29,12 +29,12 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
     }
 
     override fun buildAction(params: Map<String, String>): Action {
-        val newParams = LinkedHashMap<String, String>(params)
+        val newParams = params.toMutableMap()
         newParams.putAll(this.params)
         return configuration.buildAction(name, newParams)
     }
 
-    override fun toString(): String = "Action ($name)"
+    override fun toString() = "Action ($name)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

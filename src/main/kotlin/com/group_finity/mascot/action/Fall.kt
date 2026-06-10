@@ -16,7 +16,7 @@ import kotlin.math.abs
 
 open class Fall(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap
 ) : ActionBase(schema, animations, context) {
     private var velocityX = 0.0
@@ -24,15 +24,15 @@ open class Fall(
     private var modX = 0.0
     private var modY = 0.0
 
-    private val initialVx: Int
+    private val initialVx
         get() = eval(schema.getString(PARAMETER_INITIALVX), Number::class, DEFAULT_INITIALVX).toInt()
-    private val initialVy: Int
+    private val initialVy
         get() = eval(schema.getString(PARAMETER_INITIALVY), Number::class, DEFAULT_INITIALVY).toInt()
-    private val gravity: Double
+    private val gravity
         get() = eval(schema.getString(PARAMETER_GRAVITY), Number::class, DEFAULT_GRAVITY).toDouble()
-    private val resistanceX: Double
+    private val resistanceX
         get() = eval(schema.getString(PARAMETER_RESISTANCEX), Number::class, DEFAULT_RESISTANCEX).toDouble()
-    private val resistanceY: Double
+    private val resistanceY
         get() = eval(schema.getString(PARAMETER_RESISTANCEY), Number::class, DEFAULT_RESISTANCEY).toDouble()
 
     override fun init(mascot: Mascot) {
@@ -43,9 +43,7 @@ open class Fall(
     }
 
     override fun hasNext(): Boolean {
-        val isOnBorder =
-            environment.floor.isOn(mascot.anchor) ||
-            environment.wall.isOn(mascot.anchor)
+        val isOnBorder = environment.floor.isOn(mascot.anchor) || environment.wall.isOn(mascot.anchor)
         return super.hasNext() && !isOnBorder
     }
 

@@ -20,9 +20,10 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+@Suppress("UNUSED")
 class ComplexJump(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap
 ) : ActionBase(schema, animations, params) {
     private val delegate = Breed.Delegate(this)
@@ -30,19 +31,19 @@ class ComplexJump(
     private var isBreedEnabled = false
     private var isScanEnabled = false
 
-    private val characteristics: String
+    private val characteristics
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), String::class, DEFAULT_CHARACTERISTICS)
-    private val behavior: String
+    private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior: String
+    private val targetBehavior
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook: Boolean
+    private val targetLook
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
-    private val velocity: Double
+    private val velocity
         get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()
-    private val targetX: Int
+    private val targetX
         get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY: Int
+    private val targetY
         get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
 
     override fun init(mascot: Mascot) {
@@ -78,7 +79,6 @@ class ComplexJump(
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
-
             return super.hasNext() && (target?.affordances?.contains(affordance) ?: false)
         } else {
             val distanceX = (targetX - mascot.anchor.x).toDouble()

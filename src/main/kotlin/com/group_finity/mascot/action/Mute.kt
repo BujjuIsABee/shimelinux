@@ -12,11 +12,12 @@ import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
 import java.util.ResourceBundle
 
+@Suppress("UNUSED")
 class Mute(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
-    private val sound: String?
+    private val sound
         get() = eval(schema.getString(PARAMETER_SOUND), String::class, DEFAULT_SOUND).takeUnless { it == DEFAULT_SOUND }
 
     override fun apply() {

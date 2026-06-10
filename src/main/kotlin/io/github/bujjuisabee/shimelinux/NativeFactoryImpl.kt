@@ -8,8 +8,6 @@
 package io.github.bujjuisabee.shimelinux
 
 import com.group_finity.mascot.NativeFactory
-import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 import javax.swing.UIManager
@@ -17,12 +15,12 @@ import javax.swing.UIManager
 class NativeFactoryImpl : NativeFactory() {
     private val environment = LinuxEnvironment()
 
-    override fun getEnvironment(): Environment = environment
+    override fun getEnvironment() = environment
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = LinuxNativeImage(src)
+    override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
-        // Create the window using the default look and feel to fix transparency
+        // Create the window using the default LaF because the GTK LaF breaks transparency
         val previousLaf = UIManager.getLookAndFeel()
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         val window = LinuxTranslucentWindow()

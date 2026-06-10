@@ -11,9 +11,10 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+@Suppress("UNUSED")
 class SelfDestruct(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap
 ) : Animate(schema, animations, params) {
     override fun tick() {

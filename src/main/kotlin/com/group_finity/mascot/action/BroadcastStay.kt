@@ -14,6 +14,6 @@ import java.util.ResourceBundle
 @Deprecated("Deprecated in Shimeji-ee")
 class BroadcastStay(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap
 ) : Stay(schema, animations, params)

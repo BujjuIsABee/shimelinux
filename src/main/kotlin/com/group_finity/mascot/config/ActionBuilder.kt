@@ -30,9 +30,9 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
     val type = checkNotNull(actionNode.getAttribute(schema.getString("Type")))
     val name = actionNode.getAttribute(schema.getString("Name"))
     private val className = actionNode.getAttribute(schema.getString("Class"))
-    private val params = LinkedHashMap<String, String>()
-    private val animationBuilders = ArrayList<AnimationBuilder>()
-    private val actionRefs = ArrayList<IActionBuilder>()
+    private val params = linkedMapOf<String, String>()
+    private val animationBuilders = mutableListOf<AnimationBuilder>()
+    private val actionRefs = mutableListOf<IActionBuilder>()
 
     init {
         log.log(Level.INFO, "Loading action: $this")
@@ -75,13 +75,15 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                             try {
                                 return cls.getConstructor(
                                     ResourceBundle::class.java,
-                                    ArrayList::class.java,
+                                    List::class.java,
                                     VariableMap::class.java
                                 ).newInstance(schema, animations, variables)
                             } catch (_: Exception) {
                             }
-                            return cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java)
-                                .newInstance(schema, variables)
+                            return cls.getConstructor(
+                                ResourceBundle::class.java,
+                                VariableMap::class.java
+                            ).newInstance(schema, variables)
                         } catch (_: Exception) {
                         }
                         return cls.getConstructor().newInstance()
@@ -114,15 +116,15 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
     }
 
     private fun createActions(): List<Action> {
-        val result = ArrayList<Action>()
+        val result = mutableListOf<Action>()
         for (ref in actionRefs) {
-            result.add(ref.buildAction(HashMap()))
+            result.add(ref.buildAction(hashMapOf()))
         }
         return result
     }
 
-    private fun createAnimations(): ArrayList<Animation> {
-        val result = ArrayList<Animation>()
+    private fun createAnimations(): List<Animation> {
+        val result = mutableListOf<Animation>()
         for (animationFactory in animationBuilders) {
             result.add(animationFactory.buildAnimation())
         }
@@ -140,7 +142,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
         return result
     }
 
-    override fun toString(): String = "Action ($name,$type,$className)"
+    override fun toString() = "Action ($name,$type,$className)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

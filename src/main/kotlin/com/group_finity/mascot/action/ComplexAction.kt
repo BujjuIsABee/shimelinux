@@ -15,7 +15,7 @@ abstract class ComplexAction(
     schema: ResourceBundle,
     params: VariableMap,
     internal vararg val actions: Action
-) : ActionBase(schema, ArrayList(), params) {
+) : ActionBase(schema, listOf(), params) {
     internal open var currentAction = 0
         set (value) {
             field = value
@@ -25,7 +25,7 @@ abstract class ComplexAction(
                 }
             }
         }
-    internal val action: Action
+    internal val action
         get() = actions[currentAction]
 
     init {
@@ -43,9 +43,7 @@ abstract class ComplexAction(
         }
     }
 
-    override fun hasNext(): Boolean {
-        return super.hasNext() && currentAction < actions.size && action.hasNext()
-    }
+    override fun hasNext() = super.hasNext() && currentAction < actions.size && action.hasNext()
 
     override fun tick() {
         if (action.hasNext()) {
@@ -53,13 +51,11 @@ abstract class ComplexAction(
         }
     }
 
-    override val isDraggable: Boolean
-        get() {
-            return if (currentAction < actions.size && actions[currentAction] is ActionBase) {
-                (actions[currentAction] as ActionBase).isDraggable
-            } else {
-                true
-            }
+    override val isDraggable
+        get() = if (currentAction < actions.size && actions[currentAction] is ActionBase) {
+            (actions[currentAction] as ActionBase).isDraggable
+        } else {
+            true
         }
 
     internal fun seek() {

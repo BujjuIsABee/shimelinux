@@ -14,14 +14,15 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("UNUSED")
 class Turn(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : BorderedAction(schema, animations, params) {
     private var isTurning = false
 
-    private val isLookRight: Boolean
+    private val isLookRight
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), Boolean::class, !mascot.isLookRight)
 
     override fun hasNext(): Boolean {

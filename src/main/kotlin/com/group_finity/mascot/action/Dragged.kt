@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
 
 class Dragged(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap
 ) : ActionBase(schema, animations, context) {
     private var footX = 0.0
@@ -26,11 +26,11 @@ class Dragged(
     private var scaling = 0.0
     var timeToRegist = 0
 
-    private val offsetX: Int
+    private val offsetX
         get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
-    private val offsetY: Int
+    private val offsetY
         get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class, DEFAULT_OFFSETY).toInt()
-    private val offsetType: String
+    private val offsetType
         get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class, DEFAULT_OFFSETTYPE)
 
     override fun init(mascot: Mascot) {
@@ -42,9 +42,7 @@ class Dragged(
         timeToRegist = 250
     }
 
-    override fun hasNext(): Boolean {
-        return super.hasNext() && time < timeToRegist
-    }
+    override fun hasNext() = super.hasNext() && time < timeToRegist
 
     override fun tick() {
         mascot.isLookRight = false

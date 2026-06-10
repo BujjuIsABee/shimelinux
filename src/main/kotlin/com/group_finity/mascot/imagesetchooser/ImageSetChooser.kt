@@ -8,7 +8,6 @@
 package com.group_finity.mascot.imagesetchooser
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.config.Configuration
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Desktop
@@ -77,8 +76,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
         var onList1 = true
         var row = 0
-        val si1 = ArrayList<Int>()
-        val si2 = ArrayList<Int>()
+        val si1 = mutableListOf<Int>()
+        val si2 = mutableListOf<Int>()
 
         for (imageSet in children) {
             // Determine actions file
@@ -167,14 +166,12 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 behaviorsPath = filePath.resolve("2.xml")
             }
 
-            // TODO: Implement information
+            // Implement information
 
             var imageFile: String
             var caption: String
             try {
-                val configuration = Configuration()
-
-                // TODO: Implement information
+                // Implement information
 
                 throw Exception("Ignore me!")
             } catch (_: Exception) {
@@ -220,7 +217,7 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         list2.selectedIndices = si2.toIntArray()
     }
 
-    fun display(): ArrayList<String>? {
+    fun display(): MutableList<String>? {
         isVisible = true
         return if (cancelled) null else imageSets
     }
@@ -343,8 +340,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         add(bottonButtonsPanel, BorderLayout.SOUTH)
     }
 
-    private fun readConfigFile(): ArrayList<String> {
-        val activeImageSets = ArrayList<String>()
+    private fun readConfigFile(): MutableList<String> {
+        val activeImageSets = mutableListOf<String>()
         activeImageSets.addAll(Main.instance.properties.getProperty("ActiveShimeji", "").split('/'))
         selectAllSets = activeImageSets[0].trim().isEmpty()
         return activeImageSets

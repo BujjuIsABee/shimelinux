@@ -20,14 +20,14 @@ import kotlin.math.roundToInt
 
 class Regist(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : ActionBase(schema, animations, context) {
     private var scaling = 0.0
 
-    private val offsetX: Int
+    private val offsetX
         get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
-    private val offsetType: String
+    private val offsetType
         get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class, DEFAULT_OFFSETTYPE)
 
     override fun init(mascot: Mascot) {

@@ -22,39 +22,37 @@ import kotlin.math.roundToInt
 
 class Breed(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap
 ) : Animate(schema, animations, context) {
     class Delegate(private val action: ActionBase) {
         private val log = Logger.getLogger(this::class.java.name)
 
-        private val bornX: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class, DEFAULT_BORNX).toInt()
-        private val bornY: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class, DEFAULT_BORNY).toInt()
-        private val bornBehavior: String
-            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), String::class, DEFAULT_BORNBEHAVIOUR)
-        private val bornMascot: String
-            get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), String::class, DEFAULT_BORNMASCOT)
-        private val bornTransient: Boolean
-            get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), Boolean::class, DEFAULT_BORNTRANSIENT)
-        private val bornInterval: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNINTERVAL), Number::class, DEFAULT_BORNINTERVAL).toInt()
-        private val bornCount: Int
-            get() = action.eval(action.schema.getString(PARAMETER_BORNCOUNT), Number::class, DEFAULT_BORNCOUNT).toInt()
-        val isEnabled: Boolean
+        val isEnabled
             get() = if (bornTransient) {
                 Main.instance.properties.getProperty("Transients", "true").toBoolean()
             } else {
                 Main.instance.properties.getProperty("Breeding", "true").toBoolean()
             }
-        val isIntervalFrame: Boolean
+        val isIntervalFrame
             get() = action.time % bornInterval == 0
-        val isPenultimateFrame: Boolean
-            get() {
-                if (action.animation == null) return false
-                return action.time == action.animation!!.duration - 1
-            }
+        val isPenultimateFrame
+            get() = action.animation != null && action.time == action.animation!!.duration - 1
+
+        private val bornX
+            get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class, DEFAULT_BORNX).toInt()
+        private val bornY
+            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class, DEFAULT_BORNY).toInt()
+        private val bornBehavior
+            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), String::class, DEFAULT_BORNBEHAVIOUR)
+        private val bornMascot
+            get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), String::class, DEFAULT_BORNMASCOT)
+        private val bornTransient
+            get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), Boolean::class, DEFAULT_BORNTRANSIENT)
+        private val bornInterval
+            get() = action.eval(action.schema.getString(PARAMETER_BORNINTERVAL), Number::class, DEFAULT_BORNINTERVAL).toInt()
+        private val bornCount
+            get() = action.eval(action.schema.getString(PARAMETER_BORNCOUNT), Number::class, DEFAULT_BORNCOUNT).toInt()
 
         fun breed() {
             val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()

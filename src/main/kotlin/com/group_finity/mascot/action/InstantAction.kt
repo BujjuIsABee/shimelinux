@@ -14,7 +14,7 @@ import java.util.ResourceBundle
 abstract class InstantAction(
     schema: ResourceBundle,
     params: VariableMap
-) : ActionBase(schema, ArrayList(), params) {
+) : ActionBase(schema, listOf(), params) {
     override fun init(mascot: Mascot) {
         super.init(mascot)
         if (super.hasNext()) {
@@ -22,10 +22,9 @@ abstract class InstantAction(
         }
     }
 
-    override fun hasNext(): Boolean = false
+    override fun hasNext() = false
 
-    override fun tick() {
-    }
+    override fun tick() {}
 
     internal abstract fun apply()
 }

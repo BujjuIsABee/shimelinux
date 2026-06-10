@@ -18,17 +18,19 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class BehaviorBuilder(private val configuration: Configuration, behaviorNode: Entry, private val conditions: ArrayList<String?>) {
+class BehaviorBuilder(private val configuration: Configuration, behaviorNode: Entry, private val conditions: MutableList<String?>) {
     val name = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name")))
     private val actionName = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
     val frequency = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))).toInt()
     val isHidden = behaviorNode.getAttribute(configuration.schema.getString("Hidden")).toBoolean()
     val isToggleable: Boolean
     val isNextAdditive: Boolean
-    val nextBehaviorBuilders = ArrayList<BehaviorBuilder>()
-    private val params = LinkedHashMap<String, String>()
+    val nextBehaviorBuilders = mutableListOf<BehaviorBuilder>()
+    private val params = linkedMapOf<String, String>()
 
     init {
+        log.log(Level.INFO, "Loading behavior: $this")
+
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
         isToggleable = if (
@@ -40,8 +42,6 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
         } else {
             behaviorNode.getAttribute(configuration.schema.getString("Toggleable")).toBoolean()
         }
-
-        log.log(Level.INFO, "Loading behavior: $this")
 
         params.putAll(behaviorNode.attributes)
         params.remove(configuration.schema.getString("Name"))
@@ -63,10 +63,10 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
         log.log(Level.INFO, "Finished loading behavior: $this")
     }
 
-    private fun loadBehaviors(list: Entry, conditions: ArrayList<String?>) {
+    private fun loadBehaviors(list: Entry, conditions: MutableList<String?>) {
         for (node in list.children) {
             if (node.name == configuration.schema.getString("Condition")) {
-                val newConditions = ArrayList(conditions)
+                val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(configuration.schema.getString("Condition")))
 
                 loadBehaviors(node, newConditions)
@@ -103,7 +103,7 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
         return true
     }
 
-    override fun toString(): String = "Behavior ($name,$frequency,$actionName)"
+    override fun toString() = "Behavior ($name,$frequency,$actionName)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

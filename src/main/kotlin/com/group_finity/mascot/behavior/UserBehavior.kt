@@ -12,7 +12,6 @@ import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.action.ActionBase
 import com.group_finity.mascot.config.Configuration
-import com.group_finity.mascot.environment.MascotEnvironment
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
@@ -23,9 +22,13 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import javax.swing.SwingUtilities
 
-class UserBehavior(private val name: String, private val action: Action, private val configuration: Configuration) : Behavior {
+class UserBehavior(
+    private val name: String,
+    private val action: Action,
+    private val configuration: Configuration,
+) : Behavior {
     private lateinit var mascot: Mascot
-    internal val environment: MascotEnvironment
+    internal val environment
         get() = mascot.environment
 
     @Synchronized
@@ -87,12 +90,12 @@ class UserBehavior(private val name: String, private val action: Action, private
 
                         if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
                             mascot.anchor = Point(
-                                (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
+                                (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                                 mascot.environment.screen.top - 256
                             )
                         } else {
                             mascot.anchor = Point(
-                                (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
+                                (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
                                 mascot.environment.workArea.top - 256
                             )
                         }
@@ -186,7 +189,7 @@ class UserBehavior(private val name: String, private val action: Action, private
         }
     }
 
-    override fun toString(): String = "Behavior ($name)"
+    override fun toString() = "Behavior ($name)"
 
     enum class HotspotResult { INACTIVE, ACTIVE_NULL, ACTIVE }
 

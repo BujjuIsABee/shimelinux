@@ -19,48 +19,36 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("UNUSED")
 class ComplexMove(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap
 ) : BorderedAction(schema, animations, params) {
     private val delegate = Breed.Delegate(this)
     private var target: Mascot? = null
-    internal var isTurning = false
-        private set
-    internal val hasTurningAnimation: Boolean by lazy {
-        for (animation in animations) {
-            if (animation.isTurn) {
-                return@lazy true
-            }
-        }
-        return@lazy false
-    }
     private var isBreedEnabled = false
     private var isScanEnabled = false
+    internal var isTurning = false
+        private set
+    override val animation
+        get() = animations.firstOrNull { it.isEffective(variables) && isTurning != it.isTurn }
+    internal val hasTurningAnimation: Boolean by lazy {
+        return@lazy animations.any { it.isTurn }
+    }
 
-    private val characteristics: String
+    private val characteristics
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), String::class, DEFAULT_CHARACTERISTICS)
-    private val behavior: String
+    private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior: String
+    private val targetBehavior
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook: Boolean
+    private val targetLook
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
-    private val targetX: Int
+    private val targetX
         get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY: Int
+    private val targetY
         get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
-
-    override val animation: Animation?
-        get() {
-            for (animation in animations) {
-                if (animation.isEffective(variables) && isTurning != animation.isTurn) {
-                    return animation
-                }
-            }
-            return null
-        }
 
     override fun init(mascot: Mascot) {
         super.init(mascot)

@@ -9,7 +9,6 @@ package com.group_finity.mascot.action
 
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
-import com.group_finity.mascot.environment.MascotEnvironment
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
@@ -18,46 +17,33 @@ import kotlin.reflect.cast
 
 abstract class ActionBase(
     internal val schema: ResourceBundle,
-    internal val animations: ArrayList<Animation>,
+    internal val animations: List<Animation>,
     internal val variables: VariableMap,
 ) : Action {
     internal lateinit var mascot: Mascot
         private set
+    internal open val animation
+        get() = animations.firstOrNull { it.isEffective(variables) }
+    internal val environment
+        get() = mascot.environment
 
     private var startTime = 0
-    var time: Int
+    var time
         get() = mascot.time - startTime
         set(value) {
             startTime = mascot.time - value
         }
 
-    open val isDraggable: Boolean
+    open val isDraggable
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), Boolean::class, DEFAULT_DRAGGABLE)
-    private val isEffective: Boolean
+    private val isEffective
         get() = eval(schema.getString(PARAMETER_CONDITION), Boolean::class, DEFAULT_CONDITION)
-    private val duration: Int
+    private val duration
         get() = eval(schema.getString(PARAMETER_DURATION), Number::class, DEFAULT_DURATION).toInt()
-    internal val affordance: String
+    internal val affordance
         get() = eval(schema.getString(PARAMETER_AFFORDANCE), String::class, DEFAULT_AFFORDANCE)
-
-    private val name: String?
-        get() {
-            val result = eval(schema.getString("Name"), String::class, "null")
-            return if (result == "null") null else result
-        }
-
-    internal open val animation: Animation?
-        get() {
-            for (animation in animations) {
-                if (animation.isEffective(variables)) {
-                    return animation
-                }
-            }
-            return null
-        }
-
-    internal val environment: MascotEnvironment
-        get() = mascot.environment
+    private val name
+        get() = eval(schema.getString(PARAMETER_NAME), String::class, DEFAULT_NAME).takeUnless { it == DEFAULT_NAME }
 
     override fun init(mascot: Mascot) {
         this.mascot = mascot
@@ -72,9 +58,7 @@ abstract class ActionBase(
         }
     }
 
-    override fun hasNext(): Boolean {
-        return isEffective && time < duration
-    }
+    override fun hasNext() = isEffective && time < duration
 
     override fun next() {
         initFrame()
@@ -127,7 +111,7 @@ abstract class ActionBase(
         return defaultValue
     }
 
-    override fun toString(): String = "Action (${this::class.java.simpleName},$name)"
+    override fun toString() = "Action (${this::class.java.simpleName},$name)"
 
     companion object {
         const val PARAMETER_DURATION = "Duration"
@@ -141,5 +125,8 @@ abstract class ActionBase(
 
         const val PARAMETER_AFFORDANCE = "Affordance"
         private const val DEFAULT_AFFORDANCE = ""
+
+        const val PARAMETER_NAME = "Name"
+        private const val DEFAULT_NAME = "null"
     }
 }

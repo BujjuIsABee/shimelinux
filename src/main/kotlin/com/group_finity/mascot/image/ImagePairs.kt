@@ -17,11 +17,11 @@ object ImagePairs {
         imagePairs.putIfAbsent(fileName, imagePair)
     }
 
-    fun getImagePair(fileName: String): ImagePair? = imagePairs[fileName]
+    fun getImagePair(fileName: String) = imagePairs[fileName]
 
-    fun contains(fileName: String): Boolean = imagePairs.containsKey(fileName)
+    fun contains(fileName: String) = imagePairs.containsKey(fileName)
 
-    fun getImage(fileName: String, isLookRight: Boolean): MascotImage? = imagePairs[fileName]?.getImage(isLookRight)
+    fun getImage(fileName: String, isLookRight: Boolean) = imagePairs[fileName]?.getImage(isLookRight)
 
     fun clear() {
         imagePairs.clear()

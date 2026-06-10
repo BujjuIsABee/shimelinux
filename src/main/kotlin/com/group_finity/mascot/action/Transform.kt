@@ -16,14 +16,15 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("UNUSED")
 class Transform(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : Animate(schema, animations, params) {
-    private val transformBehavior: String
+    private val transformBehavior
         get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOUR), String::class, DEFAULT_TRANSFORMBEHAVIOUR)
-    private val transformMascot: String
+    private val transformMascot
         get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), String::class, DEFAULT_TRANSFORMMASCOT)
 
     override fun tick() {

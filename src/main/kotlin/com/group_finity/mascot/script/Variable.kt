@@ -15,7 +15,7 @@ abstract class Variable {
     abstract fun get(variables: VariableMap): Any?
 
     companion object {
-        fun parse(source: String?): Variable? = if (source == null) {
+        fun parse(source: String?) = if (source == null) {
             null
         } else if (source.startsWith($$"${") && source.endsWith("}")) {
             Script(source.substring(2, source.length - 1), false)
@@ -25,7 +25,7 @@ abstract class Variable {
             Constant(parseConstant(source))
         }
 
-        private fun parseConstant(source: String?): Any? = when (source) {
+        private fun parseConstant(source: String?) = when (source) {
             null, "null" -> null
             "true" -> true
             "false" -> false

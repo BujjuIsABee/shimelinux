@@ -20,20 +20,21 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+@Suppress("UNUSED")
 class ScanJump(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap,
 ) : ActionBase(schema, animations, params) {
     private var target: Mascot? = null
 
-    private val behavior: String
+    private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior: String
+    private val targetBehavior
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook: Boolean
+    private val targetLook
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
-    private val velocity: Double
+    private val velocity
         get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()
 
     override fun init(mascot: Mascot) {

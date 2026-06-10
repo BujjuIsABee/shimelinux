@@ -18,12 +18,12 @@ import java.util.logging.Logger
 
 class WalkWithIE(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     params: VariableMap
 ) : Move(schema, animations, params) {
-    private val offsetX: Int
+    private val offsetX
         get() = eval(schema.getString(PARAMETER_IEOFFSETX), Number::class, DEFAULT_IEOFFSETX).toInt()
-    private val offsetY: Int
+    private val offsetY
         get() = eval(schema.getString(PARAMETER_IEOFFSETY), Number::class, DEFAULT_IEOFFSETY).toInt()
 
     override fun hasNext(): Boolean {

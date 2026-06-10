@@ -33,7 +33,7 @@ class Animation(
         }
     }
 
-    fun isEffective(variables: VariableMap): Boolean = condition.get(variables) as Boolean
+    fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
 
     fun init() {
         condition.init()

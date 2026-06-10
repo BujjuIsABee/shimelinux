@@ -41,8 +41,12 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-fun main() {
+fun main(args: Array<String>) {
     try {
+        if (!args.contains("DEBUG")) {
+            Main.configureLogging()
+        }
+
         SwingUtilities.invokeLater {
             Main.instance.run()
         }
@@ -59,9 +63,9 @@ fun main() {
 
 class Main {
     private val manager = Manager()
-    private var imageSets = ArrayList<String>()
+    private var imageSets = mutableListOf<String>()
     private val configurations = ConcurrentHashMap<String, Configuration>()
-    private val childImageSets = ConcurrentHashMap<String, ArrayList<String>>()
+    private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
 
     lateinit var properties: Properties
         private set
@@ -131,7 +135,7 @@ class Main {
 
         // Create the first mascot
         for (imageSet in imageSets) {
-            // TODO: Implement information
+            // Implement information
             createMascot(imageSet)
         }
 
@@ -238,13 +242,13 @@ class Main {
 
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
-            // TODO: Implement information
+            // Implement information
 
             configuration.validate()
 
             configurations[imageSet] = configuration
 
-            val childMascots = ArrayList<String>()
+            val childMascots = mutableListOf<String>()
 
             for (list in Entry(actions.documentElement).selectChildren("ActionList")) {
                 for (node in list.selectChildren("Action")) {
@@ -359,10 +363,7 @@ class Main {
             setActiveImageSets(chooser.display())
         }
 
-        val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
-            // TODO: Implement settings
-            JOptionPane.showMessageDialog(frame, "The settings menu has not been implemented yet.", "Settings", JOptionPane.INFORMATION_MESSAGE)
-        }
+        // Implement settings
 
         //region Language submenu
         val englishMenu = MenuItem("English") {
@@ -513,7 +514,7 @@ class Main {
         icon.menu.add(JSeparator())
         icon.menu.add(allowedBehaviorsSubmenu)
         icon.menu.add(chooseShimejiMenu)
-        icon.menu.add(settingsMenu)
+        // Implement settings
         icon.menu.add(languageSubmenu)
         icon.menu.add(JSeparator())
         icon.menu.add(pauseAllMenu)
@@ -597,7 +598,7 @@ class Main {
     }
 
     fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
-        val list = ArrayList<String>()
+        val list = mutableListOf<String>()
         val data = properties.getProperty("DisabledBehaviours.${mascot.imageSet}", "").split('/')
 
         if (data.isNotEmpty() && data[0] != "") {
@@ -636,17 +637,17 @@ class Main {
         }
     }
 
-    private fun setActiveImageSets(newImageSets: ArrayList<String>?) {
+    private fun setActiveImageSets(newImageSets: MutableList<String>?) {
         if (newImageSets == null) return
 
-        val toRemove = ArrayList(imageSets)
+        val toRemove = imageSets.toMutableList()
 
         for (imageSet in toRemove) {
             log.log(Level.INFO, imageSet)
         }
 
-        val toAdd = ArrayList<String>()
-        val toRetain = ArrayList<String>()
+        val toAdd = mutableListOf<String>()
+        val toRetain = mutableListOf<String>()
 
         for (set in newImageSets) {
             if (!imageSets.contains(set)) {
@@ -672,7 +673,7 @@ class Main {
         manager.isExitOnLastRemoved = isExitOnLastRemoved
     }
 
-    private fun populateArrayListWithChildSets(imageSet: String, childList: ArrayList<String>) {
+    private fun populateArrayListWithChildSets(imageSet: String, childList: MutableList<String>) {
         if (childImageSets.containsKey(imageSet)) {
             for (set in childImageSets[imageSet]!!) {
                 if (!childList.contains(set)) {
@@ -683,7 +684,7 @@ class Main {
         }
     }
 
-    private fun removeLoadedImageSet(imageSet: String, setsToIgnore: ArrayList<String>) {
+    private fun removeLoadedImageSet(imageSet: String, setsToIgnore: MutableList<String>) {
         if (childImageSets.containsKey(imageSet)) {
             for (set in childImageSets[imageSet]!!) {
                 if (!setsToIgnore.contains(set)) {
@@ -712,7 +713,7 @@ class Main {
         } else {
             if (loadConfiguration(imageSet)) {
                 imageSets.add(imageSet)
-                // TODO: Implement information
+                // Implement information
                 createMascot(imageSet)
             } else {
                 // Failed to load
@@ -721,9 +722,7 @@ class Main {
         }
     }
 
-    fun getConfiguration(imageSet: String): Configuration? {
-        return configurations[imageSet]
-    }
+    fun getConfiguration(imageSet: String) = configurations[imageSet]
 
     fun exit() {
         exitProcess(0)
@@ -739,6 +738,9 @@ class Main {
 
         init {
             createConfigDirectory()
+        }
+
+        fun configureLogging() {
             try {
                 LogManager.getLogManager().readConfiguration(this::class.java.getResourceAsStream("/conf/logging.properties"))
             } catch (e: Exception) {
@@ -808,8 +810,8 @@ class Main {
         }
 
         fun getPath(vararg paths: String): Path {
-            val shimelinuxDir = Path(System.getProperty("user.home"), ".config", "shimelinux")
-            return Path(shimelinuxDir.toString(), *paths)
+            val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
+            return Path(dir.toString(), *paths)
         }
     }
 }

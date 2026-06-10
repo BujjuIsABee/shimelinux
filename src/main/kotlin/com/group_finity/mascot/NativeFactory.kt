@@ -21,15 +21,10 @@ abstract class NativeFactory {
 
     companion object {
         @JvmStatic
-        lateinit var instance: NativeFactory
-
-        init {
-            resetInstance()
-        }
+        var instance = io.github.bujjuisabee.shimelinux.NativeFactoryImpl()
 
         @JvmStatic
-        fun resetInstance() {
-            instance = io.github.bujjuisabee.shimelinux.NativeFactoryImpl()
-        }
+        @Deprecated("ShimeLinux only uses LinuxNativeFactory")
+        fun resetInstance() { }
     }
 }

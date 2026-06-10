@@ -11,15 +11,15 @@ import org.w3c.dom.Attr
 import org.w3c.dom.Element
 
 class Entry(private val element: Element) {
-    private val selected = HashMap<String, ArrayList<Entry>>()
+    private val selected = hashMapOf<String, List<Entry>>()
 
     val name: String
         get() = element.tagName
     val text: String
         get() = element.textContent
 
-    val attributes: Map<String, String> by lazy {
-        val result = LinkedHashMap<String, String>()
+    val attributes by lazy {
+        val result = linkedMapOf<String, String>()
         val attrs = element.attributes
         for (i in 0 until attrs.length) {
             val attr = attrs.item(i) as Attr
@@ -27,8 +27,8 @@ class Entry(private val element: Element) {
         }
         return@lazy result
     }
-    val children: ArrayList<Entry> by lazy {
-        val result = ArrayList<Entry>()
+    val children by lazy {
+        val result = mutableListOf<Entry>()
         val childNodes = element.childNodes
         for (i in 0 until childNodes.length) {
             val childNode = childNodes.item(i)
@@ -39,26 +39,17 @@ class Entry(private val element: Element) {
         return@lazy result
     }
 
-    fun getAttribute(name: String): String? {
-        return element.getAttributeNode(name)?.value
-    }
+    fun getAttribute(name: String) = element.getAttributeNode(name)?.value
 
-    fun hasChild(name: String): Boolean {
-        for (child in children) {
-            if (child.name == name) {
-                return true
-            }
-        }
-        return false
-    }
+    fun hasChild(name: String) = children.any { it.name == name }
 
-    fun selectChildren(name: String): ArrayList<Entry> {
+    fun selectChildren(name: String): List<Entry> {
         var result = selected[name]
         if (result != null) {
             return result
         }
 
-        result = ArrayList()
+        result = mutableListOf()
         for (child in children) {
             if (child.name == name) {
                 result.add(child)

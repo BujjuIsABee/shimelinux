@@ -11,7 +11,7 @@ import java.util.AbstractMap
 import javax.script.Bindings
 
 class VariableMap : Bindings {
-    val rawMap = LinkedHashMap<String, Variable>()
+    val rawMap = linkedMapOf<String, Variable>()
 
     fun init() {
         for (variable in rawMap.values) {
@@ -26,9 +26,9 @@ class VariableMap : Bindings {
     }
 
     //region Bindings Implementation
-    override val keys: MutableSet<String>
+    override val keys
         get() = rawMap.keys
-    override val values: MutableSet<Any?>
+    override val values
         get() = rawMap.keys.mapTo(mutableSetOf()) { get(it) }
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
         get() = rawMap.entries.mapTo(mutableSetOf()) { AbstractMap.SimpleEntry(it.key, get(it.key)) }
@@ -36,21 +36,21 @@ class VariableMap : Bindings {
     override val size: Int
         get() = rawMap.size
 
-    override fun isEmpty(): Boolean = rawMap.isEmpty()
+    override fun isEmpty() = rawMap.isEmpty()
 
-    override fun containsValue(value: Any?): Boolean = rawMap.containsValue(value)
+    override fun containsValue(value: Any?) = rawMap.containsValue(value)
 
-    override fun containsKey(key: String): Boolean = rawMap.containsKey(key)
+    override fun containsKey(key: String) = rawMap.containsKey(key)
 
-    override fun get(key: String): Any? = rawMap[key]?.get(this)
+    override fun get(key: String) = rawMap[key]?.get(this)
 
-    override fun remove(key: String): Any? = rawMap.remove(key)
+    override fun remove(key: String) = rawMap.remove(key)
 
     override fun clear() {
         rawMap.clear()
     }
 
-    override fun put(key: String, value: Any?): Any? = if (value is Variable) {
+    override fun put(key: String, value: Any?) = if (value is Variable) {
         rawMap.put(key, value)
     } else {
         rawMap.put(key, Constant(value))

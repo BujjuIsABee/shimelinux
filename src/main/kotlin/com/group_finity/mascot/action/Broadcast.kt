@@ -14,6 +14,6 @@ import java.util.ResourceBundle
 @Deprecated("Deprecated in Shimeji-ee")
 class Broadcast(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap
 ) : Animate(schema, animations, context)

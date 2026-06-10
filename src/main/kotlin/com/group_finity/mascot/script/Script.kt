@@ -49,7 +49,7 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
         return value
     }
 
-    override fun toString(): String = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
+    override fun toString() = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
 
     companion object {
         private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter())

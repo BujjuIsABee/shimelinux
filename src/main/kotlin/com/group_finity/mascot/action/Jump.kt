@@ -16,14 +16,14 @@ import kotlin.math.sqrt
 
 open class Jump(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : ActionBase(schema, animations, context) {
-    private val velocity: Double
+    private val velocity
         get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()
-    private val targetX: Int
+    private val targetX
         get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY: Int
+    private val targetY
         get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
 
     override fun hasNext(): Boolean {

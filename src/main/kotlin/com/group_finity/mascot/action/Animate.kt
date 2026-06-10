@@ -14,7 +14,7 @@ import java.util.ResourceBundle
 
 open class Animate(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : BorderedAction(schema, animations, context) {
     override fun tick() {
@@ -27,8 +27,5 @@ open class Animate(
         animation?.next(mascot, time)
     }
 
-    override fun hasNext(): Boolean {
-        if (animation == null) return false
-        return super.hasNext() && time < checkNotNull(animation).duration
-    }
+    override fun hasNext() = super.hasNext() && animation != null && time < animation!!.duration
 }

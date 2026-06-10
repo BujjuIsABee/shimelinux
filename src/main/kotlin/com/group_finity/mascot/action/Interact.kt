@@ -16,22 +16,22 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("UNUSED")
 class Interact(
     schema: ResourceBundle,
-    animations: ArrayList<Animation>,
+    animations: List<Animation>,
     context: VariableMap,
 ) : Animate(schema, animations, context) {
-    private val behavior: String
+    private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
 
-    override fun hasNext(): Boolean {
-        return super.hasNext() && checkNotNull(mascot.manager).hasOverlappingMascotsAtPoint(mascot.anchor)
-    }
+    override fun hasNext() = super.hasNext() && checkNotNull(mascot.manager).hasOverlappingMascotsAtPoint(mascot.anchor)
 
     override fun tick() {
         super.tick()
 
-        if ((time == checkNotNull(animation).duration - 1 || checkNotNull(animation).duration == 1) && (!behavior.trim().isEmpty())) {
+        val animation = checkNotNull(animation)
+        if ((time == animation.duration - 1 || animation.duration == 1) && (!behavior.trim().isEmpty())) {
             try {
                 mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
             } catch (e: BehaviorInstantiationException) {
