@@ -54,14 +54,13 @@ class ImageSetChooserPanel : JPanel {
         minimumSize = Dimension(248, 80)
         preferredSize = Dimension(248, 80)
         layout = BoxLayout(this, BoxLayout.X_AXIS)
+        border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
 
         checkbox = JCheckBox()
         image = JLabel()
         caption = JLabel()
         actionsFile = JLabel()
         behaviorsFile = JLabel()
-
-        image.border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
 
         val textPanel = JPanel()
         textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)

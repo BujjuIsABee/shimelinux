@@ -11,6 +11,7 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import java.awt.BorderLayout
 import java.awt.Cursor
+import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
@@ -26,6 +27,7 @@ import javax.swing.JButton
 import javax.swing.JDialog
 import javax.swing.JLabel
 import javax.swing.JList
+import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.UIManager
@@ -40,6 +42,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var selectAllSets = false
     private var cancelled = true
 
+    private lateinit var topLabelsPanel: JPanel
+    private lateinit var allLabelsPanel: JPanel
     private lateinit var label: JLabel
     private lateinit var clearAllLabel: JLabel
     private lateinit var slashLabel: JLabel
@@ -47,6 +51,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private lateinit var list1: ShimejiList
     private lateinit var list2: ShimejiList
     private lateinit var scrollPane: JScrollPane
+    private lateinit var bottonButtonsPanel: JPanel
+    private lateinit var addShimejiButton: JButton
     private lateinit var useSelectedButton: JButton
     private lateinit var useAllButton: JButton
     private lateinit var cancelButton: JButton
@@ -180,8 +186,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 onList1 = false
                 list1.addShimeji(
                     imageSet,
-                    "~/" + actionsPath.subpath(2, actionsPath.nameCount).toString(),
-                    "~/" + behaviorsPath.subpath(2, behaviorsPath.nameCount).toString(),
+                    "./" + actionsPath.subpath(4, actionsPath.nameCount).toString(),
+                    "./" + behaviorsPath.subpath(4, behaviorsPath.nameCount).toString(),
                     imageFile,
                     caption
                 )
@@ -193,8 +199,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 onList1 = true
                 list2.addShimeji(
                     imageSet,
-                    "~/" + actionsPath.subpath(2, actionsPath.nameCount).toString(),
-                    "~/" + behaviorsPath.subpath(2, behaviorsPath.nameCount).toString(),
+                    "./" + actionsPath.subpath(4, actionsPath.nameCount).toString(),
+                    "./" + behaviorsPath.subpath(4, behaviorsPath.nameCount).toString(),
                     imageFile,
                     caption
                 )
@@ -223,7 +229,7 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         defaultCloseOperation = DISPOSE_ON_CLOSE
         minimumSize = Dimension(670, 495)
 
-        val panel = JPanel(BorderLayout())
+        this.contentPane = JPanel(BorderLayout())
 
         list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
         list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
@@ -236,12 +242,12 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
         label = JLabel(Main.instance.languageBundle.getString("SelectImageSetsToUse"))
 
-        clearAllLabel = JLabel(Main.instance.languageBundle.getString("ClearAll"))
+        clearAllLabel = JLabel("<html><u>" + Main.instance.languageBundle.getString("ClearAll") + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
         clearAllLabel.font = clearAllLabel.font.deriveFont(Font.BOLD)
         clearAllLabel.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
+            override fun mouseClicked(e: MouseEvent) {
                 list1.clearSelection()
                 list2.clearSelection()
             }
@@ -249,26 +255,50 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
         slashLabel = JLabel(" / ")
 
-        selectAllLabel = JLabel(Main.instance.languageBundle.getString("SelectAll"))
+        selectAllLabel = JLabel("<html><u>" + Main.instance.languageBundle.getString("SelectAll") + "</u></html>")
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
         selectAllLabel.font = selectAllLabel.font.deriveFont(Font.BOLD)
         selectAllLabel.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
+            override fun mouseClicked(e: MouseEvent) {
                 list1.setSelectionInterval(0, list1.model.size - 1)
                 list2.setSelectionInterval(0, list2.model.size - 1)
             }
         })
 
-        val selectAndClearAllPanel = JPanel()
-        selectAndClearAllPanel.layout = BoxLayout(selectAndClearAllPanel, BoxLayout.X_AXIS)
-        selectAndClearAllPanel.add(clearAllLabel)
-        selectAndClearAllPanel.add(slashLabel)
-        selectAndClearAllPanel.add(selectAllLabel)
+        allLabelsPanel = JPanel(FlowLayout())
+        allLabelsPanel.layout = BoxLayout(allLabelsPanel, BoxLayout.X_AXIS)
+        allLabelsPanel.add(clearAllLabel)
+        allLabelsPanel.add(slashLabel)
+        allLabelsPanel.add(selectAllLabel)
 
-        val topLabelsPanel = JPanel(BorderLayout())
+        topLabelsPanel = JPanel(BorderLayout())
         topLabelsPanel.add(label, BorderLayout.WEST)
-        topLabelsPanel.add(selectAndClearAllPanel, BorderLayout.EAST)
+        topLabelsPanel.add(this@ImageSetChooser.allLabelsPanel, BorderLayout.EAST)
+
+        addShimejiButton = JButton("+")
+        addShimejiButton.addActionListener {
+            val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
+            var failed = false
+            try {
+                if (desktop != null) {
+                    desktop.open(Main.getPath("img").toFile())
+                } else {
+                    failed = true
+                }
+            } catch (_: Exception) {
+                failed = true
+            }
+
+            if (failed) {
+                JOptionPane.showMessageDialog(
+                    this@ImageSetChooser,
+                    Main.getPath("img").toString(),
+                    "Add Shimeji Here:",
+                    JOptionPane.PLAIN_MESSAGE
+                )
+            }
+        }
 
         useSelectedButton = JButton(Main.instance.languageBundle.getString("UseSelected"))
         useSelectedButton.addActionListener {
@@ -302,16 +332,15 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             dispose()
         }
 
-        val bottonButtonsPanel = JPanel(FlowLayout(FlowLayout.CENTER))
+        bottonButtonsPanel = JPanel(FlowLayout(FlowLayout.CENTER))
+        bottonButtonsPanel.add(addShimejiButton)
         bottonButtonsPanel.add(useSelectedButton)
         bottonButtonsPanel.add(useAllButton)
         bottonButtonsPanel.add(cancelButton)
 
-        panel.add(topLabelsPanel, BorderLayout.NORTH)
-        panel.add(scrollPane, BorderLayout.CENTER)
-        panel.add(bottonButtonsPanel, BorderLayout.SOUTH)
-
-        contentPane = panel
+        add(topLabelsPanel, BorderLayout.NORTH)
+        add(scrollPane, BorderLayout.CENTER)
+        add(bottonButtonsPanel, BorderLayout.SOUTH)
     }
 
     private fun readConfigFile(): ArrayList<String> {
