@@ -25,6 +25,7 @@ import java.util.Properties
 import java.util.ResourceBundle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
+import java.util.logging.LogManager
 import java.util.logging.Logger
 import javax.swing.JFrame
 import javax.swing.JOptionPane
@@ -68,8 +69,6 @@ class Main {
         private set
 
     fun run() {
-        createConfigDirectory()
-
         // Set theme
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
@@ -137,51 +136,6 @@ class Main {
         }
 
         manager.start()
-    }
-
-    private fun createConfigDirectory() {
-        try {
-            // Create conf directory
-            val confDir = getPath("conf")
-            if (!confDir.exists() || !confDir.isDirectory()) {
-                confDir.createDirectories()
-
-                // Copy actions.xml
-                confDir.resolve("actions.xml").outputStream().use {
-                    this::class.java.getResourceAsStream("/conf/actions.xml")?.copyTo(it)
-                }
-
-                // Copy behaviors.xml
-                confDir.resolve("behaviors.xml").outputStream().use {
-                    this::class.java.getResourceAsStream("/conf/behaviors.xml")?.copyTo(it)
-                }
-
-                // Copy settings.properties
-                confDir.resolve("settings.properties").outputStream().use {
-                    this::class.java.getResourceAsStream("/conf/settings.properties")?.copyTo(it)
-                }
-            }
-
-            // Create img directory
-            val imgDir = getPath("img")
-            if (!imgDir.exists() || !imgDir.isDirectory()) {
-                // Create unused directory
-                val unusedDir = imgDir.resolve("unused")
-                unusedDir.createDirectories()
-
-                // Copy default mascot
-                val defaultMascotDir = imgDir.resolve("Shimeji")
-                defaultMascotDir.createDirectories()
-                for (i in 1 until 47) {
-                    getPath("img", "Shimeji", "shime$i.png").outputStream().use {
-                        this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.copyTo(it)
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            showError("Failed to create the config directory.", e)
-            exitProcess(0)
-        }
     }
 
     private fun loadConfiguration(imageSet: String): Boolean {
@@ -782,6 +736,60 @@ class Main {
         private val log = Logger.getLogger(this::class.java.name)
 
         private val frame = JFrame()
+
+        init {
+            createConfigDirectory()
+            try {
+                LogManager.getLogManager().readConfiguration(this::class.java.getResourceAsStream("/conf/logging.properties"))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        private fun createConfigDirectory() {
+            try {
+                // Create conf directory
+                val confDir = getPath("conf")
+                if (!confDir.exists() || !confDir.isDirectory()) {
+                    confDir.createDirectories()
+
+                    // Copy actions.xml
+                    confDir.resolve("actions.xml").outputStream().use {
+                        this::class.java.getResourceAsStream("/conf/actions.xml")?.copyTo(it)
+                    }
+
+                    // Copy behaviors.xml
+                    confDir.resolve("behaviors.xml").outputStream().use {
+                        this::class.java.getResourceAsStream("/conf/behaviors.xml")?.copyTo(it)
+                    }
+
+                    // Copy settings.properties
+                    confDir.resolve("settings.properties").outputStream().use {
+                        this::class.java.getResourceAsStream("/conf/settings.properties")?.copyTo(it)
+                    }
+                }
+
+                // Create img directory
+                val imgDir = getPath("img")
+                if (!imgDir.exists() || !imgDir.isDirectory()) {
+                    // Create unused directory
+                    val unusedDir = imgDir.resolve("unused")
+                    unusedDir.createDirectories()
+
+                    // Copy default mascot
+                    val defaultMascotDir = imgDir.resolve("Shimeji")
+                    defaultMascotDir.createDirectories()
+                    for (i in 1 until 47) {
+                        getPath("img", "Shimeji", "shime$i.png").outputStream().use {
+                            this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.copyTo(it)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                showError("Failed to create the config directory.", e)
+                exitProcess(0)
+            }
+        }
 
         @JvmStatic
         fun showError(message: String) {
