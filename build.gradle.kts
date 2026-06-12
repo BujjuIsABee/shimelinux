@@ -12,6 +12,8 @@ repositories {
 dependencies {
     implementation("org.openjdk.nashorn:nashorn-core:15.7")
     implementation("com.dorkbox:SystemTray:4.4")
+    implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
+    implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
     testImplementation(kotlin("test"))
 }
 
