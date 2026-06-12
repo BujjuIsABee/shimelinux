@@ -25,22 +25,6 @@ class Breed(
     animations: List<Animation>,
     context: VariableMap
 ) : Animate(schema, animations, context) {
-    private val delegate = Delegate(this)
-
-    override fun init(mascot: Mascot) {
-        super.init(mascot)
-
-        delegate.validateBornCount()
-    }
-
-    override fun tick() {
-        super.tick()
-
-        if (delegate.isPenultimateFrame && delegate.isEnabled) {
-            delegate.breed()
-        }
-    }
-
     class Delegate(private val action: ActionBase) {
         private val log = Logger.getLogger(this::class.java.name)
 
@@ -140,6 +124,22 @@ class Breed(
 
             const val PARAMETER_BORNCOUNT = "BornCount"
             private const val DEFAULT_BORNCOUNT = 1
+        }
+    }
+
+    private val delegate = Delegate(this)
+
+    override fun init(mascot: Mascot) {
+        super.init(mascot)
+
+        delegate.validateBornCount()
+    }
+
+    override fun tick() {
+        super.tick()
+
+        if (delegate.isPenultimateFrame && delegate.isEnabled) {
+            delegate.breed()
         }
     }
 }

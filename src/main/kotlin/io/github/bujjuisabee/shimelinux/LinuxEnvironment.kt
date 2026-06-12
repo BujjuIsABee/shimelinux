@@ -11,12 +11,12 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import java.awt.Point
 
-class X11Environment : Environment() {
+class LinuxEnvironment : Environment() {
     override val workArea
         get() = screen
-
     override val activeIE = Area()
-    override val activeIETitle = ""
+    override val activeIETitle
+        get() = ""
 
     init {
         activeIE.isVisible = false
@@ -26,7 +26,9 @@ class X11Environment : Environment() {
 
     override fun restoreIE() {}
 
-    override fun refreshCache() {}
+    override fun refreshCache() {
+        // i feel so refreshed!!!
+    }
 
     override fun dispose() {}
 }

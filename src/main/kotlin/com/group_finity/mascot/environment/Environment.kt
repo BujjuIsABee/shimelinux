@@ -37,7 +37,7 @@ abstract class Environment {
         tick()
     }
 
-    open fun tick() {
+    fun tick() {
         screen.set(screenRect)
         complexScreen.set(screenRects)
         cursor.set(cursorPos)
