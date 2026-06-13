@@ -725,6 +725,8 @@ class Main {
     fun getConfiguration(imageSet: String) = configurations[imageSet]
 
     fun exit() {
+        manager.disposeAll()
+        manager.stop()
         exitProcess(0)
     }
 
