@@ -14,37 +14,10 @@ import java.awt.image.BufferedImage
 import javax.swing.UIManager
 
 class NativeFactoryImpl : NativeFactory() {
-    private val environment: Environment
-
-    init {
-        // Get window manager
-        val wm = try {
-            when (System.getenv("XDG_SESSION_TYPE").lowercase()) {
-                "x11" -> WindowManager.X11
-                "wayland" -> WindowManager.WAYLAND
-                else -> WindowManager.OTHER
-            }
-        } catch (_: Exception) {
-            WindowManager.OTHER
-        }
-
-        // Get desktop environment
-        val de = try {
-            when (System.getenv("XDG_CURRENT_DESKTOP").lowercase()) {
-                "kde" -> DesktopEnvironment.KDE
-                else -> DesktopEnvironment.OTHER
-            }
-        } catch (_: Exception) {
-            DesktopEnvironment.OTHER
-        }
-
-        environment = if (wm == WindowManager.X11) {
-            X11Environment()
-        } else if (de == DesktopEnvironment.KDE) {
-            KdeEnvironment()
-        } else {
-            GenericLinuxEnvironment()
-        }
+    private val environment: Environment = if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") {
+        KdeEnvironment()
+    } else {
+        GenericLinuxEnvironment()
     }
 
     override fun getEnvironment() = environment
@@ -59,7 +32,4 @@ class NativeFactoryImpl : NativeFactory() {
         UIManager.setLookAndFeel(previousLaf)
         return window
     }
-
-    enum class WindowManager { X11, WAYLAND, OTHER }
-    enum class DesktopEnvironment { KDE, OTHER }
 }

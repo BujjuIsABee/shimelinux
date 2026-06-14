@@ -331,13 +331,11 @@ class Main {
         }
         transformationMenu.checked = properties.getProperty("Transformation", "true").toBoolean()
 
-        /*
         val throwingMenu = Checkbox(languageBundle.getString("ThrowingWindows")) {
             toggleBooleanSetting("Throwing", true)
             updateConfigFile()
         }
         throwingMenu.checked = properties.getProperty("Throwing", "true").toBoolean()
-         */
 
         val soundsMenu = Checkbox(languageBundle.getString("SoundEffects")) {
             toggleBooleanSetting("Sounds", true)
@@ -356,7 +354,7 @@ class Main {
         allowedBehaviorsSubmenu.add(breedingMenu)
         allowedBehaviorsSubmenu.add(transientMenu)
         allowedBehaviorsSubmenu.add(transformationMenu)
-        // allowedBehaviorsSubmenu.add(throwingMenu)
+        allowedBehaviorsSubmenu.add(throwingMenu)
         allowedBehaviorsSubmenu.add(soundsMenu)
         allowedBehaviorsSubmenu.add(multiscreenMenu)
 

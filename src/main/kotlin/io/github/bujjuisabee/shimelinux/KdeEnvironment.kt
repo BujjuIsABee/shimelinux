@@ -71,7 +71,7 @@ class KdeEnvironment : Environment() {
             }
             
             function onWindowActivated(window) {
-                if (!window || !window.normalWindow || window.minimized || window.maximized) {
+                if (!window || !window.normalWindow || window.minimized) {
                     onWindowDeactivated();
                     return;
                 }
@@ -103,7 +103,7 @@ class KdeEnvironment : Environment() {
             
             function onFrameGeometryChanged(window) {
                 const bounds = window.frameGeometry;
-                if (bounds.width != width || bounds.height != height) {
+                if (bounds.width == width && bounds.height == height) {
                     resetActiveWindow();
                     width = null;
                     height = null;
@@ -115,9 +115,7 @@ class KdeEnvironment : Environment() {
             }
             
             function onWindowMaximized(window) {
-                if (window.maximized) {
-                    resetActiveWindow();
-                } else if (window.active) {
+                if (window.active) {
                     setActiveWindow(window);
                 }
             }
@@ -125,6 +123,7 @@ class KdeEnvironment : Environment() {
             workspace.windowActivated.connect(onWindowActivated);
             onWindowActivated(workspace.activeWindow);
         """.trimIndent())
+        scriptFile.deleteOnExit()
 
         scripting = dbus.getRemoteObject(
             "org.kde.KWin",
@@ -150,16 +149,14 @@ class KdeEnvironment : Environment() {
         super.tick()
 
         val activeWindow = client.activeWindow
-        if (activeWindow == null || !isViableIE(activeWindow)) return
-
-        if (client.activeWindow != null) {
-            activeIE.isVisible = true
-            activeIE.set(client.activeWindow!!.bounds)
-            activeIETitle = client.activeWindow!!.title
-        } else {
+        if (activeWindow == null || !isViableIE(activeWindow)) {
             activeIE.isVisible = false
             activeIE.set(Rectangle(0, 0, 0, 0))
             activeIETitle = ""
+        } else {
+            activeIE.isVisible = true
+            activeIE.set(activeWindow.bounds)
+            activeIETitle = activeWindow.title
         }
     }
 
