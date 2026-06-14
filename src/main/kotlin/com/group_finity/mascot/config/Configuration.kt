@@ -47,7 +47,7 @@ class Configuration {
             Locale.forLanguageTag("en-US")
         }
 
-        schema = ResourceBundle.getBundle("conf.schema", locale)
+        schema = ResourceBundle.getBundle("schema", locale)
 
         for (constant in configurationNode.selectChildren(schema.getString("Constant"))) {
             val key = checkNotNull(constant.getAttribute(schema.getString("Name")))

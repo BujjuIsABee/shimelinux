@@ -59,11 +59,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     init {
         initComponents()
 
-        try {
-            val icon = ImageIO.read(this::class.java.getResourceAsStream("/img/icon.png"))
-            setIconImage(icon)
-        } catch (_: Exception) {
-        }
+        val icon = ImageIO.read(this::class.java.getResourceAsStream("/icon.png"))
+        setIconImage(icon)
 
         title = Main.instance.languageBundle.getString("ShimejiImageSetChooser")
 
