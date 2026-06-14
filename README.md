@@ -1,4 +1,4 @@
-# ShimeLinux ![icon](src/main/resources/img/icon.png)
+# ShimeLinux ![icon](src/main/resources/icon.png)
 
 **Shimeji desktop pet for Linux**
 
