@@ -8,6 +8,7 @@
 package com.group_finity.mascot.image
 
 import java.awt.Color
+import java.awt.Image
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.nio.file.Path
@@ -83,8 +84,24 @@ object ImagePairLoader {
     }
 
     private fun scale(source: BufferedImage, scaling: Double, filter: Filter): BufferedImage {
-        // idk how to do this
-        return source
+        val hints = when (filter) {
+            Filter.NEAREST_NEIGHBOR, Filter.HQX -> Image.SCALE_REPLICATE
+            Filter.BICUBIC -> Image.SCALE_SMOOTH
+        }
+
+        val scaledWidth = (source.width * scaling).toInt()
+        val scaledHeight = (source.height * scaling).toInt()
+        val scaledImage = source.getScaledInstance(
+            scaledWidth,
+            scaledHeight,
+            hints
+        )
+
+        val result = BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB)
+        val graphics = result.createGraphics()
+        graphics.drawImage(scaledImage, 0, 0, null)
+        graphics.dispose()
+        return result
     }
 
     enum class Filter { NEAREST_NEIGHBOR, HQX, BICUBIC }
