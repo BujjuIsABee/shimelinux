@@ -16,7 +16,13 @@ import java.awt.GraphicsConfiguration
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
+import java.awt.geom.AffineTransform
+import java.awt.geom.Area
+import java.awt.geom.Path2D
 import java.awt.image.BufferedImage
+import java.util.logging.Level
+import java.util.logging.Logger
+import javax.imageio.ImageIO
 import javax.swing.JPanel
 import javax.swing.JWindow
 
@@ -27,11 +33,14 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private var imageChanged = false
     private var offset = Point(0, 0)
 
+    private val maskCache = mutableMapOf<BufferedImage, Area>()
+
     init {
         background = Color(0, 0, 0, 0)
         contentPane = object : JPanel() {
             override fun paintComponent(g: Graphics) {
                 if (image != null) {
+                    setWindowMask()
                     g.drawImage(image!!, offset.x, offset.y, null)
                 }
             }
@@ -67,6 +76,31 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
 
     override fun setVisible(b: Boolean) {
         super.setVisible(b)
+    }
+
+    private fun setWindowMask() {
+        if (image == null) return
+        val image = image!!
+
+        if (!maskCache.containsKey(image)) {
+            val width = image.width
+            val height = image.height
+            val mask = Path2D.Double()
+
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    val color = Color(image.getRGB(x, y), true)
+                    if (color.alpha > 0) {
+                        mask.append(Rectangle(x, y, 1, 1), false)
+                    }
+                }
+            }
+
+            maskCache[image] = Area(mask)
+        }
+
+        val mask = maskCache[image]!!
+        shape = mask.createTransformedArea(AffineTransform.getTranslateInstance(offset.x.toDouble(), offset.y.toDouble()))
     }
 
     override fun getGraphicsConfiguration() = gc
