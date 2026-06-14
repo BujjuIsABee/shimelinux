@@ -35,22 +35,24 @@ class KdeEnvironment : Environment() {
         dbus.requestBusName("io.github.bujjuisabee.shimelinux")
         dbus.exportObject(client)
 
-        val scriptFile = File.createTempFile("shimelinux-kwin", ".js")
+        val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
         scriptFile.writeText("""
             let activeWindow = null;
             let frameGeometryChangedHandler = null;
             let windowClosedOrMinimizedHandler = null;
-            let windowMaximizedHandler = null;
             let width = null;
             let height = null;
             
             function setActiveWindow(window) {
+                if (activeWindow != window && !isWindowOnscreen(activeWindow)) return;
+            
                 const bounds = window.frameGeometry;
                 callDBus(
                     "io.github.bujjuisabee.shimelinux",
                     "/KWinClient",
                     "io.github.bujjuisabee.shimelinux",
                     "setActiveWindow",
+                    window.internalId.toString(),
                     window.resourceClass,
                     bounds.x,
                     bounds.y,
@@ -61,6 +63,8 @@ class KdeEnvironment : Environment() {
             }
             
             function resetActiveWindow() {
+                if (!isWindowOnscreen(activeWindow)) return;
+                
                 callDBus(
                     "io.github.bujjuisabee.shimelinux",
                     "/KWinClient",
@@ -71,6 +75,8 @@ class KdeEnvironment : Environment() {
             }
             
             function onWindowActivated(window) {
+                if (!isWindowOnscreen(activeWindow)) return;
+                
                 if (!window || !window.normalWindow || window.minimized) {
                     onWindowDeactivated();
                     return;
@@ -80,48 +86,78 @@ class KdeEnvironment : Environment() {
                 
                 if (activeWindow != window) {
                     activeWindow = window;
-                    frameGeometryChangedHandler = onFrameGeometryChanged.bind(null, window);
+                    frameGeometryChangedHandler = setActiveWindow.bind(null, window);
                     windowClosedOrMinimizedHandler = resetActiveWindow.bind(null);
-                    windowMaximizedHandler = onWindowMaximized.bind(null, window);
                     window.frameGeometryChanged.connect(frameGeometryChangedHandler);
                     window.closed.connect(windowClosedOrMinimizedHandler);
                     window.minimizedChanged.connect(windowClosedOrMinimizedHandler);
-                    window.maximizedChanged.connect(windowMaximizedHandler);
                 }
             }
             
             function onWindowDeactivated() {
+                if (!isWindowOnscreen(activeWindow)) return;
+            
                 resetActiveWindow();
                 activeWindow.frameGeometryChanged.disconnect(frameGeometryChangedHandler);
                 activeWindow.closed.disconnect(windowClosedOrMinimizedHandler);
                 activeWindow.minimizedChanged.disconnect(windowClosedOrMinimizedHandler);
-                activeWindow.maximizedChanged.disconnect(windowMaximizedHandler);
                 frameGeometryChangedHandler = null;
                 windowClosedOrMinimizedHandler = null;
-                windowMaximizedHandler = null;
             }
             
-            function onFrameGeometryChanged(window) {
-                const bounds = window.frameGeometry;
-                if (bounds.width == width && bounds.height == height) {
-                    resetActiveWindow();
-                    width = null;
-                    height = null;
-                } else {
-                    setActiveWindow(window);
-                    width = bounds.width;
-                    height = bounds.height;
-                }
+            function move() {
+                callDBus(
+                    "io.github.bujjuisabee.shimelinux",
+                    "/KWinClient",
+                    "io.github.bujjuisabee.shimelinux",
+                    "getWindowPosition",
+                    (array) => {
+                        if (array[0] != "null" && array[1] != "null" && array[2] != "null") {
+                            const windowId = array[0];
+                            const x = parseInt(array[1], 10);
+                            const y = parseInt(array[2], 10);
+                            
+                            const windows = workspace.windowList();
+                            
+                            for (let i = 0; i < windows.length; i++) {
+                                const window = windows[i];
+                                if (window.internalId.toString() == windowId) {
+                                    const bounds = window.frameGeometry;
+                                    window.frameGeometry = {
+                                        x: x,
+                                        y: y,
+                                        width: bounds.width,
+                                        height: bounds.height
+                                    };
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                );
             }
             
-            function onWindowMaximized(window) {
-                if (window.active) {
-                    setActiveWindow(window);
-                }
+            function isWindowOnscreen(window) {
+                if (!window || !window.normalWindow) return true;
+                
+                const windowBounds = window.frameGeometry;
+                const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
+                
+                return windowBounds.x >= screenBounds.x &&
+                       windowBounds.y >= screenBounds.y &&
+                       (windowBounds.x + windowBounds.width) <= (screenBounds.x + screenBounds.width) &&
+                       (windowBounds.y + windowBounds.height) <= (screenBounds.y + screenBounds.height);
             }
             
             workspace.windowActivated.connect(onWindowActivated);
-            onWindowActivated(workspace.activeWindow);
+            if (workspace.activeWindow != null) {
+                onWindowActivated(workspace.activeWindow);
+            }
+            
+            const timer = new QTimer();
+            timer.interval = 40;
+            timer.timeout.connect(move);
+            timer.start();
         """.trimIndent())
         scriptFile.deleteOnExit()
 
@@ -131,7 +167,7 @@ class KdeEnvironment : Environment() {
             KWinScripting::class.java
         )
 
-        val scriptId = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin")
+        val scriptId = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
         script = dbus.getRemoteObject(
             "org.kde.KWin",
             "/Scripting/Script$scriptId",
@@ -149,20 +185,30 @@ class KdeEnvironment : Environment() {
         super.tick()
 
         val activeWindow = client.activeWindow
-        if (activeWindow == null || !isViableIE(activeWindow)) {
-            activeIE.isVisible = false
-            activeIE.set(Rectangle(0, 0, 0, 0))
-            activeIETitle = ""
-        } else {
+        if (activeWindow != null && isIE(activeWindow)) {
             activeIE.isVisible = true
             activeIE.set(activeWindow.bounds)
             activeIETitle = activeWindow.title
+        } else {
+            activeIE.isVisible = false
+            activeIE.set(Rectangle(0, 0, 0, 0))
+            activeIETitle = ""
         }
     }
 
-    override fun moveActiveIE(point: Point) {}
+    override fun moveActiveIE(point: Point) {
+        client.windowPosition = point
+    }
 
-    override fun restoreIE() {}
+    override fun restoreIE() {
+        val window = client.activeWindow
+        if (window != null) {
+            client.windowPosition = Point(
+                (workArea.width / 2) - (window.bounds.width / 2),
+                (workArea.height / 2) - (window.bounds.height / 2)
+            )
+        }
+    }
 
     override fun refreshCache() {
         cache.clear()
@@ -170,11 +216,11 @@ class KdeEnvironment : Environment() {
 
     override fun dispose() {
         script.stop()
-        scripting.unloadScript("shimelinux-kwin")
+        scripting.unloadScript("shimelinux-kwin-script")
         dbus.disconnect()
     }
 
-    private fun isViableIE(window: Window): Boolean {
+    private fun isIE(window: Window): Boolean {
         if (cache.containsKey(window.title)) {
             return cache[window.title]!!
         }
@@ -221,6 +267,7 @@ class KdeEnvironment : Environment() {
     @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
     interface KWinClient : DBusInterface {
         fun setActiveWindow(
+            internalId: String,
             resourceClass: String,
             x: Int,
             y: Int,
@@ -229,12 +276,16 @@ class KdeEnvironment : Environment() {
         )
 
         fun resetActiveWindow()
+
+        fun getWindowPosition(): Array<String>
     }
 
     class KWinClientImpl : KWinClient {
         var activeWindow: Window? = null
+        var windowPosition: Point? = null
 
         override fun setActiveWindow(
+            internalId: String,
             resourceClass: String,
             x: Int,
             y: Int,
@@ -242,6 +293,7 @@ class KdeEnvironment : Environment() {
             height: Int
         ) {
             activeWindow = Window(
+                internalId,
                 resourceClass,
                 Rectangle(x, y, width, height)
             )
@@ -251,10 +303,21 @@ class KdeEnvironment : Environment() {
             activeWindow = null
         }
 
+        override fun getWindowPosition(): Array<String> {
+            val result = arrayOf(
+                activeWindow?.id ?: "null",
+                windowPosition?.x?.toString() ?: "null",
+                windowPosition?.y?.toString() ?: "null"
+            )
+            windowPosition = null
+            return result
+        }
+
         override fun getObjectPath() = "/KWinClient"
     }
 
     data class Window(
+        val id: String,
         val title: String,
         val bounds: Rectangle
     )
