@@ -5,6 +5,7 @@ const interfaceName = "io.github.bujjuisabee.shimelinux";
 let activeWindow = null;
 let frameGeometryChangedHandler = null;
 let windowClosedOrMinimizedHandler = null;
+let moveResizedChangedHandler = null;
 let width = null;
 let height = null;
 
@@ -74,10 +75,12 @@ function onWindowActivated(window) {
 
         frameGeometryChangedHandler = setActiveWindow.bind(null, window);
         windowClosedOrMinimizedHandler = resetActiveWindow.bind(null);
+        moveResizedChangedHandler = onMoveResizedChanged.bind(null, window);
 
         window.frameGeometryChanged.connect(frameGeometryChangedHandler);
         window.closed.connect(windowClosedOrMinimizedHandler);
         window.minimizedChanged.connect(windowClosedOrMinimizedHandler);
+        window.moveResizedChanged.connect(moveResizedChangedHandler);
     }
 }
 
@@ -89,9 +92,17 @@ function onWindowDeactivated() {
     activeWindow.frameGeometryChanged.disconnect(frameGeometryChangedHandler);
     activeWindow.closed.disconnect(windowClosedOrMinimizedHandler);
     activeWindow.minimizedChanged.disconnect(windowClosedOrMinimizedHandler);
+    activeWindow.moveResizedChanged.disconnect(moveResizedChangedHandler);
 
     frameGeometryChangedHandler = null;
     windowClosedOrMinimizedHandler = null;
+    moveResizedChangedHandler = null;
+}
+
+function onMoveResizedChanged(window) {
+    if (window.move) {
+        onWindowActivated(null);
+    }
 }
 
 function isWindowOnscreen(window) {

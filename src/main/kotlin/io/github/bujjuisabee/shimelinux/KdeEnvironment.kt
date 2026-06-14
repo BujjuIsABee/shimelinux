@@ -16,8 +16,6 @@ import org.freedesktop.dbus.interfaces.DBusInterface
 import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 
 class KdeEnvironment : Environment() {
     override val workArea
