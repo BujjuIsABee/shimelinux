@@ -98,7 +98,7 @@ class Main {
         try {
             val systemLocale = Locale.getDefault().toLanguageTag()
             val locale = Locale.forLanguageTag(properties.getProperty("Language", systemLocale))
-            languageBundle = ResourceBundle.getBundle("language", locale)
+            languageBundle = ResourceBundle.getBundle("conf.language", locale)
         } catch (_: Exception) {
             showError("The default language file could not be loaded.")
             exit()
@@ -294,7 +294,7 @@ class Main {
 
         val icon = SystemTray.get()
         if (icon != null) {
-            icon.setImage(this::class.java.getResourceAsStream("/icon.png"))
+            icon.setImage(this::class.java.getResourceAsStream("/img/icon.png"))
             icon.setStatus("ShimeLinux")
         } else {
             log.log(Level.SEVERE, "Failed to create tray icon")
@@ -602,7 +602,7 @@ class Main {
             // Refresh the language bundle
             val systemLocale = Locale.getDefault().toLanguageTag()
             val locale = Locale.forLanguageTag(properties.getProperty("Language", systemLocale))
-            languageBundle = ResourceBundle.getBundle("language", locale)
+            languageBundle = ResourceBundle.getBundle("conf.language", locale)
 
             // Refresh the mascots
             val isExitOnLastRemoved = manager.isExitOnLastRemoved
@@ -778,7 +778,7 @@ class Main {
 
         fun configureLogging() {
             try {
-                LogManager.getLogManager().readConfiguration(this::class.java.getResourceAsStream("/logging.properties"))
+                LogManager.getLogManager().readConfiguration(this::class.java.getResourceAsStream("/conf/logging.properties"))
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -803,7 +803,7 @@ class Main {
 
                     // Copy settings.properties
                     confDir.resolve("settings.properties").outputStream().use {
-                        this::class.java.getResourceAsStream("/settings.properties")?.copyTo(it)
+                        this::class.java.getResourceAsStream("/conf/settings.properties")?.copyTo(it)
                     }
                 }
 

@@ -70,7 +70,7 @@ class ImageSetChooserPanel : JPanel {
 
         add(checkbox)
         add(image)
-        add(Box.createRigidArea(Dimension(4, 0)))
+        add(Box.createHorizontalStrut(4))
         add(textPanel)
     }
 }

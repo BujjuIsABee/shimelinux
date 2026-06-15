@@ -13,8 +13,11 @@ import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.Frame
+import java.awt.GridBagLayout
 import java.awt.Image
 import javax.imageio.ImageIO
+import javax.swing.BorderFactory
+import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.DefaultListModel
@@ -43,62 +46,53 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var alwaysShowInformationScreen = Main.instance.properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
     private var scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
     private var opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
-    private var filter = Main.instance.properties.getProperty("Filter", "Replicate")
+    private var filter = Main.instance.properties.getProperty("Filter", "false").toBoolean()
     private var theme = Main.instance.properties.getProperty("Theme", "GTK")
     private val initialTheme = theme
 
-    private lateinit var tabsPane: JTabbedPane
-    private lateinit var generalTab: JPanel
-    private lateinit var alwaysShowShimejiChooserCheckBox: JCheckBox
-    private lateinit var alwaysShowInformationScreenCheckBox: JCheckBox
-    private lateinit var scalingLabel: JLabel
-    private lateinit var scalingSlider: JSlider
-    private lateinit var opacityLabel: JLabel
-    private lateinit var opacitySlider: JSlider
-    private lateinit var filterLabel: JLabel
-    private lateinit var filterButtonGroup: ButtonGroup
-    private lateinit var filterReplicate: JRadioButton
-    private lateinit var filterSmooth: JRadioButton
-    private lateinit var interactiveWindowsTab: JPanel
-    private lateinit var interactiveWindowsTabsPane: JTabbedPane
-    private lateinit var whitelistPane: JScrollPane
-    private lateinit var blacklistPane: JScrollPane
-    private lateinit var interactiveWindows: JList<String>
-    private lateinit var interactiveWindowsBlacklist: JList<String>
-    private lateinit var interactiveWindowsButtonsPanel: JPanel
-    private lateinit var addButton: JButton
-    private lateinit var removeButton: JButton
-    private lateinit var themeTab: JPanel
-    private lateinit var themeButtonGroup: ButtonGroup
-    private lateinit var themeGtk: JRadioButton
-    private lateinit var themeNimbus: JRadioButton
-    private lateinit var themeMetal: JRadioButton
-    private lateinit var aboutTab: JPanel
-    private lateinit var aboutCenterPanel: JPanel
-    private lateinit var aboutImage: JLabel
-    private lateinit var shimelinuxLabel: JLabel
-    private lateinit var versionLabel: JLabel
-    private lateinit var buttonsPanel: JPanel
-    private lateinit var doneButton: JButton
-    private lateinit var cancelButton: JButton
+    private var tabbedPane: JTabbedPane
+    private var generalTabPanel: JPanel
+    private var alwaysShowShimejiChooserCheckBox: JCheckBox
+    private var alwaysShowInformationScreenCheckBox: JCheckBox
+    private var scalingLabel: JLabel
+    private var scalingSlider: JSlider
+    private var opacityLabel: JLabel
+    private var opacitySlider: JSlider
+    private var filterLabel: JLabel
+    private var filterButtonGroup: ButtonGroup
+    private var nearestNeighborRadioButton: JRadioButton
+    private var bicubicRadioButton: JRadioButton
+    private var interactiveWindowsTabPanel: JPanel
+    private var whitelistBlacklistTabbedPane: JTabbedPane
+    private var whitelistPane: JScrollPane
+    private var blacklistPane: JScrollPane
+    private var whitelistList: JList<String>
+    private var blacklistList: JList<String>
+    private var interactiveWindowsButtonsPanel: JPanel
+    private var addInteractiveWindowButton: JButton
+    private var removeInteractiveWindowButton: JButton
+    private var themeTabPanel: JPanel
+    private var themeButtonGroup: ButtonGroup
+    private var gtkThemeRadioButton: JRadioButton
+    private var nimbusThemeRadioButton: JRadioButton
+    private var metalThemeRadioButton: JRadioButton
+    private var aboutTabPanel: JPanel
+    private var aboutPanel: JPanel
+    private var aboutImageLabel: JLabel
+    private var shimelinuxLabel: JLabel
+    private var versionLabel: JLabel
+    private var buttonsPanel: JPanel
+    private var doneButton: JButton
+    private var cancelButton: JButton
 
     init {
-        initComponents()
-
-        val icon = ImageIO.read(this::class.java.getResourceAsStream("/icon.png"))
-        setIconImage(icon)
+        this::class.java.getResourceAsStream("/img/icon.png").use {
+            val icon = ImageIO.read(it)
+            setIconImage(icon)
+        }
 
         title = Main.instance.languageBundle.getString("Settings")
-    }
-
-    fun display() {
-        isVisible = true
-    }
-
-    private fun initComponents() {
-        this.contentPane = JPanel(BorderLayout())
-
-        tabsPane = JTabbedPane()
+        contentPane = JPanel(BorderLayout())
 
         alwaysShowShimejiChooserCheckBox = JCheckBox(Main.instance.languageBundle.getString("AlwaysShowShimejiChooser"))
         alwaysShowShimejiChooserCheckBox.isSelected = alwaysShowShimejiChooser
@@ -113,6 +107,8 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         }
 
         scalingLabel = JLabel(Main.instance.languageBundle.getString("Scaling"))
+        scalingLabel.alignmentX = CENTER_ALIGNMENT
+
         scalingSlider = JSlider()
         scalingSlider.maximum = 80
         scalingSlider.majorTickSpacing = 10
@@ -130,6 +126,8 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         }
 
         opacityLabel = JLabel(Main.instance.languageBundle.getString("Opacity"))
+        opacityLabel.alignmentX = CENTER_ALIGNMENT
+
         opacitySlider = JSlider()
         opacitySlider.majorTickSpacing = 10
         opacitySlider.minorTickSpacing = 5
@@ -142,40 +140,42 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         }
 
         filterLabel = JLabel(Main.instance.languageBundle.getString("FilterOptions"))
+        filterLabel.alignmentX = CENTER_ALIGNMENT
 
-        filterReplicate = JRadioButton("Pixelated")
-        filterReplicate.isSelected = filter == "Replicate"
-        filterReplicate.addChangeListener {
-            if (filterReplicate.isSelected) {
-                filter = "Replicate"
+        nearestNeighborRadioButton = JRadioButton(Main.instance.languageBundle.getString("NearestNeighbour"))
+        nearestNeighborRadioButton.isSelected = !filter
+        nearestNeighborRadioButton.addChangeListener {
+            if (nearestNeighborRadioButton.isSelected) {
+                filter = false
             }
             isImageReloadRequired = true
         }
 
-        filterSmooth = JRadioButton("Smooth")
-        filterSmooth.isSelected = filter == "Smooth"
-        filterSmooth.addChangeListener {
-            if (filterSmooth.isSelected) {
-                filter = "Smooth"
+        bicubicRadioButton = JRadioButton(Main.instance.languageBundle.getString("BicubicFilter"))
+        bicubicRadioButton.isSelected = filter
+        bicubicRadioButton.addChangeListener {
+            if (bicubicRadioButton.isSelected) {
+                filter = true
             }
             isImageReloadRequired = true
         }
 
         filterButtonGroup = ButtonGroup()
-        filterButtonGroup.add(filterReplicate)
-        filterButtonGroup.add(filterSmooth)
+        filterButtonGroup.add(nearestNeighborRadioButton)
+        filterButtonGroup.add(bicubicRadioButton)
 
-        generalTab = JPanel()
-        generalTab.layout = BoxLayout(generalTab, BoxLayout.Y_AXIS)
-        generalTab.add(alwaysShowShimejiChooserCheckBox)
-        generalTab.add(alwaysShowInformationScreenCheckBox)
-        generalTab.add(scalingLabel)
-        generalTab.add(scalingSlider)
-        generalTab.add(opacityLabel)
-        generalTab.add(opacitySlider)
-        generalTab.add(filterLabel)
-        generalTab.add(filterReplicate)
-        generalTab.add(filterSmooth)
+        generalTabPanel = JPanel()
+        generalTabPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        generalTabPanel.layout = BoxLayout(generalTabPanel, BoxLayout.Y_AXIS)
+        generalTabPanel.add(alwaysShowShimejiChooserCheckBox)
+        generalTabPanel.add(alwaysShowInformationScreenCheckBox)
+        generalTabPanel.add(scalingLabel)
+        generalTabPanel.add(scalingSlider)
+        generalTabPanel.add(opacityLabel)
+        generalTabPanel.add(opacitySlider)
+        generalTabPanel.add(filterLabel)
+        generalTabPanel.add(nearestNeighborRadioButton)
+        generalTabPanel.add(bicubicRadioButton)
 
         val whitelistModel = DefaultListModel<String>()
         for (title in Main.instance.properties.getProperty("InteractiveWindows", "").split('/')) {
@@ -184,8 +184,8 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        interactiveWindows = JList(whitelistModel)
-        whitelistPane = JScrollPane(interactiveWindows)
+        whitelistList = JList(whitelistModel)
+        whitelistPane = JScrollPane(whitelistList)
 
         val blacklistModel = DefaultListModel<String>()
         for (title in Main.instance.properties.getProperty("InteractiveWindowsBlacklist", "").split('/')) {
@@ -194,21 +194,21 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        interactiveWindowsBlacklist = JList(blacklistModel)
-        blacklistPane = JScrollPane(interactiveWindowsBlacklist)
+        blacklistList = JList(blacklistModel)
+        blacklistPane = JScrollPane(blacklistList)
 
-        interactiveWindowsTabsPane = JTabbedPane()
-        interactiveWindowsTabsPane.addTab(Main.instance.languageBundle.getString("Whitelist"), whitelistPane)
-        interactiveWindowsTabsPane.addTab(Main.instance.languageBundle.getString("Blacklist"), blacklistPane)
+        whitelistBlacklistTabbedPane = JTabbedPane()
+        whitelistBlacklistTabbedPane.addTab(Main.instance.languageBundle.getString("Whitelist"), whitelistPane)
+        whitelistBlacklistTabbedPane.addTab(Main.instance.languageBundle.getString("Blacklist"), blacklistPane)
 
-        addButton = JButton(Main.instance.languageBundle.getString("Add"))
-        addButton.preferredSize = Dimension(130, 26)
-        addButton.addActionListener {
+        addInteractiveWindowButton = JButton(Main.instance.languageBundle.getString("Add"))
+        addInteractiveWindowButton.preferredSize = Dimension(130, 26)
+        addInteractiveWindowButton.addActionListener {
             val input = JOptionPane.showInputDialog(
                 rootPane,
                 Main.instance.languageBundle.getString("InteractiveWindowHintMessage"),
                 Main.instance.languageBundle.getString(
-                    if (interactiveWindowsTabsPane.selectedIndex == 0) {
+                    if (whitelistBlacklistTabbedPane.selectedIndex == 0) {
                         "AddInteractiveWindow"
                     } else {
                         "BlacklistInteractiveWindow"
@@ -218,30 +218,30 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (!input.isNullOrBlank() && !input.contains("/")) {
-                if (interactiveWindowsTabsPane.selectedIndex == 0) {
+                if (whitelistBlacklistTabbedPane.selectedIndex == 0) {
                     whitelistModel.add(whitelistModel.size, input.trim())
-                    interactiveWindows.model = whitelistModel
+                    whitelistList.model = whitelistModel
                 } else {
                     blacklistModel.add(blacklistModel.size, input.trim())
-                    interactiveWindowsBlacklist.model = blacklistModel
+                    blacklistList.model = blacklistModel
                 }
             }
 
             isInteractiveWindowReloadRequired = true
         }
 
-        removeButton = JButton(Main.instance.languageBundle.getString("Remove"))
-        removeButton.preferredSize = Dimension(130, 26)
-        removeButton.addActionListener {
-            if (interactiveWindowsTabsPane.selectedIndex == 0) {
-                if (interactiveWindows.selectedIndex != -1) {
-                    whitelistModel.remove(interactiveWindows.selectedIndex)
-                    interactiveWindows.model = whitelistModel
+        removeInteractiveWindowButton = JButton(Main.instance.languageBundle.getString("Remove"))
+        removeInteractiveWindowButton.preferredSize = Dimension(130, 26)
+        removeInteractiveWindowButton.addActionListener {
+            if (whitelistBlacklistTabbedPane.selectedIndex == 0) {
+                if (whitelistList.selectedIndex != -1) {
+                    whitelistModel.remove(whitelistList.selectedIndex)
+                    whitelistList.model = whitelistModel
                 }
             } else {
-                if (interactiveWindowsBlacklist.selectedIndex != -1) {
-                    blacklistModel.remove(interactiveWindowsBlacklist.selectedIndex)
-                    interactiveWindowsBlacklist.model = blacklistModel
+                if (blacklistList.selectedIndex != -1) {
+                    blacklistModel.remove(blacklistList.selectedIndex)
+                    blacklistList.model = blacklistModel
                 }
             }
 
@@ -249,77 +249,80 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         }
 
         interactiveWindowsButtonsPanel = JPanel(FlowLayout())
-        interactiveWindowsButtonsPanel.add(addButton)
-        interactiveWindowsButtonsPanel.add(removeButton)
+        interactiveWindowsButtonsPanel.add(addInteractiveWindowButton)
+        interactiveWindowsButtonsPanel.add(removeInteractiveWindowButton)
 
-        interactiveWindowsTab = JPanel(BorderLayout())
-        interactiveWindowsTab.add(interactiveWindowsTabsPane, BorderLayout.CENTER)
-        interactiveWindowsTab.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
+        interactiveWindowsTabPanel = JPanel(BorderLayout())
+        interactiveWindowsTabPanel.add(whitelistBlacklistTabbedPane, BorderLayout.CENTER)
+        interactiveWindowsTabPanel.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
 
-        themeGtk = JRadioButton("GTK")
-        themeGtk.isSelected = theme == "GTK"
-        themeGtk.addActionListener {
-            if (themeGtk.isSelected) {
+        gtkThemeRadioButton = JRadioButton("GTK")
+        gtkThemeRadioButton.isSelected = theme == "GTK"
+        gtkThemeRadioButton.addActionListener {
+            if (gtkThemeRadioButton.isSelected) {
                 theme = "GTK"
                 refreshTheme()
             }
         }
 
-        themeNimbus = JRadioButton("Nimbus")
-        themeNimbus.isSelected = theme == "Nimbus"
-        themeNimbus.addActionListener {
-            if (themeNimbus.isSelected) {
+        nimbusThemeRadioButton = JRadioButton("Nimbus")
+        nimbusThemeRadioButton.isSelected = theme == "Nimbus"
+        nimbusThemeRadioButton.addActionListener {
+            if (nimbusThemeRadioButton.isSelected) {
                 theme = "Nimbus"
                 refreshTheme()
             }
         }
 
-        themeMetal = JRadioButton("Metal")
-        themeMetal.isSelected = theme == "Metal"
-        themeMetal.addActionListener {
-            if (themeMetal.isSelected) {
+        metalThemeRadioButton = JRadioButton("Metal")
+        metalThemeRadioButton.isSelected = theme == "Metal"
+        metalThemeRadioButton.addActionListener {
+            if (metalThemeRadioButton.isSelected) {
                 theme = "Metal"
                 refreshTheme()
             }
         }
 
         themeButtonGroup = ButtonGroup()
-        themeButtonGroup.add(themeGtk)
-        themeButtonGroup.add(themeNimbus)
-        themeButtonGroup.add(themeMetal)
+        themeButtonGroup.add(gtkThemeRadioButton)
+        themeButtonGroup.add(nimbusThemeRadioButton)
+        themeButtonGroup.add(metalThemeRadioButton)
 
-        themeTab = JPanel()
-        themeTab.layout = BoxLayout(themeTab, BoxLayout.Y_AXIS)
-        themeTab.add(themeGtk)
-        themeTab.add(themeNimbus)
-        themeTab.add(themeMetal)
+        themeTabPanel = JPanel()
+        themeTabPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        themeTabPanel.layout = BoxLayout(themeTabPanel, BoxLayout.Y_AXIS)
+        themeTabPanel.add(gtkThemeRadioButton)
+        themeTabPanel.add(nimbusThemeRadioButton)
+        themeTabPanel.add(metalThemeRadioButton)
 
-        val image = ImageIO.read(this::class.java.getResourceAsStream("/icon.png"))
-        aboutImage = JLabel()
-        aboutImage.icon = ImageIcon(image.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
-        aboutImage.alignmentX = CENTER_ALIGNMENT
+        val image = ImageIO.read(this::class.java.getResourceAsStream("/img/icon.png"))
+        aboutImageLabel = JLabel()
+        aboutImageLabel.icon = ImageIcon(image.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
+        aboutImageLabel.alignmentX = CENTER_ALIGNMENT
 
         shimelinuxLabel = JLabel("ShimeLinux")
-        shimelinuxLabel.font = shimelinuxLabel.font.deriveFont(Font.BOLD, 24.0f)
+        shimelinuxLabel.font = shimelinuxLabel.font.deriveFont(Font.BOLD, shimelinuxLabel.font.size + 10.0f)
         shimelinuxLabel.alignmentX = CENTER_ALIGNMENT
+
         versionLabel = JLabel("v0.1.0")
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
-        aboutCenterPanel = JPanel()
-        aboutCenterPanel.layout = BoxLayout(aboutCenterPanel, BoxLayout.Y_AXIS)
-        aboutCenterPanel.add(aboutImage)
-        aboutCenterPanel.add(shimelinuxLabel)
-        aboutCenterPanel.add(versionLabel)
+        aboutPanel = JPanel()
+        aboutPanel.layout = BoxLayout(aboutPanel, BoxLayout.Y_AXIS)
+        aboutPanel.add(aboutImageLabel)
+        aboutPanel.add(shimelinuxLabel)
+        aboutPanel.add(versionLabel)
 
-        aboutTab = JPanel()
-        aboutTab.add(aboutCenterPanel)
+        aboutTabPanel = JPanel(GridBagLayout())
+        aboutTabPanel.add(aboutPanel)
 
-        tabsPane.addTab(Main.instance.languageBundle.getString("General"), generalTab)
+        tabbedPane = JTabbedPane()
+        tabbedPane.addTab(Main.instance.languageBundle.getString("General"), generalTabPanel)
         if (NativeFactory.instance.getEnvironment() is KdeEnvironment) {
-            tabsPane.addTab(Main.instance.languageBundle.getString("InteractiveWindows"), interactiveWindowsTab)
+            tabbedPane.addTab(Main.instance.languageBundle.getString("InteractiveWindows"), interactiveWindowsTabPanel)
         }
-        tabsPane.addTab(Main.instance.languageBundle.getString("Theme"), themeTab)
-        tabsPane.addTab(Main.instance.languageBundle.getString("About"), aboutTab)
+        tabbedPane.addTab(Main.instance.languageBundle.getString("Theme"), themeTabPanel)
+        tabbedPane.addTab(Main.instance.languageBundle.getString("About"), aboutTabPanel)
 
         doneButton = JButton(Main.instance.languageBundle.getString("Done"))
         doneButton.addActionListener {
@@ -327,7 +330,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             Main.instance.properties.setProperty("AlwaysShowInformationScreen", alwaysShowInformationScreen.toString())
             Main.instance.properties.setProperty("Scaling", scaling.toString())
             Main.instance.properties.setProperty("Opacity", opacity.toString())
-            Main.instance.properties.setProperty("Filter", filter)
+            Main.instance.properties.setProperty("Filter", filter.toString())
             Main.instance.properties.setProperty("Theme", theme)
 
             val whitelistBuilder = StringBuilder()
@@ -366,10 +369,14 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         buttonsPanel.add(doneButton)
         buttonsPanel.add(cancelButton)
 
-        add(tabsPane, BorderLayout.CENTER)
+        add(tabbedPane, BorderLayout.CENTER)
         add(buttonsPanel, BorderLayout.SOUTH)
 
         pack()
+    }
+
+    fun display() {
+        isVisible = true
     }
 
     private fun refreshTheme() {
