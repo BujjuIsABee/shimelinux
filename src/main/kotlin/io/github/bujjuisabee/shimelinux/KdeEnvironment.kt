@@ -110,7 +110,7 @@ class KdeEnvironment : Environment() {
         for (title in blacklist) {
             if (title.isNotBlank()) {
                 blacklistInUse = true
-                if (window.title == title) {
+                if (window.title.contains(title)) {
                     windowCache[window.title] = false
                     return false
                 }
@@ -122,7 +122,7 @@ class KdeEnvironment : Environment() {
         for (title in whitelist) {
             if (title.isNotBlank()) {
                 whitelistInUse = true
-                if (window.title == title) {
+                if (window.title.contains(title)) {
                     windowCache[window.title] = true
                     return true
                 }
@@ -148,7 +148,7 @@ class KdeEnvironment : Environment() {
     interface KWinClient : DBusInterface {
         fun setActiveWindow(
             internalId: String,
-            resourceClass: String,
+            caption: String,
             x: Int,
             y: Int,
             width: Int,
@@ -166,7 +166,7 @@ class KdeEnvironment : Environment() {
 
         override fun setActiveWindow(
             internalId: String,
-            resourceClass: String,
+            caption: String,
             x: Int,
             y: Int,
             width: Int,
@@ -174,7 +174,7 @@ class KdeEnvironment : Environment() {
         ) {
             activeWindow = Window(
                 internalId,
-                resourceClass,
+                caption,
                 Rectangle(x, y, width, height)
             )
         }

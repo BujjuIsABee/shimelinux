@@ -85,8 +85,8 @@ object ImagePairLoader {
 
     private fun scale(source: BufferedImage, scaling: Double, filter: Filter): BufferedImage {
         val hints = when (filter) {
-            Filter.NEAREST_NEIGHBOR, Filter.HQX -> Image.SCALE_REPLICATE
-            Filter.BICUBIC -> Image.SCALE_SMOOTH
+            Filter.REPLICATE -> Image.SCALE_REPLICATE
+            Filter.SMOOTH -> Image.SCALE_SMOOTH
         }
 
         val scaledWidth = (source.width * scaling).toInt()
@@ -104,5 +104,5 @@ object ImagePairLoader {
         return result
     }
 
-    enum class Filter { NEAREST_NEIGHBOR, HQX, BICUBIC }
+    enum class Filter { REPLICATE, SMOOTH }
 }

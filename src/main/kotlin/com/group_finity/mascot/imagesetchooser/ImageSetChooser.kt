@@ -42,7 +42,7 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var cancelled = true
 
     private lateinit var topLabelsPanel: JPanel
-    private lateinit var allLabelsPanel: JPanel
+    private lateinit var labelsPanel: JPanel
     private lateinit var label: JLabel
     private lateinit var clearAllLabel: JLabel
     private lateinit var slashLabel: JLabel
@@ -260,17 +260,17 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             }
         })
 
-        allLabelsPanel = JPanel(FlowLayout())
-        allLabelsPanel.layout = BoxLayout(allLabelsPanel, BoxLayout.X_AXIS)
-        allLabelsPanel.add(clearAllLabel)
-        allLabelsPanel.add(slashLabel)
-        allLabelsPanel.add(selectAllLabel)
+        labelsPanel = JPanel(FlowLayout())
+        labelsPanel.layout = BoxLayout(labelsPanel, BoxLayout.X_AXIS)
+        labelsPanel.add(clearAllLabel)
+        labelsPanel.add(slashLabel)
+        labelsPanel.add(selectAllLabel)
 
         topLabelsPanel = JPanel(BorderLayout())
         topLabelsPanel.add(label, BorderLayout.WEST)
-        topLabelsPanel.add(this@ImageSetChooser.allLabelsPanel, BorderLayout.EAST)
+        topLabelsPanel.add(this@ImageSetChooser.labelsPanel, BorderLayout.EAST)
 
-        addShimejiButton = JButton("+")
+        addShimejiButton = JButton(Main.instance.languageBundle.getString("Add"))
         addShimejiButton.addActionListener {
             val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
             var failed = false

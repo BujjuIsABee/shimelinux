@@ -73,20 +73,25 @@ class Main {
         private set
 
     fun run() {
-        // Set theme
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
-        } catch (_: Exception) {
-            log.log(Level.WARNING, "Failed to set theme.")
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        }
-
         // Load properties
         try {
             val input = getPath("conf", "settings.properties").inputStream()
             properties = Properties()
             properties.load(input)
         } catch (_: Exception) {
+        }
+
+        // Set theme
+        try {
+            UIManager.setLookAndFeel(when (properties.getProperty("Theme", "GTK")) {
+                "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                "Nimbus" -> "javax.swing.plaf.nimbus.NimbusLookAndFeel"
+                "Metal" -> "javax.swing.plaf.metal.MetalLookAndFeel"
+                else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+            })
+        } catch (_: Exception) {
+            log.log(Level.WARNING, "Failed to set theme.")
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         }
 
         // Load languages
@@ -363,7 +368,36 @@ class Main {
             setActiveImageSets(chooser.display())
         }
 
-        // Implement settings
+        val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
+            val settings = SettingsWindow(frame, true)
+            settings.display()
+
+            if (settings.isEnvironmentReloadRequired) {
+                NativeFactory.instance.getEnvironment().dispose()
+                NativeFactory.resetInstance()
+            }
+            if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
+                val isExitOnLastRemoved = manager.isExitOnLastRemoved
+                manager.isExitOnLastRemoved = false
+                manager.disposeAll()
+
+                ImagePairs.clear()
+                configurations.clear()
+
+                for (imageSet in imageSets) {
+                    loadConfiguration(imageSet)
+                }
+
+                for (imageSet in imageSets) {
+                    createMascot(imageSet)
+                }
+
+                manager.isExitOnLastRemoved = isExitOnLastRemoved
+            }
+            if (settings.isInteractiveWindowReloadRequired) {
+                NativeFactory.instance.getEnvironment().refreshCache()
+            }
+        }
 
         //region Language submenu
         val englishMenu = MenuItem("English") {
@@ -514,7 +548,7 @@ class Main {
         icon.menu.add(JSeparator())
         icon.menu.add(allowedBehaviorsSubmenu)
         icon.menu.add(chooseShimejiMenu)
-        // Implement settings
+        icon.menu.add(settingsMenu)
         icon.menu.add(languageSubmenu)
         icon.menu.add(JSeparator())
         icon.menu.add(pauseAllMenu)

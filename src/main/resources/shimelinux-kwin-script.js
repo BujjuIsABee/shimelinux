@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2026, Bujju
+ * All rights reserved.
+ * License: https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE
+ * Original License: https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE-ORIGINAL
+ */
+
 const busName = "io.github.bujjuisabee.shimelinux";
 const clientPath = "/KWinClient";
 const interfaceName = "io.github.bujjuisabee.shimelinux";
@@ -6,18 +13,16 @@ let activeWindow = null;
 let frameGeometryChangedHandler = null;
 let windowClosedOrMinimizedHandler = null;
 let moveResizedChangedHandler = null;
-let width = null;
-let height = null;
 
 function setActiveWindow(window) {
-    if (activeWindow != window && !isWindowOnscreen(activeWindow)) return;
+    if (activeWindow != window && isWindowOffscreen(activeWindow)) return;
 
     const bounds = window.frameGeometry;
     callDBus(
         busName, clientPath, interfaceName,
         "setActiveWindow",
         window.internalId.toString(),
-        window.resourceClass,
+        window.caption,
         bounds.x, bounds.y,
         bounds.width, bounds.height,
         () => {}
@@ -25,7 +30,7 @@ function setActiveWindow(window) {
 }
 
 function resetActiveWindow() {
-    if (!isWindowOnscreen(activeWindow)) return;
+    if (isWindowOffscreen(activeWindow)) return;
 
     callDBus(
         busName, clientPath, interfaceName,
@@ -61,7 +66,7 @@ function move() {
 }
 
 function onWindowActivated(window) {
-    if (!isWindowOnscreen(activeWindow)) return;
+    if (isWindowOffscreen(activeWindow)) return;
 
     if (!window || !window.normalWindow || window.minimized) {
         onWindowDeactivated();
@@ -85,7 +90,7 @@ function onWindowActivated(window) {
 }
 
 function onWindowDeactivated() {
-    if (!isWindowOnscreen(activeWindow)) return;
+    if (isWindowOffscreen(activeWindow)) return;
 
     resetActiveWindow();
 
@@ -105,15 +110,18 @@ function onMoveResizedChanged(window) {
     }
 }
 
-function isWindowOnscreen(window) {
-    if (!window || !window.normalWindow) return true;
+function isWindowOffscreen(window) {
+    if (!window || !window.normalWindow) return false;
 
     const windowBounds = window.frameGeometry;
     const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
 
-    return windowBounds.x >= screenBounds.x && windowBounds.y >= screenBounds.y &&
-    (windowBounds.x + windowBounds.width) <= (screenBounds.x + screenBounds.width) &&
-    (windowBounds.y + windowBounds.height) <= (screenBounds.y + screenBounds.height);
+    const onScreen = windowBounds.x >= screenBounds.x &&
+        windowBounds.y >= screenBounds.y &&
+        (windowBounds.x + windowBounds.width) <= (screenBounds.x + screenBounds.width) &&
+        (windowBounds.y + windowBounds.height) <= (screenBounds.y + screenBounds.height);
+
+    return !onScreen;
 }
 
 workspace.windowActivated.connect(onWindowActivated);

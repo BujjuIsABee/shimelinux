@@ -76,16 +76,11 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
         val opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
         val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
 
-        val filterText = Main.instance.properties.getProperty("Filter", "false")
-        val filter = if (
-            filterText.equals("true", true) ||
-            filterText.equals("hqx", true)
-        ) {
-            ImagePairLoader.Filter.HQX
-        } else if (filterText.equals("bicubic", true)) {
-            ImagePairLoader.Filter.BICUBIC
-        } else {
-            ImagePairLoader.Filter.NEAREST_NEIGHBOR
+        val filterText = Main.instance.properties.getProperty("Filter", "Replicate")
+        val filter = when (filterText) {
+            "Replicate" -> ImagePairLoader.Filter.REPLICATE
+            "Smooth" -> ImagePairLoader.Filter.SMOOTH
+            else -> ImagePairLoader.Filter.REPLICATE
         }
 
         if (imageText != null) {
