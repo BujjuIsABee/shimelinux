@@ -43,8 +43,8 @@ class ScanJump(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        if (mascot.manager != null) {
-            target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
+        mascot.manager?.let {
+            target = it.getMascotWithAffordance(affordance)?.get()
         }
 
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)

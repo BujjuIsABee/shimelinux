@@ -54,8 +54,10 @@ class Dragged(
         var offsetX = (offsetX * scaling).roundToInt()
         var offsetY = (offsetY * scaling).roundToInt()
         if (offsetType == schema.getString("Origin")) {
-            offsetX = 0 - offsetX + checkNotNull(mascot.image).center.x
-            offsetY = 0 - offsetY + checkNotNull(mascot.image).center.y
+            mascot.image?.let {
+                offsetX = 0 - offsetX + it.center.x
+                offsetY = 0 - offsetY + it.center.y
+            }
         }
 
         if (abs(cursor.x - mascot.anchor.x + offsetX) >= 5) {

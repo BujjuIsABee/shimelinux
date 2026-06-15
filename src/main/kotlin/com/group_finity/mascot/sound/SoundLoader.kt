@@ -18,17 +18,16 @@ object SoundLoader {
         if (Sounds.contains(name + volume)) return
 
         // Load clip
-        val stream = AudioSystem.getAudioInputStream(File(name))
         val clip = AudioSystem.getClip()
-        clip.open(stream)
+        AudioSystem.getAudioInputStream(File(name)).use { clip.open(it) }
 
         // Set volume
         (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = volume
 
         // Handle stop event
-        clip.addLineListener { event ->
-            if (event.type == LineEvent.Type.STOP) {
-                (event.line as Clip).stop()
+        clip.addLineListener {
+            if (it.type == LineEvent.Type.STOP) {
+                (it.line as Clip).stop()
             }
         }
 

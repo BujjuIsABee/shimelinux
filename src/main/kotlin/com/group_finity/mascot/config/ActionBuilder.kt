@@ -71,20 +71,18 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 "Embedded" -> {
                     try {
                         val cls = Class.forName(className) as Class<out Action>
-                        try {
-                            try {
+                        runCatching {
+                            runCatching {
                                 return cls.getConstructor(
                                     ResourceBundle::class.java,
                                     List::class.java,
                                     VariableMap::class.java
                                 ).newInstance(schema, animations, variables)
-                            } catch (_: Exception) {
                             }
                             return cls.getConstructor(
                                 ResourceBundle::class.java,
                                 VariableMap::class.java
                             ).newInstance(schema, variables)
-                        } catch (_: Exception) {
                         }
                         return cls.getConstructor().newInstance()
                     } catch (e: InstantiationException) {

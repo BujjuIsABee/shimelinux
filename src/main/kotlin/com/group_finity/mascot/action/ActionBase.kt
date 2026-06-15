@@ -30,9 +30,7 @@ abstract class ActionBase(
     private var startTime = 0
     var time
         get() = mascot.time - startTime
-        set(value) {
-            startTime = mascot.time - value
-        }
+        set(value) { startTime = mascot.time - value }
 
     open val isDraggable
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), Boolean::class, DEFAULT_DRAGGABLE)

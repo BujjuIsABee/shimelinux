@@ -22,55 +22,44 @@ import javax.swing.JPanel
 import javax.swing.UIManager
 
 class ImageSetChooserPanel : JPanel {
-    private lateinit var checkbox: JCheckBox
-    private lateinit var image: JLabel
-    private lateinit var caption: JLabel
-    private lateinit var actionsFile: JLabel
-    private lateinit var behaviorsFile: JLabel
+    private var checkbox: JCheckBox
+    private var image: JLabel
+    private var caption: JLabel
 
     var imageSetName: String? = null
         private set
 
     constructor(imageSet: String, actions: String, behaviors: String, imageLocation: String, captionText: String) {
-        initComponents()
-
         imageSetName = imageSet
-        caption.text = captionText
-        caption.font = caption.font.deriveFont(Font.BOLD)
-        actionsFile.text = actions
-        behaviorsFile.text = behaviors
-        try {
-            val icon = ImageIO.read(File(imageLocation))
-            image.icon = ImageIcon(icon.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
-        } catch (_: Exception) {
-        }
-    }
-
-    fun setCheckbox(value: Boolean) {
-        checkbox.isSelected = value
-    }
-
-    private fun initComponents() {
         minimumSize = Dimension(248, 80)
         preferredSize = Dimension(248, 80)
         layout = BoxLayout(this, BoxLayout.X_AXIS)
         border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
 
         checkbox = JCheckBox()
+
         image = JLabel()
-        caption = JLabel()
-        actionsFile = JLabel()
-        behaviorsFile = JLabel()
+        runCatching {
+            val icon = ImageIO.read(File(imageLocation))
+            image.icon = ImageIcon(icon.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
+        }
+
+        caption = JLabel(captionText)
+        caption.font = caption.font.deriveFont(Font.BOLD)
 
         val textPanel = JPanel()
         textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
         textPanel.add(caption)
-        textPanel.add(actionsFile)
-        textPanel.add(behaviorsFile)
+        textPanel.add(JLabel(actions))
+        textPanel.add(JLabel(behaviors))
 
         add(checkbox)
         add(image)
         add(Box.createHorizontalStrut(4))
         add(textPanel)
+    }
+
+    fun setCheckbox(value: Boolean) {
+        checkbox.isSelected = value
     }
 }

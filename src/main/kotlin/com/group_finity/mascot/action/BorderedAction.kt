@@ -36,9 +36,7 @@ abstract class BorderedAction(
     }
 
     override fun tick() {
-        if (border != null) {
-            mascot.anchor = border!!.move(mascot.anchor)
-        }
+        border?.move(mascot.anchor)
     }
 
     companion object {

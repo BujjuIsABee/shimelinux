@@ -30,16 +30,17 @@ class Interact(
     override fun tick() {
         super.tick()
 
-        val animation = checkNotNull(animation)
-        if ((time == animation.duration - 1 || animation.duration == 1) && (!behavior.trim().isEmpty())) {
-            try {
-                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
-            } catch (e: BehaviorInstantiationException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
-            } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+        animation?.let { animation ->
+            if ((time == animation.duration - 1 || animation.duration == 1) && (!behavior.trim().isEmpty())) {
+                try {
+                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+                } catch (e: BehaviorInstantiationException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                } catch (e: CantBeAliveException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                }
             }
         }
     }

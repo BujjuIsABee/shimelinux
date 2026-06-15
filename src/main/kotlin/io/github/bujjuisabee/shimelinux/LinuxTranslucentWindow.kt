@@ -39,9 +39,10 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         background = Color(0, 0, 0, 0)
         contentPane = object : JPanel() {
             override fun paintComponent(g: Graphics) {
+                val image = image
                 if (image != null) {
                     setWindowMask()
-                    g.drawImage(image!!, offset.x, offset.y, null)
+                    g.drawImage(image, offset.x, offset.y, null)
                 }
             }
         }
@@ -79,8 +80,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     private fun setWindowMask() {
-        if (image == null) return
-        val image = image!!
+        val image = image ?: return
 
         if (!maskCache.containsKey(image)) {
             val width = image.width
@@ -99,8 +99,9 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
             maskCache[image] = Area(mask)
         }
 
-        val mask = maskCache[image]!!
-        shape = mask.createTransformedArea(AffineTransform.getTranslateInstance(offset.x.toDouble(), offset.y.toDouble()))
+        maskCache[image]?.let {
+            shape = it.createTransformedArea(AffineTransform.getTranslateInstance(offset.x.toDouble(), offset.y.toDouble()))
+        }
     }
 
     override fun getGraphicsConfiguration() = gc

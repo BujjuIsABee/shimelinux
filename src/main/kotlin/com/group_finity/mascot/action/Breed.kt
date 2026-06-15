@@ -37,7 +37,7 @@ class Breed(
         val isIntervalFrame
             get() = action.time % bornInterval == 0
         val isPenultimateFrame
-            get() = action.animation != null && action.time == action.animation!!.duration - 1
+            get() = action.animation?.let { action.time == it.duration - 1 } == true
 
         private val bornX
             get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class, DEFAULT_BORNX).toInt()

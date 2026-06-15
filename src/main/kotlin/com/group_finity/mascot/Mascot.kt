@@ -61,10 +61,11 @@ class Mascot(var imageSet: String) {
         get() = cursorPosition != null
     val bounds: Rectangle
         get() {
+            val image = image
             if (image != null) {
-                val top = anchor.y - image!!.center.y
-                val left = anchor.x - image!!.center.x
-                return Rectangle(left, top, image!!.size.width, image!!.size.height)
+                val top = anchor.y - image.center.y
+                val left = anchor.x - image.center.x
+                return Rectangle(left, top, image.size.width, image.size.height)
             } else {
                 return window.asComponent().bounds
             }
@@ -94,9 +95,10 @@ class Mascot(var imageSet: String) {
                         showPopup(e.x, e.y)
                     }
                 } else {
+                    val behavior = behavior
                     if (!isPaused && behavior != null) {
                         try {
-                            behavior!!.mousePressed(e)
+                            behavior.mousePressed(e)
                         } catch (e: CantBeAliveException) {
                             log.log(Level.SEVERE, "Fatal Error", e)
                             Main.showError(Main.instance.languageBundle.getString("SevereShimejiErrorErrorMessage"), e)
@@ -112,9 +114,10 @@ class Mascot(var imageSet: String) {
                         showPopup(e.x, e.y)
                     }
                 } else {
+                    val behavior = behavior
                     if (!isPaused && behavior != null) {
                         try {
-                            behavior!!.mouseReleased(e)
+                            behavior.mouseReleased(e)
                         } catch (e: CantBeAliveException) {
                             log.log(Level.SEVERE, "Fatal Error", e)
                             Main.showError(Main.instance.languageBundle.getString("SevereShimejiErrorErrorMessage"), e)
@@ -216,7 +219,7 @@ class Mascot(var imageSet: String) {
         val allowedSubmenu = JMenu(lang.getString("AllowedBehaviours"))
         val config = checkNotNull(Main.instance.getConfiguration(imageSet))
         for (behaviorName in config.behaviorNames) {
-            try {
+            runCatching {
                 if (!config.isBehaviorHidden(behaviorName)) {
                     val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
                     if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
@@ -239,7 +242,6 @@ class Mascot(var imageSet: String) {
                         allowedSubmenu.add(toggleItem)
                     }
                 }
-            } catch (_: Exception) {
             }
         }
 
@@ -268,9 +270,10 @@ class Mascot(var imageSet: String) {
     }
 
     fun tick() {
+        val behavior = behavior
         if (isAnimating && behavior != null) {
             try {
-                behavior!!.next()
+                behavior.next()
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError(Main.instance.languageBundle.getString("CouldNotGetNextBehaviourErrorMessage"), e)
@@ -283,24 +286,27 @@ class Mascot(var imageSet: String) {
 
     fun apply() {
         if (isAnimating) {
+            val image = image
             if (image != null) {
                 // Set the window's position and size
                 window.asComponent().bounds = bounds
 
                 // Show the image
-                window.setImage(image!!.image)
+                window.setImage(image.image)
                 window.asComponent().isVisible = true
                 window.updateImage()
             } else {
                 window.asComponent().isVisible = false
             }
 
-            if (!Sounds.isMuted && sound != null && Sounds.contains(sound!!)) {
-                val clip = Sounds.getSound(sound!!)!!
-                if (!clip.isRunning) {
-                    clip.stop()
-                    clip.microsecondPosition = 0
-                    clip.start()
+            val sound = sound
+            if (!Sounds.isMuted && sound != null && Sounds.contains(sound)) {
+                Sounds.getSound(sound)?.let { clip ->
+                    if (!clip.isRunning) {
+                        clip.stop()
+                        clip.microsecondPosition = 0
+                        clip.start()
+                    }
                 }
             }
         }

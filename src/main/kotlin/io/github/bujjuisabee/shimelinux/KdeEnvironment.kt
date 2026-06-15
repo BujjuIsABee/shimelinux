@@ -26,39 +26,41 @@ class KdeEnvironment : Environment() {
 
     private val dbus = DBusConnectionBuilder.forSessionBus().build()
     private val client = KWinClientImpl()
-    private val scripting: KWinScripting
-    private val script: KWinScript
+    private var scripting: KWinScripting? = null
+    private var script: KWinScript? = null
 
     private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
-        dbus.requestBusName("io.github.bujjuisabee.shimelinux")
-        dbus.exportObject(client)
+        runCatching {
+            dbus.requestBusName("io.github.bujjuisabee.shimelinux")
+            dbus.exportObject(client)
 
-        val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
-        scriptFile.deleteOnExit()
-        this::class.java.getResourceAsStream("/shimelinux-kwin-script.js")?.use {
-            it.copyTo(scriptFile.outputStream())
+            val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
+            scriptFile.deleteOnExit()
+            this::class.java.getResourceAsStream("/shimelinux-kwin-script.js")?.use {
+                it.copyTo(scriptFile.outputStream())
+            }
+
+            scripting = dbus.getRemoteObject(
+                "org.kde.KWin",
+                "/Scripting",
+                KWinScripting::class.java
+            )
+
+            val scriptId = checkNotNull(scripting).loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
+            script = dbus.getRemoteObject(
+                "org.kde.KWin",
+                "/Scripting/Script$scriptId",
+                KWinScript::class.java
+            )
+
+            script?.run()
+
+            Runtime.getRuntime().addShutdownHook(Thread {
+                dispose()
+            })
         }
-
-        scripting = dbus.getRemoteObject(
-            "org.kde.KWin",
-            "/Scripting",
-            KWinScripting::class.java
-        )
-
-        val scriptId = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
-        script = dbus.getRemoteObject(
-            "org.kde.KWin",
-            "/Scripting/Script$scriptId",
-            KWinScript::class.java
-        )
-
-        script.run()
-
-        Runtime.getRuntime().addShutdownHook(Thread {
-            dispose()
-        })
     }
 
     override fun tick() {
@@ -95,14 +97,17 @@ class KdeEnvironment : Environment() {
     }
 
     override fun dispose() {
-        script.stop()
-        scripting.unloadScript("shimelinux-kwin-script")
-        dbus.disconnect()
+        runCatching {
+            script?.stop()
+            scripting?.unloadScript("shimelinux-kwin-script")
+            dbus.disconnect()
+        }
     }
 
     private fun isIE(window: Window): Boolean {
-        if (windowCache.containsKey(window.title)) {
-            return windowCache[window.title]!!
+        val cachedResult = windowCache[window.title]
+        if (cachedResult != null) {
+            return cachedResult
         }
 
         var blacklistInUse = false

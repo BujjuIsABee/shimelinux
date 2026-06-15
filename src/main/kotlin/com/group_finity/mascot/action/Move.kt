@@ -42,7 +42,7 @@ open class Move(
     override fun tick() {
         super.tick()
 
-        if (border != null && !border!!.isOn(mascot.anchor)) {
+        if (border?.isOn(mascot.anchor) != true) {
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
             throw LostGroundException()
         }
@@ -57,7 +57,7 @@ open class Move(
             isDown = mascot.anchor.y < targetY
         }
 
-        if (isTurning && time >= checkNotNull(animation).duration) {
+        if (isTurning && animation?.let { time >= it.duration } == true) {
             isTurning = false
         }
 

@@ -42,12 +42,11 @@ class ComplexArea {
     }
 
     fun retain(deviceNames: Collection<String>) {
-        areaMap.entries.removeIf { entry ->
-            !deviceNames.contains(entry.key)
+        areaMap.entries.removeIf {
+            !deviceNames.contains(it.key)
         }
     }
 
-    @Suppress("UNUSED")
     fun getBottomBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
         for (area in areaMap.values) {
@@ -63,7 +62,6 @@ class ComplexArea {
         return result
     }
 
-    @Suppress("UNUSED")
     fun getTopBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
         for (area in areaMap.values) {
@@ -79,7 +77,6 @@ class ComplexArea {
         return result
     }
 
-    @Suppress("UNUSED")
     fun getLeftBorder(location: Point): Wall? {
         var result: Wall? = null
         for (area in areaMap.values) {
@@ -95,7 +92,6 @@ class ComplexArea {
         return result
     }
 
-    @Suppress("UNUSED")
     fun getRightBorder(location: Point): Wall? {
         var result: Wall? = null
         for (area in areaMap.values) {

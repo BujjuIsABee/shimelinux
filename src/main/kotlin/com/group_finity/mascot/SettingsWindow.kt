@@ -7,7 +7,6 @@
 
 package com.group_finity.mascot
 
-import io.github.bujjuisabee.shimelinux.KdeEnvironment
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.FlowLayout
@@ -17,7 +16,6 @@ import java.awt.GridBagLayout
 import java.awt.Image
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
-import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.DefaultListModel
@@ -35,7 +33,9 @@ import javax.swing.JSlider
 import javax.swing.JTabbedPane
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
+import javax.swing.UnsupportedLookAndFeelException
 import kotlin.io.path.outputStream
+import kotlin.text.replace
 
 class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     var isEnvironmentReloadRequired = false
@@ -86,10 +86,8 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var cancelButton: JButton
 
     init {
-        this::class.java.getResourceAsStream("/img/icon.png").use {
-            val icon = ImageIO.read(it)
-            setIconImage(icon)
-        }
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        setIconImage(icon)
 
         title = Main.instance.languageBundle.getString("Settings")
         contentPane = JPanel(BorderLayout())
@@ -121,8 +119,10 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 scalingSlider.value = 5
             }
 
-            scaling = scalingSlider.value / 10.0
-            isImageReloadRequired = true
+            if (scalingSlider.value / 10.0 != scaling) {
+                scaling = scalingSlider.value / 10.0
+                isImageReloadRequired = true
+            }
         }
 
         opacityLabel = JLabel(Main.instance.languageBundle.getString("Opacity"))
@@ -135,8 +135,10 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         opacitySlider.snapToTicks = true
         opacitySlider.value = (opacity * 100.0).toInt()
         opacitySlider.addChangeListener {
-            opacity = opacitySlider.value / 100.0
-            isImageReloadRequired = true
+            if (opacitySlider.value / 100.0 != opacity) {
+                opacity = opacitySlider.value / 100.0
+                isImageReloadRequired = true
+            }
         }
 
         filterLabel = JLabel(Main.instance.languageBundle.getString("FilterOptions"))
@@ -145,19 +147,24 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         nearestNeighborRadioButton = JRadioButton(Main.instance.languageBundle.getString("NearestNeighbour"))
         nearestNeighborRadioButton.isSelected = !filter
         nearestNeighborRadioButton.addChangeListener {
+
             if (nearestNeighborRadioButton.isSelected) {
-                filter = false
+                if (filter) {
+                    filter = false
+                    isImageReloadRequired = true
+                }
             }
-            isImageReloadRequired = true
         }
 
         bicubicRadioButton = JRadioButton(Main.instance.languageBundle.getString("BicubicFilter"))
         bicubicRadioButton.isSelected = filter
         bicubicRadioButton.addChangeListener {
             if (bicubicRadioButton.isSelected) {
-                filter = true
+                if (!filter) {
+                    filter = true
+                    isImageReloadRequired = true
+                }
             }
-            isImageReloadRequired = true
         }
 
         filterButtonGroup = ButtonGroup()
@@ -260,8 +267,10 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         gtkThemeRadioButton.isSelected = theme == "GTK"
         gtkThemeRadioButton.addActionListener {
             if (gtkThemeRadioButton.isSelected) {
-                theme = "GTK"
-                refreshTheme()
+                if (theme != "GTK") {
+                    theme = "GTK"
+                    refreshTheme()
+                }
             }
         }
 
@@ -269,8 +278,10 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         nimbusThemeRadioButton.isSelected = theme == "Nimbus"
         nimbusThemeRadioButton.addActionListener {
             if (nimbusThemeRadioButton.isSelected) {
-                theme = "Nimbus"
-                refreshTheme()
+                if (theme != "Nimbus") {
+                    theme = "Nimbus"
+                    refreshTheme()
+                }
             }
         }
 
@@ -278,8 +289,10 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         metalThemeRadioButton.isSelected = theme == "Metal"
         metalThemeRadioButton.addActionListener {
             if (metalThemeRadioButton.isSelected) {
-                theme = "Metal"
-                refreshTheme()
+                if (theme != "Metal") {
+                    theme = "Metal"
+                    refreshTheme()
+                }
             }
         }
 
@@ -295,7 +308,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         themeTabPanel.add(nimbusThemeRadioButton)
         themeTabPanel.add(metalThemeRadioButton)
 
-        val image = ImageIO.read(this::class.java.getResourceAsStream("/img/icon.png"))
+        val image = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         aboutImageLabel = JLabel()
         aboutImageLabel.icon = ImageIcon(image.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
         aboutImageLabel.alignmentX = CENTER_ALIGNMENT
@@ -318,11 +331,14 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
         tabbedPane = JTabbedPane()
         tabbedPane.addTab(Main.instance.languageBundle.getString("General"), generalTabPanel)
-        if (NativeFactory.instance.getEnvironment() is KdeEnvironment) {
-            tabbedPane.addTab(Main.instance.languageBundle.getString("InteractiveWindows"), interactiveWindowsTabPanel)
-        }
+        tabbedPane.addTab(Main.instance.languageBundle.getString("InteractiveWindows"), interactiveWindowsTabPanel)
         tabbedPane.addTab(Main.instance.languageBundle.getString("Theme"), themeTabPanel)
         tabbedPane.addTab(Main.instance.languageBundle.getString("About"), aboutTabPanel)
+
+        // Don't show interactive windows tab unless the KDE environment is used
+        if (System.getenv("XDG_CURRENT_DESKTOP") != "KDE") {
+            tabbedPane.remove(interactiveWindowsTabPanel)
+        }
 
         doneButton = JButton(Main.instance.languageBundle.getString("Done"))
         doneButton.addActionListener {
@@ -333,24 +349,18 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             Main.instance.properties.setProperty("Filter", filter.toString())
             Main.instance.properties.setProperty("Theme", theme)
 
-            val whitelistBuilder = StringBuilder()
-            for (title in whitelistModel.elements()) {
-                if (whitelistBuilder.isNotBlank()) {
-                    whitelistBuilder.append("/")
-                }
-                whitelistBuilder.append(title)
-            }
+            val whitelist = whitelistModel.elements().toString()
+                .replace("[", "")
+                .replace("]", "")
+                .replace(", ", "/")
 
-            val blacklistBuilder = StringBuilder()
-            for (title in blacklistModel.elements()) {
-                if (blacklistBuilder.isNotBlank()) {
-                    blacklistBuilder.append("/")
-                }
-                blacklistBuilder.append(title)
-            }
+            val blacklist = blacklistModel.elements().toString()
+                .replace("[", "")
+                .replace("]", "")
+                .replace(", ", "/")
 
-            Main.instance.properties.setProperty("InteractiveWindows", whitelistBuilder.toString())
-            Main.instance.properties.setProperty("InteractiveWindowsBlacklist", blacklistBuilder.toString())
+            Main.instance.properties.setProperty("InteractiveWindows", whitelist)
+            Main.instance.properties.setProperty("InteractiveWindowsBlacklist", blacklist)
 
             Main.getPath("conf", "settings.properties").outputStream().use {
                 Main.instance.properties.store(it, "ShimeLinux Configuration Options")
@@ -388,7 +398,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
                 else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
             })
             SwingUtilities.updateComponentTreeUI(this)
-        } catch (_: Exception) {
+        } catch (_: UnsupportedLookAndFeelException) {
         }
     }
 }

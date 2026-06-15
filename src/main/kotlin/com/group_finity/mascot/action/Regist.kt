@@ -37,8 +37,9 @@ class Regist(
     }
 
     override fun hasNext(): Boolean {
-        val offsetX = if (offsetType == schema.getString("Origin")) {
-            0 - offsetX + checkNotNull(mascot.image).center.x
+        val image = mascot.image
+        val offsetX = if (offsetType == schema.getString("Origin") && image != null) {
+            0 - offsetX + image.center.x
         } else {
             (offsetX * scaling).roundToInt()
         }
@@ -50,7 +51,7 @@ class Regist(
 
         animation?.next(mascot, time)
 
-        if (time + 1 >= checkNotNull(animation).duration) {
+        if (animation?.let { time + 1 >= it.duration } == true) {
             mascot.isLookRight = Math.random() < 0.5
 
             log.log(Level.INFO, "Lost ground ($mascot,$this)")

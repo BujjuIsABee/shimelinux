@@ -27,7 +27,7 @@ class Turn(
 
     override fun hasNext(): Boolean {
         isTurning = isTurning || isLookRight != mascot.isLookRight
-        return super.hasNext() && time < checkNotNull(animation).duration && isTurning
+        return super.hasNext() && animation?.let { time < it.duration } == true && isTurning
     }
 
     override fun tick() {
@@ -35,7 +35,7 @@ class Turn(
 
         super.tick()
 
-        if (border != null && !border!!.isOn(mascot.anchor)) {
+        if (border?.isOn(mascot.anchor) != true) {
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
             throw LostGroundException()
         }

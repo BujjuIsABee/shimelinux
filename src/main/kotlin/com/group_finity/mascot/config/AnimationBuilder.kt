@@ -59,12 +59,14 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
     }
 
     private fun loadPose(frameNode: Entry): Pose {
-        val imageText = if (!frameNode.getAttribute(schema.getString("Image")).isNullOrEmpty()) {
-            Main.getPath("img", imageSet, frameNode.getAttribute(schema.getString("Image"))!!)
+        val leftImageText = frameNode.getAttribute(schema.getString("Image"))
+        val leftImagePath = if (!leftImageText.isNullOrEmpty()) {
+            Main.getPath("img", imageSet, leftImageText)
         } else null
 
-        val imageRightText = if (!frameNode.getAttribute(schema.getString("ImageRight")).isNullOrEmpty()) {
-            Main.getPath("img", imageSet, frameNode.getAttribute(schema.getString("ImageRight"))!!)
+        val rightImageText = frameNode.getAttribute(schema.getString("ImageRight"))
+        val rightImagePath = if (!rightImageText.isNullOrEmpty()) {
+            Main.getPath("img", imageSet, rightImageText)
         } else null
 
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
@@ -82,15 +84,15 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
             ImagePairLoader.Filter.NEAREST_NEIGHBOR
         }
 
-        if (imageText != null) {
+        if (leftImagePath != null) {
             val anchorCoordinates = anchorText.split(",")
             val anchor = Point(anchorCoordinates[0].toInt(), anchorCoordinates[1].toInt())
 
             try {
-                ImagePairLoader.load(imageText, imageRightText, anchor, scaling, filter, opacity)
+                ImagePairLoader.load(leftImagePath, rightImagePath, anchor, scaling, filter, opacity)
             } catch (e: Exception) {
-                log.log(Level.SEVERE, "Failed to load image: $imageText, ${imageRightText ?: ""}", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadImageErrorMessage") + ": $imageText, ${imageRightText ?: ""}", e)
+                log.log(Level.SEVERE, "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}", e)
+                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadImageErrorMessage") + ": $leftImagePath, ${rightImagePath ?: ""}", e)
             }
         }
 
@@ -121,7 +123,7 @@ class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry,
             }
         }
 
-        val pose = Pose(imageText, imageRightText, moveX, moveY, duration, soundText)
+        val pose = Pose(leftImagePath, rightImagePath, moveX, moveY, duration, soundText)
 
         log.log(Level.INFO, "Loaded pose: $pose")
 

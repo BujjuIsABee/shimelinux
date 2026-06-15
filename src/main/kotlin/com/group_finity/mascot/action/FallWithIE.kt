@@ -26,9 +26,10 @@ class FallWithIE(
     private val offsetY
         get() = eval(schema.getString(PARAMETER_IEOFFSETY), Number::class, DEFAULT_IEOFFSETY).toInt()
 
-    override fun hasNext(): Boolean {
-        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) return false
-        return super.hasNext()
+    override fun hasNext() = if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) {
+        false
+    } else {
+        super.hasNext()
     }
 
     override fun tick() {

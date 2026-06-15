@@ -33,7 +33,7 @@ class VariableMap : Bindings {
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
         get() = rawMap.entries.mapTo(mutableSetOf()) { AbstractMap.SimpleEntry(it.key, get(it.key)) }
 
-    override val size: Int
+    override val size
         get() = rawMap.size
 
     override fun isEmpty() = rawMap.isEmpty()

@@ -46,8 +46,8 @@ class ScanMove(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        if (mascot.manager != null) {
-            target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
+        mascot.manager?.let {
+            target = it.getMascotWithAffordance(affordance)?.get()
         }
 
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
@@ -65,7 +65,7 @@ class ScanMove(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        if ((border != null) && !border!!.isOn(mascot.anchor)) {
+        if (border?.isOn(mascot.anchor) == false) {
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
             throw LostGroundException()
         }
@@ -84,7 +84,7 @@ class ScanMove(
 
         val down = mascot.anchor.y < targetY
 
-        if (isTurning && time >= checkNotNull(animation).duration) {
+        if (isTurning && animation?.let { time >= it.duration } == true) {
             isTurning = false
         }
 

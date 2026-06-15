@@ -96,7 +96,7 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
     fun isEffective(context: VariableMap): Boolean {
         if (frequency == 0) return false
         for (condition in conditions) {
-            if (condition != null && !(Variable.parse(condition)!!.get(context) as Boolean)) {
+            if (condition != null && Variable.parse(condition)?.get(context) as? Boolean != true) {
                 return false
             }
         }

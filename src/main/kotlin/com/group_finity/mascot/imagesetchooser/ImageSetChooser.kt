@@ -56,11 +56,8 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var cancelButton: JButton
 
     init {
-        // Set icon
-        this::class.java.getResourceAsStream("/img/icon.png").use {
-            val icon = ImageIO.read(it)
-            setIconImage(icon)
-        }
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        setIconImage(icon)
 
         title = Main.instance.languageBundle.getString("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)
@@ -338,20 +335,18 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun updateConfigFile() {
-        try {
-            val value = StringBuilder()
-            for (imageSet in imageSets) {
-                if (!value.isEmpty()) {
-                    value.append('/')
-                }
-                value.append(imageSet)
-            }
+        runCatching {
+            val activeShimeji = imageSets
+                .toString()
+                .replace("[", "")
+                .replace("]", "")
+                .replace(", ", "/")
 
-            configPath.outputStream().use { stream ->
-                Main.instance.properties.setProperty("ActiveShimeji", value.toString())
-                Main.instance.properties.store(stream, "ShimeLinux Configuration Options")
+            Main.instance.properties.setProperty("ActiveShimeji", activeShimeji)
+
+            configPath.outputStream().use {
+                Main.instance.properties.store(it, "ShimeLinux Configuration Options")
             }
-        } catch (_: Exception) {
         }
     }
 

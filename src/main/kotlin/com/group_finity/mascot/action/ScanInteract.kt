@@ -50,7 +50,7 @@ class ScanInteract(
         putVariable(schema.getString(VARIABLE_TARGETY), null)
     }
 
-    override fun hasNext() = super.hasNext() && isTurning || time < checkNotNull(animation).duration
+    override fun hasNext() = super.hasNext() && isTurning || animation?.let { time < it.duration } == true
 
     override fun tick() {
         super.tick()
@@ -58,13 +58,15 @@ class ScanInteract(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        if ((border != null) && !border!!.isOn(mascot.anchor)) {
+        if (border?.isOn(mascot.anchor) == false) {
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
             throw LostGroundException()
         }
 
-        if (mascot.manager != null && !(target?.affordances?.contains(affordance) ?: false)) {
-            target = mascot.manager!!.getMascotWithAffordance(affordance)?.get()
+        mascot.manager?.let { manager ->
+            if (target?.affordances?.contains(affordance) != true) {
+                target = manager.getMascotWithAffordance(affordance)?.get()
+            }
         }
 
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)

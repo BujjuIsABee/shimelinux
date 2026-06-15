@@ -136,14 +136,16 @@ class Configuration {
     }
 
     fun buildAction(name: String, params: Map<String, String>): Action {
-        val factory = actionBuilders[name] ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
+        val factory = actionBuilders[name]
+            ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
         return factory.buildAction(params)
     }
 
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
-        if (behaviorBuilders.containsKey(name)) {
+        val factory = behaviorBuilders[name]
+        if (factory != null) {
             if (isBehaviorEnabled(name, mascot)) {
-                return behaviorBuilders[name]!!.buildBehavior()
+                return factory.buildBehavior()
             } else {
                 if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
                     mascot.anchor = Point(
@@ -163,13 +165,8 @@ class Configuration {
         }
     }
 
-    fun buildBehavior(name: String): Behavior {
-        if (behaviorBuilders.containsKey(name)) {
-            return behaviorBuilders[name]!!.buildBehavior()
-        } else {
-            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
-        }
-    }
+    fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior()
+        ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
 
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -246,26 +243,11 @@ class Configuration {
         return true
     }
 
-    fun isBehaviorEnabled(name: String?, mascot: Mascot): Boolean {
-        if (behaviorBuilders.containsKey(name)) {
-            return isBehaviorEnabled(behaviorBuilders[name]!!, mascot)
-        }
-        return false
-    }
+    fun isBehaviorEnabled(name: String?, mascot: Mascot) = behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
 
-    fun isBehaviorHidden(name: String?): Boolean {
-        if (behaviorBuilders.containsKey(name)) {
-            return behaviorBuilders[name]!!.isHidden
-        }
-        return false
-    }
+    fun isBehaviorHidden(name: String?) = behaviorBuilders[name]?.isHidden == true
 
-    fun isBehaviorToggleable(name: String?): Boolean {
-        if (behaviorBuilders.containsKey(name)) {
-            return behaviorBuilders[name]!!.isToggleable
-        }
-        return false
-    }
+    fun isBehaviorToggleable(name: String?) = behaviorBuilders[name]?.isToggleable == true
 
     fun containsInformationKey(key: String?) = information.containsKey(key)
 

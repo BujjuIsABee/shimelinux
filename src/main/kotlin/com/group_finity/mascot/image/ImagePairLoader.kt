@@ -21,14 +21,14 @@ object ImagePairLoader {
         if (ImagePairs.contains(leftPath.toString() + (rightPath?.toString() ?: ""))) return
 
         // Load left image
-        val leftImage = scale(premultiply(ImageIO.read(leftPath.inputStream()), opacity), scaling, filter)
+        val leftImage = leftPath.inputStream().use {
+            scale(premultiply(ImageIO.read(it), opacity), scaling, filter)
+        }
 
         // Load right image
-        val rightImage = if (rightPath != null) {
-            scale(premultiply(ImageIO.read(rightPath.inputStream()), opacity), scaling, filter)
-        } else {
-            flip(leftImage)
-        }
+        val rightImage = rightPath?.inputStream()?.use {
+            scale(premultiply(ImageIO.read(it), opacity), scaling, filter)
+        } ?: flip(leftImage)
 
         val leftCenter = Point((center.x * scaling).roundToInt(), (center.y * scaling).roundToInt())
         val rightCenter = Point(rightImage.width - (center.x * scaling).roundToInt(), (center.y * scaling).roundToInt())

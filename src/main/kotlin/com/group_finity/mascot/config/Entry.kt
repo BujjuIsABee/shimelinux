@@ -45,9 +45,7 @@ class Entry(private val element: Element) {
 
     fun selectChildren(name: String): List<Entry> {
         var result = selected[name]
-        if (result != null) {
-            return result
-        }
+        if (result != null) return result
 
         result = mutableListOf()
         for (child in children) {

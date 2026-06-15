@@ -51,10 +51,10 @@ class Manager {
     }
 
     fun stop() {
-        if (timer == null) return
-
-        timer!!.cancel()
-        timer = null
+        timer?.let {
+            it.cancel()
+            timer = null
+        }
     }
 
     fun tick() {

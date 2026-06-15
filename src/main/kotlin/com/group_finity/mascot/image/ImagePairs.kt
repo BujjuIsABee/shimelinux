@@ -28,8 +28,6 @@ object ImagePairs {
     }
 
     fun removeAll(searchTerm: String) {
-        imagePairs.entries.removeIf { entry ->
-            searchTerm == Paths.get(entry.key).getName(2).toString()
-        }
+        imagePairs.entries.removeIf { searchTerm == Paths.get(it.key).getName(2).toString() }
     }
 }

@@ -47,18 +47,12 @@ abstract class Environment {
         var count = 0
 
         for (area in screens) {
-            if (area.topBorder.isOn(location)) {
-                ++count
-            }
-            if (area.bottomBorder.isOn(location)) {
-                ++count
-            }
+            if (area.topBorder.isOn(location)) count++
+            if (area.bottomBorder.isOn(location)) count++
         }
 
-        if (count == 0) {
-            if (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location)) {
-                return true
-            }
+        if (count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))) {
+            return true
         }
 
         return count == 1
@@ -68,18 +62,12 @@ abstract class Environment {
         var count = 0
 
         for (area in screens) {
-            if (area.leftBorder.isOn(location)) {
-                ++count
-            }
-            if (area.rightBorder.isOn(location)) {
-                ++count
-            }
+            if (area.leftBorder.isOn(location)) count++
+            if (area.rightBorder.isOn(location)) count++
         }
 
-        if (count == 0) {
-            if (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location)) {
-                return true
-            }
+        if (count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))) {
+            return true
         }
 
         return count == 1

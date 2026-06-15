@@ -30,9 +30,8 @@ class Transform(
     override fun tick() {
         super.tick()
 
-        val animation = checkNotNull(animation)
         val canTransform = Main.instance.properties.getProperty("Transformation", "true").toBoolean()
-        if ((time == animation.duration - 1 || animation.duration == 1) && canTransform) {
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) {
             transform()
         }
     }

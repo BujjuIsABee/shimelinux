@@ -43,6 +43,8 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     try {
+        Main.createConfigDirectory()
+
         if (!args.contains("DEBUG")) {
             Main.configureLogging()
         }
@@ -74,11 +76,9 @@ class Main {
 
     fun run() {
         // Load properties
-        try {
-            val input = getPath("conf", "settings.properties").inputStream()
+        runCatching {
             properties = Properties()
-            properties.load(input)
-        } catch (_: Exception) {
+            getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
         }
 
         // Set theme
@@ -191,7 +191,9 @@ class Main {
 
             log.log(Level.INFO, "Reading action file ($actionsPath)")
 
-            val actions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(actionsPath.inputStream())
+            val actions = actionsPath.inputStream().use {
+                DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
+            }
 
             val configuration = Configuration()
 
@@ -243,11 +245,13 @@ class Main {
 
             log.log(Level.INFO, "Reading behavior file ($behaviorsPath)")
 
-            val behaviors = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(behaviorsPath.inputStream())
+            val behaviors = behaviorsPath.inputStream().use {
+                DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
+            }
 
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
-            // Implement information
+            // TODO: Implement information
 
             configuration.validate()
 
@@ -257,8 +261,8 @@ class Main {
 
             for (list in Entry(actions.documentElement).selectChildren("ActionList")) {
                 for (node in list.selectChildren("Action")) {
-                    if (node.attributes.containsKey("BornMascot")) {
-                        val set = node.getAttribute("BornMascot")!!
+                    var set = node.getAttribute("BornMascot")
+                    if (set != null) {
                         if (!childMascots.contains(set)) {
                             childMascots.add(set)
                         }
@@ -266,8 +270,8 @@ class Main {
                             loadConfiguration(set)
                         }
                     }
-                    if (node.attributes.containsKey("TransformMascot")) {
-                        val set = node.getAttribute("TransformMascot")!!
+                    set = node.getAttribute("TransformMascot")
+                    if (set != null) {
                         if (!childMascots.contains(set)) {
                             childMascots.add(set)
                         }
@@ -294,7 +298,9 @@ class Main {
 
         val icon = SystemTray.get()
         if (icon != null) {
-            icon.setImage(this::class.java.getResourceAsStream("/img/icon.png"))
+            this::class.java.getResourceAsStream("/img/icon.png").use {
+                icon.setImage(it)
+            }
             icon.setStatus("ShimeLinux")
         } else {
             log.log(Level.SEVERE, "Failed to create tray icon")
@@ -646,7 +652,13 @@ class Main {
         }
 
         if (list.isNotEmpty()) {
-            properties.setProperty("DisabledBehaviours.${mascot.imageSet}", list.toString().replace("[", "").replace("]", "").replace(", ", "/"))
+            properties.setProperty(
+                "DisabledBehaviours.${mascot.imageSet}",
+                list.toString()
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(", ", "/")
+            )
         } else {
             properties.remove("DisabledBehaviours.${mascot.imageSet}")
         }
@@ -663,11 +675,10 @@ class Main {
     }
 
     private fun updateConfigFile() {
-        try {
+        runCatching {
             getPath("conf", "settings.properties").outputStream().use {
                 properties.store(it, "ShimeLinux Configuration Options")
             }
-        } catch (_: Exception) {
         }
     }
 
@@ -708,8 +719,8 @@ class Main {
     }
 
     private fun populateArrayListWithChildSets(imageSet: String, childList: MutableList<String>) {
-        if (childImageSets.containsKey(imageSet)) {
-            for (set in childImageSets[imageSet]!!) {
+        childImageSets[imageSet]?.let {
+            for (set in it) {
                 if (!childList.contains(set)) {
                     populateArrayListWithChildSets(set, childList)
                     childList.add(set)
@@ -719,8 +730,8 @@ class Main {
     }
 
     private fun removeLoadedImageSet(imageSet: String, setsToIgnore: MutableList<String>) {
-        if (childImageSets.containsKey(imageSet)) {
-            for (set in childImageSets[imageSet]!!) {
+        childImageSets[imageSet]?.let {
+            for (set in it) {
                 if (!setsToIgnore.contains(set)) {
                     setsToIgnore.add(set)
                     imageSets.remove(imageSet)
@@ -747,7 +758,7 @@ class Main {
         } else {
             if (loadConfiguration(imageSet)) {
                 imageSets.add(imageSet)
-                // Implement information
+                // TODO: Implement information
                 createMascot(imageSet)
             } else {
                 // Failed to load
@@ -772,19 +783,17 @@ class Main {
 
         private val frame = JFrame()
 
-        init {
-            createConfigDirectory()
-        }
-
         fun configureLogging() {
             try {
-                LogManager.getLogManager().readConfiguration(this::class.java.getResourceAsStream("/conf/logging.properties"))
+                this::class.java.getResourceAsStream("/conf/logging.properties").use {
+                    LogManager.getLogManager().readConfiguration(it)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
-        private fun createConfigDirectory() {
+        fun createConfigDirectory() {
             try {
                 // Create conf directory
                 val confDir = getPath("conf")
@@ -792,18 +801,24 @@ class Main {
                     confDir.createDirectories()
 
                     // Copy actions.xml
-                    confDir.resolve("actions.xml").outputStream().use {
-                        this::class.java.getResourceAsStream("/conf/actions.xml")?.copyTo(it)
+                    confDir.resolve("actions.xml").outputStream().use { output ->
+                        this::class.java.getResourceAsStream("/conf/actions.xml")?.use { input ->
+                            input.copyTo(output)
+                        }
                     }
 
                     // Copy behaviors.xml
-                    confDir.resolve("behaviors.xml").outputStream().use {
-                        this::class.java.getResourceAsStream("/conf/behaviors.xml")?.copyTo(it)
+                    confDir.resolve("behaviors.xml").outputStream().use { output ->
+                        this::class.java.getResourceAsStream("/conf/behaviors.xml")?.use { input ->
+                            input.copyTo(output)
+                        }
                     }
 
                     // Copy settings.properties
-                    confDir.resolve("settings.properties").outputStream().use {
-                        this::class.java.getResourceAsStream("/conf/settings.properties")?.copyTo(it)
+                    confDir.resolve("settings.properties").outputStream().use { output ->
+                        this::class.java.getResourceAsStream("/conf/settings.properties")?.use { input ->
+                            input.copyTo(output)
+                        }
                     }
                 }
 
@@ -818,8 +833,10 @@ class Main {
                     val defaultMascotDir = imgDir.resolve("Shimeji")
                     defaultMascotDir.createDirectories()
                     for (i in 1 until 47) {
-                        getPath("img", "Shimeji", "shime$i.png").outputStream().use {
-                            this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.copyTo(it)
+                        getPath("img", "Shimeji", "shime$i.png").outputStream().use { output ->
+                            this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.use { input ->
+                                input.copyTo(output)
+                            }
                         }
                     }
                 }
@@ -827,6 +844,11 @@ class Main {
                 showError("Failed to create the config directory.", e)
                 exitProcess(0)
             }
+        }
+
+        fun getPath(vararg paths: String): Path {
+            val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
+            return Path(dir.toString(), *paths)
         }
 
         @JvmStatic
@@ -843,11 +865,6 @@ class Main {
             }
 
             showError(m)
-        }
-
-        fun getPath(vararg paths: String): Path {
-            val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
-            return Path(dir.toString(), *paths)
         }
     }
 }

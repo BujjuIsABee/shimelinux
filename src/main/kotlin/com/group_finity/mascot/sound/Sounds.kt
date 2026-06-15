@@ -18,8 +18,8 @@ object Sounds {
         get() = !Main.instance.properties.getProperty("Sounds", "true").toBoolean()
         set(value) {
             if (value) {
-                for (key in sounds.keys) {
-                    sounds[key]!!.stop()
+                for (sound in sounds.values) {
+                    sound.stop()
                 }
             }
         }
