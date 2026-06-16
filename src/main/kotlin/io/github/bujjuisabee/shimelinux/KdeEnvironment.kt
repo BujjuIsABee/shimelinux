@@ -115,7 +115,7 @@ class KdeEnvironment : Environment() {
         for (title in blacklist) {
             if (title.isNotBlank()) {
                 blacklistInUse = true
-                if (window.title.contains(title)) {
+                if (window.title.contains(title, true)) {
                     windowCache[window.title] = false
                     return false
                 }
@@ -127,7 +127,7 @@ class KdeEnvironment : Environment() {
         for (title in whitelist) {
             if (title.isNotBlank()) {
                 whitelistInUse = true
-                if (window.title.contains(title)) {
+                if (window.title.contains(title, true)) {
                     windowCache[window.title] = true
                     return true
                 }
