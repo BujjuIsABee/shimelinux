@@ -140,7 +140,17 @@ class Main {
 
         // Create the first mascot
         for (imageSet in imageSets) {
-            // TODO: Implement information
+            val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
+            val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
+            configurations[imageSet]?.let { config ->
+                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || infoAlreadySeen.contains(imageSet))
+                ) {
+                    val info = InformationWindow(imageSet, config)
+                    info.display()
+                    setMascotInformationDismissed(imageSet)
+                    updateConfigFile()
+                }
+            }
             createMascot(imageSet)
         }
 
@@ -251,7 +261,28 @@ class Main {
 
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
-            // TODO: Implement information
+            filePath = getPath("conf")
+            var infoPath = filePath.resolve("info.xml")
+
+            filePath = getPath("conf", imageSet)
+            if (filePath.resolve("info.xml").exists()) {
+                infoPath = filePath.resolve("info.xml")
+            }
+
+            filePath = getPath("img", imageSet, "conf")
+            if (filePath.resolve("info.xml").exists()) {
+                infoPath = filePath.resolve("info.xml")
+            }
+
+            if (infoPath.exists()) {
+                log.log(Level.INFO, "Reading information file ($infoPath)")
+
+                val information = infoPath.inputStream().use {
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
+                }
+
+                configuration.load(Entry(information.documentElement), imageSet)
+            }
 
             configuration.validate()
 
@@ -674,6 +705,25 @@ class Main {
         }
     }
 
+    private fun setMascotInformationDismissed(imageSet: String) {
+        val list = mutableListOf<String>()
+        val data = properties.getProperty("InformationDismissed", "").split('/')
+
+        if (data.isNotEmpty() && data[0].isNotEmpty()) {
+            list.addAll(data.toList())
+        }
+        if (!list.contains(imageSet)) {
+            list.add(imageSet)
+        }
+
+        val value = list.toString()
+            .replace("[", "")
+            .replace("]", "")
+            .replace(", ", "/")
+
+        properties.setProperty("InformationDismissed", value)
+    }
+
     private fun updateConfigFile() {
         runCatching {
             getPath("conf", "settings.properties").outputStream().use {
@@ -758,7 +808,18 @@ class Main {
         } else {
             if (loadConfiguration(imageSet)) {
                 imageSets.add(imageSet)
-                // TODO: Implement information
+
+                val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
+                val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
+                configurations[imageSet]?.let { config ->
+                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || infoAlreadySeen.contains(imageSet))
+                    ) {
+                        val info = InformationWindow(imageSet, config)
+                        info.display()
+                        setMascotInformationDismissed(imageSet)
+                        updateConfigFile()
+                    }
+                }
                 createMascot(imageSet)
             } else {
                 // Failed to load

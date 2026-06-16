@@ -8,6 +8,8 @@
 package com.group_finity.mascot.imagesetchooser
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.config.Configuration
+import com.group_finity.mascot.config.Entry
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Desktop
@@ -30,8 +32,10 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.UIManager
+import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
@@ -279,10 +283,41 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
 
             val behaviorsFile = "./${behaviorsPath.subpath(4, behaviorsPath.nameCount)}"
 
-            // TODO: Implement information
+            // Determine information file
+            filePath = Main.getPath("conf")
+            var infoPath = filePath.resolve("info.xml")
 
-            var imageFile: String = topDir.resolve(Path(imageSet, "shime1.png")).toString()
-            var caption: String = imageSet
+            filePath = Main.getPath("conf", imageSet)
+            if (filePath.resolve("info.xml").exists()) {
+                infoPath = filePath.resolve("info.xml")
+            }
+
+            filePath = Main.getPath("img", imageSet, "conf")
+            if (filePath.resolve("info.xml").exists()) {
+                infoPath = filePath.resolve("info.xml")
+            }
+
+            var imageFile = topDir.resolve(Path(imageSet, "shime1.png")).toString()
+            var caption = imageSet
+
+            runCatching {
+                val config = Configuration()
+
+                if (infoPath.exists()) {
+                    val information = infoPath.inputStream().use {
+                        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
+                    }
+
+                    config.load(Entry(information.documentElement), imageSet)
+                }
+
+                config.getInformation(config.schema.getString("Name"))?.let {
+                    caption = it
+                }
+                config.getInformation(config.schema.getString("PreviewImage"))?.let {
+                    imageFile = topDir.resolve(Path(imageSet, it)).toString()
+                }
+            }
 
             if (onList1) {
                 onList1 = false
