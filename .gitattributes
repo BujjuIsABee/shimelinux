@@ -1,0 +1,2 @@
+# Ignore Java files so the very long hqx files don't count towards the project's language stats
+*.java linguist-vendored
