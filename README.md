@@ -29,4 +29,4 @@ You can also use an AUR helper like yay or paru.
 
 ## How to use
 
-When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click on the tray icon and select "Choose Shimeji...." Then, click on the "Add" button to open the `/img` folder. Once you've added Shimeji to this folder, you can reopen the image set chooser and select the Shimeji you want. Shimeji in the `/img/unused` folder will be ignored.
+When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click the tray icon and select "Choose Shimeji...." Then, click the "Add" button to open the `/img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want. Shimeji in the `/img/unused` folder will be ignored.
