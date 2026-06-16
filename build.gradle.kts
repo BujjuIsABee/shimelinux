@@ -34,6 +34,8 @@ tasks.jar {
     from({
         configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
     })
+
+    exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
 }
 
 tasks.test {
