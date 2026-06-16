@@ -7,6 +7,9 @@
 
 package com.group_finity.mascot.image
 
+import hqx.Hqx_2x
+import hqx.Hqx_3x
+import hqx.Hqx_4x
 import java.awt.Color
 import java.awt.Point
 import java.awt.RenderingHints
@@ -84,22 +87,94 @@ object ImagePairLoader {
     }
 
     private fun scale(source: BufferedImage, scaling: Double, filter: Filter): BufferedImage {
-        val hints = when (filter) {
-            Filter.NEAREST_NEIGHBOR -> RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
-            Filter.BICUBIC -> RenderingHints.VALUE_INTERPOLATION_BICUBIC
+        var filter = filter
+        var width = source.width
+        var height = source.height
+        var workingImage: BufferedImage? = null
+
+        var effectiveScaling = scaling
+        if (filter == Filter.HQX && scaling > 1.0) {
+            val buffer: IntArray
+            var rgbValues = source.getRGB(0, 0, width, height, null, 0, width)
+
+            when (scaling) {
+                4.0, 8.0 -> {
+                    width *= 4
+                    height *= 4
+                    buffer = IntArray(width * height)
+                    Hqx_4x.hq4x_32_rb(rgbValues, buffer, width / 4, height / 4)
+                    rgbValues = buffer
+                    effectiveScaling = if (scaling > 4.0) 2.0 else 1.0
+                }
+
+                3.0, 6.0 -> {
+                    width *= 3
+                    height *= 3
+                    buffer = IntArray(width * height)
+                    Hqx_3x.hq3x_32_rb(rgbValues, buffer, width / 3, height / 3)
+                    rgbValues = buffer
+                    effectiveScaling = if (scaling > 4.0) 2.0 else 1.0
+                }
+
+                2.0 -> {
+                    width *= 2
+                    height *= 2
+                    buffer = IntArray(width * height)
+                    Hqx_2x.hq2x_32_rb(rgbValues, buffer, width / 2, height / 2)
+                    rgbValues = buffer
+                    effectiveScaling = 1.0
+                }
+
+                else -> {
+                    filter = Filter.NEAREST_NEIGHBOR
+                }
+            }
+
+            // Apply the changes if hqx is still on
+            if (filter == Filter.HQX) {
+                workingImage = BufferedImage(
+                    (width * effectiveScaling).roundToInt(),
+                    (height * effectiveScaling).roundToInt(),
+                    BufferedImage.TYPE_INT_ARGB_PRE
+                )
+                var srcColIndex = 0
+                var srcRowIndex = 0
+
+                for (y in 0 until workingImage.height) {
+                    for (x in 0 until workingImage.width) {
+                        workingImage.setRGB(x, y, rgbValues[srcColIndex / effectiveScaling.toInt()])
+                        srcColIndex++
+                    }
+
+                    // Reset the srcColIndex to re-use the same indexes and stretch horizontally
+                    srcRowIndex++
+                    if (srcRowIndex.toDouble() != effectiveScaling) {
+                        srcColIndex -= workingImage.width
+                    } else {
+                        srcRowIndex = 0
+                    }
+                }
+            }
         }
 
-        val scaledWidth = (source.width * scaling).toInt()
-        val scaledHeight = (source.height * scaling).toInt()
+        width = (width * effectiveScaling).roundToInt()
+        height = (height * effectiveScaling).roundToInt()
 
-        val result = BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB)
-        val graphics = result.createGraphics()
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hints)
-        graphics.drawImage(source, 0, 0, scaledWidth, scaledHeight, null)
-        graphics.dispose()
+        val copy = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE)
 
-        return result
+        val g2d = copy.createGraphics()
+        val renderHint = if (filter == Filter.BICUBIC) {
+            RenderingHints.VALUE_INTERPOLATION_BICUBIC
+        } else {
+            RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR
+        }
+
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, renderHint)
+        g2d.drawImage(workingImage ?: source, 0, 0, width, height, null)
+        g2d.dispose()
+
+        return copy
     }
 
-    enum class Filter { NEAREST_NEIGHBOR, BICUBIC }
+    enum class Filter { NEAREST_NEIGHBOR, BICUBIC, HQX }
 }

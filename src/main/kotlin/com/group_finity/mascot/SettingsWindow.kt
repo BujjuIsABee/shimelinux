@@ -46,7 +46,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var alwaysShowInformationScreen = Main.instance.properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
     private var scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
     private var opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
-    private var filter = Main.instance.properties.getProperty("Filter", "false").toBoolean()
+    private var filter = Main.instance.properties.getProperty("Filter", "false")
     private var theme = Main.instance.properties.getProperty("Theme", "GTK")
     private val initialTheme = theme
 
@@ -62,6 +62,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var filterButtonGroup: ButtonGroup
     private var nearestNeighborRadioButton: JRadioButton
     private var bicubicRadioButton: JRadioButton
+    private var hqxRadioButton: JRadioButton
     private var interactiveWindowsTabPanel: JPanel
     private var whitelistBlacklistTabbedPane: JTabbedPane
     private var whitelistPane: JScrollPane
@@ -145,23 +146,33 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         filterLabel.alignmentX = CENTER_ALIGNMENT
 
         nearestNeighborRadioButton = JRadioButton(Main.instance.languageBundle.getString("NearestNeighbour"))
-        nearestNeighborRadioButton.isSelected = !filter
+        nearestNeighborRadioButton.isSelected = filter.equals("false", true) || filter.equals("nearest", true)
         nearestNeighborRadioButton.addChangeListener {
-
             if (nearestNeighborRadioButton.isSelected) {
-                if (filter) {
-                    filter = false
+                if (!filter.equals("false", true) && !filter.equals("nearest", true)) {
+                    filter = "nearest"
                     isImageReloadRequired = true
                 }
             }
         }
 
         bicubicRadioButton = JRadioButton(Main.instance.languageBundle.getString("BicubicFilter"))
-        bicubicRadioButton.isSelected = filter
+        bicubicRadioButton.isSelected = filter.equals("bicubic", true)
         bicubicRadioButton.addChangeListener {
             if (bicubicRadioButton.isSelected) {
-                if (!filter) {
-                    filter = true
+                if (!filter.equals("bicubic", true)) {
+                    filter = "bicubic"
+                    isImageReloadRequired = true
+                }
+            }
+        }
+
+        hqxRadioButton = JRadioButton(Main.instance.languageBundle.getString("Filter"))
+        hqxRadioButton.isSelected = filter.equals("true", true) || filter.equals("hqx", true)
+        hqxRadioButton.addChangeListener {
+            if (hqxRadioButton.isSelected) {
+                if (!filter.equals("true", true) && !filter.equals("hqx", true)) {
+                    filter = "hqx"
                     isImageReloadRequired = true
                 }
             }
@@ -170,6 +181,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         filterButtonGroup = ButtonGroup()
         filterButtonGroup.add(nearestNeighborRadioButton)
         filterButtonGroup.add(bicubicRadioButton)
+        filterButtonGroup.add(hqxRadioButton)
 
         generalTabPanel = JPanel()
         generalTabPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -183,6 +195,7 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         generalTabPanel.add(filterLabel)
         generalTabPanel.add(nearestNeighborRadioButton)
         generalTabPanel.add(bicubicRadioButton)
+        generalTabPanel.add(hqxRadioButton)
 
         val whitelistModel = DefaultListModel<String>()
         for (title in Main.instance.properties.getProperty("InteractiveWindows", "").split('/')) {
