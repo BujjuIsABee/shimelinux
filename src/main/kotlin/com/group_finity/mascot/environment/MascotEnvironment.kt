@@ -22,7 +22,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         get() = if (
             currentWorkArea != null &&
             !Main.instance.properties.getProperty("Multiscreen", "true").toBoolean() &&
-            currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) != true
+            !currentWorkArea!!.toRectangle().intersects(impl.activeIE.toRectangle())
         ) {
             Area()
         } else {
@@ -54,36 +54,35 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     fun getWorkArea(ignoreSettings: Boolean): Area {
-        val currentWorkArea = currentWorkArea
         if (currentWorkArea != null) {
             if (ignoreSettings || Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
                 if (currentWorkArea != impl.workArea &&
-                    currentWorkArea.toRectangle().contains(impl.workArea.toRectangle()) &&
+                    checkNotNull(currentWorkArea).toRectangle().contains(impl.workArea.toRectangle()) &&
                     impl.workArea.contains(mascot.anchor.x, mascot.anchor.y)
                 ) {
-                    this.currentWorkArea = impl.workArea
-                    return currentWorkArea
-                } else if (currentWorkArea.contains(mascot.anchor.x, mascot.anchor.y)) {
-                    return currentWorkArea
+                    currentWorkArea = impl.workArea
+                    return checkNotNull(currentWorkArea)
+                } else if (checkNotNull(currentWorkArea).contains(mascot.anchor.x, mascot.anchor.y)) {
+                    return checkNotNull(currentWorkArea)
                 }
             } else {
-                return currentWorkArea
+                return checkNotNull(currentWorkArea)
             }
         }
 
         if (impl.workArea.contains(mascot.anchor.x, mascot.anchor.y)) {
-            this.currentWorkArea = impl.workArea
+            currentWorkArea = impl.workArea
             return checkNotNull(currentWorkArea)
         }
 
         for (area in impl.screens) {
             if (area.contains(mascot.anchor.x, mascot.anchor.y)) {
-                this.currentWorkArea = area
+                currentWorkArea = area
                 return checkNotNull(currentWorkArea)
             }
         }
 
-        this.currentWorkArea = impl.workArea
+        currentWorkArea = impl.workArea
         return checkNotNull(currentWorkArea)
     }
 

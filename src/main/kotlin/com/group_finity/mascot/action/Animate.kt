@@ -20,7 +20,7 @@ open class Animate(
     override fun tick() {
         super.tick()
 
-        if (border?.isOn(mascot.anchor) == true) {
+        if (border?.isOn(mascot.anchor) != true) {
             throw LostGroundException()
         }
 
