@@ -349,12 +349,12 @@ class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
             Main.instance.properties.setProperty("Filter", filter.toString())
             Main.instance.properties.setProperty("Theme", theme)
 
-            val whitelist = whitelistModel.elements().toString()
+            val whitelist = whitelistModel.elements().toList().toString()
                 .replace("[", "")
                 .replace("]", "")
                 .replace(", ", "/")
 
-            val blacklist = blacklistModel.elements().toString()
+            val blacklist = blacklistModel.elements().toList().toString()
                 .replace("[", "")
                 .replace("]", "")
                 .replace(", ", "/")

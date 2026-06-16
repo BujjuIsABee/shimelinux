@@ -140,7 +140,7 @@ class Main {
 
         // Create the first mascot
         for (imageSet in imageSets) {
-            // Implement information
+            // TODO: Implement information
             createMascot(imageSet)
         }
 
