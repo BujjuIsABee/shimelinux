@@ -28,7 +28,7 @@ import javax.swing.JScrollPane
 import javax.swing.UIManager
 import javax.swing.event.HyperlinkEvent
 
-class InformationWindow(val imageSet: String, val config: Configuration) : JFrame() {
+class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     private val imagePanel: JPanel
     private val splashImageLabel: JLabel
     private val scrollPane: JScrollPane

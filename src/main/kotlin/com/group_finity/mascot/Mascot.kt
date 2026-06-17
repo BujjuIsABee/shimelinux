@@ -55,6 +55,7 @@ class Mascot(var imageSet: String) {
     var isDragging = false
     val environment = MascotEnvironment(this)
     var sound: String? = null
+    internal var debugWindow: DebugWindow? = null
     val affordances = mutableListOf<String>()
     val hotspots = mutableListOf<Hotspot>()
     val isHotspotClicked
@@ -186,6 +187,14 @@ class Mascot(var imageSet: String) {
             NativeFactory.instance.getEnvironment().restoreIE()
         }
 
+        val debugMenu = JMenuItem(lang.getString("RevealStatistics"))
+        debugMenu.addActionListener {
+            if (debugWindow == null) {
+                debugWindow = DebugWindow(imageSet)
+            }
+            debugWindow?.isVisible = true
+        }
+
         val dismissMenu = JMenuItem(lang.getString("Dismiss"))
         dismissMenu.addActionListener {
             dispose()
@@ -249,6 +258,7 @@ class Mascot(var imageSet: String) {
         popup.addSeparator()
         popup.add(followCursorMenu)
         popup.add(restoreWindowsMenu)
+        popup.add(debugMenu)
         popup.addSeparator()
         if (behaviorsSubmenu.menuComponentCount > 0) {
             popup.add(behaviorsSubmenu)
@@ -282,6 +292,31 @@ class Mascot(var imageSet: String) {
 
             time++
         }
+
+        debugWindow?.let { debugWindow ->
+            behavior?.let { behavior ->
+                debugWindow.setBehavior(behavior.toString()
+                    .substring(10, behavior.toString().length - 1)
+                    .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+                    .replace("  ", " "))
+            }
+
+            debugWindow.setShimejiX(anchor.x)
+            debugWindow.setShimejiY(anchor.y)
+
+            val activeWindow = environment.activeIE
+            debugWindow.setWindowTitle(environment.activeIETitle)
+            debugWindow.setWindowX(activeWindow.left)
+            debugWindow.setWindowY(activeWindow.top)
+            debugWindow.setWindowWidth(activeWindow.width)
+            debugWindow.setWindowHeight(activeWindow.height)
+
+            val workArea = environment.workArea
+            debugWindow.setEnvironmentX(workArea.left)
+            debugWindow.setEnvironmentY(workArea.top)
+            debugWindow.setEnvironmentWidth(workArea.width)
+            debugWindow.setEnvironmentHeight(workArea.height)
+        }
     }
 
     fun apply() {
@@ -314,6 +349,11 @@ class Mascot(var imageSet: String) {
 
     fun dispose() {
         log.log(Level.INFO, "Destroying mascot: {$this}")
+
+        debugWindow?.let {
+            it.isVisible = false
+            debugWindow = null
+        }
 
         isAnimating = false
         window.dispose()

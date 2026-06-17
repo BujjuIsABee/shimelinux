@@ -45,19 +45,19 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
     private var selectAllSets = false
     private var cancelled = true
 
-    private var topLabelsPanel: JPanel
-    private var clearSelectLabelsPanel: JPanel
-    private var bottomButtonsPanel: JPanel
-    private var selectImageSetsLabel: JLabel
-    private var clearAllLabel: JLabel
-    private var selectAllLabel: JLabel
-    private var list1: ShimejiList
-    private var list2: ShimejiList
-    private var scrollPane: JScrollPane
-    private var addButton: JButton
-    private var useSelectedButton: JButton
-    private var useAllButton: JButton
-    private var cancelButton: JButton
+    private val topLabelsPanel: JPanel
+    private val clearSelectLabelsPanel: JPanel
+    private val bottomButtonsPanel: JPanel
+    private val selectImageSetsLabel: JLabel
+    private val clearAllLabel: JLabel
+    private val selectAllLabel: JLabel
+    private val list1: ShimejiList
+    private val list2: ShimejiList
+    private val scrollPane: JScrollPane
+    private val addButton: JButton
+    private val useSelectedButton: JButton
+    private val useAllButton: JButton
+    private val cancelButton: JButton
 
     init {
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }

@@ -21,15 +21,21 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.UIManager
 
-class ImageSetChooserPanel : JPanel {
-    private var checkbox: JCheckBox
-    private var image: JLabel
-    private var caption: JLabel
+class ImageSetChooserPanel(
+    imageSet: String,
+    actions: String,
+    behaviors: String,
+    imageLocation: String,
+    captionText: String
+) : JPanel() {
+    private val checkbox: JCheckBox
+    private val image: JLabel
+    private val caption: JLabel
 
     var imageSetName: String? = null
         private set
 
-    constructor(imageSet: String, actions: String, behaviors: String, imageLocation: String, captionText: String) {
+    init {
         imageSetName = imageSet
         minimumSize = Dimension(248, 80)
         preferredSize = Dimension(248, 80)
