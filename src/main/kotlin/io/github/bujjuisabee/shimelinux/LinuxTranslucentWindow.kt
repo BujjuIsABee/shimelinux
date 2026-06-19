@@ -20,9 +20,6 @@ import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Path2D
 import java.awt.image.BufferedImage
-import java.util.logging.Level
-import java.util.logging.Logger
-import javax.imageio.ImageIO
 import javax.swing.JPanel
 import javax.swing.JWindow
 

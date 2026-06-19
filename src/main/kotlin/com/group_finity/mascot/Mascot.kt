@@ -280,10 +280,9 @@ class Mascot(var imageSet: String) {
     }
 
     fun tick() {
-        val behavior = behavior
-        if (isAnimating && behavior != null) {
+        if (isAnimating) {
             try {
-                behavior.next()
+                behavior?.next()
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError(Main.instance.languageBundle.getString("CouldNotGetNextBehaviourErrorMessage"), e)

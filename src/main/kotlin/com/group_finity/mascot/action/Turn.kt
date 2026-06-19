@@ -35,7 +35,7 @@ class Turn(
 
         super.tick()
 
-        if (border?.isOn(mascot.anchor) != true) {
+        if (border?.isOn(mascot.anchor) == false) {
             log.log(Level.INFO, "Lost ground ($mascot,$this)")
             throw LostGroundException()
         }

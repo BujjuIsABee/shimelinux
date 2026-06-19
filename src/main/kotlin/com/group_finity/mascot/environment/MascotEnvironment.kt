@@ -22,7 +22,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         get() = if (
             currentWorkArea != null &&
             !Main.instance.properties.getProperty("Multiscreen", "true").toBoolean() &&
-            !currentWorkArea!!.toRectangle().intersects(impl.activeIE.toRectangle())
+            currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false
         ) {
             Area()
         } else {
@@ -88,11 +88,9 @@ class MascotEnvironment(private val mascot: Mascot) {
 
     fun getCeiling(ignoreSeparator: Boolean) = if (activeIE.bottomBorder.isOn(mascot.anchor)) {
         activeIE.bottomBorder
-    }
-    else if (workArea.topBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
+    } else if (workArea.topBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
         workArea.topBorder
-    }
-    else {
+    } else {
         NotOnBorder.INSTANCE
     }
 

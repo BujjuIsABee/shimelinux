@@ -81,8 +81,8 @@ abstract class ActionBase(
     internal open fun refreshHotspots() {
         mascot.hotspots.clear()
         try {
-            if (animation != null) {
-                for (hotspot in animation!!.hotspots) {
+            animation?.let {
+                for (hotspot in it.hotspots) {
                     mascot.hotspots.add(hotspot)
                 }
             }

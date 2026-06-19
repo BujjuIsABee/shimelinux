@@ -64,7 +64,7 @@ class ScanInteract(
         }
 
         mascot.manager?.let { manager ->
-            if (target?.affordances?.contains(affordance) != true) {
+            if (target?.affordances?.contains(affordance) == false) {
                 target = manager.getMascotWithAffordance(affordance)?.get()
             }
         }

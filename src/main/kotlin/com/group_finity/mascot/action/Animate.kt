@@ -11,6 +11,8 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
+import java.util.logging.Level
+import java.util.logging.Logger
 
 open class Animate(
     schema: ResourceBundle,
@@ -20,12 +22,12 @@ open class Animate(
     override fun tick() {
         super.tick()
 
-        if (border?.isOn(mascot.anchor) != true) {
+        if (border != null && border?.isOn(mascot.anchor) == false) {
             throw LostGroundException()
         }
 
         animation?.next(mascot, time)
     }
 
-    override fun hasNext() = super.hasNext() && animation != null && time < animation!!.duration
+    override fun hasNext() = super.hasNext() && animation?.let { time < it.duration } == true
 }
