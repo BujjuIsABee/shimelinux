@@ -38,7 +38,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
-class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
+class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val configPath = Main.getPath("conf", "settings.properties")
     private val topDir = Main.getPath("img")
     private var imageSets = ArrayList<String>()
@@ -112,7 +112,7 @@ class ImageSetChooser(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
         topLabelsPanel.add(selectImageSetsLabel, BorderLayout.WEST)
         topLabelsPanel.add(clearSelectLabelsPanel, BorderLayout.EAST)
 
-        addButton = JButton(Main.instance.languageBundle.getString("Add"))
+        addButton = JButton(Main.instance.languageBundle.getString("More"))
         addButton.addActionListener {
             val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
             var failed = false

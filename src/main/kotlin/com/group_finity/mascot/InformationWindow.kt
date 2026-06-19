@@ -16,7 +16,6 @@ import java.net.URI
 import java.util.StringTokenizer
 import javax.imageio.ImageIO
 import javax.swing.BoxLayout
-import javax.swing.GroupLayout
 import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JEditorPane
@@ -74,30 +73,10 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         footerPanel.preferredSize = Dimension(380, 36)
         footerPanel.add(closeButton)
 
-        val layout = GroupLayout(contentPane)
-        contentPane.layout = layout
-
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                        .addComponent(imagePanel, GroupLayout.DEFAULT_SIZE, 600, Int.MAX_VALUE)
-                        .addComponent(footerPanel, GroupLayout.Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
-                        .addComponent(scrollPane, GroupLayout.Alignment.LEADING))
-                    .addContainerGap())
-        )
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(imagePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(footerPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap())
-        )
+        contentPane.layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
+        add(imagePanel)
+        add(scrollPane)
+        add(footerPanel)
 
         val textColor = UIManager.getColor("Label.foreground")
         val linkColor = UIManager.getColor("textHighlight")

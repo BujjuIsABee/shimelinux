@@ -16,10 +16,14 @@ import javax.swing.LayoutStyle
 import javax.swing.SwingConstants
 
 class DebugWindow(imageSet: String) : JFrame() {
+    private val behaviorLabel: JLabel
+    private val behaviorValue: JLabel
     private val shimejiXLabel: JLabel
     private val shimejiXValue: JLabel
     private val shimejiYLabel: JLabel
     private val shimejiYValue: JLabel
+    private val activeIELabel: JLabel
+    private val activeIEValue: JLabel
     private val windowXLabel: JLabel
     private val windowXValue: JLabel
     private val windowYLabel: JLabel
@@ -28,8 +32,6 @@ class DebugWindow(imageSet: String) : JFrame() {
     private val windowWidthValue: JLabel
     private val windowHeightLabel: JLabel
     private val windowHeightValue: JLabel
-    private val behaviorLabel: JLabel
-    private val behaviorValue: JLabel
     private val environmentXLabel: JLabel
     private val environmentXValue: JLabel
     private val environmentYLabel: JLabel
@@ -38,8 +40,6 @@ class DebugWindow(imageSet: String) : JFrame() {
     private val environmentWidthValue: JLabel
     private val environmentHeightLabel: JLabel
     private val environmentHeightValue: JLabel
-    private val activeIELabel: JLabel
-    private val activeIEValue: JLabel
 
     init {
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
@@ -47,6 +47,11 @@ class DebugWindow(imageSet: String) : JFrame() {
 
         title = imageSet
         defaultCloseOperation = DISPOSE_ON_CLOSE
+
+        behaviorLabel = JLabel(Main.instance.languageBundle.getString("Behaviour"))
+        behaviorLabel.font = behaviorLabel.font.deriveFont(Font.BOLD)
+        behaviorValue = JLabel("N/A")
+        behaviorValue.horizontalAlignment = SwingConstants.LEFT
 
         shimejiXLabel = JLabel(Main.instance.languageBundle.getString("ShimejiX"))
         shimejiXLabel.font = shimejiXLabel.font.deriveFont(Font.BOLD)
@@ -57,6 +62,11 @@ class DebugWindow(imageSet: String) : JFrame() {
         shimejiYLabel.font = shimejiYLabel.font.deriveFont(Font.BOLD)
         shimejiYValue = JLabel("N/A")
         shimejiYValue.horizontalAlignment = SwingConstants.LEFT
+
+        activeIELabel = JLabel(Main.instance.languageBundle.getString("ActiveIE"))
+        activeIELabel.font = activeIELabel.font.deriveFont(Font.BOLD)
+        activeIEValue = JLabel("N/A")
+        activeIEValue.horizontalAlignment = SwingConstants.LEFT
 
         windowXLabel = JLabel(Main.instance.languageBundle.getString("WindowX"))
         windowXLabel.font = windowXLabel.font.deriveFont(Font.BOLD)
@@ -78,11 +88,6 @@ class DebugWindow(imageSet: String) : JFrame() {
         windowHeightValue = JLabel("N/A")
         windowHeightValue.horizontalAlignment = SwingConstants.LEFT
 
-        behaviorLabel = JLabel(Main.instance.languageBundle.getString("Behaviour"))
-        behaviorLabel.font = behaviorLabel.font.deriveFont(Font.BOLD)
-        behaviorValue = JLabel("N/A")
-        behaviorValue.horizontalAlignment = SwingConstants.LEFT
-
         environmentXLabel = JLabel(Main.instance.languageBundle.getString("EnvironmentX"))
         environmentXLabel.font = environmentXLabel.font.deriveFont(Font.BOLD)
         environmentXValue = JLabel("N/A")
@@ -102,11 +107,6 @@ class DebugWindow(imageSet: String) : JFrame() {
         environmentHeightLabel.font = environmentHeightLabel.font.deriveFont(Font.BOLD)
         environmentHeightValue = JLabel("N/A")
         environmentHeightValue.horizontalAlignment = SwingConstants.LEFT
-
-        activeIELabel = JLabel(Main.instance.languageBundle.getString("ActiveIE"))
-        activeIELabel.font = activeIELabel.font.deriveFont(Font.BOLD)
-        activeIEValue = JLabel("N/A")
-        activeIEValue.horizontalAlignment = SwingConstants.LEFT
 
         val layout = GroupLayout(contentPane)
         contentPane.layout = layout

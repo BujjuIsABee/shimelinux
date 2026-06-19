@@ -37,7 +37,7 @@ import javax.swing.UnsupportedLookAndFeelException
 import kotlin.io.path.outputStream
 import kotlin.text.replace
 
-class SettingsWindow(parent: Frame, modal: Boolean) : JDialog(parent, modal) {
+class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     var isEnvironmentReloadRequired = false
     var isImageReloadRequired = false
     var isInteractiveWindowReloadRequired = false

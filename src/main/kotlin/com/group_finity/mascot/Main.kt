@@ -19,6 +19,8 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
+import java.awt.Toolkit
+import java.io.File
 import java.nio.file.Path
 import java.util.Locale
 import java.util.Properties
@@ -27,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.LogManager
 import java.util.logging.Logger
-import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.SwingUtilities
@@ -44,6 +45,8 @@ import kotlin.system.exitProcess
 fun main(args: Array<String>) {
     try {
         Main.createConfigDirectory()
+
+        Main.instance.init()
 
         if (!args.contains("DEBUG")) {
             Main.configureLogging()
@@ -74,11 +77,30 @@ class Main {
     lateinit var languageBundle: ResourceBundle
         private set
 
-    fun run() {
-        // Load properties
+    fun init() {
         runCatching {
+            // Load properties
             properties = Properties()
             getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
+
+            // Set menu scaling
+            if (properties.containsKey("MenuDPI")) {
+                val menuScaling = properties.getProperty("MenuDPI", "96").toInt() / 96.0f
+                System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+            } else {
+                val dpi = Toolkit.getDefaultToolkit().screenResolution.coerceAtLeast(96)
+                properties.setProperty("MenuDPI", dpi.toString())
+                updateConfigFile()
+
+                if (dpi != 96) {
+                    // Restart
+                    val jarPath = this::class.java.protectionDomain.codeSource.location.path
+                    val restartProcess = ProcessBuilder("java", "-jar", jarPath)
+                    restartProcess.directory(File(System.getProperty("user.dir")))
+                    restartProcess.start()
+                    exitProcess(0)
+                }
+            }
         }
 
         // Set theme
@@ -103,7 +125,9 @@ class Main {
             showError("The default language file could not be loaded.")
             exit()
         }
+    }
 
+    fun run() {
         // Get the image sets to use
         if (!properties.getProperty("AlwaysShowShimejiChooser", "false").toBoolean()) {
             for (set in properties.getProperty("ActiveShimeji", "").split('/')) {
@@ -114,7 +138,7 @@ class Main {
         }
         do {
             if (imageSets.isEmpty()) {
-                val selectedImageSets = ImageSetChooser(frame, true).display()
+                val selectedImageSets = ImageSetChooser(null, true).display()
                 if (selectedImageSets != null) {
                     imageSets = selectedImageSets
                 } else {
@@ -143,7 +167,7 @@ class Main {
             val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
             val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
             configurations[imageSet]?.let { config ->
-                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || infoAlreadySeen.contains(imageSet))
+                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
                 ) {
                     val info = InformationWindow(imageSet, config)
                     info.display()
@@ -401,12 +425,12 @@ class Main {
         allowedBehaviorsSubmenu.add(multiscreenMenu)
 
         val chooseShimejiMenu = MenuItem(languageBundle.getString("ChooseShimeji")) {
-            val chooser = ImageSetChooser(frame, true)
+            val chooser = ImageSetChooser(null, true)
             setActiveImageSets(chooser.display())
         }
 
         val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
-            val settings = SettingsWindow(frame, true)
+            val settings = SettingsWindow(null, true)
             settings.display()
 
             if (settings.isEnvironmentReloadRequired) {
@@ -812,7 +836,7 @@ class Main {
                 val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
                 val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
                 configurations[imageSet]?.let { config ->
-                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || infoAlreadySeen.contains(imageSet))
+                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
                     ) {
                         val info = InformationWindow(imageSet, config)
                         info.display()
@@ -837,22 +861,10 @@ class Main {
     }
 
     companion object {
-        @JvmStatic
-        val instance = Main()
-
         private val log = Logger.getLogger(this::class.java.name)
 
-        private val frame = JFrame()
-
-        fun configureLogging() {
-            try {
-                this::class.java.getResourceAsStream("/conf/logging.properties").use {
-                    LogManager.getLogManager().readConfiguration(it)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        @JvmStatic
+        val instance = Main()
 
         fun createConfigDirectory() {
             try {
@@ -907,6 +919,16 @@ class Main {
             }
         }
 
+        fun configureLogging() {
+            try {
+                this::class.java.getResourceAsStream("/conf/logging.properties").use {
+                    LogManager.getLogManager().readConfiguration(it)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         fun getPath(vararg paths: String): Path {
             val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
             return Path(dir.toString(), *paths)
@@ -914,7 +936,7 @@ class Main {
 
         @JvmStatic
         fun showError(message: String) {
-            JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE)
+            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
         }
 
         @JvmStatic
@@ -925,7 +947,7 @@ class Main {
                 "\n${exception.message}"
             }
 
-            showError(m)
+            showError(m + "\n${instance.languageBundle.getString("SeeLogForDetails")}")
         }
     }
 }
