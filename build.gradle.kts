@@ -14,6 +14,7 @@ dependencies {
     implementation("com.dorkbox:SystemTray:4.4")
     implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
     implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
+    implementation("com.formdev:flatlaf:3.7.1")
     testImplementation(kotlin("test"))
 }
 

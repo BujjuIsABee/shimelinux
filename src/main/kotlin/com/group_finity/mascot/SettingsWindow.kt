@@ -8,6 +8,7 @@
 package com.group_finity.mascot
 
 import java.awt.BorderLayout
+import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
@@ -22,6 +23,8 @@ import javax.swing.DefaultListModel
 import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JColorChooser
+import javax.swing.JComboBox
 import javax.swing.JDialog
 import javax.swing.JLabel
 import javax.swing.JList
@@ -73,10 +76,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val addInteractiveWindowButton: JButton
     private val removeInteractiveWindowButton: JButton
     private val themeTabPanel: JPanel
-    private val themeButtonGroup: ButtonGroup
-    private val gtkThemeRadioButton: JRadioButton
-    private val nimbusThemeRadioButton: JRadioButton
-    private val metalThemeRadioButton: JRadioButton
+    private val themeDropdown: JComboBox<String>
+    private val themeCardsPanel: JPanel
+    private val gtkCardPanel: JPanel
+    private val flatLightCardPanel: JPanel
+    private val flatDarkCardPanel: JPanel
+    private val nimbusCardPanel: JPanel
     private val aboutTabPanel: JPanel
     private val aboutPanel: JPanel
     private val aboutImageLabel: JLabel
@@ -276,50 +281,59 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         interactiveWindowsTabPanel.add(whitelistBlacklistTabbedPane, BorderLayout.CENTER)
         interactiveWindowsTabPanel.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
 
-        gtkThemeRadioButton = JRadioButton("GTK")
-        gtkThemeRadioButton.isSelected = theme == "GTK"
-        gtkThemeRadioButton.addActionListener {
-            if (gtkThemeRadioButton.isSelected) {
-                if (theme != "GTK") {
-                    theme = "GTK"
-                    refreshTheme()
-                }
+        gtkCardPanel = JPanel(GridBagLayout())
+        gtkCardPanel.add(JLabel("This theme cannot be customized"))
+
+        flatLightCardPanel = JPanel()
+        flatLightCardPanel.layout = BoxLayout(flatLightCardPanel, BoxLayout.Y_AXIS)
+        flatLightCardPanel.add(JColorChooser())
+
+        flatDarkCardPanel = JPanel()
+        flatDarkCardPanel.layout = BoxLayout(flatDarkCardPanel, BoxLayout.Y_AXIS)
+        flatDarkCardPanel.add(JColorChooser())
+
+        nimbusCardPanel = JPanel(GridBagLayout())
+        nimbusCardPanel.add(JLabel("This theme cannot be customized"))
+
+        themeCardsPanel = JPanel()
+        val cardLayout = CardLayout()
+        themeCardsPanel.layout = cardLayout
+        themeCardsPanel.add(gtkCardPanel, "GTK")
+        themeCardsPanel.add(flatLightCardPanel, "Flat (Light)")
+        themeCardsPanel.add(flatDarkCardPanel, "Flat (Dark)")
+        themeCardsPanel.add(nimbusCardPanel, "Nimbus")
+
+        themeDropdown = JComboBox()
+        themeDropdown.addItem("GTK")
+        themeDropdown.addItem("Flat (Light)")
+        themeDropdown.addItem("Flat (Dark)")
+        themeDropdown.addItem("Nimbus")
+        themeDropdown.addItemListener { event ->
+            val selectedOption = event.item.toString()
+            theme = when (selectedOption) {
+                "GTK" -> "GTK"
+                "Flat (Light)" -> "FlatLight"
+                "Flat (Dark)" -> "FlatDark"
+                "Nimbus" -> "Nimbus"
+                else -> "GTK"
             }
+            refreshTheme()
+
+            cardLayout.show(themeCardsPanel, selectedOption)
         }
 
-        nimbusThemeRadioButton = JRadioButton("Nimbus")
-        nimbusThemeRadioButton.isSelected = theme == "Nimbus"
-        nimbusThemeRadioButton.addActionListener {
-            if (nimbusThemeRadioButton.isSelected) {
-                if (theme != "Nimbus") {
-                    theme = "Nimbus"
-                    refreshTheme()
-                }
-            }
+        themeDropdown.selectedItem = when (theme) {
+            "GTK" -> "GTK"
+            "FlatLight" -> "Flat (Light)"
+            "FlatDark" -> "Flat (Dark)"
+            "Nimbus" -> "Nimbus"
+            else -> "GTK"
         }
-
-        metalThemeRadioButton = JRadioButton("Metal")
-        metalThemeRadioButton.isSelected = theme == "Metal"
-        metalThemeRadioButton.addActionListener {
-            if (metalThemeRadioButton.isSelected) {
-                if (theme != "Metal") {
-                    theme = "Metal"
-                    refreshTheme()
-                }
-            }
-        }
-
-        themeButtonGroup = ButtonGroup()
-        themeButtonGroup.add(gtkThemeRadioButton)
-        themeButtonGroup.add(nimbusThemeRadioButton)
-        themeButtonGroup.add(metalThemeRadioButton)
 
         themeTabPanel = JPanel()
-        themeTabPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         themeTabPanel.layout = BoxLayout(themeTabPanel, BoxLayout.Y_AXIS)
-        themeTabPanel.add(gtkThemeRadioButton)
-        themeTabPanel.add(nimbusThemeRadioButton)
-        themeTabPanel.add(metalThemeRadioButton)
+        themeTabPanel.add(themeDropdown)
+        themeTabPanel.add(themeCardsPanel)
 
         val image = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         aboutImageLabel = JLabel()
@@ -386,6 +400,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         cancelButton.addActionListener {
             theme = initialTheme
             refreshTheme()
+
+            isEnvironmentReloadRequired = false
+            isImageReloadRequired = false
+            isInteractiveWindowReloadRequired = false
+
             dispose()
         }
         buttonsPanel = JPanel(FlowLayout())
@@ -406,8 +425,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         try {
             UIManager.setLookAndFeel(when (theme) {
                 "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
                 "Nimbus" -> "javax.swing.plaf.nimbus.NimbusLookAndFeel"
-                "Metal" -> "javax.swing.plaf.metal.MetalLookAndFeel"
                 else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
             })
             SwingUtilities.updateComponentTreeUI(this)

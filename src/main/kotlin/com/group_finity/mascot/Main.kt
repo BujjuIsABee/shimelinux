@@ -7,6 +7,7 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatLaf
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
@@ -105,10 +106,13 @@ class Main {
 
         // Set theme
         try {
+            FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
+
             UIManager.setLookAndFeel(when (properties.getProperty("Theme", "GTK")) {
                 "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
                 "Nimbus" -> "javax.swing.plaf.nimbus.NimbusLookAndFeel"
-                "Metal" -> "javax.swing.plaf.metal.MetalLookAndFeel"
                 else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
             })
         } catch (_: Exception) {
@@ -903,12 +907,30 @@ class Main {
                     }
                 }
 
+                // Create theme directory
+                val themeDir = confDir.resolve("theme")
+                if (!themeDir.exists() || !themeDir.isDirectory()) {
+                    themeDir.createDirectories()
+
+                    // Copy FlatLightLaf.properties
+                    themeDir.resolve("FlatLightLaf.properties").outputStream().use { output ->
+                        this::class.java.getResourceAsStream("/conf/theme/FlatLightLaf.properties")?.use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+
+                    // Copy FlatDarkLaf.properties
+                    themeDir.resolve("FlatDarkLaf.properties").outputStream().use { output ->
+                        this::class.java.getResourceAsStream("/conf/theme/FlatDarkLaf.properties")?.use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+
                 // Create img directory
                 val imgDir = getPath("img")
                 if (!imgDir.exists() || !imgDir.isDirectory()) {
-                    // Create unused directory
-                    val unusedDir = imgDir.resolve("unused")
-                    unusedDir.createDirectories()
+                    imgDir.createDirectories()
 
                     // Copy default mascot
                     val defaultMascotDir = imgDir.resolve("Shimeji")
@@ -920,6 +942,12 @@ class Main {
                             }
                         }
                     }
+                }
+
+                // Create unused directory
+                val unusedDir = imgDir.resolve("unused")
+                if (!unusedDir.exists() || !unusedDir.isDirectory()) {
+                    unusedDir.createDirectories()
                 }
             } catch (e: Exception) {
                 showError("Failed to create the config directory.", e)
