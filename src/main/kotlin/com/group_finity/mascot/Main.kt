@@ -590,12 +590,9 @@ class Main {
         languageSubmenu.add(koreanMenu)
         languageSubmenu.add(japaneseMenu)
 
-        val pauseAllMenu = MenuItem(if (manager.isPaused) {
-            languageBundle.getString("ResumeAnimations")
-        } else {
-            languageBundle.getString("PauseAnimations")
-        }) {
-            manager.togglePauseAll()
+        var pauseAllMenu: MenuItem? = null
+        pauseAllMenu = MenuItem(languageBundle.getString("PauseAnimations")) {
+            pauseAllMenu?.let { pauseMenuClicked(it) }
         }
 
         val dismissAllMenu = MenuItem(languageBundle.getString("DismissAll")) {
@@ -614,6 +611,17 @@ class Main {
         icon.menu.add(JSeparator())
         icon.menu.add(pauseAllMenu)
         icon.menu.add(dismissAllMenu)
+    }
+
+    private fun pauseMenuClicked(pauseMenuItem: MenuItem) {
+        manager.togglePauseAll()
+
+        // Update pause menu item text
+        pauseMenuItem.text = if (manager.isPaused) {
+            languageBundle.getString("ResumeAnimations")
+        } else {
+            languageBundle.getString("PauseAnimations")
+        }
     }
 
     private fun createMascot() {
