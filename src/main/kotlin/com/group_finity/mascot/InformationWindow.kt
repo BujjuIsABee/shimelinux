@@ -227,5 +227,6 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         add(JScrollPane(editorPane))
         add(footerPanel)
         pack()
+        setLocationRelativeTo(null)
     }
 }

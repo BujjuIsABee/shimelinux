@@ -39,7 +39,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
-    private val conf = Main.instance.properties
     private val confPath = Main.getPath("conf", "settings.properties")
     private val topDir = Main.getPath("img")
 
@@ -341,6 +340,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         add(headerPanel, BorderLayout.NORTH)
         add(scrollPane, BorderLayout.CENTER)
         add(bottomButtonsPanel, BorderLayout.SOUTH)
+        setLocationRelativeTo(null)
     }
 
     fun display(): MutableList<String>? {
@@ -350,7 +350,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun readConfigFile(): MutableList<String> {
         val activeImageSets = mutableListOf<String>()
-        activeImageSets.addAll(conf.getProperty("ActiveShimeji", "").split('/'))
+        activeImageSets.addAll(Main.instance.properties.getProperty("ActiveShimeji", "").split('/'))
         selectAllSets = activeImageSets[0].trim().isEmpty()
         return activeImageSets
     }
@@ -363,8 +363,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 .replace("]", "")
                 .replace(", ", "/")
 
-            conf.setProperty("ActiveShimeji", activeShimeji)
-            confPath.outputStream().use { conf.store(it, "ShimeLinux Configuration Options") }
+            Main.instance.properties.setProperty("ActiveShimeji", activeShimeji)
+            confPath.outputStream().use { Main.instance.properties.store(it, "ShimeLinux Configuration Options") }
         }
     }
 

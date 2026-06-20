@@ -222,6 +222,7 @@ class DebugWindow(imageSet: String) : JFrame() {
         defaultCloseOperation = DISPOSE_ON_CLOSE
         contentPane.layout = layout
         pack()
+        setLocationRelativeTo(null)
     }
 
     //region Setters
