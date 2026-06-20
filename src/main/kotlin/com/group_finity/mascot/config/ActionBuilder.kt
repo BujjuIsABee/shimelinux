@@ -93,6 +93,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                         throw ActionInstantiationException(Main.instance.languageBundle.getString("ClassNotFoundErrorMessage") + " ($this)", e)
                     }
                 }
+
                 "Move" -> Move(schema, animations, variables)
                 "Stay" -> Stay(schema, animations, variables)
                 "Animate" -> Animate(schema, animations, variables)

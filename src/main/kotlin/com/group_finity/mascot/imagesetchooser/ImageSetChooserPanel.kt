@@ -22,35 +22,23 @@ import javax.swing.JPanel
 import javax.swing.UIManager
 
 class ImageSetChooserPanel(
-    imageSet: String,
+    val imageSet: String,
     actions: String,
     behaviors: String,
     imageLocation: String,
     captionText: String
 ) : JPanel() {
-    private val checkbox: JCheckBox
-    private val image: JLabel
-    private val caption: JLabel
-
-    var imageSetName: String? = null
-        private set
+    private val checkbox: JCheckBox = JCheckBox()
 
     init {
-        imageSetName = imageSet
-        minimumSize = Dimension(248, 80)
-        preferredSize = Dimension(248, 80)
-        layout = BoxLayout(this, BoxLayout.X_AXIS)
-        border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
-
-        checkbox = JCheckBox()
-
-        image = JLabel()
-        runCatching {
-            val icon = ImageIO.read(File(imageLocation))
-            image.icon = ImageIcon(icon.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
+        val image = JLabel()
+        image.icon = runCatching {
+            ImageIO.read(File(imageLocation))
+        }.getOrNull()?.let {
+            ImageIcon(it.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
         }
 
-        caption = JLabel(captionText)
+        val caption = JLabel(captionText)
         caption.font = caption.font.deriveFont(Font.BOLD)
 
         val textPanel = JPanel()
@@ -59,6 +47,10 @@ class ImageSetChooserPanel(
         textPanel.add(JLabel(actions))
         textPanel.add(JLabel(behaviors))
 
+        minimumSize = Dimension(248, 80)
+        preferredSize = Dimension(248, 80)
+        layout = BoxLayout(this, BoxLayout.X_AXIS)
+        border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
         add(checkbox)
         add(image)
         add(Box.createHorizontalStrut(4))

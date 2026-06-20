@@ -37,15 +37,19 @@ class ThrowIE(
 
         if (activeIE.isVisible) {
             if (mascot.isLookRight) {
-                environment.moveActiveIE(Point(
-                    activeIE.left + initialVx,
-                    activeIE.top + initialVy + (time * gravity).toInt()
-                ))
+                environment.moveActiveIE(
+                    Point(
+                        activeIE.left + initialVx,
+                        activeIE.top + initialVy + (time * gravity).toInt()
+                    )
+                )
             } else {
-                environment.moveActiveIE(Point(
-                    activeIE.left - initialVx,
-                    activeIE.top + initialVy + (time * gravity).toInt()
-                ))
+                environment.moveActiveIE(
+                    Point(
+                        activeIE.left - initialVx,
+                        activeIE.top + initialVy + (time * gravity).toInt()
+                    )
+                )
             }
         }
     }

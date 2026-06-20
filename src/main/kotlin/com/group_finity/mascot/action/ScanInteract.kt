@@ -77,7 +77,7 @@ class ScanInteract(
             val animation = checkNotNull(animation)
 
             if (mascot.anchor.x != target.anchor.x) {
-                isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
+                isTurning =hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
                 mascot.isLookRight = mascot.anchor.x < target.anchor.x
             }
 
@@ -90,9 +90,15 @@ class ScanInteract(
 
             if (!isTurning && (time == animation.duration - 1 || animation.duration == 1) && !behavior.trim().isEmpty()) {
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                        behavior,
+                        mascot
+                    )
                     if (!targetBehavior.trim().isEmpty()) {
-                        target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
+                        target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                            targetBehavior,
+                            target
+                        )
                     }
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight

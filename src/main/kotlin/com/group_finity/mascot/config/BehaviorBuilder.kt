@@ -18,7 +18,11 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class BehaviorBuilder(private val configuration: Configuration, behaviorNode: Entry, private val conditions: MutableList<String?>) {
+class BehaviorBuilder(
+    private val configuration: Configuration,
+    behaviorNode: Entry,
+    private val conditions: MutableList<String?>
+) {
     val name = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name")))
     private val actionName = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
     val frequency = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))).toInt()
@@ -55,7 +59,7 @@ class BehaviorBuilder(private val configuration: Configuration, behaviorNode: En
 
         for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviourList"))) {
             isNextAdditive = nextList.getAttribute(configuration.schema.getString("Add")).toBoolean()
-            loadBehaviors(nextList, ArrayList())
+            loadBehaviors(nextList, mutableListOf())
         }
 
         this.isNextAdditive = isNextAdditive

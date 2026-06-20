@@ -113,8 +113,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         } else {
             if (activeIE.rightBorder.isOn(mascot.anchor)) {
                 return activeIE.rightBorder
-            }
-            else if (workArea.leftBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) {
+            } else if (workArea.leftBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) {
                 return workArea.leftBorder
             }
         }

@@ -81,9 +81,7 @@ class Mascot(var imageSet: String) {
                 refreshCursor(value)
             }
         }
-    val variables by lazy {
-        return@lazy VariableMap()
-    }
+    val variables = VariableMap()
 
     init {
         log.log(Level.INFO, "Created a mascot ($this)")
@@ -215,11 +213,13 @@ class Mascot(var imageSet: String) {
             Main.instance.exit()
         }
 
-        val pauseMenu = JMenuItem(if (isAnimating) {
-            lang.getString("PauseAnimations")
-        } else {
-            lang.getString("ResumeAnimations")
-        })
+        val pauseMenu = JMenuItem(
+            if (isAnimating) {
+                lang.getString("PauseAnimations")
+            } else {
+                lang.getString("ResumeAnimations")
+            }
+        )
         pauseMenu.addActionListener {
             isPaused = !isPaused
         }
@@ -246,7 +246,11 @@ class Mascot(var imageSet: String) {
                     if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains('/')) {
                         val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
                         toggleItem.addActionListener {
-                            Main.instance.setMascotBehaviorEnabled(behaviorName, this, !config.isBehaviorEnabled(behaviorName, this))
+                            Main.instance.setMascotBehaviorEnabled(
+                                behaviorName,
+                                this,
+                                !config.isBehaviorEnabled(behaviorName, this)
+                            )
                         }
                         allowedSubmenu.add(toggleItem)
                     }
@@ -294,10 +298,12 @@ class Mascot(var imageSet: String) {
 
         debugWindow?.let { debugWindow ->
             behavior?.let { behavior ->
-                debugWindow.setBehavior(behavior.toString()
-                    .substring(10, behavior.toString().length - 1)
-                    .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
-                    .replace("  ", " "))
+                debugWindow.setBehavior(
+                    behavior.toString()
+                        .substring(10, behavior.toString().length - 1)
+                        .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+                        .replace("  ", " ")
+                )
             }
 
             debugWindow.setShimejiX(anchor.x)

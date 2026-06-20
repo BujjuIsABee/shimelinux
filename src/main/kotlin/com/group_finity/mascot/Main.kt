@@ -108,13 +108,14 @@ class Main {
         try {
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
-            UIManager.setLookAndFeel(when (properties.getProperty("Theme", "GTK")) {
-                "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                "Nimbus" -> "javax.swing.plaf.nimbus.NimbusLookAndFeel"
-                else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-            })
+            UIManager.setLookAndFeel(
+                when (properties.getProperty("Theme", "GTK")) {
+                    "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
+                    else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                }
+            )
         } catch (_: Exception) {
             log.log(Level.WARNING, "Failed to set theme.")
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
@@ -171,10 +172,11 @@ class Main {
             val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
             val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
             configurations[imageSet]?.let { config ->
-                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
+                if (config.containsInformationKey("SplashImage") &&
+                    (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
                 ) {
                     val info = InformationWindow(imageSet, config)
-                    info.display()
+                    info.isVisible = true
                     setMascotInformationDismissed(imageSet)
                     updateConfigFile()
                 }
@@ -435,7 +437,7 @@ class Main {
 
         val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
             val settings = SettingsWindow(null, true)
-            settings.display()
+            settings.isVisible = true
 
             if (settings.isEnvironmentReloadRequired) {
                 NativeFactory.instance.getEnvironment().dispose()
@@ -848,10 +850,11 @@ class Main {
                 val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
                 val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
                 configurations[imageSet]?.let { config ->
-                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
+                    if (config.containsInformationKey("SplashImage") &&
+                        (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
                     ) {
                         val info = InformationWindow(imageSet, config)
-                        info.display()
+                        info.isVisible = true
                         setMascotInformationDismissed(imageSet)
                         updateConfigFile()
                     }

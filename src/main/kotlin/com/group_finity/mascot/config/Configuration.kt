@@ -18,7 +18,8 @@ import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
-import java.util.*
+import java.util.Locale
+import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -189,7 +190,7 @@ class Configuration {
         if (previousName != null) {
             val previousBehaviorFactory = checkNotNull(behaviorBuilders[previousName])
             if (!previousBehaviorFactory.isNextAdditive) {
-                totalFrequency = 0
+                totalFrequency = 0L
                 candidates.clear()
             }
 
@@ -206,18 +207,26 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-                mascot.anchor = Point(
-                    (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
-                    mascot.environment.screen.top - 256
-                )
-            } else {
-                mascot.anchor = Point(
-                    (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
-                    mascot.environment.workArea.top - 256
-                )
+            val fallbackCandidates = behaviorBuilders.values.filter {
+                it.isEffective(context) && isBehaviorEnabled(it, mascot)
             }
-            return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
+
+            if (fallbackCandidates.isNotEmpty()) {
+                candidates.addAll(fallbackCandidates)
+            } else {
+                if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                    mascot.anchor = Point(
+                        (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
+                        mascot.environment.screen.top - 256
+                    )
+                } else {
+                    mascot.anchor = Point(
+                        (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
+                        mascot.environment.workArea.top - 256
+                    )
+                }
+                return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
+            }
         }
 
         var random = Math.random() * totalFrequency
@@ -234,7 +243,7 @@ class Configuration {
 
     fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean {
         if (builder.isToggleable) {
-            for (behavior in Main.instance.properties.getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/")) {
+            for (behavior in Main.instance.properties.getProperty("DisabledBehaviours." + mascot.imageSet, "").split("/")) {
                 if (behavior == builder.name) {
                     return false
                 }

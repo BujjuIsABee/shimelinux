@@ -77,7 +77,10 @@ class Breed(
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(bornBehavior, action.mascot)
+                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(
+                        bornBehavior,
+                        action.mascot
+                    )
                     action.mascot.manager?.add(mascot)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)

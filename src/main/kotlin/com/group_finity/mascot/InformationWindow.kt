@@ -28,55 +28,32 @@ import javax.swing.UIManager
 import javax.swing.event.HyperlinkEvent
 
 class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
-    private val imagePanel: JPanel
-    private val splashImageLabel: JLabel
-    private val scrollPane: JScrollPane
-    private val editorPane: JEditorPane
-    private val footerPanel: JPanel
-    private val closeButton: JButton
-
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
-        iconImage = icon
-
-        title = if (config.containsInformationKey("Name")) {
-            config.getInformation("Name")
-        } else {
-            Main.instance.languageBundle.getString("Information")
-        }
-        defaultCloseOperation = DISPOSE_ON_CLOSE
+        val lang = Main.instance.languageBundle
 
         val splashImage = requireNotNull(config.getInformation("SplashImage"))
-        splashImageLabel = JLabel()
-        splashImageLabel.alignmentX = 0.5f
+        val splashImageLabel = JLabel()
+        splashImageLabel.alignmentX = CENTER_ALIGNMENT
         splashImageLabel.icon = ImageIcon(Main.getPath("img", imageSet, splashImage).toString())
 
-        imagePanel = JPanel()
+        val imagePanel = JPanel()
         imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
         imagePanel.add(splashImageLabel)
 
-        editorPane = JEditorPane()
-        editorPane.isEditable = false
+        val editorPane = JEditorPane()
         editorPane.border = null
+        editorPane.isEditable = false
         editorPane.contentType = "text/html"
 
-        scrollPane = JScrollPane()
-        scrollPane.setViewportView(editorPane)
-
-        closeButton = JButton(Main.instance.languageBundle.getString("Close"))
+        val closeButton = JButton(lang.getString("Close"))
         closeButton.minimumSize = Dimension(95, 23)
         closeButton.maximumSize = Dimension(130, 26)
         closeButton.preferredSize = Dimension(130, 26)
         closeButton.addActionListener { dispose() }
 
-        footerPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
+        val footerPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
         footerPanel.preferredSize = Dimension(380, 36)
         footerPanel.add(closeButton)
-
-        contentPane.layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
-        add(imagePanel)
-        add(scrollPane)
-        add(footerPanel)
 
         val textColor = UIManager.getColor("Label.foreground")
         val linkColor = UIManager.getColor("textHighlight")
@@ -90,25 +67,29 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
 
         html.append(splashImageLabel.font.size).append("pt ")
         html.append(splashImageLabel.font.fontName).append("; ")
-        html.append(String.format(
-            "#%02X%02X%02X",
-            textColor.red,
-            textColor.green,
-            textColor.blue
-        ))
+        html.append(
+            String.format(
+                "#%02X%02X%02X",
+                textColor.red,
+                textColor.green,
+                textColor.blue
+            )
+        )
         html.append("\">")
 
         if (config.containsInformationKey("ArtistName")) {
-            html.append(Main.instance.languageBundle.getString("ArtBy")).append(" ")
+            html.append(lang.getString("ArtBy")).append(" ")
             if (config.containsInformationKey("ArtistURL")) {
                 html.append("<a href=\"").append(config.getInformation("ArtistURL"))
                 html.append("\" style=\"color:")
-                html.append(String.format(
-                    "#%02X%02X%02X",
-                    linkColor.red,
-                    linkColor.green,
-                    linkColor.blue
-                ))
+                html.append(
+                    String.format(
+                        "#%02X%02X%02X",
+                        linkColor.red,
+                        linkColor.green,
+                        linkColor.blue
+                    )
+                )
                 html.append("\">")
             }
             html.append(config.getInformation("ArtistName"))
@@ -122,16 +103,18 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 html.append(" - ")
             }
 
-            html.append(Main.instance.languageBundle.getString("ScriptedBy")).append(" ")
+            html.append(lang.getString("ScriptedBy")).append(" ")
             if (config.containsInformationKey("ScripterURL")) {
                 html.append("<a href=\"").append(config.getInformation("ScripterURL"))
                 html.append("\" style=\"color:")
-                html.append(String.format(
-                    "#%02X%02X%02X",
-                    linkColor.red,
-                    linkColor.green,
-                    linkColor.blue
-                ))
+                html.append(
+                    String.format(
+                        "#%02X%02X%02X",
+                        linkColor.red,
+                        linkColor.green,
+                        linkColor.blue
+                    )
+                )
                 html.append("\">")
             }
             html.append(config.getInformation("ScripterName"))
@@ -147,16 +130,18 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 html.append(" - ")
             }
 
-            html.append(Main.instance.languageBundle.getString("CommissionedBy")).append(" ")
+            html.append(lang.getString("CommissionedBy")).append(" ")
             if (config.containsInformationKey("CommissionerURL")) {
                 html.append("<a href=\"").append(config.getInformation("CommissionerURL"))
                 html.append("\" style=\"color:")
-                html.append(String.format(
-                    "#%02X%02X%02X",
-                    linkColor.red,
-                    linkColor.green,
-                    linkColor.blue
-                ))
+                html.append(
+                    String.format(
+                        "#%02X%02X%02X",
+                        linkColor.red,
+                        linkColor.green,
+                        linkColor.blue
+                    )
+                )
                 html.append("\">")
             }
             html.append(config.getInformation("CommissionerName"))
@@ -173,16 +158,18 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 html.append(" - ")
             }
 
-            html.append(Main.instance.languageBundle.getString("SupportAt")).append(" ")
+            html.append(lang.getString("SupportAt")).append(" ")
             if (config.containsInformationKey("SupportURL")) {
                 html.append("<a href=\"").append(config.getInformation("SupportURL"))
                 html.append("\" style=\"color:")
-                html.append(String.format(
-                    "#%02X%02X%02X",
-                    linkColor.red,
-                    linkColor.green,
-                    linkColor.blue
-                ))
+                html.append(
+                    String.format(
+                        "#%02X%02X%02X",
+                        linkColor.red,
+                        linkColor.green,
+                        linkColor.blue
+                    )
+                )
                 html.append("\">")
             }
             html.append(config.getInformation("SupportName"))
@@ -199,12 +186,12 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 if (st.hasMoreTokens()) {
                     val url = st.nextToken()
                     if (JOptionPane.showConfirmDialog(
-                        this@InformationWindow,
-                        Main.instance.languageBundle.getString("ConfirmVisitWebsiteMessage") + "\n" +
-                        Main.instance.languageBundle.getString("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
-                        Main.instance.languageBundle.getString("VisitWebsite"),
-                        JOptionPane.YES_NO_OPTION
-                    ) == JOptionPane.YES_OPTION
+                            this@InformationWindow,
+                            lang.getString("ConfirmVisitWebsiteMessage") + "\n" +
+                            lang.getString("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
+                            lang.getString("VisitWebsite"),
+                            JOptionPane.YES_NO_OPTION
+                        ) == JOptionPane.YES_OPTION
                     ) {
                         val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
                         var failed = false
@@ -221,7 +208,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                         if (failed) {
                             JOptionPane.showMessageDialog(
                                 this@InformationWindow,
-                                Main.instance.languageBundle.getString("FailedOpenWebBrowserErrorMessage") + "\n$url",
+                                lang.getString("FailedOpenWebBrowserErrorMessage") + "\n$url",
                                 "Error",
                                 JOptionPane.PLAIN_MESSAGE
                             )
@@ -231,10 +218,14 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
             }
         }
 
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        iconImage = icon
+        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else lang.getString("Information")
+        defaultCloseOperation = DISPOSE_ON_CLOSE
+        contentPane.layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
+        add(imagePanel)
+        add(JScrollPane(editorPane))
+        add(footerPanel)
         pack()
-    }
-
-    fun display() {
-        isVisible = true
     }
 }

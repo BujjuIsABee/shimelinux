@@ -59,15 +59,19 @@ class WalkWithIE(
 
         if (activeIE.isVisible) {
             if (mascot.isLookRight) {
-                environment.moveActiveIE(Point(
-                    mascot.anchor.x - offsetX,
-                    mascot.anchor.y + offsetY - activeIE.height
-                ))
+                environment.moveActiveIE(
+                    Point(
+                        mascot.anchor.x - offsetX,
+                        mascot.anchor.y + offsetY - activeIE.height
+                    )
+                )
             } else {
-                environment.moveActiveIE(Point(
-                    mascot.anchor.x + offsetX - activeIE.width,
-                    mascot.anchor.y + offsetY - activeIE.height
-                ))
+                environment.moveActiveIE(
+                    Point(
+                        mascot.anchor.x + offsetX - activeIE.width,
+                        mascot.anchor.y + offsetY - activeIE.height
+                    )
+                )
             }
         }
     }

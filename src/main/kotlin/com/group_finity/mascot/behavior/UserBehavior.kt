@@ -101,7 +101,7 @@ class UserBehavior(
                         }
 
                         try {
-                            mascot.behavior = configuration.buildBehavior((configuration.schema.getString(BEHAVIOURNAME_FALL)))
+                            mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_FALL))
                         } catch (e: BehaviorInstantiationException) {
                             throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitialiseErrorMessage"), e)
                         }
@@ -138,7 +138,10 @@ class UserBehavior(
 
             for (hotspot in mascot.hotspots) {
                 if (hotspot.contains(mascot, e.point) &&
-                    checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).isBehaviorEnabled(hotspot.behavior, mascot)
+                    checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).isBehaviorEnabled(
+                        hotspot.behavior,
+                        mascot
+                    )
                 ) {
                     handled = true
                     try {

@@ -99,7 +99,7 @@ abstract class ActionBase(
         }
     }
 
-    internal fun <T : Any> eval(name: String, type: KClass<T>, defaultValue: T) : T {
+    internal fun <T : Any> eval(name: String, type: KClass<T>, defaultValue: T): T {
         synchronized(variables) {
             val variable = variables.rawMap[name]
             if (variable != null) {

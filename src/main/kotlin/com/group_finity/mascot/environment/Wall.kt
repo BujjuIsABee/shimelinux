@@ -37,7 +37,7 @@ class Wall(val area: Area, val isRight: Boolean) : Border {
 
         val d = bottom - dbottom - (top - dtop)
         if (d == 0) return location
-        
+
         val newLocation = Point(location.x + dx, (location.y - (top - dtop)) * (bottom - top) / d + top)
         if ((abs(newLocation.x - location.x) >= 80) || (abs(newLocation.y - location.y) >= 80)) return location
 

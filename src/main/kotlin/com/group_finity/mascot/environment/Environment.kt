@@ -18,10 +18,6 @@ abstract class Environment {
     internal abstract val workArea: Area
     abstract val activeIE: Area
     abstract val activeIETitle: String
-    abstract fun moveActiveIE(point: Point)
-    abstract fun restoreIE()
-    abstract fun refreshCache()
-    abstract fun dispose()
 
     var complexScreen = ComplexArea()
     var screen = Area()
@@ -72,6 +68,14 @@ abstract class Environment {
 
         return count == 1
     }
+
+    abstract fun moveActiveIE(point: Point)
+
+    abstract fun restoreIE()
+
+    abstract fun refreshCache()
+
+    abstract fun dispose()
 
     companion object {
         internal var screenRect = Rectangle(Point(0, 0), Toolkit.getDefaultToolkit().screenSize)

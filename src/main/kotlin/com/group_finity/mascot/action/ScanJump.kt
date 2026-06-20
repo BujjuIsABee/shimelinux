@@ -94,8 +94,14 @@ class ScanJump(
             mascot.anchor = Point(targetX, targetY)
 
             try {
-                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
-                target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
+                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                    behavior,
+                    mascot
+                )
+                target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                    targetBehavior,
+                    target
+                )
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }

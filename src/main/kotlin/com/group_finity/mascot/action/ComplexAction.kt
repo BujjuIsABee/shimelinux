@@ -17,7 +17,7 @@ abstract class ComplexAction(
     internal vararg val actions: Action
 ) : ActionBase(schema, listOf(), params) {
     internal open var currentAction = 0
-        set (value) {
+        set(value) {
             field = value
             if (super.hasNext()) {
                 if (field < actions.size) {

@@ -25,16 +25,18 @@ class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) :
         imageLocation: String,
         captionText: String
     ) {
-        model.add(model.size, ImageSetChooserPanel(
-            imageSet,
-            actions,
-            behaviors,
-            imageLocation,
-            captionText
-        ))
+        model.add(
+            model.size, ImageSetChooserPanel(
+                imageSet,
+                actions,
+                behaviors,
+                imageLocation,
+                captionText
+            )
+        )
     }
 
-    class CellRenderer: ListCellRenderer<ImageSetChooserPanel> {
+    class CellRenderer : ListCellRenderer<ImageSetChooserPanel> {
         override fun getListCellRendererComponent(
             list: JList<out ImageSetChooserPanel>,
             component: ImageSetChooserPanel,

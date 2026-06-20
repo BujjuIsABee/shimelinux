@@ -41,7 +41,10 @@ class Transform(
 
         try {
             mascot.imageSet = childType
-            mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(transformBehavior, mascot)
+            mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(
+                transformBehavior,
+                mascot
+            )
         } catch (e: BehaviorInstantiationException) {
             log.log(Level.SEVERE, "Fatal Error", e)
             Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
