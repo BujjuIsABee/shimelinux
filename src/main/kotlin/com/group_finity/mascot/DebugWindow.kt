@@ -8,11 +8,12 @@
 package com.group_finity.mascot
 
 import java.awt.Font
+import java.awt.GridLayout
 import javax.imageio.ImageIO
-import javax.swing.GroupLayout
+import javax.swing.BorderFactory
 import javax.swing.JFrame
 import javax.swing.JLabel
-import javax.swing.LayoutStyle
+import javax.swing.JPanel
 
 class DebugWindow(imageSet: String) : JFrame() {
     private val behaviorValue: JLabel
@@ -89,138 +90,38 @@ class DebugWindow(imageSet: String) : JFrame() {
         environmentHeightValue = JLabel("N/A")
         environmentHeightValue.alignmentX = LEFT_ALIGNMENT
 
-        val layout = GroupLayout(contentPane)
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(
-                    layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(shimejiXLabel)
-                                .addComponent(shimejiYLabel)
-                                .addComponent(behaviorLabel)
-                                .addComponent(windowXLabel)
-                                .addComponent(windowYLabel)
-                                .addComponent(windowWidthLabel)
-                                .addComponent(windowHeightLabel)
-                                .addComponent(environmentXLabel)
-                                .addComponent(environmentYLabel)
-                                .addComponent(environmentWidthLabel)
-                                .addComponent(environmentHeightLabel)
-                                .addComponent(activeIELabel)
-                        )
-                        .addGap(42, 42, 42)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(behaviorValue, GroupLayout.DEFAULT_SIZE, 165, Int.MAX_VALUE)
-                                .addGroup(
-                                    layout.createSequentialGroup()
-                                        .addGroup(
-                                            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                .addComponent(shimejiYValue)
-                                                .addComponent(shimejiXValue)
-                                                .addComponent(windowXValue)
-                                                .addComponent(windowYValue)
-                                                .addComponent(windowHeightValue)
-                                                .addComponent(environmentHeightValue)
-                                                .addComponent(environmentWidthValue)
-                                                .addComponent(windowWidthValue)
-                                                .addComponent(environmentXValue)
-                                                .addComponent(environmentYValue)
-                                                .addComponent(activeIEValue)
-                                        )
-                                        .addGap(0, 0, Int.MAX_VALUE)
-                                )
-                        )
-                        .addContainerGap()
-                )
-        )
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(
-                    layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(behaviorLabel)
-                                .addComponent(behaviorValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(shimejiXLabel)
-                                .addComponent(shimejiXValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(shimejiYValue)
-                                .addComponent(shimejiYLabel)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(activeIELabel)
-                                .addComponent(activeIEValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(windowXLabel)
-                                .addComponent(windowXValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(windowYLabel)
-                                .addComponent(windowYValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(windowWidthLabel)
-                                .addComponent(windowWidthValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(windowHeightLabel)
-                                .addComponent(windowHeightValue, GroupLayout.Alignment.TRAILING)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(environmentXValue)
-                                .addComponent(environmentXLabel)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(environmentYLabel)
-                                .addComponent(environmentYValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(environmentWidthLabel)
-                                .addComponent(environmentWidthValue)
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(
-                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(environmentHeightLabel)
-                                .addComponent(environmentHeightValue)
-                        )
-                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Int.MAX_VALUE)
-                )
-        )
+        val panel = JPanel(GridLayout(12, 2, 42, 0))
+        panel.border = BorderFactory.createEmptyBorder(0, 0, 0, 42)
+        panel.add(behaviorLabel)
+        panel.add(behaviorValue)
+        panel.add(shimejiXLabel)
+        panel.add(shimejiXValue)
+        panel.add(shimejiYLabel)
+        panel.add(shimejiYValue)
+        panel.add(activeIELabel)
+        panel.add(activeIEValue)
+        panel.add(windowXLabel)
+        panel.add(windowXValue)
+        panel.add(windowYLabel)
+        panel.add(windowYValue)
+        panel.add(windowWidthLabel)
+        panel.add(windowWidthValue)
+        panel.add(windowHeightLabel)
+        panel.add(windowHeightValue)
+        panel.add(environmentXLabel)
+        panel.add(environmentXValue)
+        panel.add(environmentYLabel)
+        panel.add(environmentYValue)
+        panel.add(environmentWidthLabel)
+        panel.add(environmentWidthValue)
+        panel.add(environmentHeightLabel)
+        panel.add(environmentHeightValue)
 
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
         title = imageSet
         defaultCloseOperation = DISPOSE_ON_CLOSE
-        contentPane.layout = layout
+        add(panel)
         pack()
         setLocationRelativeTo(null)
     }

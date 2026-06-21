@@ -16,7 +16,6 @@ import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.Frame
 import java.awt.GridBagLayout
-import java.awt.GridLayout
 import java.awt.Image
 import java.util.Properties
 import javax.imageio.ImageIO
@@ -314,8 +313,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         editBackgroundColorPanel.add(Box.createHorizontalStrut(3))
         editBackgroundColorPanel.add(changeBackgroundColorButton)
 
-        val editBackgroundColorCell = JPanel(FlowLayout(FlowLayout.RIGHT))
-        editBackgroundColorCell.add(editBackgroundColorPanel)
+        val backgroundColorPanel = JPanel(BorderLayout())
+        backgroundColorPanel.add(JLabel(lang.getString("BackgroundColour")), BorderLayout.WEST)
+        backgroundColorPanel.add(editBackgroundColorPanel, BorderLayout.EAST)
 
         val changeTextColorButton = JButton(lang.getString("Change"))
         changeTextColorButton.addActionListener {
@@ -361,8 +361,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         editTextColorPanel.add(Box.createHorizontalStrut(3))
         editTextColorPanel.add(changeTextColorButton)
 
-        val editTextColorCell = JPanel(FlowLayout(FlowLayout.RIGHT))
-        editTextColorCell.add(editTextColorPanel)
+        val textColorPanel = JPanel(BorderLayout())
+        textColorPanel.add(JLabel(lang.getString("TextColour")), BorderLayout.WEST)
+        textColorPanel.add(editTextColorPanel, BorderLayout.EAST)
 
         val changeAccentColorButton = JButton(lang.getString("Change"))
         changeAccentColorButton.addActionListener {
@@ -408,16 +409,15 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         editAccentColorPanel.add(Box.createHorizontalStrut(3))
         editAccentColorPanel.add(changeAccentColorButton)
 
-        val editAccentColorCell = JPanel(FlowLayout(FlowLayout.RIGHT))
-        editAccentColorCell.add(editAccentColorPanel)
+        val accentColorPanel = JPanel(BorderLayout())
+        accentColorPanel.add(JLabel(lang.getString("AccentColour")), BorderLayout.WEST)
+        accentColorPanel.add(editAccentColorPanel, BorderLayout.EAST)
 
-        val themeCustomizer = JPanel(GridLayout(3, 2))
-        themeCustomizer.add(JLabel(lang.getString("BackgroundColour")))
-        themeCustomizer.add(editBackgroundColorCell)
-        themeCustomizer.add(JLabel(lang.getString("TextColour")))
-        themeCustomizer.add(editTextColorCell)
-        themeCustomizer.add(JLabel(lang.getString("AccentColour")))
-        themeCustomizer.add(editAccentColorCell)
+        val themeCustomizer = JPanel()
+        themeCustomizer.layout = BoxLayout(themeCustomizer, BoxLayout.Y_AXIS)
+        themeCustomizer.add(backgroundColorPanel)
+        themeCustomizer.add(textColorPanel)
+        themeCustomizer.add(accentColorPanel)
 
         val resetButton = JButton(lang.getString("Reset"))
         resetButton.addActionListener {
