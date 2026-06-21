@@ -97,12 +97,16 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         }
 
         maskCache[image]?.let {
-            shape = it.createTransformedArea(
-                AffineTransform.getTranslateInstance(
-                    offset.x.toDouble(),
-                    offset.y.toDouble()
+            shape = if (!it.isEmpty) {
+                it.createTransformedArea(
+                    AffineTransform.getTranslateInstance(
+                        offset.x.toDouble(),
+                        offset.y.toDouble()
+                    )
                 )
-            )
+            } else {
+                null
+            }
         }
     }
 
