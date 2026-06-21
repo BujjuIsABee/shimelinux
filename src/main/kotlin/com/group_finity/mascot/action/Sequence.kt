@@ -13,7 +13,7 @@ import java.util.ResourceBundle
 class Sequence(
     schema: ResourceBundle,
     params: VariableMap,
-    vararg actions: Action,
+    vararg actions: Action
 ) : ComplexAction(schema, params, *actions) {
     private val isLoop
         get() = eval(schema.getString(PARAMETER_LOOP), Boolean::class, DEFAULT_LOOP)

@@ -18,7 +18,7 @@ import java.util.logging.Logger
 open class Move(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : BorderedAction(schema, animations, context) {
     internal var isTurning = false
     override val animation

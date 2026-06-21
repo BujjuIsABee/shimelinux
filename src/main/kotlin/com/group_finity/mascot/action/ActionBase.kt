@@ -18,7 +18,7 @@ import kotlin.reflect.cast
 abstract class ActionBase(
     internal val schema: ResourceBundle,
     internal val animations: List<Animation>,
-    internal val variables: VariableMap,
+    internal val variables: VariableMap
 ) : Action {
     internal lateinit var mascot: Mascot
         private set

@@ -25,7 +25,7 @@ import javax.swing.SwingUtilities
 class UserBehavior(
     private val name: String,
     private val action: Action,
-    private val configuration: Configuration,
+    private val configuration: Configuration
 ) : Behavior {
     private lateinit var mascot: Mascot
     internal val environment
@@ -101,7 +101,7 @@ class UserBehavior(
                         }
 
                         try {
-                            mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_FALL))
+                            mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
                         } catch (e: BehaviorInstantiationException) {
                             throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitialiseErrorMessage"), e)
                         }
@@ -122,7 +122,7 @@ class UserBehavior(
             try {
                 mascot.cursorPosition = null
                 mascot.isDragging = false
-                mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_FALL))
+                mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
             } catch (e: BehaviorInstantiationException) {
                 throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitialiseErrorMessage"), e)
             }
@@ -166,7 +166,7 @@ class UserBehavior(
 
             if (!handled) {
                 try {
-                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_DRAGGED))
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDragActionInitialiseErrorMessage"), e)
                 }
@@ -184,7 +184,7 @@ class UserBehavior(
             if (mascot.isDragging) {
                 try {
                     mascot.isDragging = false
-                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_THROWN))
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_THROWN))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDropActionInitialiseErrorMessage"), e)
                 }
@@ -199,8 +199,8 @@ class UserBehavior(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        const val BEHAVIOURNAME_FALL = "Fall"
-        const val BEHAVIOURNAME_DRAGGED = "Dragged"
-        const val BEHAVIOURNAME_THROWN = "Thrown"
+        const val BEHAVIOR_FALL = "Fall"
+        const val BEHAVIOR_DRAGGED = "Dragged"
+        const val BEHAVIOR_THROWN = "Thrown"
     }
 }

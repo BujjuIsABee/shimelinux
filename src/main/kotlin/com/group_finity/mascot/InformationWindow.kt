@@ -28,30 +28,37 @@ import javax.swing.UIManager
 import javax.swing.event.HyperlinkEvent
 
 class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
+    private val lang = Main.instance.languageBundle
+
+    private val imagePanel: JPanel
+    private val splashImageLabel: JLabel
+    private val editorPane: JEditorPane
+    private val footerPanel: JPanel
+    private val closeButton: JButton
+
     init {
-        val lang = Main.instance.languageBundle
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        iconImage = icon
+        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else lang.getString("Information")
+        defaultCloseOperation = DISPOSE_ON_CLOSE
+        layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
 
         val splashImage = requireNotNull(config.getInformation("SplashImage"))
-        val splashImageLabel = JLabel()
+        splashImageLabel = JLabel()
         splashImageLabel.alignmentX = CENTER_ALIGNMENT
         splashImageLabel.icon = ImageIcon(Main.getPath("img", imageSet, splashImage).toString())
 
-        val imagePanel = JPanel()
+        imagePanel = JPanel()
         imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
         imagePanel.add(splashImageLabel)
 
-        val editorPane = JEditorPane()
-        editorPane.border = null
-        editorPane.isEditable = false
-        editorPane.contentType = "text/html"
-
-        val closeButton = JButton(lang.getString("Close"))
+        closeButton = JButton(lang.getString("Close"))
         closeButton.minimumSize = Dimension(95, 23)
         closeButton.maximumSize = Dimension(130, 26)
         closeButton.preferredSize = Dimension(130, 26)
         closeButton.addActionListener { dispose() }
 
-        val footerPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
+        footerPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
         footerPanel.preferredSize = Dimension(380, 36)
         footerPanel.add(closeButton)
 
@@ -179,54 +186,56 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         }
         html.append("</center>")
 
+        editorPane = JEditorPane()
+        editorPane.border = null
+        editorPane.isEditable = false
+        editorPane.contentType = "text/html"
         editorPane.text = html.toString()
-        editorPane.addHyperlinkListener { event ->
-            if (event.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-                val st = StringTokenizer(event.description, " ")
-                if (st.hasMoreTokens()) {
-                    val url = st.nextToken()
-                    if (JOptionPane.showConfirmDialog(
-                            this@InformationWindow,
-                            lang.getString("ConfirmVisitWebsiteMessage") + "\n" +
-                            lang.getString("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
-                            lang.getString("VisitWebsite"),
-                            JOptionPane.YES_NO_OPTION
-                        ) == JOptionPane.YES_OPTION
-                    ) {
-                        val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
-                        var failed = false
-                        try {
-                            if (desktop != null) {
-                                desktop.browse(URI(url))
-                            } else {
-                                failed = true
-                            }
-                        } catch (_: Exception) {
-                            failed = true
-                        }
+        editorPane.addHyperlinkListener { event -> handleHyperlink(event) }
 
-                        if (failed) {
-                            JOptionPane.showMessageDialog(
-                                this@InformationWindow,
-                                lang.getString("FailedOpenWebBrowserErrorMessage") + "\n$url",
-                                "Error",
-                                JOptionPane.PLAIN_MESSAGE
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
-        iconImage = icon
-        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else lang.getString("Information")
-        defaultCloseOperation = DISPOSE_ON_CLOSE
-        contentPane.layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
         add(imagePanel)
         add(JScrollPane(editorPane))
         add(footerPanel)
         pack()
         setLocationRelativeTo(null)
+    }
+
+    private fun handleHyperlink(event: HyperlinkEvent) {
+        if (event.eventType == HyperlinkEvent.EventType.ACTIVATED) {
+            val st = StringTokenizer(event.description, " ")
+            if (st.hasMoreTokens()) {
+                val url = st.nextToken()
+                val response = JOptionPane.showConfirmDialog(
+                    this@InformationWindow,
+                    lang.getString("ConfirmVisitWebsiteMessage") + "\n" +
+                    lang.getString("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
+                    lang.getString("VisitWebsite"),
+                    JOptionPane.YES_NO_OPTION
+                )
+
+                if (response == JOptionPane.YES_OPTION) {
+                    val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
+                    var failed = false
+                    try {
+                        if (desktop != null) {
+                            desktop.browse(URI(url))
+                        } else {
+                            failed = true
+                        }
+                    } catch (_: Exception) {
+                        failed = true
+                    }
+
+                    if (failed) {
+                        JOptionPane.showMessageDialog(
+                            this@InformationWindow,
+                            lang.getString("FailedOpenWebBrowserErrorMessage") + "\n$url",
+                            "Error",
+                            JOptionPane.PLAIN_MESSAGE
+                        )
+                    }
+                }
+            }
+        }
     }
 }

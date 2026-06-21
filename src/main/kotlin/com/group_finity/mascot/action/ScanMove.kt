@@ -23,7 +23,7 @@ import java.util.logging.Logger
 class ScanMove(
     schema: ResourceBundle,
     animations: List<Animation>,
-    params: VariableMap,
+    params: VariableMap
 ) : BorderedAction(schema, animations, params) {
     private var target: Mascot? = null
     internal var isTurning = false

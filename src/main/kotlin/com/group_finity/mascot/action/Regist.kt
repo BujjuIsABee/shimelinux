@@ -21,7 +21,7 @@ import kotlin.math.roundToInt
 class Regist(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : ActionBase(schema, animations, context) {
     private var scaling = 0.0
 

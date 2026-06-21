@@ -16,7 +16,7 @@ class Animation(
     private val condition: Variable,
     private val poses: Array<Pose>,
     val hotspots: Array<Hotspot>,
-    val isTurn: Boolean,
+    val isTurn: Boolean
 ) {
     val duration: Int
         get() {

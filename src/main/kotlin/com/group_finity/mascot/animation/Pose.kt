@@ -18,7 +18,7 @@ class Pose(
     val dx: Int,
     val dy: Int,
     val duration: Int,
-    val soundName: String?,
+    val soundName: String?
 ) {
     val imageName
         get() = "${leftImage ?: ""}${rightImage ?: ""}"

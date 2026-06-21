@@ -17,7 +17,7 @@ import kotlin.math.sqrt
 open class Jump(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : ActionBase(schema, animations, context) {
     private val velocity
         get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()

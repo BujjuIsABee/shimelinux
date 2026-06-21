@@ -38,9 +38,9 @@ class BehaviorBuilder(
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
         isToggleable = if (
-            name == UserBehavior.BEHAVIOURNAME_FALL ||
-            name == UserBehavior.BEHAVIOURNAME_THROWN ||
-            name == UserBehavior.BEHAVIOURNAME_DRAGGED
+            name == UserBehavior.BEHAVIOR_FALL ||
+            name == UserBehavior.BEHAVIOR_THROWN ||
+            name == UserBehavior.BEHAVIOR_DRAGGED
         ) {
             false
         } else {

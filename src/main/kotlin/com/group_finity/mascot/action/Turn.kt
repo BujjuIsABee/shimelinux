@@ -18,7 +18,7 @@ import java.util.logging.Logger
 class Turn(
     schema: ResourceBundle,
     animations: List<Animation>,
-    params: VariableMap,
+    params: VariableMap
 ) : BorderedAction(schema, animations, params) {
     private var isTurning = false
 

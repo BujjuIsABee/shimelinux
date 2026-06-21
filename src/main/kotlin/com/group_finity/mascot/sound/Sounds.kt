@@ -32,6 +32,5 @@ object Sounds {
 
     fun getSound(fileName: String) = sounds[fileName]
 
-    fun getSoundsIgnoringVolume(fileName: String) =
-        sounds.filter { it.key.startsWith(fileName) }.values.toMutableList()
+    fun getSoundsIgnoringVolume(fileName: String) = sounds.filter { it.key.startsWith(fileName) }.values.toMutableList()
 }

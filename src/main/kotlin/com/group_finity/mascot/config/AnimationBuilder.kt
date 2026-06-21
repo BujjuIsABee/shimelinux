@@ -28,7 +28,11 @@ import kotlin.io.path.exists
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class AnimationBuilder(private val schema: ResourceBundle, animationNode: Entry, private val imageSet: String) {
+class AnimationBuilder(
+    private val schema: ResourceBundle,
+    animationNode: Entry,
+    private val imageSet: String
+) {
     private val condition = animationNode.getAttribute(schema.getString("Condition")) ?: "true"
     private val poses = mutableListOf<Pose>()
     private val hotspots = mutableListOf<Hotspot>()

@@ -13,6 +13,7 @@ import com.group_finity.mascot.environment.Environment
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.types.Variant
 import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
@@ -32,7 +33,7 @@ class KdeEnvironment : Environment() {
     private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
-        runCatching {
+        // runCatching {
             dbus.requestBusName("io.github.bujjuisabee.shimelinux")
             dbus.exportObject(client)
 
@@ -60,7 +61,7 @@ class KdeEnvironment : Environment() {
             Runtime.getRuntime().addShutdownHook(Thread {
                 dispose()
             })
-        }
+        // }
     }
 
     override fun tick() {
@@ -97,11 +98,11 @@ class KdeEnvironment : Environment() {
     }
 
     override fun dispose() {
-        runCatching {
+        // runCatching {
             script?.stop()
             scripting?.unloadScript("shimelinux-kwin-script")
             dbus.disconnect()
-        }
+        // }
     }
 
     private fun isIE(window: Window): Boolean {
@@ -162,7 +163,7 @@ class KdeEnvironment : Environment() {
 
         fun resetActiveWindow()
 
-        fun getWindowPosition(): Array<String>
+        fun getWindowPosition(): Map<String, Variant<*>>?
     }
 
     class KWinClientImpl : KWinClient {
@@ -188,13 +189,20 @@ class KdeEnvironment : Environment() {
             activeWindow = null
         }
 
-        override fun getWindowPosition(): Array<String> {
-            val result = arrayOf(
-                activeWindow?.id ?: "null",
-                windowPosition?.x?.toString() ?: "null",
-                windowPosition?.y?.toString() ?: "null"
+        override fun getWindowPosition(): Map<String, Variant<*>>? {
+            val activeWindow = activeWindow
+            val windowPosition = windowPosition
+            if (activeWindow == null || windowPosition == null) {
+                return null
+            }
+
+            val result = mapOf(
+                "windowId" to Variant(activeWindow.id),
+                "x" to Variant(windowPosition.x),
+                "y" to Variant(windowPosition.y)
             )
-            windowPosition = null
+
+            this.windowPosition = null
             return result
         }
 

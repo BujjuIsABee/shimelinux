@@ -16,7 +16,7 @@ import java.util.ResourceBundle
 class BreedJump(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : Jump(schema, animations, context) {
     private val delegate = Breed.Delegate(this)
 

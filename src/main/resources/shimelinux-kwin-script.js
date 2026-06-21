@@ -44,12 +44,12 @@ function move() {
     callDBus(
         busName, clientPath, interfaceName,
         "getWindowPosition",
-        (params) => {
-            if (params[0] == "null" || params[1] == "null" || params[2] == "null") return;
+        (response) => {
+            if (!response) return;
 
-            const windowId = params[0];
-            const x = parseInt(params[1], 10);
-            const y = parseInt(params[2], 10);
+            const windowId = response.windowId;
+            const x = response.x;
+            const y = response.y;
 
             workspace.windowList().forEach(window => {
                 if (window.internalId.toString() == windowId) {
@@ -70,7 +70,9 @@ function onWindowActivated(window) {
     if (isWindowOffscreen(activeWindow)) return;
 
     if (!window || !window.normalWindow || window.minimized) {
-        onWindowDeactivated();
+        if (activeWindow) {
+            onWindowDeactivated();
+        }
         return;
     }
 
@@ -116,7 +118,6 @@ function isWindowOffscreen(window) {
 
     const windowBounds = window.frameGeometry;
     const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
-
     const onScreen =
         windowBounds.x >= screenBounds.x &&
         windowBounds.y >= screenBounds.y &&
@@ -127,6 +128,7 @@ function isWindowOffscreen(window) {
 }
 
 workspace.windowActivated.connect(onWindowActivated);
+onWindowActivated(workspace.activeWindow);
 
 // Start a timer to call move() every 40 milliseconds
 const timer = new QTimer();

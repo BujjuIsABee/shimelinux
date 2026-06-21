@@ -24,7 +24,7 @@ import kotlin.math.sqrt
 class ScanJump(
     schema: ResourceBundle,
     animations: List<Animation>,
-    params: VariableMap,
+    params: VariableMap
 ) : ActionBase(schema, animations, params) {
     private var target: Mascot? = null
 

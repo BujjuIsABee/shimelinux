@@ -39,27 +39,47 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
+    private val lang = Main.instance.languageBundle
+
+    private val headerPanel: JPanel
+    private val labelsPanel: JPanel
+    private val clearAllLabel: JLabel
+    private val selectAllLabel: JLabel
+    private val listScrollPane: JScrollPane
+    private val listPanel: JPanel
+    private val list1: ShimejiList
+    private val list2: ShimejiList
+    private val footerPanel: JPanel
+    private val moreButton: JButton
+    private val useSelectedButton: JButton
+    private val useAllButton: JButton
+    private val cancelButton: JButton
+
     private val confPath = Main.getPath("conf", "settings.properties")
     private val topDir = Main.getPath("img")
-
     private var imageSets = ArrayList<String>()
     private var selectAllSets = false
     private var cancelled = true
 
     init {
-        val lang = Main.instance.languageBundle
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        setIconImage(icon)
+        title = lang.getString("ShimejiImageSetChooser")
+        minimumSize = Dimension(670, 495)
+        contentPane = JPanel(BorderLayout())
+        defaultCloseOperation = DISPOSE_ON_CLOSE
 
-        val list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
-        val list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
 
-        val listPanel = JPanel(GridLayout(1, 2, 0, 0))
+        listPanel = JPanel(GridLayout(1, 2, 0, 0))
         listPanel.add(list1)
         listPanel.add(list2)
 
-        val scrollPane = JScrollPane(listPanel)
-        scrollPane.preferredSize = Dimension(518, 100)
+        listScrollPane = JScrollPane(listPanel)
+        listScrollPane.preferredSize = Dimension(518, 100)
 
-        val clearAllLabel = JLabel("<html><u>" + lang.getString("ClearAll") + "</u></html>")
+        clearAllLabel = JLabel("<html><u>" + lang.getString("ClearAll") + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
         clearAllLabel.font = clearAllLabel.font.deriveFont(Font.BOLD)
@@ -70,7 +90,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         })
 
-        val selectAllLabel = JLabel("<html><u>" + lang.getString("SelectAll") + "</u></html>")
+        selectAllLabel = JLabel("<html><u>" + lang.getString("SelectAll") + "</u></html>")
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
         selectAllLabel.font = selectAllLabel.font.deriveFont(Font.BOLD)
@@ -81,87 +101,42 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         })
 
-        val labelsPanel = JPanel(FlowLayout())
+        labelsPanel = JPanel(FlowLayout())
         labelsPanel.layout = BoxLayout(labelsPanel, BoxLayout.X_AXIS)
         labelsPanel.add(clearAllLabel)
         labelsPanel.add(JLabel(" / "))
         labelsPanel.add(selectAllLabel)
 
-        val headerPanel = JPanel(BorderLayout())
+        headerPanel = JPanel(BorderLayout())
         headerPanel.add(JLabel(lang.getString("SelectImageSetsToUse")), BorderLayout.WEST)
         headerPanel.add(labelsPanel, BorderLayout.EAST)
 
-        val moreButton = JButton(lang.getString("More"))
-        moreButton.addActionListener {
-            val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
-            var failed = false
-            try {
-                if (desktop != null) {
-                    desktop.open(Main.getPath("img").toFile())
-                    cancelled = true
-                    dispose()
-                } else {
-                    failed = true
-                }
-            } catch (_: Exception) {
-                failed = true
-            }
+        moreButton = JButton(lang.getString("More"))
+        moreButton.addActionListener { handleMore() }
 
-            if (failed) {
-                JOptionPane.showMessageDialog(
-                    this@ImageSetChooser,
-                    Main.getPath("img").toString(),
-                    "Add Shimeji Here:",
-                    JOptionPane.PLAIN_MESSAGE
-                )
-            }
-        }
+        useSelectedButton = JButton(lang.getString("UseSelected"))
+        useSelectedButton.addActionListener { handleUseSelected() }
 
-        val useSelectedButton = JButton(lang.getString("UseSelected"))
-        useSelectedButton.addActionListener {
-            imageSets.clear()
-
-            for (selection in list1.selectedValuesList) {
-                if (selection is ImageSetChooserPanel) {
-                    imageSets.add(checkNotNull(selection.imageSet))
-                }
-            }
-
-            for (selection in list2.selectedValuesList) {
-                if (selection is ImageSetChooserPanel) {
-                    imageSets.add(checkNotNull(selection.imageSet))
-                }
-            }
-
-            updateConfigFile()
-            cancelled = false
-            dispose()
-        }
-
-        val useAllButton = JButton(lang.getString("UseAll"))
+        useAllButton = JButton(lang.getString("UseAll"))
         useAllButton.addActionListener {
             cancelled = false
             dispose()
         }
 
-        val cancelButton = JButton(lang.getString("Cancel"))
-        cancelButton.addActionListener {
-            dispose()
-        }
+        cancelButton = JButton(lang.getString("Cancel"))
+        cancelButton.addActionListener { dispose() }
 
-        val bottomButtonsPanel = JPanel(FlowLayout(FlowLayout.CENTER))
-        bottomButtonsPanel.add(moreButton)
-        bottomButtonsPanel.add(useSelectedButton)
-        bottomButtonsPanel.add(useAllButton)
-        bottomButtonsPanel.add(cancelButton)
+        footerPanel = JPanel(FlowLayout(FlowLayout.CENTER))
+        footerPanel.add(moreButton)
+        footerPanel.add(useSelectedButton)
+        footerPanel.add(useAllButton)
+        footerPanel.add(cancelButton)
+
+        val children = topDir.toFile().listFiles()
+            .filter { it.isDirectory && !it.absolutePath.contains("unused", true) }
+            .map { it.name }
 
         val activeImageSets = readConfigFile()
-
-        val children = topDir.toFile().listFiles().filter {
-            it.isDirectory &&
-            !it.absolutePath.contains("unused", true)
-        }.map { it.name }
-
         var onList1 = true
         var row = 0
         val si1 = mutableListOf<Int>()
@@ -331,15 +306,9 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setUpList(list2)
         list2.selectedIndices = si2.toIntArray()
 
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
-        setIconImage(icon)
-        title = lang.getString("ShimejiImageSetChooser")
-        minimumSize = Dimension(670, 495)
-        contentPane = JPanel(BorderLayout())
-        defaultCloseOperation = DISPOSE_ON_CLOSE
         add(headerPanel, BorderLayout.NORTH)
-        add(scrollPane, BorderLayout.CENTER)
-        add(bottomButtonsPanel, BorderLayout.SOUTH)
+        add(listScrollPane, BorderLayout.CENTER)
+        add(footerPanel, BorderLayout.SOUTH)
         setLocationRelativeTo(null)
     }
 
@@ -364,8 +333,53 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 .replace(", ", "/")
 
             Main.instance.properties.setProperty("ActiveShimeji", activeShimeji)
-            confPath.outputStream().use { Main.instance.properties.store(it, "ShimeLinux Configuration Options") }
+            confPath.outputStream().use { Main.instance.properties.store(it, "Configuration Options") }
         }
+    }
+
+    private fun handleMore() {
+        val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
+        var failed = false
+        try {
+            if (desktop != null) {
+                desktop.open(Main.getPath("img").toFile())
+                cancelled = true
+                dispose()
+            } else {
+                failed = true
+            }
+        } catch (_: Exception) {
+            failed = true
+        }
+
+        if (failed) {
+            JOptionPane.showMessageDialog(
+                this@ImageSetChooser,
+                Main.getPath("img").toString(),
+                "Add Shimeji Here:",
+                JOptionPane.PLAIN_MESSAGE
+            )
+        }
+    }
+
+    private fun handleUseSelected() {
+        imageSets.clear()
+
+        for (selection in list1.selectedValuesList) {
+            if (selection is ImageSetChooserPanel) {
+                imageSets.add(checkNotNull(selection.imageSet))
+            }
+        }
+
+        for (selection in list2.selectedValuesList) {
+            if (selection is ImageSetChooserPanel) {
+                imageSets.add(checkNotNull(selection.imageSet))
+            }
+        }
+
+        updateConfigFile()
+        cancelled = false
+        dispose()
     }
 
     private fun setUpList(list: JList<ImageSetChooserPanel>) {

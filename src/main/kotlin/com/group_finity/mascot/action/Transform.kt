@@ -20,7 +20,7 @@ import java.util.logging.Logger
 class Transform(
     schema: ResourceBundle,
     animations: List<Animation>,
-    params: VariableMap,
+    params: VariableMap
 ) : Animate(schema, animations, params) {
     private val transformBehavior
         get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOUR), String::class, DEFAULT_TRANSFORMBEHAVIOUR)

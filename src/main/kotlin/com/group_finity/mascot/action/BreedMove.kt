@@ -16,7 +16,7 @@ import java.util.ResourceBundle
 class BreedMove(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : Move(schema, animations, context) {
     private val delegate = Breed.Delegate(this)
 

@@ -16,7 +16,7 @@ import java.util.ResourceBundle
 class ThrowIE(
     schema: ResourceBundle,
     animations: List<Animation>,
-    params: VariableMap,
+    params: VariableMap
 ) : Animate(schema, animations, params) {
     private val initialVx
         get() = eval(schema.getString(PARAMETER_INITIALVX), Number::class, DEFAULT_INITIALVX).toInt()

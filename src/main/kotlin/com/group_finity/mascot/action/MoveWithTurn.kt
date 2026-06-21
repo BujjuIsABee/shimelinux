@@ -15,7 +15,7 @@ import java.util.ResourceBundle
 class MoveWithTurn(
     schema: ResourceBundle,
     animations: List<Animation>,
-    params: VariableMap,
+    params: VariableMap
 ) : Move(schema, animations, params) {
     override val animation: Animation?
         get() {

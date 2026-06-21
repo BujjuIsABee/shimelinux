@@ -13,7 +13,7 @@ import java.util.ResourceBundle
 
 class Offset(
     schema: ResourceBundle,
-    params: VariableMap,
+    params: VariableMap
 ) : InstantAction(schema, params) {
     private val offsetX
         get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()

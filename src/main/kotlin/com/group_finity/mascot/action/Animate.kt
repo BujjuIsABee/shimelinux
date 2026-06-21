@@ -17,7 +17,7 @@ import java.util.logging.Logger
 open class Animate(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : BorderedAction(schema, animations, context) {
     override fun tick() {
         super.tick()

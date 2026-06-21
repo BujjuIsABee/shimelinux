@@ -384,7 +384,6 @@ class Main {
             NativeFactory.instance.getEnvironment().restoreIE()
         }
 
-        //region Allowed behaviors submenu
         val breedingMenu = Checkbox(languageBundle.getString("BreedingCloning")) {
             toggleBooleanSetting("Breeding", true)
             updateConfigFile()
@@ -420,7 +419,6 @@ class Main {
             updateConfigFile()
         }
         multiscreenMenu.checked = properties.getProperty("Multiscreen", "true").toBoolean()
-        //endregion
 
         val allowedBehaviorsSubmenu = Menu(languageBundle.getString("AllowedBehaviours"))
         allowedBehaviorsSubmenu.add(breedingMenu)
@@ -466,7 +464,6 @@ class Main {
             }
         }
 
-        //region Language submenu
         val englishMenu = MenuItem("English") {
             updateLanguage("en-GB")
             updateConfigFile()
@@ -571,7 +568,6 @@ class Main {
             updateLanguage("ja-JP")
             updateConfigFile()
         }
-        //endregion
 
         val languageSubmenu = Menu(languageBundle.getString("Language"))
         languageSubmenu.add(englishMenu)
@@ -765,7 +761,7 @@ class Main {
     private fun updateConfigFile() {
         runCatching {
             getPath("conf", "settings.properties").outputStream().use {
-                properties.store(it, "ShimeLinux Configuration Options")
+                properties.store(it, "Configuration Options")
             }
         }
     }

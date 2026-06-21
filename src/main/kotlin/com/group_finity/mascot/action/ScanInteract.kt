@@ -22,7 +22,7 @@ import java.util.logging.Logger
 class ScanInteract(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : BorderedAction(schema, animations, context) {
     private var target: Mascot? = null
     internal var isTurning = false

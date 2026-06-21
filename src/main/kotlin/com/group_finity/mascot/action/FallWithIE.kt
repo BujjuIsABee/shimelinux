@@ -19,7 +19,7 @@ import java.util.logging.Logger
 class FallWithIE(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : Fall(schema, animations, context) {
     private val offsetX
         get() = eval(schema.getString(PARAMETER_IEOFFSETX), Number::class, DEFAULT_IEOFFSETX).toInt()

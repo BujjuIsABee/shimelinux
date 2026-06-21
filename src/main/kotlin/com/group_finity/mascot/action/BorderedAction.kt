@@ -16,7 +16,7 @@ import java.util.ResourceBundle
 abstract class BorderedAction(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : ActionBase(schema, animations, context) {
     internal var border: Border? = null
         private set

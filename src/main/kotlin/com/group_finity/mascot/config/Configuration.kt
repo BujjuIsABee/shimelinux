@@ -159,7 +159,7 @@ class Configuration {
                         mascot.environment.workArea.top - 256
                     )
                 }
-                return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
+                return buildBehavior(schema.getString(UserBehavior.BEHAVIOR_FALL))
             }
         } else {
             throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
@@ -225,7 +225,7 @@ class Configuration {
                         mascot.environment.workArea.top - 256
                     )
                 }
-                return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
+                return buildBehavior(schema.getString(UserBehavior.BEHAVIOR_FALL))
             }
         }
 

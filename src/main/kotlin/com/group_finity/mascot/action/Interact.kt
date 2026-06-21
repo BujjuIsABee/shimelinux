@@ -20,7 +20,7 @@ import java.util.logging.Logger
 class Interact(
     schema: ResourceBundle,
     animations: List<Animation>,
-    context: VariableMap,
+    context: VariableMap
 ) : Animate(schema, animations, context) {
     private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
