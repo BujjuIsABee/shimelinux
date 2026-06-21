@@ -33,7 +33,7 @@ class KdeEnvironment : Environment() {
     private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
-        // runCatching {
+        runCatching {
             dbus.requestBusName("io.github.bujjuisabee.shimelinux")
             dbus.exportObject(client)
 
@@ -61,7 +61,7 @@ class KdeEnvironment : Environment() {
             Runtime.getRuntime().addShutdownHook(Thread {
                 dispose()
             })
-        // }
+        }
     }
 
     override fun tick() {
@@ -98,11 +98,11 @@ class KdeEnvironment : Environment() {
     }
 
     override fun dispose() {
-        // runCatching {
+        runCatching {
             script?.stop()
             scripting?.unloadScript("shimelinux-kwin-script")
             dbus.disconnect()
-        // }
+        }
     }
 
     private fun isIE(window: Window): Boolean {
