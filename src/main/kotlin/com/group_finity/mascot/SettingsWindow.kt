@@ -394,7 +394,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         shimelinuxLabel.font = shimelinuxLabel.font.deriveFont(Font.BOLD, shimelinuxLabel.font.size + 10.0f)
         shimelinuxLabel.alignmentX = CENTER_ALIGNMENT
 
-        versionLabel = JLabel("v0.2.0")
+        versionLabel = JLabel("v1.0.0")
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
         infoPanel = JPanel()
