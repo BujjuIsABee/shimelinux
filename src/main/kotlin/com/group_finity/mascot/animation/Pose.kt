@@ -31,5 +31,5 @@ class Pose(
         mascot.sound = soundName
     }
 
-    override fun toString() = "Pose ($imageName,$dx,$dy,$duration,$soundName)"
+    override fun toString() = "Pose ($imageName, $dx, $dy, $duration, $soundName)"
 }

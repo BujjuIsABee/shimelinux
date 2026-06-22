@@ -52,9 +52,14 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 }
             }
         } catch (e: ConfigurationException) {
-            val errorMessage = Main.instance.languageBundle.getString("FailedLoadActionErrorMessage")
-            val forShimeji = Main.instance.languageBundle.getString("ForShimeji")
-            throw ConfigurationException("$errorMessage \"$name\" $forShimeji \"$imageSet.\"", e)
+            val message = buildString {
+                append(Main.instance.languageBundle.getString("FailedLoadActionErrorMessage"))
+                append(" \"$name\" ")
+                append(Main.instance.languageBundle.getString("ForShimeji"))
+                append(" \"$imageSet.\"")
+            }
+
+            throw ConfigurationException(message, e)
         }
 
         log.log(Level.INFO, "Finished loading action")
@@ -71,20 +76,16 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 "Embedded" -> {
                     try {
                         val cls = Class.forName(className) as Class<out Action>
-                        runCatching {
-                            runCatching {
-                                return cls.getConstructor(
-                                    ResourceBundle::class.java,
-                                    List::class.java,
-                                    VariableMap::class.java
-                                ).newInstance(schema, animations, variables)
-                            }
-                            return cls.getConstructor(
-                                ResourceBundle::class.java,
-                                VariableMap::class.java
-                            ).newInstance(schema, variables)
+
+                        return runCatching {
+                            cls.getConstructor(ResourceBundle::class.java, List::class.java, VariableMap::class.java)
+                                .newInstance(schema, animations, variables)
+                        }.recoverCatching {
+                            cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java)
+                                .newInstance(schema, variables)
+                        }.getOrElse {
+                            cls.getConstructor().newInstance()
                         }
-                        return cls.getConstructor().newInstance()
                     } catch (e: InstantiationException) {
                         throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedClassActionInitialiseErrorMessage") + " ($this)", e)
                     } catch (e: IllegalAccessException) {
@@ -141,7 +142,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
         return result
     }
 
-    override fun toString() = "Action ($name,$type,$className)"
+    override fun toString() = "Action ($name, $type, $className)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

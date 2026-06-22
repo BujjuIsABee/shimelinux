@@ -26,12 +26,13 @@ class NativeFactoryImpl : NativeFactory() {
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
-        // Create the window using the default LaF because the other ones breaks transparency
         val previousLaf = UIManager.getLookAndFeel()
+
+        // Create the window using the default LaF because the other ones break transparency
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         val window = LinuxTranslucentWindow()
-        SwingUtilities.updateComponentTreeUI(window)
         UIManager.setLookAndFeel(previousLaf)
+
         return window
     }
 }

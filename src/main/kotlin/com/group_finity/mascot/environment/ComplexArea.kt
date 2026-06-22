@@ -42,9 +42,7 @@ class ComplexArea {
     }
 
     fun retain(deviceNames: Collection<String>) {
-        areaMap.entries.removeIf {
-            !deviceNames.contains(it.key)
-        }
+        areaMap.entries.removeIf { !deviceNames.contains(it.key) }
     }
 
     fun getBottomBorder(location: Point): FloorCeiling? {

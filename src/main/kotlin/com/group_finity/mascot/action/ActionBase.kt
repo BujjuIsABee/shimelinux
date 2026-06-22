@@ -30,7 +30,9 @@ abstract class ActionBase(
     private var startTime = 0
     var time
         get() = mascot.time - startTime
-        set(value) { startTime = mascot.time - value }
+        set(value) {
+            startTime = mascot.time - value
+        }
 
     open val isDraggable
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), Boolean::class, DEFAULT_DRAGGABLE)
@@ -61,12 +63,15 @@ abstract class ActionBase(
     override fun next() {
         initFrame()
 
+        // Update affordances
         mascot.affordances.clear()
-        if (!affordance.trim().isEmpty()) {
+        if (affordance.isNotBlank()) {
             mascot.affordances.add(affordance)
         }
 
+        // Update hotspots
         refreshHotspots()
+
         tick()
     }
 
@@ -81,10 +86,8 @@ abstract class ActionBase(
     internal open fun refreshHotspots() {
         mascot.hotspots.clear()
         try {
-            animation?.let {
-                for (hotspot in it.hotspots) {
-                    mascot.hotspots.add(hotspot)
-                }
+            for (hotspot in animation?.hotspots.orEmpty()) {
+                mascot.hotspots.add(hotspot)
             }
         } catch (_: VariableException) {
             mascot.hotspots.clear()
@@ -102,14 +105,12 @@ abstract class ActionBase(
     internal fun <T : Any> eval(name: String, type: KClass<T>, defaultValue: T): T {
         synchronized(variables) {
             val variable = variables.rawMap[name]
-            if (variable != null) {
-                return type.cast(variable.get(variables))
-            }
+            if (variable != null) return type.cast(variable.get(variables))
         }
         return defaultValue
     }
 
-    override fun toString() = "Action (${this::class.java.simpleName},$name)"
+    override fun toString() = "Action (${this::class.java.simpleName}, $name)"
 
     companion object {
         const val PARAMETER_DURATION = "Duration"

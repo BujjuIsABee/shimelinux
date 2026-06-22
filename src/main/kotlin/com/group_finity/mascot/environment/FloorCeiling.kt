@@ -39,13 +39,7 @@ class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
         if (d == 0) return location
 
         val newLocation = Point((location.x - (left - dleft)) * ((right - left) / d) + left, location.y + dy)
-        if ((abs(newLocation.x - location.x) >= 80) ||
-            (newLocation.y - location.y > 20) ||
-            (newLocation.y - location.y < -80)
-        ) {
-            return location
-        }
-
+        if (abs(newLocation.x - location.x) >= 80 || newLocation.y - location.y > 20 ||newLocation.y - location.y < -80) return location
         return newLocation
     }
 }

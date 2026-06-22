@@ -20,7 +20,6 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-@Suppress("UNUSED")
 class ScanJump(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -43,9 +42,7 @@ class ScanJump(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        mascot.manager?.let {
-            target = it.getMascotWithAffordance(affordance)?.get()
-        }
+        target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
 
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
         putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
@@ -53,7 +50,7 @@ class ScanJump(
 
     override fun hasNext(): Boolean {
         if (mascot.manager == null) return super.hasNext()
-        return super.hasNext() && target?.affordances?.contains(affordance) ?: false
+        return super.hasNext() && target?.affordances?.contains(affordance) == true
     }
 
     override fun tick() {
@@ -72,7 +69,7 @@ class ScanJump(
         }
 
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
         if (distance != 0.0) {
@@ -94,11 +91,11 @@ class ScanJump(
             mascot.anchor = Point(targetX, targetY)
 
             try {
-                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
                     behavior,
                     mascot
                 )
-                target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
                     targetBehavior,
                     target
                 )

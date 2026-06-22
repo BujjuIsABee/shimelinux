@@ -65,132 +65,147 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         val textColor = UIManager.getColor("Label.foreground")
         val linkColor = UIManager.getColor("textHighlight")
 
-        val html = StringBuilder("<center style=\"font:")
-        when (splashImageLabel.font.style) {
-            Font.BOLD -> html.append("bold ")
-            Font.ITALIC -> html.append("italic ")
-            Font.BOLD + Font.ITALIC -> html.append("italic bold ")
-        }
-
-        html.append(splashImageLabel.font.size).append("pt ")
-        html.append(splashImageLabel.font.fontName).append("; ")
-        html.append(
-            String.format(
-                "#%02X%02X%02X",
-                textColor.red,
-                textColor.green,
-                textColor.blue
-            )
-        )
-        html.append("\">")
-
-        if (config.containsInformationKey("ArtistName")) {
-            html.append(lang.getString("ArtBy")).append(" ")
-            if (config.containsInformationKey("ArtistURL")) {
-                html.append("<a href=\"").append(config.getInformation("ArtistURL"))
-                html.append("\" style=\"color:")
-                html.append(
-                    String.format(
-                        "#%02X%02X%02X",
-                        linkColor.red,
-                        linkColor.green,
-                        linkColor.blue
-                    )
-                )
-                html.append("\">")
-            }
-            html.append(config.getInformation("ArtistName"))
-            if (config.containsInformationKey("ArtistURL")) {
-                html.append("</a>")
-            }
-        }
-
-        if (config.containsInformationKey("ScripterName")) {
-            if (config.containsInformationKey("ArtistName")) {
-                html.append(" - ")
-            }
-
-            html.append(lang.getString("ScriptedBy")).append(" ")
-            if (config.containsInformationKey("ScripterURL")) {
-                html.append("<a href=\"").append(config.getInformation("ScripterURL"))
-                html.append("\" style=\"color:")
-                html.append(
-                    String.format(
-                        "#%02X%02X%02X",
-                        linkColor.red,
-                        linkColor.green,
-                        linkColor.blue
-                    )
-                )
-                html.append("\">")
-            }
-            html.append(config.getInformation("ScripterName"))
-            if (config.containsInformationKey("ScripterURL")) {
-                html.append("</a>")
-            }
-        }
-
-        if (config.containsInformationKey("CommissionerName")) {
-            if (config.containsInformationKey("ArtistName") ||
-                config.containsInformationKey("ScripterName")
-            ) {
-                html.append(" - ")
-            }
-
-            html.append(lang.getString("CommissionedBy")).append(" ")
-            if (config.containsInformationKey("CommissionerURL")) {
-                html.append("<a href=\"").append(config.getInformation("CommissionerURL"))
-                html.append("\" style=\"color:")
-                html.append(
-                    String.format(
-                        "#%02X%02X%02X",
-                        linkColor.red,
-                        linkColor.green,
-                        linkColor.blue
-                    )
-                )
-                html.append("\">")
-            }
-            html.append(config.getInformation("CommissionerName"))
-            if (config.containsInformationKey("CommissionerURL")) {
-                html.append("</a>")
-            }
-        }
-
-        if (config.containsInformationKey("SupportName")) {
-            if (config.containsInformationKey("ArtistName") ||
-                config.containsInformationKey("ScripterName") ||
-                config.containsInformationKey("CommissionerName")
-            ) {
-                html.append(" - ")
-            }
-
-            html.append(lang.getString("SupportAt")).append(" ")
-            if (config.containsInformationKey("SupportURL")) {
-                html.append("<a href=\"").append(config.getInformation("SupportURL"))
-                html.append("\" style=\"color:")
-                html.append(
-                    String.format(
-                        "#%02X%02X%02X",
-                        linkColor.red,
-                        linkColor.green,
-                        linkColor.blue
-                    )
-                )
-                html.append("\">")
-            }
-            html.append(config.getInformation("SupportName"))
-            if (config.containsInformationKey("SupportURL")) {
-                html.append("</a>")
-            }
-        }
-        html.append("</center>")
-
         editorPane = JEditorPane()
         editorPane.border = null
         editorPane.isEditable = false
         editorPane.contentType = "text/html"
-        editorPane.text = html.toString()
+        editorPane.text = buildString {
+            append("<center ")
+
+            append("style=\"font:")
+            when (splashImageLabel.font.style) {
+                Font.BOLD -> append("bold ")
+                Font.ITALIC -> append("italic ")
+                Font.BOLD + Font.ITALIC -> append("italic bold ")
+            }
+
+            append(splashImageLabel.font.size).append("pt ")
+            append(splashImageLabel.font.fontName).append("; ")
+            append(
+                String.format(
+                    "#%02X%02X%02X",
+                    textColor.red,
+                    textColor.green,
+                    textColor.blue
+                )
+            )
+
+            append("\">")
+
+            if (config.containsInformationKey("ArtistName")) {
+                append(lang.getString("ArtBy")).append(" ")
+                if (config.containsInformationKey("ArtistURL")) {
+                    append("<a href=\"").append(config.getInformation("ArtistURL")).append("\" ")
+
+                    append("style=\"color:")
+                    append(
+                        String.format(
+                            "#%02X%02X%02X",
+                            linkColor.red,
+                            linkColor.green,
+                            linkColor.blue
+                        )
+                    )
+
+                    append("\">")
+                }
+
+                append(config.getInformation("ArtistName"))
+                if (config.containsInformationKey("ArtistURL")) {
+                    append("</a>")
+                }
+            }
+
+            if (config.containsInformationKey("ScripterName")) {
+                if (config.containsInformationKey("ArtistName")) {
+                    append(" - ")
+                }
+
+                append(lang.getString("ScriptedBy")).append(" ")
+                if (config.containsInformationKey("ScripterURL")) {
+                    append("<a href=\"").append(config.getInformation("ScripterURL")).append("\" ")
+
+                    append("style=\"color:")
+                    append(
+                        String.format(
+                            "#%02X%02X%02X",
+                            linkColor.red,
+                            linkColor.green,
+                            linkColor.blue
+                        )
+                    )
+
+                    append("\">")
+                }
+
+                append(config.getInformation("ScripterName"))
+                if (config.containsInformationKey("ScripterURL")) {
+                    append("</a>")
+                }
+            }
+
+            if (config.containsInformationKey("CommissionerName")) {
+                if (config.containsInformationKey("ArtistName") ||
+                    config.containsInformationKey("ScripterName")
+                ) {
+                    append(" - ")
+                }
+
+                append(lang.getString("CommissionedBy")).append(" ")
+                if (config.containsInformationKey("CommissionerURL")) {
+                    append("<a href=\"").append(config.getInformation("CommissionerURL")).append("\" ")
+
+                    append("style=\"color:")
+                    append(
+                        String.format(
+                            "#%02X%02X%02X",
+                            linkColor.red,
+                            linkColor.green,
+                            linkColor.blue
+                        )
+                    )
+
+                    append("\">")
+                }
+
+                append(config.getInformation("CommissionerName"))
+                if (config.containsInformationKey("CommissionerURL")) {
+                    append("</a>")
+                }
+            }
+
+            if (config.containsInformationKey("SupportName")) {
+                if (config.containsInformationKey("ArtistName") ||
+                    config.containsInformationKey("ScripterName") ||
+                    config.containsInformationKey("CommissionerName")
+                ) {
+                    append(" - ")
+                }
+
+                append(lang.getString("SupportAt")).append(" ")
+                if (config.containsInformationKey("SupportURL")) {
+                    append("<a href=\"").append(config.getInformation("SupportURL")).append("\" ")
+
+                    append("style=\"color:")
+                    append(
+                        String.format(
+                            "#%02X%02X%02X",
+                            linkColor.red,
+                            linkColor.green,
+                            linkColor.blue
+                        )
+                    )
+
+                    append("\">")
+                }
+
+                append(config.getInformation("SupportName"))
+                if (config.containsInformationKey("SupportURL")) {
+                    append("</a>")
+                }
+            }
+            append("</center>")
+        }
         editorPane.addHyperlinkListener { event -> handleHyperlink(event) }
 
         add(imagePanel)
@@ -215,18 +230,9 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
 
                 if (response == JOptionPane.YES_OPTION) {
                     val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
-                    var failed = false
                     try {
-                        if (desktop != null) {
-                            desktop.browse(URI(url))
-                        } else {
-                            failed = true
-                        }
+                        checkNotNull(desktop).browse(URI(url))
                     } catch (_: Exception) {
-                        failed = true
-                    }
-
-                    if (failed) {
                         JOptionPane.showMessageDialog(
                             this@InformationWindow,
                             lang.getString("FailedOpenWebBrowserErrorMessage") + "\n$url",

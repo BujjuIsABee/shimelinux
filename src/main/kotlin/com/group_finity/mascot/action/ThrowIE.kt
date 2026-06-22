@@ -34,23 +34,20 @@ class ThrowIE(
         super.tick()
 
         val activeIE = environment.activeIE
-
         if (activeIE.isVisible) {
-            if (mascot.isLookRight) {
-                environment.moveActiveIE(
+            environment.moveActiveIE(
+                if (mascot.isLookRight) {
                     Point(
                         activeIE.left + initialVx,
                         activeIE.top + initialVy + (time * gravity).toInt()
                     )
-                )
-            } else {
-                environment.moveActiveIE(
+                } else {
                     Point(
                         activeIE.left - initialVx,
                         activeIE.top + initialVy + (time * gravity).toInt()
                     )
-                )
-            }
+                }
+            )
         }
     }
 

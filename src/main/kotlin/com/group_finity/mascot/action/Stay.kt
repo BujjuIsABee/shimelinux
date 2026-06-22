@@ -23,7 +23,7 @@ open class Stay(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 

@@ -16,7 +16,6 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Suppress("UNUSED")
 class Transform(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -31,17 +30,14 @@ class Transform(
         super.tick()
 
         val canTransform = Main.instance.properties.getProperty("Transformation", "true").toBoolean()
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) {
-            transform()
-        }
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) transform()
     }
 
     private fun transform() {
         val childType = transformMascot.takeUnless { Main.instance.getConfiguration(it) == null } ?: mascot.imageSet
-
         try {
             mascot.imageSet = childType
-            mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(
+            mascot.behavior = Main.instance.getConfiguration(childType)?.buildBehavior(
                 transformBehavior,
                 mascot
             )

@@ -14,7 +14,6 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Suppress("UNUSED")
 class Turn(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -36,7 +35,7 @@ class Turn(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 

@@ -16,7 +16,6 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Suppress("UNUSED")
 class Interact(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -25,25 +24,24 @@ class Interact(
     private val behavior
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
 
-    override fun hasNext() = super.hasNext() && checkNotNull(mascot.manager).hasOverlappingMascotsAtPoint(mascot.anchor)
+    override fun hasNext() = super.hasNext() && mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
 
     override fun tick() {
         super.tick()
 
-        animation?.let { animation ->
-            if ((time == animation.duration - 1 || animation.duration == 1) && (!behavior.trim().isEmpty())) {
-                try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
-                        behavior,
-                        mascot
-                    )
-                } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
-                } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
-                }
+        val animation = animation ?: return
+        if ((time == animation.duration - 1 || animation.duration == 1) && (!behavior.trim().isEmpty())) {
+            try {
+                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
+                    behavior,
+                    mascot
+                )
+            } catch (e: BehaviorInstantiationException) {
+                log.log(Level.SEVERE, "Fatal Error", e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+            } catch (e: CantBeAliveException) {
+                log.log(Level.SEVERE, "Fatal Error", e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
             }
         }
     }

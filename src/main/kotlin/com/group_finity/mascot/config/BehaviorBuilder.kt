@@ -37,8 +37,7 @@ class BehaviorBuilder(
 
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
-        isToggleable = if (
-            name == UserBehavior.BEHAVIOR_FALL ||
+        isToggleable = if (name == UserBehavior.BEHAVIOR_FALL ||
             name == UserBehavior.BEHAVIOR_THROWN ||
             name == UserBehavior.BEHAVIOR_DRAGGED
         ) {
@@ -72,7 +71,6 @@ class BehaviorBuilder(
             if (node.name == configuration.schema.getString("Condition")) {
                 val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(configuration.schema.getString("Condition")))
-
                 loadBehaviors(node, newConditions)
             } else if (node.name == configuration.schema.getString("BehaviourReference")) {
                 val behavior = BehaviorBuilder(configuration, node, conditions)
@@ -91,23 +89,21 @@ class BehaviorBuilder(
     fun buildBehavior(): Behavior {
         try {
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
-        } catch (_: ActionInstantiationException) {
-            log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)")
-            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("FailedInitialiseCorrespondingActionErrorMessage") + " ($this)")
+        } catch (e: ActionInstantiationException) {
+            log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)", e)
+            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("FailedInitialiseCorrespondingActionErrorMessage") + " ($this)", e)
         }
     }
 
     fun isEffective(context: VariableMap): Boolean {
         if (frequency == 0) return false
         for (condition in conditions) {
-            if (condition != null && Variable.parse(condition)?.get(context) as? Boolean == false) {
-                return false
-            }
+            if (condition != null && Variable.parse(condition)?.get(context) as? Boolean == false) return false
         }
         return true
     }
 
-    override fun toString() = "Behavior ($name,$frequency,$actionName)"
+    override fun toString() = "Behavior ($name, $frequency, $actionName)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

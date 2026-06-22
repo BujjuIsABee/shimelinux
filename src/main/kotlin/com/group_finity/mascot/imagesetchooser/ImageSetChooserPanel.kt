@@ -37,7 +37,7 @@ class ImageSetChooserPanel(
         minimumSize = Dimension(248, 80)
         preferredSize = Dimension(248, 80)
         layout = BoxLayout(this, BoxLayout.X_AXIS)
-        border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"))
+        border = BorderFactory.createLineBorder(UIManager.getColor("Table.gridColor"))
 
         imageLabel = JLabel()
         imageLabel.icon = runCatching {

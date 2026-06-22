@@ -11,7 +11,6 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
-@Suppress("UNUSED")
 class SelfDestruct(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -20,8 +19,6 @@ class SelfDestruct(
     override fun tick() {
         super.tick()
 
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true) {
-            mascot.dispose()
-        }
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true) mascot.dispose()
     }
 }

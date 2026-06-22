@@ -56,20 +56,20 @@ class Breed(
 
         fun breed() {
             val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
-            val childType = if (Main.instance.getConfiguration(bornMascot) != null) bornMascot else action.mascot.imageSet
+            val childType = bornMascot.takeIf { Main.instance.getConfiguration(it) != null } ?: action.mascot.imageSet
 
             repeat(bornCount) {
                 val mascot = Mascot(childType)
 
-                log.log(Level.INFO, "Mascot breeding (${action.mascot},$action,$mascot)")
+                log.log(Level.INFO, "Mascot breeding (${action.mascot}, $action, $mascot)")
 
-                if (action.mascot.isLookRight) {
-                    mascot.anchor = Point(
+                mascot.anchor = if (action.mascot.isLookRight) {
+                    Point(
                         action.mascot.anchor.x - (bornX * scaling).roundToInt(),
                         action.mascot.anchor.y + (bornY * scaling).roundToInt()
                     )
                 } else {
-                    mascot.anchor = Point(
+                    Point(
                         action.mascot.anchor.x + (bornX * scaling).roundToInt(),
                         action.mascot.anchor.y + (bornY * scaling).roundToInt()
                     )
@@ -77,7 +77,7 @@ class Breed(
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(
+                    mascot.behavior = Main.instance.getConfiguration(childType)?.buildBehavior(
                         bornBehavior,
                         action.mascot
                     )

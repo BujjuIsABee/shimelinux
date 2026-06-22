@@ -19,7 +19,6 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Suppress("UNUSED")
 class ScanMove(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -46,9 +45,7 @@ class ScanMove(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        mascot.manager?.let {
-            target = it.getMascotWithAffordance(affordance)?.get()
-        }
+        target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
 
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
         putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
@@ -56,7 +53,7 @@ class ScanMove(
 
     override fun hasNext(): Boolean {
         if (mascot.manager == null) return super.hasNext()
-        return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) ?: false)
+        return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) == true)
     }
 
     override fun tick() {
@@ -66,7 +63,7 @@ class ScanMove(
         mascot.affordances.clear()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 
@@ -90,24 +87,20 @@ class ScanMove(
 
         animation?.next(mascot, time)
 
-        if ((mascot.isLookRight && (mascot.anchor.x >= targetX)) ||
-            (!mascot.isLookRight && (mascot.anchor.x <= targetX))
-        ) {
+        if ((mascot.isLookRight && mascot.anchor.x >= targetX) || (!mascot.isLookRight && mascot.anchor.x <= targetX)) {
             mascot.anchor = Point(targetX, mascot.anchor.y)
         }
-        if ((down && (mascot.anchor.y >= targetY)) ||
-            (!down && (mascot.anchor.y <= targetY))
-        ) {
+        if ((down && mascot.anchor.y >= targetY) || (!down && mascot.anchor.y <= targetY)) {
             mascot.anchor = Point(mascot.anchor.x, targetY)
         }
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
                     behavior,
                     mascot
                 )
-                target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
                     targetBehavior,
                     target
                 )

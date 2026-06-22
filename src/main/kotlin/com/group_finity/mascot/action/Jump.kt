@@ -28,8 +28,9 @@ open class Jump(
 
     override fun hasNext(): Boolean {
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
+
         return super.hasNext() && distance != 0.0
     }
 
@@ -37,7 +38,7 @@ open class Jump(
         mascot.isLookRight = mascot.anchor.x < targetX
 
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
         if (distance != 0.0) {

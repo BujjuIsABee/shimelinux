@@ -20,7 +20,6 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-@Suppress("UNUSED")
 class ComplexJump(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -67,9 +66,7 @@ class ComplexJump(
             // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
-            mascot.manager?.let {
-                target = it.getMascotWithAffordance(affordance)?.get()
-            }
+            target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
 
             putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
             putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
@@ -79,13 +76,13 @@ class ComplexJump(
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
-            return super.hasNext() && (target?.affordances?.contains(affordance) ?: false)
+            return super.hasNext() && target?.affordances?.contains(affordance) == true
         } else {
             val distanceX = (targetX - mascot.anchor.x).toDouble()
-            val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2
+            val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
             val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
-            return super.hasNext() && (distance != 0.0)
+            return super.hasNext() && distance != 0.0
         }
     }
 
@@ -115,15 +112,15 @@ class ComplexJump(
         }
 
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
         if (distance != 0.0) {
             val velocityX = (velocity * distanceX / distance).toInt()
             val velocityY = (velocity * distanceY / distance).toInt()
 
-            putVariable(schema.getString(VARIABLE_VELOCITYX), velocityX)
-            putVariable(schema.getString(VARIABLE_VELOCITYY), velocityY)
+            putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
+            putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
 
             mascot.anchor = Point(
                 mascot.anchor.x + velocityX,
@@ -139,11 +136,11 @@ class ComplexJump(
             if (isScanEnabled) {
                 try {
                     val target = checkNotNull(target)
-                    mascot.behavior =checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                    mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
                         behavior,
                         mascot
                     )
-                    target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                    target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
                         targetBehavior,
                         target
                     )

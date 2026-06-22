@@ -43,9 +43,6 @@ class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) :
             index: Int,
             isSelected: Boolean,
             cellHasFocus: Boolean
-        ): Component {
-            component.setCheckbox(isSelected)
-            return component
-        }
+        ) = component.also { it.setCheckbox(isSelected) }
     }
 }

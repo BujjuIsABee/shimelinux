@@ -28,9 +28,7 @@ class Animation(
         }
 
     init {
-        if (poses.isEmpty()) {
-            throw IllegalArgumentException("Poses is empty")
-        }
+        require(poses.isNotEmpty())
     }
 
     fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
@@ -44,16 +42,14 @@ class Animation(
     }
 
     fun next(mascot: Mascot, time: Int) {
-        checkNotNull(getPoseAt(time)).next(mascot)
+        getPoseAt(time)?.next(mascot)
     }
 
     fun getPoseAt(time: Int): Pose? {
         var t = time % duration
         for (pose in poses) {
             t -= pose.duration
-            if (t < 0) {
-                return pose
-            }
+            if (t < 0) return pose
         }
         return null
     }

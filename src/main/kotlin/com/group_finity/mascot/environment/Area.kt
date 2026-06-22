@@ -46,5 +46,5 @@ class Area {
 
     fun toRectangle() = Rectangle(left, top, width, height)
 
-    override fun toString() = "Area (left=$left,top=$top,right=$right,bottom=$bottom)"
+    override fun toString() = "Area ($left, $top, $right, $bottom)"
 }

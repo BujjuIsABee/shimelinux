@@ -45,8 +45,6 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     try {
-        Main.createConfigDirectory()
-
         Main.instance.init()
 
         if (!args.contains("DEBUG")) {
@@ -79,7 +77,9 @@ class Main {
         private set
 
     fun init() {
-        runCatching {
+        try {
+            createConfigDirectory()
+
             // Load properties
             properties = Properties()
             getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
@@ -102,6 +102,7 @@ class Main {
                     exitProcess(0)
                 }
             }
+        } catch (_: Exception) {
         }
 
         // Set theme
@@ -172,9 +173,7 @@ class Main {
             val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
             val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
             configurations[imageSet]?.let { config ->
-                if (config.containsInformationKey("SplashImage") &&
-                    (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
-                ) {
+                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
                     val info = InformationWindow(imageSet, config)
                     info.isVisible = true
                     setMascotInformationDismissed(imageSet)
@@ -189,6 +188,7 @@ class Main {
 
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
+            // Load actions
             var filePath = getPath("conf")
             var actionsPath = filePath.resolve("actions.xml")
             if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -239,6 +239,7 @@ class Main {
 
             configuration.load(Entry(actions.documentElement), imageSet)
 
+            // Load behaviors
             filePath = getPath("conf")
             var behaviorsPath = filePath.resolve("behaviors.xml")
             if (filePath.resolve("\u884C\u52D5.xml").exists()) {
@@ -291,6 +292,7 @@ class Main {
 
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
+            // Load info
             filePath = getPath("conf")
             var infoPath = filePath.resolve("info.xml")
 
@@ -319,7 +321,6 @@ class Main {
             configurations[imageSet] = configuration
 
             val childMascots = mutableListOf<String>()
-
             for (list in Entry(actions.documentElement).selectChildren("ActionList")) {
                 for (node in list.selectChildren("Action")) {
                     var set = node.getAttribute("BornMascot")
@@ -342,7 +343,6 @@ class Main {
                     }
                 }
             }
-
             childImageSets[imageSet] = childMascots
 
             return true
@@ -359,9 +359,7 @@ class Main {
 
         val icon = SystemTray.get()
         if (icon != null) {
-            this::class.java.getResourceAsStream("/img/icon.png").use {
-                icon.setImage(it)
-            }
+            this::class.java.getResourceAsStream("/img/icon.png").use { icon.setImage(it) }
             icon.setStatus("ShimeLinux")
         } else {
             log.log(Level.SEVERE, "Failed to create tray icon")
@@ -434,6 +432,10 @@ class Main {
         }
 
         val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
+            if (!manager.isPaused) {
+                manager.togglePauseAll()
+            }
+
             val settings = SettingsWindow(null, true)
             settings.isVisible = true
 
@@ -452,7 +454,6 @@ class Main {
                 for (imageSet in imageSets) {
                     loadConfiguration(imageSet)
                 }
-
                 for (imageSet in imageSets) {
                     createMascot(imageSet)
                 }
@@ -461,6 +462,10 @@ class Main {
             }
             if (settings.isInteractiveWindowReloadRequired) {
                 NativeFactory.instance.getEnvironment().refreshCache()
+            }
+
+            if (manager.isPaused) {
+                manager.togglePauseAll()
             }
         }
 
@@ -644,7 +649,7 @@ class Main {
         mascot.isLookRight = Math.random() < 0.5
 
         try {
-            mascot.behavior = checkNotNull(getConfiguration(imageSet)).buildNextBehavior(null, mascot)
+            mascot.behavior = getConfiguration(imageSet)?.buildNextBehavior(null, mascot)
             manager.add(mascot)
         } catch (e: BehaviorInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the first action", e)
@@ -759,10 +764,11 @@ class Main {
     }
 
     private fun updateConfigFile() {
-        runCatching {
+        try {
             getPath("conf", "settings.properties").outputStream().use {
                 properties.store(it, "Configuration Options")
             }
+        } catch (_: Exception) {
         }
     }
 
@@ -770,11 +776,6 @@ class Main {
         if (newImageSets == null) return
 
         val toRemove = imageSets.toMutableList()
-
-        for (imageSet in toRemove) {
-            log.log(Level.INFO, imageSet)
-        }
-
         val toAdd = mutableListOf<String>()
         val toRetain = mutableListOf<String>()
 

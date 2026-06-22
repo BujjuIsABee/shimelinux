@@ -35,7 +35,7 @@ class UserBehavior(
     override fun init(mascot: Mascot) {
         this.mascot = mascot
 
-        log.log(Level.INFO, "Behavior ($mascot,$this)")
+        log.log(Level.INFO, "Behavior ($mascot, $this)")
 
         try {
             action.init(mascot)
@@ -54,9 +54,7 @@ class UserBehavior(
     @Synchronized
     override fun next() {
         try {
-            if (action.hasNext()) {
-                action.next()
-            }
+            if (action.hasNext()) action.next()
 
             var hotspotResult = HotspotResult.INACTIVE
             if (mascot.isHotspotClicked) {
@@ -82,19 +80,19 @@ class UserBehavior(
 
             if (hotspotResult != HotspotResult.ACTIVE) {
                 if (action.hasNext()) {
-                    if ((mascot.bounds.x + mascot.bounds.width <= environment.screen.left) ||
-                        (environment.screen.right <= mascot.bounds.x) ||
-                        (environment.screen.bottom <= mascot.bounds.y)
+                    if (mascot.bounds.x + mascot.bounds.width <= environment.screen.left ||
+                        environment.screen.right <= mascot.bounds.x ||
+                        environment.screen.bottom <= mascot.bounds.y
                     ) {
-                        log.log(Level.INFO, "Out of the screen bounds ($mascot,$this)")
+                        log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
 
-                        if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-                            mascot.anchor = Point(
+                        mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                            Point(
                                 (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                                 mascot.environment.screen.top - 256
                             )
                         } else {
-                            mascot.anchor = Point(
+                            Point(
                                 (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
                                 mascot.environment.workArea.top - 256
                             )
@@ -107,7 +105,7 @@ class UserBehavior(
                         }
                     }
                 } else {
-                    log.log(Level.INFO, "Completed behavior ($mascot,$this)")
+                    log.log(Level.INFO, "Completed behavior ($mascot, $this)")
 
                     try {
                         mascot.behavior = configuration.buildNextBehavior(name, mascot)
@@ -117,7 +115,7 @@ class UserBehavior(
                 }
             }
         } catch (_: LostGroundException) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
 
             try {
                 mascot.cursorPosition = null
@@ -137,12 +135,8 @@ class UserBehavior(
             var handled = false
 
             for (hotspot in mascot.hotspots) {
-                if (hotspot.contains(mascot, e.point) &&
-                    checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).isBehaviorEnabled(
-                        hotspot.behavior,
-                        mascot
-                    )
-                ) {
+                val behaviorEnabled = Main.instance.getConfiguration(mascot.imageSet)?.isBehaviorEnabled(hotspot.behavior, mascot) == true
+                if (hotspot.contains(mascot, e.point) && behaviorEnabled) {
                     handled = true
                     try {
                         mascot.cursorPosition = e.point

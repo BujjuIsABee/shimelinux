@@ -20,10 +20,13 @@ class Sequence(
 
     override var currentAction
         get() = super.currentAction
-        set(value) { super.currentAction = if (isLoop) value % actions.size else value }
+        set(value) {
+            super.currentAction = if (isLoop) value % actions.size else value
+        }
 
     override fun hasNext(): Boolean {
         seek()
+
         return super.hasNext()
     }
 

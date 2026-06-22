@@ -125,9 +125,7 @@ object ImagePairLoader {
                     effectiveScaling = 1.0
                 }
 
-                else -> {
-                    filter = Filter.NEAREST_NEIGHBOR
-                }
+                else -> filter = Filter.NEAREST_NEIGHBOR
             }
 
             // Apply the changes if hqx is still on

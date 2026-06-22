@@ -64,15 +64,9 @@ class AnimationBuilder(
 
     private fun loadPose(frameNode: Entry): Pose {
         val leftImageText = frameNode.getAttribute(schema.getString("Image"))
-        val leftImagePath = if (!leftImageText.isNullOrEmpty()) {
-            Main.getPath("img", imageSet, leftImageText)
-        } else null
-
+        val leftImagePath = if (!leftImageText.isNullOrEmpty()) Main.getPath("img", imageSet, leftImageText) else null
         val rightImageText = frameNode.getAttribute(schema.getString("ImageRight"))
-        val rightImagePath = if (!rightImageText.isNullOrEmpty()) {
-            Main.getPath("img", imageSet, rightImageText)
-        } else null
-
+        val rightImagePath = if (!rightImageText.isNullOrEmpty()) Main.getPath("img", imageSet, rightImageText) else null
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
         val moveText = checkNotNull(frameNode.getAttribute(schema.getString("Velocity")))
         val durationText = checkNotNull(frameNode.getAttribute(schema.getString("Duration")))
@@ -91,7 +85,7 @@ class AnimationBuilder(
         }
 
         if (leftImagePath != null) {
-            val anchorCoordinates = anchorText.split(",")
+            val anchorCoordinates = anchorText.split(',')
             val anchor = Point(anchorCoordinates[0].toInt(), anchorCoordinates[1].toInt())
 
             try {
@@ -102,7 +96,7 @@ class AnimationBuilder(
             }
         }
 
-        val moveCoordinates = moveText.split(",")
+        val moveCoordinates = moveText.split(',')
         var moveX = moveCoordinates[0].toInt()
         var moveY = moveCoordinates[1].toInt()
 

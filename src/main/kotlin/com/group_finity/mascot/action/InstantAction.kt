@@ -17,14 +17,13 @@ abstract class InstantAction(
 ) : ActionBase(schema, listOf(), params) {
     override fun init(mascot: Mascot) {
         super.init(mascot)
-        if (super.hasNext()) {
-            apply()
-        }
+
+        if (super.hasNext()) apply()
     }
 
     override fun hasNext() = false
 
-    override fun tick() {}
+    override fun tick() { }
 
     internal abstract fun apply()
 }

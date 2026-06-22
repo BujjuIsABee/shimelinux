@@ -24,6 +24,7 @@ import javax.swing.JPanel
 import javax.swing.JWindow
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
+    // Get a translucency capable graphics configuration
     private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
 
     private var image: BufferedImage? = null
@@ -36,7 +37,6 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         background = Color(0, 0, 0, 0)
         contentPane = object : JPanel() {
             override fun paintComponent(g: Graphics) {
-                val image = image
                 if (image != null) {
                     setWindowMask()
                     g.drawImage(image, offset.x, offset.y, null)
@@ -45,6 +45,8 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         }
     }
 
+    override fun getGraphicsConfiguration() = gc
+
     override fun asComponent() = this
 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
@@ -52,7 +54,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         val windowBounds = Rectangle(x, y, width, height)
         val newBounds = screenBounds.intersection(windowBounds)
 
-        // Allow mascots to go offscreen by resizing the window and offsetting the image
+        // Allow mascots to go partially offscreen by resizing the window and offsetting the image
         super.setBounds(newBounds.x, newBounds.y, newBounds.width, newBounds.height)
         offset = Point(windowBounds.x - newBounds.x, windowBounds.y - newBounds.y)
     }
@@ -66,14 +68,11 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     override fun updateImage() {
+        // Only repaint when the image has changed to reduce flickering
         if (imageChanged) {
             repaint()
             imageChanged = false
         }
-    }
-
-    override fun setVisible(b: Boolean) {
-        super.setVisible(b)
     }
 
     private fun setWindowMask() {
@@ -109,6 +108,4 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
             }
         }
     }
-
-    override fun getGraphicsConfiguration() = gc
 }

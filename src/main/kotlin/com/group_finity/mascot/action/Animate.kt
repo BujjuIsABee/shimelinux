@@ -22,7 +22,8 @@ open class Animate(
     override fun tick() {
         super.tick()
 
-        if (border != null && border?.isOn(mascot.anchor) == false) {
+        if (border?.isOn(mascot.anchor) == false) {
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 
@@ -30,4 +31,8 @@ open class Animate(
     }
 
     override fun hasNext() = super.hasNext() && animation?.let { time < it.duration } == true
+
+    companion object {
+        private val log = Logger.getLogger(this::class.java.name)
+    }
 }

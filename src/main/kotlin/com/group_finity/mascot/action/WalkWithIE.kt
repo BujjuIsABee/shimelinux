@@ -35,7 +35,7 @@ class WalkWithIE(
         val activeIE = environment.activeIE
 
         if (!activeIE.isVisible) {
-            log.log(Level.INFO, "IE not visible ($mascot,$this)")
+            log.log(Level.INFO, "IE not visible ($mascot, $this)")
             throw LostGroundException()
         }
 
@@ -43,14 +43,14 @@ class WalkWithIE(
             if (mascot.anchor.x - offsetX != activeIE.left ||
                 mascot.anchor.y + offsetY != activeIE.bottom
             ) {
-                log.log(Level.INFO, "Lost ground ($mascot,$this)")
+                log.log(Level.INFO, "Lost ground ($mascot, $this)")
                 throw LostGroundException()
             }
         } else {
             if (mascot.anchor.x + offsetX != activeIE.right ||
                 mascot.anchor.y + offsetY != activeIE.bottom
             ) {
-                log.log(Level.INFO, "Lost ground ($mascot,$this)")
+                log.log(Level.INFO, "Lost ground ($mascot, $this)")
                 throw LostGroundException()
             }
         }
@@ -58,21 +58,19 @@ class WalkWithIE(
         super.tick()
 
         if (activeIE.isVisible) {
-            if (mascot.isLookRight) {
-                environment.moveActiveIE(
+            environment.moveActiveIE(
+                if (mascot.isLookRight) {
                     Point(
                         mascot.anchor.x - offsetX,
                         mascot.anchor.y + offsetY - activeIE.height
                     )
-                )
-            } else {
-                environment.moveActiveIE(
+                } else {
                     Point(
                         mascot.anchor.x + offsetX - activeIE.width,
                         mascot.anchor.y + offsetY - activeIE.height
                     )
-                )
-            }
+                }
+            )
         }
     }
 

@@ -33,9 +33,9 @@ open class Move(
         get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
 
     override fun hasNext(): Boolean {
-        val hasNotReached =
-            (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
+        val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
             (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
+
         return super.hasNext() && (!hasNotReached || isTurning)
     }
 
@@ -43,7 +43,7 @@ open class Move(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 

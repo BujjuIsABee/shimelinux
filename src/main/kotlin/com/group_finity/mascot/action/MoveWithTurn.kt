@@ -23,9 +23,7 @@ class MoveWithTurn(
                 return animations[animations.size - 1]
             } else {
                 for (index in 0 until animations.size - 1) {
-                    if (animations[index].isEffective(variables)) {
-                        return animations[index]
-                    }
+                    if (animations[index].isEffective(variables)) return animations[index]
                 }
             }
             return null

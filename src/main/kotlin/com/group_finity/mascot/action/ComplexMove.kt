@@ -19,7 +19,6 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Suppress("UNUSED")
 class ComplexMove(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -33,7 +32,7 @@ class ComplexMove(
         private set
     override val animation
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning != it.isTurn }
-    internal val hasTurningAnimation: Boolean by lazy {
+    internal val hasTurningAnimation by lazy {
         return@lazy animations.any { it.isTurn }
     }
 
@@ -71,9 +70,7 @@ class ComplexMove(
             // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
-            mascot.manager?.let {
-                target = it.getMascotWithAffordance(affordance)?.get()
-            }
+            target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
 
             putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
             putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
@@ -83,11 +80,11 @@ class ComplexMove(
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
-            return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) ?: false)
+            return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) == true)
         } else {
-            val hasNotReached =
-                (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
+            val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
                 (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
+
             return super.hasNext() && hasNotReached
         }
     }
@@ -100,14 +97,14 @@ class ComplexMove(
             mascot.affordances.clear()
         }
 
-
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 
-        val targetX = if (isScanEnabled) checkNotNull(target?.anchor?.x) else targetX
-        val targetY = if (isScanEnabled) checkNotNull(target?.anchor?.y) else targetY
+        val target = checkNotNull(target)
+        val targetX = if (isScanEnabled) target.anchor.x else targetX
+        val targetY = if (isScanEnabled) target.anchor.y else targetY
 
         if (isScanEnabled) {
             putVariable(schema.getString(VARIABLE_TARGETX), targetX)
@@ -149,12 +146,11 @@ class ComplexMove(
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                val target = checkNotNull(target)
-                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
                     behavior,
                     mascot
                 )
-                target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
                     targetBehavior,
                     target
                 )

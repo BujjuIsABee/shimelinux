@@ -21,6 +21,7 @@ class Manager {
     private val mascots = mutableListOf<Mascot>()
     private val added = linkedSetOf<Mascot>()
     private val removed = linkedSetOf<Mascot>()
+    private var timer: Timer? = null
     var isExitOnLastRemoved = true
 
     val isPaused: Boolean
@@ -36,18 +37,13 @@ class Manager {
             }
             return isPaused
         }
-
     val count
         get() = getCount(null)
-
-    private var timer: Timer? = null
 
     fun start() {
         if (timer != null) return
 
-        timer = timer("UpdateMascot", false, period = TICK_INTERVAL) {
-            tick()
-        }
+        timer = timer("UpdateMascot", false, period = TICK_INTERVAL) { tick() }
     }
 
     fun stop() {
@@ -132,11 +128,11 @@ class Manager {
                         mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
                     }
                 } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Failed to set behavior.", e)
+                    log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
                     Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
                     mascot.dispose()
                 } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
+                    log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
                     Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
                     mascot.dispose()
                 }
@@ -208,9 +204,7 @@ class Manager {
 
             var result = 0
             for (mascot in mascots) {
-                if (mascot.imageSet == imageSet) {
-                    result++
-                }
+                if (mascot.imageSet == imageSet) result++
             }
             return result
         }
@@ -219,9 +213,7 @@ class Manager {
     fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? {
         synchronized(mascots) {
             for (mascot in mascots) {
-                if (mascot.affordances.contains(affordance)) {
-                    return WeakReference(mascot)
-                }
+                if (mascot.affordances.contains(affordance)) return WeakReference(mascot)
             }
         }
         return null
@@ -231,12 +223,8 @@ class Manager {
         synchronized(mascots) {
             var count = 0
             for (mascot in mascots) {
-                if (mascot.anchor == anchor) {
-                    count++
-                }
-                if (count > 1) {
-                    return true
-                }
+                if (mascot.anchor == anchor) count++
+                if (count > 1) return true
             }
         }
         return false

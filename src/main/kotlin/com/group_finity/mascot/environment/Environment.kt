@@ -26,10 +26,7 @@ abstract class Environment {
         get() = complexScreen.areas
 
     fun init() {
-        timer("UpdateScreenRect", true, period = 5000L) {
-            updateScreenRect()
-        }
-
+        timer("UpdateScreenRect", true, period = 5000L) { updateScreenRect() }
         tick()
     }
 
@@ -47,10 +44,7 @@ abstract class Environment {
             if (area.bottomBorder.isOn(location)) count++
         }
 
-        if (count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))) {
-            return true
-        }
-
+        if (count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))) return true
         return count == 1
     }
 
@@ -62,10 +56,7 @@ abstract class Environment {
             if (area.rightBorder.isOn(location)) count++
         }
 
-        if (count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))) {
-            return true
-        }
-
+        if (count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))) return true
         return count == 1
     }
 
@@ -86,8 +77,7 @@ abstract class Environment {
         fun updateScreenRect() {
             var virtualBounds = Rectangle()
             val screenRects = hashMapOf<String, Rectangle>()
-            val environment = GraphicsEnvironment.getLocalGraphicsEnvironment()
-            val devices = environment.screenDevices
+            val devices = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
 
             for (device in devices) {
                 screenRects[device.iDstring] = device.defaultConfiguration.bounds

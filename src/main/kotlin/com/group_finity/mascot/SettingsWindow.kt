@@ -7,7 +7,7 @@
 
 package com.group_finity.mascot
 
-import com.formdev.flatlaf.FlatLaf
+import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -118,7 +118,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         title = lang.getString("Settings")
         layout = BorderLayout()
 
-        runCatching {
+        try {
             Main.getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
                 lightTheme.load(it)
             }
@@ -126,8 +126,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             Main.getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
                 darkTheme.load(it)
             }
+        } catch (_: Exception) {
         }
 
+        // Store initial theme colors
         initialLightBackgroundColor = lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
         initialLightTextColor = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
         initialLightAccentColor = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
@@ -230,7 +232,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 whitelistModel.add(whitelistModel.size, title)
             }
         }
-        whitelist = JList(whitelistModel)
 
         blacklistModel = DefaultListModel<String>()
         for (title in Main.instance.properties.getProperty("InteractiveWindowsBlacklist", "").split('/')) {
@@ -238,6 +239,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 blacklistModel.add(blacklistModel.size, title)
             }
         }
+
+        whitelist = JList(whitelistModel)
         blacklist = JList(blacklistModel)
 
         interactiveWindowsTabs = JTabbedPane()
@@ -246,11 +249,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         addInteractiveWindowButton = JButton(lang.getString("Add"))
         addInteractiveWindowButton.preferredSize = Dimension(130, 26)
-        addInteractiveWindowButton.addActionListener { handleAddInteractiveWindow() }
+        addInteractiveWindowButton.addActionListener { handleAddInteractiveWindowButtonAction() }
 
         removeInteractiveWindowButton = JButton(lang.getString("Remove"))
         removeInteractiveWindowButton.preferredSize = Dimension(130, 26)
-        removeInteractiveWindowButton.addActionListener { handleRemoveInteractiveWindow() }
+        removeInteractiveWindowButton.addActionListener { handleRemoveInteractiveWindowButtonAction() }
 
         interactiveWindowsButtonsPanel = JPanel(FlowLayout())
         interactiveWindowsButtonsPanel.add(addInteractiveWindowButton)
@@ -259,14 +262,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         interactiveWindowsTab = JPanel(BorderLayout())
         interactiveWindowsTab.add(interactiveWindowsTabs, BorderLayout.CENTER)
         interactiveWindowsTab.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
-
-        val themeMap = mapOf(
-            0 to "GTK",
-            1 to "FlatLight",
-            2 to "FlatDark"
-        )
-
-        val indexMap = themeMap.entries.associate { it.value to it.key }
 
         themeComboBox = JComboBox<String>()
         themeComboBox.addItem("GTK")
@@ -277,13 +272,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         gtkCard.add(JLabel(lang.getString("ThemeCannotBeCustomized")))
 
         backgroundColorButton = JButton(lang.getString("Change"))
-        backgroundColorButton.addActionListener { handleChangeBackgroundColor() }
+        backgroundColorButton.addActionListener { handleChangeBackgroundColorButtonAction() }
 
         textColorButton = JButton(lang.getString("Change"))
-        textColorButton.addActionListener { handleChangeTextColor() }
+        textColorButton.addActionListener { handleChangeTextColorButtonAction() }
 
         accentColorButton = JButton(lang.getString("Change"))
-        accentColorButton.addActionListener { handleChangeAccentColor() }
+        accentColorButton.addActionListener { handleChangeAccentColorButtonAction() }
 
         backgroundColorRightPanel = JPanel()
         backgroundColorRightPanel.layout = BoxLayout(backgroundColorRightPanel, BoxLayout.X_AXIS)
@@ -346,7 +341,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         customizeThemePanel.add(accentColorPanel)
 
         resetButton = JButton(lang.getString("Reset"))
-        resetButton.addActionListener { handleResetTheme() }
+        resetButton.addActionListener { handleResetThemeButtonAction() }
 
         resetButtonPanel = JPanel(FlowLayout())
         resetButtonPanel.add(resetButton)
@@ -360,6 +355,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         themeCards.add(gtkCard, "GtkCard")
         themeCards.add(flatCard, "FlatCard")
 
+        val themeMap = mapOf(0 to "GTK", 1 to "FlatLight", 2 to "FlatDark")
+        val indexMap = themeMap.entries.associate { it.value to it.key }
         themeComboBox.addItemListener {
             theme = themeMap[themeComboBox.selectedIndex] ?: "GTK"
             refreshTheme()
@@ -421,7 +418,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setLocationRelativeTo(null)
     }
 
-    private fun handleAddInteractiveWindow() {
+    private fun handleAddInteractiveWindowButtonAction() {
         val input = JOptionPane.showInputDialog(
             rootPane,
             lang.getString("InteractiveWindowHintMessage"),
@@ -446,7 +443,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
     }
 
-    private fun handleRemoveInteractiveWindow() {
+    private fun handleRemoveInteractiveWindowButtonAction() {
         if (interactiveWindowsTabs.selectedIndex == 0) {
             if (whitelist.selectedIndex != -1) {
                 whitelistModel.remove(whitelist.selectedIndex)
@@ -460,7 +457,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
     }
 
-    private fun handleChangeBackgroundColor() {
+    private fun handleChangeBackgroundColorButtonAction() {
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
             lang.getString("ChooseBackgroundColour"),
@@ -481,7 +478,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
     }
 
-    private fun handleChangeTextColor() {
+    private fun handleChangeTextColorButtonAction() {
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
             lang.getString("ChooseTextColour"),
@@ -502,7 +499,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
     }
 
-    private fun handleChangeAccentColor() {
+    private fun handleChangeAccentColorButtonAction() {
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
             lang.getString("ChooseAccentColour"),
@@ -523,7 +520,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
     }
 
-    private fun handleResetTheme() {
+    private fun handleResetThemeButtonAction() {
         if (themeComboBox.selectedIndex == 1) {
             lightTheme.setProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
             lightTheme.setProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
@@ -602,7 +599,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         )
     }
 
-    private fun refreshTheme() = runCatching {
+    private fun refreshTheme() {
         Main.getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
             lightTheme.store(it, "Flat Light Theme")
         }
@@ -620,8 +617,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         )
 
-        FlatLaf.updateUI()
-        SwingUtilities.updateComponentTreeUI(this)
+        for (window in getWindows()) {
+            // Do not update translucent windows
+            if (window is TranslucentWindow) continue
+
+            SwingUtilities.updateComponentTreeUI(window)
+        }
     }
 
     companion object {
@@ -631,8 +632,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
         private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
 
-        private fun getHex(color: Color) = String
-            .format("#%06X", color.rgb and 0xFFFFFF)
-            .replace("\\", "")
+        private fun getHex(color: Color) = String.format("#%06X", color.rgb and 0xFFFFFF)
     }
 }

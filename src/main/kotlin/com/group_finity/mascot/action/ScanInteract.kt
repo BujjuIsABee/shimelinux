@@ -18,7 +18,6 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-@Suppress("UNUSED")
 class ScanInteract(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -59,25 +58,22 @@ class ScanInteract(
         mascot.affordances.clear()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
 
-        mascot.manager?.let { manager ->
-            if (target?.affordances?.contains(affordance) == false) {
-                target = manager.getMascotWithAffordance(affordance)?.get()
-            }
+        if (target?.affordances?.contains(affordance) == false) {
+            target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
         }
 
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
         putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
 
-        if (target?.affordances?.contains(affordance) ?: false) {
-            val target = checkNotNull(target)
-            val animation = checkNotNull(animation)
-
+        val target = target
+        val animation = animation
+        if (target?.affordances?.contains(affordance) ?: false && animation != null) {
             if (mascot.anchor.x != target.anchor.x) {
-                isTurning =hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
+                isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
                 mascot.isLookRight = mascot.anchor.x < target.anchor.x
             }
 
@@ -88,14 +84,14 @@ class ScanInteract(
 
             animation.next(mascot, time)
 
-            if (!isTurning && (time == animation.duration - 1 || animation.duration == 1) && !behavior.trim().isEmpty()) {
+            if (!isTurning && (time == animation.duration - 1 || animation.duration == 1) && behavior.isNotBlank()) {
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(
+                    mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
                         behavior,
                         mascot
                     )
-                    if (!targetBehavior.trim().isEmpty()) {
-                        target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(
+                    if (targetBehavior.isNotBlank()) {
+                        target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
                             targetBehavior,
                             target
                         )

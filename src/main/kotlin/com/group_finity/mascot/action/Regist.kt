@@ -43,6 +43,7 @@ class Regist(
         } else {
             (offsetX * scaling).roundToInt()
         }
+
         return super.hasNext() && abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
     }
 
@@ -54,7 +55,7 @@ class Regist(
         if (animation?.let { time + 1 >= it.duration } == true) {
             mascot.isLookRight = Math.random() < 0.5
 
-            log.log(Level.INFO, "Lost ground ($mascot,$this)")
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }
     }

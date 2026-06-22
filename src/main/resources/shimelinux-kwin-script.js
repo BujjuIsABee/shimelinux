@@ -15,14 +15,10 @@ let windowClosedOrMinimizedHandler = null;
 let moveResizedChangedHandler = null;
 
 function setActiveWindow(window) {
-    // Don't set a new active window if the current one is offscreen (so it can be restored)
-    if (activeWindow != window && isWindowOffscreen(activeWindow)) return;
-
     const bounds = window.frameGeometry;
     callDBus(
         busName, clientPath, interfaceName,
         "setActiveWindow",
-        window.internalId.toString(),
         window.caption,
         bounds.x, bounds.y,
         bounds.width, bounds.height,
@@ -31,8 +27,6 @@ function setActiveWindow(window) {
 }
 
 function resetActiveWindow() {
-    if (isWindowOffscreen(activeWindow)) return;
-
     callDBus(
         busName, clientPath, interfaceName,
         "resetActiveWindow",
@@ -40,39 +34,57 @@ function resetActiveWindow() {
     );
 }
 
-function move() {
+function tick() {
+    // Move windows
     callDBus(
         busName, clientPath, interfaceName,
         "getWindowPosition",
         (response) => {
-            if (!response) return;
+            if (!response || !activeWindow) return;
 
-            const windowId = response.windowId;
             const x = response.x;
             const y = response.y;
 
-            workspace.windowList().forEach(window => {
-                if (window.internalId.toString() == windowId) {
-                    const bounds = window.frameGeometry;
-                    window.frameGeometry = {
-                        x: x,
-                        y: y,
-                        width: bounds.width,
-                        height: bounds.height
-                    };
-                }
-            });
+            const bounds = activeWindow.frameGeometry;
+            activeWindow.frameGeometry = {
+                x: x,
+                y: y,
+                width: bounds.width,
+                height: bounds.height
+            };
+        }
+    );
+
+    // Restore windows
+    callDBus(
+        busName, clientPath, interfaceName,
+        "getRestoreWindows",
+        (response) => {
+            if (!response) return;
+
+            const windows = workspace.windowList();
+            for (const window of windows) {
+                if (!window || !window.normalWindow || isWindowOnscreen(window)) continue;
+
+                const windowBounds = window.frameGeometry;
+                const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
+                const centerX = (screenBounds.width / 2) - (windowBounds.width / 2);
+                const centerY = (screenBounds.height / 2) - (windowBounds.height / 2);
+
+                window.frameGeometry = {
+                    x: centerX,
+                    y: centerY,
+                    width: windowBounds.width,
+                    height: windowBounds.height
+                };
+            }
         }
     );
 }
 
 function onWindowActivated(window) {
-    if (isWindowOffscreen(activeWindow)) return;
-
     if (!window || !window.normalWindow || window.minimized) {
-        if (activeWindow) {
-            onWindowDeactivated();
-        }
+        if (activeWindow) onWindowDeactivated();
         return;
     }
 
@@ -106,32 +118,25 @@ function onWindowDeactivated() {
 }
 
 function onMoveResizedChanged(window) {
-    // Reset the active window if it was moved by the user
-    // Otherwise the Shimeji will stand in midair
-    if (window.move) {
-        onWindowActivated(null);
-    }
+    // Reset the active window if it was moved by the user so the Shimeji doesn't stand in midair
+    if (window.move) onWindowActivated(null);
 }
 
-function isWindowOffscreen(window) {
-    if (!window || !window.normalWindow) return false;
-
+function isWindowOnscreen(window) {
     const windowBounds = window.frameGeometry;
     const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
-    const onScreen =
-        windowBounds.x >= screenBounds.x &&
-        windowBounds.y >= screenBounds.y &&
-        (windowBounds.x + windowBounds.width) <= (screenBounds.x + screenBounds.width) &&
-        (windowBounds.y + windowBounds.height) <= (screenBounds.y + screenBounds.height);
 
-    return !onScreen;
+    return windowBounds.y + windowBounds.height >= screenBounds.y &&
+        windowBounds.x + windowBounds.width >= screenBounds.x &&
+        windowBounds.y <= screenBounds.y + screenBounds.height &&
+        windowBounds.x <= screenBounds.x + screenBounds.width;
 }
 
 workspace.windowActivated.connect(onWindowActivated);
 onWindowActivated(workspace.activeWindow);
 
-// Start a timer to call move() every 40 milliseconds
+// Start a timer to call tick() every 40 milliseconds
 const timer = new QTimer();
 timer.interval = 40;
-timer.timeout.connect(move);
+timer.timeout.connect(tick);
 timer.start();

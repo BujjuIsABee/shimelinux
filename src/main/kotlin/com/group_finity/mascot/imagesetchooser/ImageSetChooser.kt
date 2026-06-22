@@ -250,7 +250,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             var imageFile = topDir.resolve(Path(imageSet, "shime1.png")).toString()
             var caption = imageSet
 
-            runCatching {
+            try {
                 val config = Configuration()
 
                 if (infoPath.exists()) {
@@ -267,6 +267,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 config.getInformation(config.schema.getString("PreviewImage"))?.let {
                     imageFile = topDir.resolve(Path(imageSet, it)).toString()
                 }
+            } catch (_: Exception) {
             }
 
             if (onList1) {
@@ -339,20 +340,11 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun handleMore() {
         val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
-        var failed = false
         try {
-            if (desktop != null) {
-                desktop.open(Main.getPath("img").toFile())
-                cancelled = true
-                dispose()
-            } else {
-                failed = true
-            }
+            checkNotNull(desktop).open(Main.getPath("img").toFile())
+            cancelled = true
+            dispose()
         } catch (_: Exception) {
-            failed = true
-        }
-
-        if (failed) {
             JOptionPane.showMessageDialog(
                 this@ImageSetChooser,
                 Main.getPath("img").toString(),

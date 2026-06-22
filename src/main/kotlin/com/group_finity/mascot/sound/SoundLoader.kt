@@ -25,11 +25,7 @@ object SoundLoader {
         (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = volume
 
         // Handle stop event
-        clip.addLineListener {
-            if (it.type == LineEvent.Type.STOP) {
-                (it.line as Clip).stop()
-            }
-        }
+        clip.addLineListener { if (it.type == LineEvent.Type.STOP) (it.line as Clip).stop() }
 
         Sounds.load(name + volume, clip)
     }

@@ -19,9 +19,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     val workArea
         get() = getWorkArea(false)
     val activeIE
-        get() = if (
-            currentWorkArea != null &&
-            !Main.instance.properties.getProperty("Multiscreen", "true").toBoolean() &&
+        get() = if (!Main.instance.properties.getProperty("Multiscreen", "true").toBoolean() &&
             currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false
         ) {
             Area()
@@ -54,36 +52,38 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     fun getWorkArea(ignoreSettings: Boolean): Area {
+        var currentWorkArea = currentWorkArea
+
         if (currentWorkArea != null) {
             if (ignoreSettings || Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
                 if (currentWorkArea != impl.workArea &&
-                    checkNotNull(currentWorkArea).toRectangle().contains(impl.workArea.toRectangle()) &&
+                    currentWorkArea.toRectangle().contains(impl.workArea.toRectangle()) &&
                     impl.workArea.contains(mascot.anchor.x, mascot.anchor.y)
                 ) {
                     currentWorkArea = impl.workArea
-                    return checkNotNull(currentWorkArea)
-                } else if (checkNotNull(currentWorkArea).contains(mascot.anchor.x, mascot.anchor.y)) {
-                    return checkNotNull(currentWorkArea)
+                    return currentWorkArea.also { this.currentWorkArea = it }
+                } else if (currentWorkArea.contains(mascot.anchor.x, mascot.anchor.y)) {
+                    return currentWorkArea
                 }
             } else {
-                return checkNotNull(currentWorkArea)
+                return currentWorkArea
             }
         }
 
         if (impl.workArea.contains(mascot.anchor.x, mascot.anchor.y)) {
             currentWorkArea = impl.workArea
-            return checkNotNull(currentWorkArea)
+            return currentWorkArea.also { this.currentWorkArea = it }
         }
 
         for (area in impl.screens) {
             if (area.contains(mascot.anchor.x, mascot.anchor.y)) {
                 currentWorkArea = area
-                return checkNotNull(currentWorkArea)
+                return currentWorkArea.also { this.currentWorkArea = it }
             }
         }
 
         currentWorkArea = impl.workArea
-        return checkNotNull(currentWorkArea)
+        return currentWorkArea.also { this.currentWorkArea = it }
     }
 
     fun getCeiling(ignoreSeparator: Boolean) = if (activeIE.bottomBorder.isOn(mascot.anchor)) {
@@ -104,18 +104,11 @@ class MascotEnvironment(private val mascot: Mascot) {
 
     fun getWall(ignoreSeparator: Boolean): Border {
         if (mascot.isLookRight) {
-            if (activeIE.leftBorder.isOn(mascot.anchor)) {
-                return activeIE.leftBorder
-            }
-            if (workArea.rightBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) {
-                return workArea.rightBorder
-            }
+            if (activeIE.leftBorder.isOn(mascot.anchor)) return activeIE.leftBorder
+            if (workArea.rightBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) return workArea.rightBorder
         } else {
-            if (activeIE.rightBorder.isOn(mascot.anchor)) {
-                return activeIE.rightBorder
-            } else if (workArea.leftBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) {
-                return workArea.leftBorder
-            }
+            if (activeIE.rightBorder.isOn(mascot.anchor)) return activeIE.rightBorder
+            if (workArea.leftBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) return workArea.leftBorder
         }
         return NotOnBorder.INSTANCE
     }

@@ -12,7 +12,6 @@ import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
 import java.util.ResourceBundle
 
-@Suppress("UNUSED")
 class Mute(
     schema: ResourceBundle,
     params: VariableMap
@@ -25,25 +24,19 @@ class Mute(
         if (sound != null) {
             var clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", sound).toString())
             if (clips.isNotEmpty()) {
-                for (clip in clips) {
-                    if (clip.isRunning) {
-                        clip.stop()
-                    }
+                for (clip in clips.filter { it.isRunning }) {
+                    clip.stop()
                 }
             } else {
                 clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", mascot.imageSet, sound).toString())
                 if (clips.isNotEmpty()) {
-                    for (clip in clips) {
-                        if (clip.isRunning) {
-                            clip.stop()
-                        }
+                    for (clip in clips.filter { it.isRunning }) {
+                        clip.stop()
                     }
                 } else {
                     clips = Sounds.getSoundsIgnoringVolume(Main.getPath("img", mascot.imageSet, "sound", sound).toString())
-                    for (clip in clips) {
-                        if (clip.isRunning) {
-                            clip.stop()
-                        }
+                    for (clip in clips.filter { it.isRunning }) {
+                        clip.stop()
                     }
                 }
             }

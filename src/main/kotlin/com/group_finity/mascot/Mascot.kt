@@ -34,32 +34,32 @@ import javax.swing.event.PopupMenuListener
 class Mascot(var imageSet: String) {
     private val id = lastId.incrementAndGet()
     private val window = NativeFactory.instance.newTransparentWindow()
+    private var debugWindow: DebugWindow? = null
+    val environment = MascotEnvironment(this)
+    val variables = VariableMap()
+    val affordances = mutableListOf<String>()
+    val hotspots = mutableListOf<Hotspot>()
     var manager: Manager? = null
     var anchor = Point(0, 0)
     var image: MascotImage? = null
+    var sound: String? = null
     var isLookRight = false
-    var behavior: Behavior? = null
-        set(value) {
-            field = value
-            field?.init(this)
-        }
-    var time = 0
-        private set
-    val count
-        get() = manager?.getCount(imageSet) ?: 0
-    val totalCount
-        get() = manager?.count ?: 0
-    private var isAnimating = true
-        get() = field && !isPaused
     var isPaused = false
     var isDragging = false
-    val environment = MascotEnvironment(this)
-    var sound: String? = null
-    internal var debugWindow: DebugWindow? = null
-    val affordances = mutableListOf<String>()
-    val hotspots = mutableListOf<Hotspot>()
+    private var isAnimating = true
+        get() = field && !isPaused
     val isHotspotClicked
         get() = cursorPosition != null
+    var cursorPosition: Point? = null
+        set(value) {
+            field = value
+
+            if (value == null) {
+                refreshCursor(false)
+            } else {
+                refreshCursor(value)
+            }
+        }
     val bounds: Rectangle
         get() {
             val image = image
@@ -71,17 +71,16 @@ class Mascot(var imageSet: String) {
                 return window.asComponent().bounds
             }
         }
-    var cursorPosition: Point? = null
+    var behavior: Behavior? = null
         set(value) {
-            field = value
-
-            if (value == null) {
-                refreshCursor(false)
-            } else {
-                refreshCursor(value)
-            }
+            field = value?.also { it.init(this) }
         }
-    val variables = VariableMap()
+    var time = 0
+        private set
+    val count
+        get() = manager?.getCount(imageSet) ?: 0
+    val totalCount
+        get() = manager?.count ?: 0
 
     init {
         log.log(Level.INFO, "Created a mascot ($this)")
@@ -158,14 +157,13 @@ class Mascot(var imageSet: String) {
         val lang = Main.instance.languageBundle
 
         popup.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuCanceled(p0: PopupMenuEvent?) {
-            }
+            override fun popupMenuCanceled(e: PopupMenuEvent) { }
 
-            override fun popupMenuWillBecomeInvisible(p0: PopupMenuEvent?) {
+            override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
                 isAnimating = true
             }
 
-            override fun popupMenuWillBecomeVisible(p0: PopupMenuEvent?) {
+            override fun popupMenuWillBecomeVisible(e: PopupMenuEvent) {
                 isAnimating = false
             }
         })
@@ -228,7 +226,7 @@ class Mascot(var imageSet: String) {
         val allowedSubmenu = JMenu(lang.getString("AllowedBehaviours"))
         val config = checkNotNull(Main.instance.getConfiguration(imageSet))
         for (behaviorName in config.behaviorNames) {
-            runCatching {
+            try {
                 if (!config.isBehaviorHidden(behaviorName)) {
                     val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
                     if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
@@ -255,6 +253,7 @@ class Mascot(var imageSet: String) {
                         allowedSubmenu.add(toggleItem)
                     }
                 }
+            } catch (_: Exception) {
             }
         }
 
@@ -292,7 +291,6 @@ class Mascot(var imageSet: String) {
                 Main.showError(Main.instance.languageBundle.getString("CouldNotGetNextBehaviourErrorMessage"), e)
                 dispose()
             }
-
             time++
         }
 
@@ -353,7 +351,7 @@ class Mascot(var imageSet: String) {
     }
 
     fun dispose() {
-        log.log(Level.INFO, "Destroying mascot: {$this}")
+        log.log(Level.INFO, "Destroying mascot: $this")
 
         debugWindow?.let {
             it.isVisible = false
@@ -369,9 +367,8 @@ class Mascot(var imageSet: String) {
     private fun refreshCursor(position: Point) {
         var useHand = false
         for (hotspot in hotspots) {
-            if (hotspot.contains(this, position) &&
-                checkNotNull(Main.instance.getConfiguration(imageSet)).isBehaviorEnabled(hotspot.behavior, this)
-            ) {
+            val isEnabled = checkNotNull(Main.instance.getConfiguration(imageSet)).isBehaviorEnabled(hotspot.behavior, this)
+            if (hotspot.contains(this, position) && isEnabled) {
                 useHand = true
                 break
             }
@@ -380,14 +377,10 @@ class Mascot(var imageSet: String) {
     }
 
     private fun refreshCursor(useHand: Boolean) {
-        window.asComponent().cursor =
-            Cursor.getPredefinedCursor(
-                if (useHand) Cursor.HAND_CURSOR
-                else Cursor.DEFAULT_CURSOR
-            )
+        window.asComponent().cursor = Cursor.getPredefinedCursor(if (useHand) Cursor.HAND_CURSOR else Cursor.DEFAULT_CURSOR)
     }
 
-    override fun toString() = "Mascot ($id,$imageSet)"
+    override fun toString() = "Mascot ($id, $imageSet)"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

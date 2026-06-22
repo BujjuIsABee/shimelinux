@@ -19,19 +19,15 @@ abstract class ComplexAction(
     internal open var currentAction = 0
         set(value) {
             field = value
-            if (super.hasNext()) {
-                if (field < actions.size) {
-                    action.init(mascot)
-                }
+            if (super.hasNext() && field < actions.size) {
+                action.init(mascot)
             }
         }
     internal val action
         get() = actions[currentAction]
 
     init {
-        if (actions.isEmpty()) {
-            throw IllegalArgumentException("Actions is empty")
-        }
+        require(actions.isNotEmpty())
     }
 
     override fun init(mascot: Mascot) {
@@ -61,9 +57,7 @@ abstract class ComplexAction(
     internal fun seek() {
         if (super.hasNext()) {
             while (currentAction < actions.size) {
-                if (action.hasNext()) {
-                    break
-                }
+                if (action.hasNext()) break
                 currentAction++
             }
         }
