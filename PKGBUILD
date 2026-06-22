@@ -24,7 +24,7 @@ package() {
     install -Dm755 "$srcdir/$pkgname-$pkgver/shimelinux.sh" "$pkgdir/usr/bin/$pkgname"
 
     # Create desktop entry
-    install -Dm644 "$srcdir/$pkgname-$pkgver/src/main/resources/img/icon.png" "$pkgdir/usr/share/pixmaps/$pkgname.png"
+    install -Dm644 "$srcdir/$pkgname-$pkgver/src/icon.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/$pkgname.svg"
     install -Dm644 "$srcdir/$pkgname-$pkgver/shimelinux.desktop" -t "$pkgdir/usr/share/applications/"
 
     # Install licenses
