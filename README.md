@@ -1,4 +1,4 @@
-# ShimeLinux <img width="24" height="24" src="src/main/resources/img/icon.png" />
+# ShimeLinux <img width="24" height="24" src="icon.svg" />
 
 **Shimeji desktop pet for Linux**
 
