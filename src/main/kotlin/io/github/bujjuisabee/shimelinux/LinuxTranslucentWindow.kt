@@ -35,6 +35,7 @@ import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Path2D
 import java.awt.image.BufferedImage
+import java.util.IdentityHashMap
 import javax.swing.JPanel
 import javax.swing.JWindow
 
@@ -46,7 +47,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private var imageChanged = false
     private var offset = Point(0, 0)
 
-    private val maskCache = mutableMapOf<BufferedImage, Area>()
+    private val maskCache = IdentityHashMap<BufferedImage, Area>()
 
     init {
         background = Color(0, 0, 0, 0)
@@ -96,13 +97,16 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         if (!maskCache.containsKey(image)) {
             val width = image.width
             val height = image.height
+            val rgb = image.getRGB(0, 0, width, height, null, 0, width)
+            val rect = Rectangle()
             val mask = Path2D.Double()
 
             for (x in 0 until width) {
                 for (y in 0 until height) {
-                    val color = Color(image.getRGB(x, y), true)
+                    val color = Color(rgb[y * width + x], true)
                     if (color.alpha > 0) {
-                        mask.append(Rectangle(x, y, 1, 1), false)
+                        rect.setBounds(x, y, 1, 1)
+                        mask.append(rect, false)
                     }
                 }
             }
@@ -113,10 +117,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         maskCache[image]?.let {
             shape = if (!it.isEmpty) {
                 it.createTransformedArea(
-                    AffineTransform.getTranslateInstance(
-                        offset.x.toDouble(),
-                        offset.y.toDouble()
-                    )
+                    AffineTransform.getTranslateInstance(offset.x.toDouble(), offset.y.toDouble())
                 )
             } else {
                 null
