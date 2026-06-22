@@ -1,6 +1,6 @@
-ShimeLinux is an unofficial Kotlin rewrite/Linux port of Shimeji-ee by Kilkakon
-(https://kilkakon.com/shimeji). The original project incorporates work from
-Yuki Yamada of Group Finity and other contributors.
+ShimeLinux is an unofficial Linux port/Kotlin rewrite of Shimeji-ee by Kilkakon
+(https://kilkakon.com/shimeji). The project also incorporates work from Shimeji
+by Yuki Yamada of Group Finity, hqx-java by Arcnor and FlatLaf by FormDev.
 
 Here are the original licenses:
 
@@ -50,3 +50,40 @@ documentation, but not required.
 to the original software will not.
 3. From a distribution of the source or remove the display, then you must
 change the contents of the display.
+
+===== HQX-JAVA BY ARCNOR =====
+
+Copyright © 2003 Maxim Stepin (maxst@hiend3d.com)
+
+Copyright © 2010 Cameron Zemek (grom@zeminvaders.net)
+
+Copyright © 2011 Tamme Schichler (tamme.schichler@googlemail.com)
+
+Copyright © 2012 A. Eduardo García (arcnorj@gmail.com)
+
+hqx-java is free software: you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+hqx-java is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with hqx-java. If not, see <http://www.gnu.org/licenses/>.
+
+===== FLATLAF BY FORMDEV =====
+
+Copyright 2019 FormDev Software GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
