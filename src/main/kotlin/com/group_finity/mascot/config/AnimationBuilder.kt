@@ -92,7 +92,7 @@ class AnimationBuilder(
         val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
 
         val filterText = Main.instance.properties.getProperty("Filter", "Nearest")
-        val filter = when (filterText.lowercase()) {
+        val filter = when (filterText) {
             "Nearest" -> ImagePairLoader.Filter.NEAREST_NEIGHBOR
             "Bicubic" -> ImagePairLoader.Filter.BICUBIC
             "Hqx" -> ImagePairLoader.Filter.HQX
