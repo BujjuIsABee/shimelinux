@@ -25,8 +25,10 @@ package io.github.bujjuisabee.shimelinux
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
+import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Graphics
+import java.awt.Graphics2D
 import java.awt.GraphicsConfiguration
 import java.awt.GraphicsEnvironment
 import java.awt.Point
@@ -36,7 +38,6 @@ import java.awt.geom.Area
 import java.awt.geom.Path2D
 import java.awt.image.BufferedImage
 import java.util.IdentityHashMap
-import javax.swing.JPanel
 import javax.swing.JWindow
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
@@ -50,15 +51,9 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     private val maskCache = IdentityHashMap<BufferedImage, Area>()
 
     init {
+        System.setProperty("sun.awt.noerasebackground", "true")
+
         background = Color(0, 0, 0, 0)
-        contentPane = object : JPanel() {
-            override fun paintComponent(g: Graphics) {
-                if (image != null) {
-                    setWindowMask()
-                    g.drawImage(image, offset.x, offset.y, null)
-                }
-            }
-        }
     }
 
     override fun getGraphicsConfiguration() = gc
@@ -91,12 +86,24 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         }
     }
 
+    override fun paint(g: Graphics) {
+        if (image != null) {
+            setWindowMask()
+
+            val g2d = g as Graphics2D
+            g2d.composite = AlphaComposite.Src
+            g2d.drawImage(image, offset.x, offset.y, null)
+            g2d.dispose()
+        }
+    }
+
     private fun setWindowMask() {
         val image = image ?: return
 
         if (!maskCache.containsKey(image)) {
             val width = image.width
             val height = image.height
+
             val rgb = image.getRGB(0, 0, width, height, null, 0, width)
             val rect = Rectangle()
             val mask = Path2D.Double()
