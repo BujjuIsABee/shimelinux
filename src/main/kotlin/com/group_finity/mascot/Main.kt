@@ -782,6 +782,8 @@ class Main {
         if (newImageSets == null) return
 
         val toRemove = imageSets.toMutableList()
+        toRemove.removeAll(newImageSets)
+
         val toAdd = mutableListOf<String>()
         val toRetain = mutableListOf<String>()
 
