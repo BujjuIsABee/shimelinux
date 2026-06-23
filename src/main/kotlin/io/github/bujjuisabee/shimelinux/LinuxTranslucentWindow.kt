@@ -79,7 +79,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     override fun updateImage() {
-        // Only repaint when the image has changed to reduce flickering
+        // Redraw the image if it has been changed
         if (imageChanged) {
             repaint()
             imageChanged = false
@@ -122,12 +122,13 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         }
 
         maskCache[image]?.let {
-            shape = if (!it.isEmpty) {
-                it.createTransformedArea(
-                    AffineTransform.getTranslateInstance(offset.x.toDouble(), offset.y.toDouble())
+            if (!it.isEmpty) {
+                shape = it.createTransformedArea(
+                    AffineTransform.getTranslateInstance(
+                        offset.x.toDouble(),
+                        offset.y.toDouble()
+                    )
                 )
-            } else {
-                null
             }
         }
     }
