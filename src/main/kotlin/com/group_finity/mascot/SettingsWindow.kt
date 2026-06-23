@@ -112,7 +112,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
     private var opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
     private var filter = Main.instance.properties.getProperty("Filter", "Nearest")
-    private var theme = Main.instance.properties.getProperty("Theme", "GTK")
+    private var theme = Main.instance.properties.getProperty("Theme", "FlatDark")
     private val initialTheme = theme
     private val lightTheme = Properties()
     private val darkTheme = Properties()
@@ -279,12 +279,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         interactiveWindowsTab.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
 
         themeComboBox = JComboBox<String>()
-        themeComboBox.addItem("GTK")
-        themeComboBox.addItem("Flat Light")
         themeComboBox.addItem("Flat Dark")
-
-        gtkCard = JPanel(GridBagLayout())
-        gtkCard.add(JLabel(lang.getString("ThemeCannotBeCustomized")))
+        themeComboBox.addItem("Flat Light")
+        themeComboBox.addItem("GTK")
 
         backgroundColorButton = JButton(lang.getString("Change"))
         backgroundColorButton.addActionListener { handleChangeBackgroundColorButtonAction() }
@@ -365,17 +362,20 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatCard.add(customizeThemePanel, BorderLayout.NORTH)
         flatCard.add(resetButtonPanel, BorderLayout.SOUTH)
 
+        gtkCard = JPanel(GridBagLayout())
+        gtkCard.add(JLabel(lang.getString("ThemeCannotBeCustomized")))
+
         val cardLayout = CardLayout()
         themeCards = JPanel(cardLayout)
-        themeCards.add(gtkCard, "GtkCard")
         themeCards.add(flatCard, "FlatCard")
+        themeCards.add(gtkCard, "GtkCard")
 
-        val themeMap = mapOf(0 to "GTK", 1 to "FlatLight", 2 to "FlatDark")
+        val themeMap = mapOf(0 to "FlatDark", 1 to "FlatLight", 2 to "GTK")
         val indexMap = themeMap.entries.associate { it.value to it.key }
         themeComboBox.addItemListener {
-            theme = themeMap[themeComboBox.selectedIndex] ?: "GTK"
+            theme = themeMap[themeComboBox.selectedIndex] ?: "FlatDark"
             refreshTheme()
-            cardLayout.show(themeCards, if (theme == "GTK") "GtkCard" else "FlatCard")
+            cardLayout.show(themeCards, if (theme == "Flat") "FlatCard" else "GtkCard")
         }
 
         // Set the selected index after adding the item listener so the correct card is shown
@@ -625,10 +625,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         UIManager.setLookAndFeel(
             when (theme) {
-                "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
                 "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                else -> "com.formdev.flatlaf.FlatDarkLaf"
             }
         )
 

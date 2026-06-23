@@ -125,11 +125,11 @@ class Main {
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
             UIManager.setLookAndFeel(
-                when (properties.getProperty("Theme", "GTK")) {
-                    "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                when (properties.getProperty("Theme", "FlatDark")) {
                     "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    else -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                    "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                    else -> "com.formdev.flatlaf.FlatDarkLaf"
                 }
             )
         } catch (_: Exception) {
