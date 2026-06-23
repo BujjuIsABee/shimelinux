@@ -24,7 +24,6 @@ package com.group_finity.mascot
 
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.BorderLayout
-import java.awt.CardLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
@@ -32,6 +31,7 @@ import java.awt.Font
 import java.awt.Frame
 import java.awt.GridBagLayout
 import java.awt.Image
+import java.util.Hashtable
 import java.util.Properties
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
@@ -83,10 +83,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val removeInteractiveWindowButton: JButton
     private val themeTab: JPanel
     private val themeComboBox: JComboBox<String>
-    private val themeCards: JPanel
-    private val gtkCard: JPanel
-    private val flatCard: JPanel
-    private val customizeThemePanel: JPanel
+    private val flatThemePanel: JPanel
+    private val flatThemeColorsPanel: JPanel
     private val backgroundColorPanel: JPanel
     private val backgroundColorRightPanel: JPanel
     private val backgroundColorButton: JButton
@@ -96,6 +94,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val accentColorPanel: JPanel
     private val accentColorRightPanel: JPanel
     private val accentColorButton: JButton
+    private val themeFooterPanel: JPanel
+    private val menuScalingLabel: JLabel
+    private val menuScalingSlider: JSlider
     private val resetButtonPanel: JPanel
     private val resetButton: JButton
     private val aboutTab: JPanel
@@ -113,17 +114,18 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
     private var filter = Main.instance.properties.getProperty("Filter", "Nearest")
     private var theme = Main.instance.properties.getProperty("Theme", "FlatDark")
+    private var menuScaling = Main.instance.properties.getProperty("MenuDPI", "96").toInt()
     private val initialTheme = theme
-    private val lightTheme = Properties()
     private val darkTheme = Properties()
-    private val initialLightBackgroundColor: String
-    private val initialLightTextColor: String
-    private val initialLightAccentColor: String
+    private val lightTheme = Properties()
     private val initialDarkBackgroundColor: String
     private val initialDarkTextColor: String
     private val initialDarkAccentColor: String
+    private val initialLightBackgroundColor: String
+    private val initialLightTextColor: String
+    private val initialLightAccentColor: String
 
-    var isEnvironmentReloadRequired = false
+    var isRestartRequired = false
     var isImageReloadRequired = false
     var isInteractiveWindowReloadRequired = false
 
@@ -134,23 +136,23 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         layout = BorderLayout()
 
         try {
-            Main.getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
-                lightTheme.load(it)
-            }
-
             Main.getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
                 darkTheme.load(it)
+            }
+
+            Main.getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
+                lightTheme.load(it)
             }
         } catch (_: Exception) {
         }
 
         // Store initial theme colors
-        initialLightBackgroundColor = lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
-        initialLightTextColor = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
-        initialLightAccentColor = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
         initialDarkBackgroundColor = darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
         initialDarkTextColor = darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
         initialDarkAccentColor = darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+        initialLightBackgroundColor = lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
+        initialLightTextColor = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
+        initialLightAccentColor = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
 
         alwaysShowShimejiChooserCheckBox = JCheckBox(lang.getString("AlwaysShowShimejiChooser"))
         alwaysShowShimejiChooserCheckBox.isSelected = alwaysShowShimejiChooser
@@ -298,8 +300,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             getColorPreview(
                 backgroundColorButton,
                 "@background",
-                DEFAULT_LIGHT_BACKGROUND_COLOR,
-                DEFAULT_DARK_BACKGROUND_COLOR
+                DEFAULT_DARK_BACKGROUND_COLOR,
+                DEFAULT_LIGHT_BACKGROUND_COLOR
             )
         )
         backgroundColorRightPanel.add(Box.createHorizontalStrut(3))
@@ -315,8 +317,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             getColorPreview(
                 textColorButton,
                 "@foreground",
-                DEFAULT_LIGHT_TEXT_COLOR,
-                DEFAULT_DARK_TEXT_COLOR
+                DEFAULT_DARK_TEXT_COLOR,
+                DEFAULT_LIGHT_TEXT_COLOR
             )
         )
         textColorRightPanel.add(Box.createHorizontalStrut(3))
@@ -343,48 +345,72 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         accentColorPanel.add(JLabel(lang.getString("AccentColour")), BorderLayout.WEST)
         accentColorPanel.add(accentColorRightPanel, BorderLayout.EAST)
 
-        customizeThemePanel = JPanel()
-        customizeThemePanel.layout = BoxLayout(customizeThemePanel, BoxLayout.Y_AXIS)
-        customizeThemePanel.add(Box.createVerticalStrut(6))
-        customizeThemePanel.add(backgroundColorPanel)
-        customizeThemePanel.add(Box.createVerticalStrut(6))
-        customizeThemePanel.add(textColorPanel)
-        customizeThemePanel.add(Box.createVerticalStrut(6))
-        customizeThemePanel.add(accentColorPanel)
+        flatThemeColorsPanel = JPanel()
+        flatThemeColorsPanel.layout = BoxLayout(flatThemeColorsPanel, BoxLayout.Y_AXIS)
+        flatThemeColorsPanel.add(Box.createVerticalStrut(6))
+        flatThemeColorsPanel.add(backgroundColorPanel)
+        flatThemeColorsPanel.add(Box.createVerticalStrut(6))
+        flatThemeColorsPanel.add(textColorPanel)
+        flatThemeColorsPanel.add(Box.createVerticalStrut(6))
+        flatThemeColorsPanel.add(accentColorPanel)
 
-        resetButton = JButton(lang.getString("Reset"))
-        resetButton.addActionListener { handleResetThemeButtonAction() }
-
-        resetButtonPanel = JPanel(FlowLayout())
-        resetButtonPanel.add(resetButton)
-
-        flatCard = JPanel(BorderLayout())
-        flatCard.add(customizeThemePanel, BorderLayout.NORTH)
-        flatCard.add(resetButtonPanel, BorderLayout.SOUTH)
-
-        gtkCard = JPanel(GridBagLayout())
-        gtkCard.add(JLabel(lang.getString("ThemeCannotBeCustomized")))
-
-        val cardLayout = CardLayout()
-        themeCards = JPanel(cardLayout)
-        themeCards.add(flatCard, "FlatCard")
-        themeCards.add(gtkCard, "GtkCard")
+        flatThemePanel = JPanel(BorderLayout())
+        flatThemePanel.add(flatThemeColorsPanel, BorderLayout.NORTH)
 
         val themeMap = mapOf(0 to "FlatDark", 1 to "FlatLight", 2 to "GTK")
         val indexMap = themeMap.entries.associate { it.value to it.key }
         themeComboBox.addItemListener {
             theme = themeMap[themeComboBox.selectedIndex] ?: "FlatDark"
             refreshTheme()
-            cardLayout.show(themeCards, if (theme == "Flat") "FlatCard" else "GtkCard")
+            flatThemePanel.isVisible = themeComboBox.selectedIndex != 2
         }
 
         // Set the selected index after adding the item listener so the correct card is shown
         themeComboBox.selectedIndex = indexMap[theme] ?: 0
 
+        resetButton = JButton(lang.getString("Reset"))
+        resetButton.addActionListener { handleResetButtonAction() }
+
+        resetButtonPanel = JPanel()
+        resetButtonPanel.alignmentX = CENTER_ALIGNMENT
+        resetButtonPanel.add(resetButton)
+
+        menuScalingLabel = JLabel(lang.getString("MenuScaling"))
+        menuScalingLabel.alignmentX = CENTER_ALIGNMENT
+
+        menuScalingSlider = JSlider()
+        menuScalingSlider.minimum = 1
+        menuScalingSlider.maximum = 3
+        menuScalingSlider.majorTickSpacing = 1
+        menuScalingSlider.paintTicks = true
+        menuScalingSlider.snapToTicks = true
+        menuScalingSlider.paintLabels = true
+        menuScalingSlider.labelTable = Hashtable(
+            mapOf(
+                1 to JLabel("1.0"),
+                2 to JLabel("2.0"),
+                3 to JLabel("3.0")
+            )
+        )
+        menuScalingSlider.value = menuScaling / 96
+        menuScalingSlider.addChangeListener {
+            if (menuScalingSlider.value != menuScaling / 96) {
+                menuScaling = menuScalingSlider.value * 96
+                isRestartRequired = true
+            }
+        }
+
+        themeFooterPanel = JPanel()
+        themeFooterPanel.layout = BoxLayout(themeFooterPanel, BoxLayout.Y_AXIS)
+        themeFooterPanel.add(menuScalingLabel)
+        themeFooterPanel.add(menuScalingSlider)
+        themeFooterPanel.add(resetButtonPanel)
+
         themeTab = JPanel(BorderLayout())
         themeTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         themeTab.add(themeComboBox, BorderLayout.NORTH)
-        themeTab.add(themeCards, BorderLayout.CENTER)
+        themeTab.add(flatThemePanel, BorderLayout.CENTER)
+        themeTab.add(themeFooterPanel, BorderLayout.SOUTH)
 
         aboutImageLabel = JLabel()
         aboutImageLabel.icon = ImageIcon(icon.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
@@ -473,89 +499,90 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun handleChangeBackgroundColorButtonAction() {
+        val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
+        val defaultColor = if (themeComboBox.selectedIndex == 0) DEFAULT_DARK_BACKGROUND_COLOR else DEFAULT_LIGHT_BACKGROUND_COLOR
+
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
             lang.getString("ChooseBackgroundColour"),
-            Color.decode(
-                if (themeComboBox.selectedIndex == 1) {
-                    lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
-                } else {
-                    darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
-                }
-            ),
+            Color.decode(selectedTheme.getProperty("@background", defaultColor)),
             false
         )
 
         if (color != null) {
-            val selectedTheme = if (themeComboBox.selectedIndex == 1) lightTheme else darkTheme
             selectedTheme.setProperty("@background", getHex(color))
             refreshTheme()
         }
     }
 
     private fun handleChangeTextColorButtonAction() {
+        val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
+        val defaultColor = if (themeComboBox.selectedIndex == 0) DEFAULT_DARK_TEXT_COLOR else DEFAULT_LIGHT_TEXT_COLOR
+
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
             lang.getString("ChooseTextColour"),
-            Color.decode(
-                if (themeComboBox.selectedIndex == 1) {
-                    lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
-                } else {
-                    darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
-                }
-            ),
+            Color.decode(selectedTheme.getProperty("@foreground", defaultColor)),
             false
         )
 
         if (color != null) {
-            val selectedTheme = if (themeComboBox.selectedIndex == 1) lightTheme else darkTheme
+            val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
             selectedTheme.setProperty("@foreground", getHex(color))
             refreshTheme()
         }
     }
 
     private fun handleChangeAccentColorButtonAction() {
+        val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
+        val defaultColor = DEFAULT_ACCENT_COLOR
+
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
             lang.getString("ChooseAccentColour"),
-            Color.decode(
-                if (themeComboBox.selectedIndex == 1) {
-                    lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-                } else {
-                    darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-                }
-            ),
+            Color.decode(selectedTheme.getProperty("@accentColor", defaultColor)),
             false
         )
 
         if (color != null) {
-            val selectedTheme = if (themeComboBox.selectedIndex == 1) lightTheme else darkTheme
             selectedTheme.setProperty("@accentColor", getHex(color))
             refreshTheme()
         }
     }
 
-    private fun handleResetThemeButtonAction() {
-        if (themeComboBox.selectedIndex == 1) {
-            lightTheme.setProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
-            lightTheme.setProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
-            lightTheme.setProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-        } else {
+    private fun handleResetButtonAction() {
+        if (themeComboBox.selectedIndex == 0) {
             darkTheme.setProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
             darkTheme.setProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
             darkTheme.setProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+        } else if (themeComboBox.selectedIndex == 1) {
+            lightTheme.setProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
+            lightTheme.setProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
+            lightTheme.setProperty("@accentColor", DEFAULT_ACCENT_COLOR)
         }
 
         refreshTheme()
     }
 
     private fun handleDone() {
+        if (isRestartRequired) {
+            val response = JOptionPane.showConfirmDialog(
+                this,
+                lang.getString("RestartRequiredMessage"),
+                lang.getString("RestartRequired"),
+                JOptionPane.YES_NO_OPTION
+            )
+
+            isRestartRequired = response == JOptionPane.YES_OPTION
+        }
+
         Main.instance.properties.setProperty("AlwaysShowShimejiChooser", alwaysShowShimejiChooser.toString())
         Main.instance.properties.setProperty("AlwaysShowInformationScreen", alwaysShowInformationScreen.toString())
         Main.instance.properties.setProperty("Scaling", scaling.toString())
         Main.instance.properties.setProperty("Opacity", opacity.toString())
         Main.instance.properties.setProperty("Filter", filter.toString())
         Main.instance.properties.setProperty("Theme", theme)
+        Main.instance.properties.setProperty("MenuDPI", menuScaling.toString())
 
         val whitelist = whitelistModel.elements().toList().toString()
             .replace("[", "")
@@ -579,16 +606,16 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun handleCancel() {
         // Reset theme
-        lightTheme.setProperty("@background", initialLightBackgroundColor)
-        lightTheme.setProperty("@foreground", initialLightTextColor)
-        lightTheme.setProperty("@accentColor", initialLightAccentColor)
         darkTheme.setProperty("@background", initialDarkBackgroundColor)
         darkTheme.setProperty("@foreground", initialDarkTextColor)
         darkTheme.setProperty("@accentColor", initialDarkAccentColor)
+        lightTheme.setProperty("@background", initialLightBackgroundColor)
+        lightTheme.setProperty("@foreground", initialLightTextColor)
+        lightTheme.setProperty("@accentColor", initialLightAccentColor)
         theme = initialTheme
         refreshTheme()
 
-        isEnvironmentReloadRequired = false
+        isRestartRequired = false
         isImageReloadRequired = false
         isInteractiveWindowReloadRequired = false
 
@@ -598,29 +625,29 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private fun getColorPreview(
         button: JButton,
         colorKey: String,
-        colorLight: String,
-        colorDark: String
+        colorDark: String,
+        colorLight: String
     ) = object : JPanel() {
         override fun getPreferredSize() = Dimension(button.preferredSize.height, button.preferredSize.height)
 
         override fun getBorder() = BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"), 1)
 
         override fun getBackground() = Color.decode(
-            if (themeComboBox.selectedIndex == 1) {
-                lightTheme.getProperty(colorKey, colorLight)
-            } else {
+            if (themeComboBox.selectedIndex == 0) {
                 darkTheme.getProperty(colorKey, colorDark)
+            } else {
+                lightTheme.getProperty(colorKey, colorLight)
             }
         )
     }
 
     private fun refreshTheme() {
-        Main.getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
-            lightTheme.store(it, "Flat Light Theme")
-        }
-
         Main.getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
             darkTheme.store(it, "Flat Dark Theme")
+        }
+
+        Main.getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
+            lightTheme.store(it, "Flat Light Theme")
         }
 
         UIManager.setLookAndFeel(
@@ -641,10 +668,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     companion object {
-        private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
-        private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
         private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
         private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
+        private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
+        private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
         private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
 
         private fun getHex(color: Color) = String.format("#%06X", color.rgb and 0xFFFFFF)

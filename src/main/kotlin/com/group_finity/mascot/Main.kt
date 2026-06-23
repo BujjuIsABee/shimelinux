@@ -60,11 +60,11 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     try {
-        Main.instance.init()
-
         if (!args.contains("DEBUG")) {
             Main.configureLogging()
         }
+
+        Main.instance.init()
 
         SwingUtilities.invokeLater {
             Main.instance.run()
@@ -103,19 +103,6 @@ class Main {
             if (properties.containsKey("MenuDPI")) {
                 val menuScaling = properties.getProperty("MenuDPI", "96").toInt() / 96.0f
                 System.setProperty("sun.java2d.uiScale", menuScaling.toString())
-            } else {
-                val dpi = Toolkit.getDefaultToolkit().screenResolution.coerceAtLeast(96)
-                properties.setProperty("MenuDPI", dpi.toString())
-                updateConfigFile()
-
-                if (dpi != 96) {
-                    // Restart
-                    val jarPath = this::class.java.protectionDomain.codeSource.location.path
-                    val restartProcess = ProcessBuilder("java", "-jar", jarPath)
-                    restartProcess.directory(File(System.getProperty("user.dir")))
-                    restartProcess.start()
-                    exitProcess(0)
-                }
             }
         } catch (_: Exception) {
         }
@@ -454,11 +441,15 @@ class Main {
             val settings = SettingsWindow(null, true)
             settings.isVisible = true
 
-            if (settings.isEnvironmentReloadRequired) {
-                NativeFactory.instance.getEnvironment().dispose()
-                NativeFactory.resetInstance()
+            if (settings.isRestartRequired) {
+                // Restart
+                val jarPath = this::class.java.protectionDomain.codeSource.location.path
+                val restartProcess = ProcessBuilder("java", "-jar", jarPath)
+                restartProcess.directory(File(System.getProperty("user.dir")))
+                restartProcess.start()
+                exit()
             }
-            if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
+            if (settings.isImageReloadRequired) {
                 val isExitOnLastRemoved = manager.isExitOnLastRemoved
                 manager.isExitOnLastRemoved = false
                 manager.disposeAll()
