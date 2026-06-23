@@ -22,6 +22,8 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatClientProperties
+import com.formdev.flatlaf.ui.FlatLineBorder
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.BorderLayout
 import java.awt.Color
@@ -31,6 +33,7 @@ import java.awt.Font
 import java.awt.Frame
 import java.awt.GridBagLayout
 import java.awt.Image
+import java.awt.Insets
 import java.util.Hashtable
 import java.util.Properties
 import javax.imageio.ImageIO
@@ -81,7 +84,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val interactiveWindowsButtonsPanel: JPanel
     private val addInteractiveWindowButton: JButton
     private val removeInteractiveWindowButton: JButton
-    private val themeTab: JPanel
+    private val menuTab: JPanel
     private val themeComboBox: JComboBox<String>
     private val flatThemePanel: JPanel
     private val flatThemeColorsPanel: JPanel
@@ -94,8 +97,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val accentColorPanel: JPanel
     private val accentColorRightPanel: JPanel
     private val accentColorButton: JButton
-    private val themeFooterPanel: JPanel
-    private val menuScalingLabel: JLabel
+    private val gtkThemePanel: JPanel
+    private val themePanel: JPanel
+    private val menuScalingPanel: JPanel
     private val menuScalingSlider: JSlider
     private val resetButtonPanel: JPanel
     private val resetButton: JButton
@@ -132,6 +136,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     init {
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
+        minimumSize = Dimension(500, 470)
         title = lang.getString("Settings")
         layout = BorderLayout()
 
@@ -170,6 +175,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         scalingSlider.maximum = 80
         scalingSlider.majorTickSpacing = 10
         scalingSlider.minorTickSpacing = 5
+        scalingSlider.paintLabels = true
         scalingSlider.paintTicks = true
         scalingSlider.snapToTicks = true
         scalingSlider.value = (scaling * 10.0).toInt()
@@ -187,6 +193,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         opacitySlider = JSlider()
         opacitySlider.majorTickSpacing = 10
         opacitySlider.minorTickSpacing = 5
+        opacitySlider.paintLabels = true
         opacitySlider.paintTicks = true
         opacitySlider.snapToTicks = true
         opacitySlider.value = (opacity * 100.0).toInt()
@@ -219,7 +226,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         hqxRadioButton.isSelected = filter == "Hqx"
         hqxRadioButton.addChangeListener {
             if (hqxRadioButton.isSelected && filter != "Hqx") {
-                filter = "hqx"
+                filter = "Hqx"
                 isImageReloadRequired = true
             }
         }
@@ -234,10 +241,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         generalTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         generalTab.add(alwaysShowShimejiChooserCheckBox)
         generalTab.add(alwaysShowInformationScreenCheckBox)
+        generalTab.add(Box.createVerticalStrut(10))
         generalTab.add(JLabel(lang.getString("Scaling")))
         generalTab.add(scalingSlider)
+        generalTab.add(Box.createVerticalStrut(10))
         generalTab.add(JLabel(lang.getString("Opacity")))
         generalTab.add(opacitySlider)
+        generalTab.add(Box.createVerticalStrut(10))
         generalTab.add(JLabel(lang.getString("FilterOptions")))
         generalTab.add(nearestNeighborRadioButton)
         generalTab.add(bicubicRadioButton)
@@ -354,20 +364,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeColorsPanel.add(Box.createVerticalStrut(6))
         flatThemeColorsPanel.add(accentColorPanel)
 
-        flatThemePanel = JPanel(BorderLayout())
-        flatThemePanel.add(flatThemeColorsPanel, BorderLayout.NORTH)
-
-        val themeMap = mapOf(0 to "FlatDark", 1 to "FlatLight", 2 to "GTK")
-        val indexMap = themeMap.entries.associate { it.value to it.key }
-        themeComboBox.addItemListener {
-            theme = themeMap[themeComboBox.selectedIndex] ?: "FlatDark"
-            refreshTheme()
-            flatThemePanel.isVisible = themeComboBox.selectedIndex != 2
-        }
-
-        // Set the selected index after adding the item listener so the correct card is shown
-        themeComboBox.selectedIndex = indexMap[theme] ?: 0
-
         resetButton = JButton(lang.getString("Reset"))
         resetButton.addActionListener { handleResetButtonAction() }
 
@@ -375,8 +371,33 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         resetButtonPanel.alignmentX = CENTER_ALIGNMENT
         resetButtonPanel.add(resetButton)
 
-        menuScalingLabel = JLabel(lang.getString("MenuScaling"))
-        menuScalingLabel.alignmentX = CENTER_ALIGNMENT
+        flatThemePanel = JPanel(BorderLayout())
+        flatThemePanel.add(flatThemeColorsPanel, BorderLayout.NORTH)
+        flatThemePanel.add(resetButtonPanel, BorderLayout.SOUTH)
+
+        gtkThemePanel = JPanel(GridBagLayout())
+        gtkThemePanel.add(JLabel(lang.getString("GtkThemeMessage")))
+
+        val themeMap = mapOf(0 to "FlatDark", 1 to "FlatLight", 2 to "GTK")
+        val indexMap = themeMap.entries.associate { it.value to it.key }
+
+        themeComboBox.selectedIndex = indexMap[theme] ?: 0
+        themeComboBox.addItemListener {
+            theme = themeMap[themeComboBox.selectedIndex] ?: "FlatDark"
+            refreshTheme()
+            flatThemePanel.isVisible = themeComboBox.selectedIndex != 2
+            gtkThemePanel.isVisible = themeComboBox.selectedIndex == 2
+        }
+
+        flatThemePanel.isVisible = themeComboBox.selectedIndex != 2
+        gtkThemePanel.isVisible = themeComboBox.selectedIndex == 2
+
+        themePanel = JPanel()
+        themePanel.layout = BoxLayout(themePanel, BoxLayout.Y_AXIS)
+        themePanel.border = BorderFactory.createTitledBorder(lang.getString("Theme"))
+        themePanel.add(themeComboBox)
+        themePanel.add(flatThemePanel)
+        themePanel.add(gtkThemePanel)
 
         menuScalingSlider = JSlider()
         menuScalingSlider.minimum = 1
@@ -400,17 +421,15 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        themeFooterPanel = JPanel()
-        themeFooterPanel.layout = BoxLayout(themeFooterPanel, BoxLayout.Y_AXIS)
-        themeFooterPanel.add(menuScalingLabel)
-        themeFooterPanel.add(menuScalingSlider)
-        themeFooterPanel.add(resetButtonPanel)
+        menuScalingPanel = JPanel()
+        menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
+        menuScalingPanel.border = BorderFactory.createTitledBorder(lang.getString("MenuScaling"))
+        menuScalingPanel.add(menuScalingSlider)
 
-        themeTab = JPanel(BorderLayout())
-        themeTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        themeTab.add(themeComboBox, BorderLayout.NORTH)
-        themeTab.add(flatThemePanel, BorderLayout.CENTER)
-        themeTab.add(themeFooterPanel, BorderLayout.SOUTH)
+        menuTab = JPanel(BorderLayout())
+        menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        menuTab.add(themePanel, BorderLayout.CENTER)
+        menuTab.add(menuScalingPanel, BorderLayout.NORTH)
 
         aboutImageLabel = JLabel()
         aboutImageLabel.icon = ImageIcon(icon.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
@@ -435,7 +454,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         mainTabs = JTabbedPane()
         mainTabs.addTab(lang.getString("General"), generalTab)
         mainTabs.addTab(lang.getString("InteractiveWindows"), interactiveWindowsTab)
-        mainTabs.addTab(lang.getString("Theme"), themeTab)
+        mainTabs.addTab(lang.getString("Menu"), menuTab)
         mainTabs.addTab(lang.getString("About"), aboutTab)
 
         // Don't show interactive windows tab unless the KDE environment is used
@@ -551,6 +570,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun handleResetButtonAction() {
+        // Reset current theme colors
         if (themeComboBox.selectedIndex == 0) {
             darkTheme.setProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
             darkTheme.setProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
@@ -628,9 +648,16 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         colorDark: String,
         colorLight: String
     ) = object : JPanel() {
-        override fun getPreferredSize() = Dimension(button.preferredSize.height, button.preferredSize.height)
+        init {
+            isOpaque = false
 
-        override fun getBorder() = BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"), 1)
+            putClientProperty(FlatClientProperties.STYLE, "arc: 16")
+        }
+
+        override fun getPreferredSize() = Dimension(
+            button.preferredSize.height,
+            button.preferredSize.height
+        )
 
         override fun getBackground() = Color.decode(
             if (themeComboBox.selectedIndex == 0) {
@@ -638,6 +665,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             } else {
                 lightTheme.getProperty(colorKey, colorLight)
             }
+        )
+
+        override fun getBorder() = FlatLineBorder(
+            Insets(15, 15, 15, 15),
+            UIManager.getColor("Component.borderColor"),
+            1.0f,
+            15
         )
     }
 

@@ -81,7 +81,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setIconImage(icon)
         title = lang.getString("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)
-        contentPane = JPanel(BorderLayout())
+        contentPane.layout = BorderLayout()
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
         list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
@@ -93,6 +93,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         listScrollPane = JScrollPane(listPanel)
         listScrollPane.preferredSize = Dimension(518, 100)
+        listScrollPane.verticalScrollBar.unitIncrement = 10
 
         clearAllLabel = JLabel("<html><u>" + lang.getString("ClearAll") + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)

@@ -22,7 +22,6 @@
 
 package com.group_finity.mascot.imagesetchooser
 
-import java.awt.Component
 import javax.swing.DefaultListModel
 import javax.swing.JList
 import javax.swing.ListCellRenderer

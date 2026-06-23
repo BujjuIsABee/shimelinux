@@ -63,6 +63,7 @@ class DebugWindow(imageSet: String) : JFrame() {
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
         title = imageSet
+        isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
         behaviorLabel = JLabel(lang.getString("Behaviour"))

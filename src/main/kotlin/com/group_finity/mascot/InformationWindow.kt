@@ -55,6 +55,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
         title = if (config.containsInformationKey("Name")) config.getInformation("Name") else lang.getString("Information")
+        isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
 
