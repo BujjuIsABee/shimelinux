@@ -118,7 +118,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
     private var filter = Main.instance.properties.getProperty("Filter", "Nearest")
     private var theme = Main.instance.properties.getProperty("Theme", "FlatDark")
-    private var menuScaling = Main.instance.properties.getProperty("MenuDPI", "96").toInt()
+    private var menuScaling = Main.instance.properties.getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1").toInt()
     private val initialTheme = theme
     private val darkTheme = Properties()
     private val lightTheme = Properties()
@@ -408,15 +408,15 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuScalingSlider.paintLabels = true
         menuScalingSlider.labelTable = Hashtable(
             mapOf(
-                1 to JLabel("1.0"),
-                2 to JLabel("2.0"),
-                3 to JLabel("3.0")
+                1 to JLabel("1x"),
+                2 to JLabel("2x"),
+                3 to JLabel("3x")
             )
         )
-        menuScalingSlider.value = menuScaling / 96
+        menuScalingSlider.value = menuScaling
         menuScalingSlider.addChangeListener {
-            if (menuScalingSlider.value != menuScaling / 96) {
-                menuScaling = menuScalingSlider.value * 96
+            if (menuScalingSlider.value != menuScaling) {
+                menuScaling = menuScalingSlider.value
                 isRestartRequired = true
             }
         }
@@ -602,7 +602,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         Main.instance.properties.setProperty("Opacity", opacity.toString())
         Main.instance.properties.setProperty("Filter", filter.toString())
         Main.instance.properties.setProperty("Theme", theme)
-        Main.instance.properties.setProperty("MenuDPI", menuScaling.toString())
+        Main.instance.properties.setProperty("MenuScaling", menuScaling.toString())
 
         val whitelist = whitelistModel.elements().toList().toString()
             .replace("[", "")
@@ -671,7 +671,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             Insets(15, 15, 15, 15),
             UIManager.getColor("Component.borderColor"),
             1.0f,
-            15
+            16
         )
     }
 

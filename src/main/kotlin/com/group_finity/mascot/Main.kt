@@ -100,10 +100,8 @@ class Main {
             getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
 
             // Set menu scaling
-            if (properties.containsKey("MenuDPI")) {
-                val menuScaling = properties.getProperty("MenuDPI", "96").toInt() / 96.0f
-                System.setProperty("sun.java2d.uiScale", menuScaling.toString())
-            }
+            val menuScaling = properties.getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1").toInt()
+            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
         } catch (_: Exception) {
         }
 
