@@ -136,7 +136,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     init {
         val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
-        minimumSize = Dimension(500, 470)
         title = lang.getString("Settings")
         layout = BorderLayout()
 
@@ -699,6 +698,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             SwingUtilities.updateComponentTreeUI(window)
         }
+
+        pack()
     }
 
     companion object {
