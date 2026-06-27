@@ -216,28 +216,19 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            candidates.addAll(
-                behaviorBuilders.values.filter {
-                    it.isEffective(context) &&
-                    isBehaviorEnabled(it, mascot)
-                }
-            )
-
-            if (candidates.isEmpty()) {
-                mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-                   Point(
-                        (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
-                        mascot.environment.screen.top - 256
-                    )
-                } else {
-                    Point(
-                        (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
-                        mascot.environment.workArea.top - 256
-                    )
-                }
-
-                return buildBehavior(schema.getString(UserBehavior.BEHAVIOR_FALL))
+            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                Point(
+                    (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
+                    mascot.environment.screen.top - 256
+                )
+            } else {
+                Point(
+                    (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
+                    mascot.environment.workArea.top - 256
+                )
             }
+
+            return buildBehavior(schema.getString(UserBehavior.BEHAVIOR_FALL))
         }
 
         // Randomly pick behavior from candidates

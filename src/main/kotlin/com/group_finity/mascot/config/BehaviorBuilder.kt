@@ -36,7 +36,7 @@ import java.util.logging.Logger
 class BehaviorBuilder(
     private val configuration: Configuration,
     behaviorNode: Entry,
-    private val conditions: MutableList<String?>
+    private var conditions: MutableList<String?>
 ) {
     val name = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name")))
     private val actionName = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
@@ -50,6 +50,7 @@ class BehaviorBuilder(
     init {
         log.log(Level.INFO, "Loading behavior: $this")
 
+        conditions = conditions.toMutableList()
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
         isToggleable = if (name == UserBehavior.BEHAVIOR_FALL ||

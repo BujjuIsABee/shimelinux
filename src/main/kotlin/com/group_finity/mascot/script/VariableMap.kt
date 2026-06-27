@@ -40,7 +40,7 @@ class VariableMap : Bindings {
         }
     }
 
-    //region Bindings Implementation
+    //region Bindings Impl
     override val keys
         get() = rawMap.keys
     override val values
@@ -54,9 +54,9 @@ class VariableMap : Bindings {
 
     override fun containsValue(value: Any?) = rawMap.containsValue(value)
 
-    override fun containsKey(key: String) = rawMap.containsKey(key)
+    override fun containsKey(key: String) = true
 
-    override fun get(key: String) = rawMap[key]?.get(this)
+    override fun get(key: String) = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() } ?: 0.0
 
     override fun remove(key: String) = rawMap.remove(key)
 
