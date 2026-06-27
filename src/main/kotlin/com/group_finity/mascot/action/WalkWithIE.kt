@@ -36,14 +36,14 @@ class WalkWithIE(
     animations: List<Animation>,
     params: VariableMap
 ) : Move(schema, animations, params) {
-    private val offsetX
-        get() = eval(schema.getString(PARAMETER_IEOFFSETX), Number::class, DEFAULT_IEOFFSETX).toInt()
-    private val offsetY
-        get() = eval(schema.getString(PARAMETER_IEOFFSETY), Number::class, DEFAULT_IEOFFSETY).toInt()
+    private val offsetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETX), DEFAULT_IEOFFSETX).toInt()
+    private val offsetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETY), DEFAULT_IEOFFSETY).toInt()
 
     override fun hasNext(): Boolean {
-        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) return false
-        return super.hasNext()
+        val canThrow = Main.instance.properties.getProperty("Throwing", "true").toBoolean()
+        return super.hasNext() && canThrow
     }
 
     override fun tick() {

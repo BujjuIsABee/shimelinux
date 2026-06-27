@@ -24,11 +24,10 @@ package com.group_finity.mascot.action
 
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
+import com.group_finity.mascot.environment.MascotEnvironment
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
-import kotlin.reflect.KClass
-import kotlin.reflect.cast
 
 abstract class ActionBase(
     internal val schema: ResourceBundle,
@@ -37,32 +36,30 @@ abstract class ActionBase(
 ) : Action {
     internal lateinit var mascot: Mascot
         private set
-    internal open val animation
+    internal open val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) }
-    internal val environment
+    internal val environment: MascotEnvironment
         get() = mascot.environment
-
-    private var startTime = 0
-    var time
-        get() = mascot.time - startTime
+    var time = 0
+        get() = mascot.time - field
         set(value) {
-            startTime = mascot.time - value
+            field = mascot.time - value
         }
 
-    open val isDraggable
-        get() = eval(schema.getString(PARAMETER_DRAGGABLE), Boolean::class, DEFAULT_DRAGGABLE)
-    private val isEffective
-        get() = eval(schema.getString(PARAMETER_CONDITION), Boolean::class, DEFAULT_CONDITION)
-    private val duration
-        get() = eval(schema.getString(PARAMETER_DURATION), Number::class, DEFAULT_DURATION).toInt()
-    internal val affordance
-        get() = eval(schema.getString(PARAMETER_AFFORDANCE), String::class, DEFAULT_AFFORDANCE)
-    private val name
-        get() = eval(schema.getString(PARAMETER_NAME), String::class, DEFAULT_NAME).takeUnless { it == DEFAULT_NAME }
+    open val isDraggable: Boolean
+        get() = eval(schema.getString(PARAMETER_DRAGGABLE), DEFAULT_DRAGGABLE)
+    private val isEffective: Boolean
+        get() = eval(schema.getString(PARAMETER_CONDITION), DEFAULT_CONDITION)
+    private val duration: Int
+        get() = eval<Number>(schema.getString(PARAMETER_DURATION), DEFAULT_DURATION).toInt()
+    internal val affordance: String
+        get() = eval(schema.getString(PARAMETER_AFFORDANCE), DEFAULT_AFFORDANCE)
+    private val name: String?
+        get() = eval(schema.getString(PARAMETER_NAME), DEFAULT_NAME)
 
     override fun init(mascot: Mascot) {
         this.mascot = mascot
-        time = 0
+        this.time = 0
 
         variables["mascot"] = mascot
         variables["action"] = this
@@ -101,9 +98,7 @@ abstract class ActionBase(
     internal open fun refreshHotspots() {
         mascot.hotspots.clear()
         try {
-            for (hotspot in animation?.hotspots.orEmpty()) {
-                mascot.hotspots.add(hotspot)
-            }
+            mascot.hotspots.addAll(animation?.hotspots.orEmpty())
         } catch (_: VariableException) {
             mascot.hotspots.clear()
         }
@@ -117,15 +112,17 @@ abstract class ActionBase(
         }
     }
 
-    internal fun <T : Any> eval(name: String, type: KClass<T>, defaultValue: T): T {
+    internal inline fun <reified T> eval(name: String, defaultValue: T): T {
         synchronized(variables) {
-            val variable = variables.rawMap[name]
-            if (variable != null) return type.cast(variable.get(variables))
+            return variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue
         }
-        return defaultValue
     }
 
-    override fun toString() = "Action (${this::class.java.simpleName}, $name)"
+    override fun toString() = try {
+        "Action (${this::class.java.simpleName}, $name)"
+    } catch (_: VariableException) {
+        "Action (${this::class.java.simpleName}, null)"
+    }
 
     companion object {
         const val PARAMETER_DURATION = "Duration"
@@ -141,6 +138,6 @@ abstract class ActionBase(
         private const val DEFAULT_AFFORDANCE = ""
 
         const val PARAMETER_NAME = "Name"
-        private const val DEFAULT_NAME = "null"
+        private val DEFAULT_NAME = null
     }
 }

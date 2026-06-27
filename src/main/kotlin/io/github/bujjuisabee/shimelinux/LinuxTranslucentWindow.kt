@@ -36,24 +36,24 @@ import java.awt.Rectangle
 import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Path2D
-import java.awt.image.BufferedImage
-import java.util.IdentityHashMap
 import javax.swing.JWindow
 
 class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
-    // Get a translucency capable graphics configuration
-    private val gc: GraphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
-
-    private var image: BufferedImage? = null
+    private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var offset = Point(0, 0)
+    private val maskCache = mutableMapOf<LinuxNativeImage, Area>()
 
-    private val maskCache = IdentityHashMap<BufferedImage, Area>()
+    // Get a graphics configuration that supports transparency
+    private val gc: GraphicsConfiguration =
+        GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
 
     init {
-        System.setProperty("sun.awt.noerasebackground", "true")
-
+        // Make the window translucent
         background = Color(0, 0, 0, 0)
+
+        // Prevents flickering when the background is repainted
+        System.setProperty("sun.awt.noerasebackground", "true")
     }
 
     override fun getGraphicsConfiguration() = gc
@@ -61,7 +61,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     override fun asComponent() = this
 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
-        val screenBounds = NativeFactory.instance.getEnvironment().screen.toRectangle()
+        val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
         val windowBounds = Rectangle(x, y, width, height)
         val newBounds = screenBounds.intersection(windowBounds)
 
@@ -71,10 +71,9 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     override fun setImage(image: NativeImage) {
-        val newImage = (image as LinuxNativeImage).managedImage
-        if (this.image != newImage) {
+        if (image is LinuxNativeImage && this.image != image) {
             imageChanged = true
-            this.image = newImage
+            this.image = image
         }
     }
 
@@ -87,6 +86,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     override fun paint(g: Graphics) {
+        val image = image?.managedImage
         if (image != null) {
             setWindowMask()
 
@@ -98,38 +98,36 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
     }
 
     private fun setWindowMask() {
-        val image = image ?: return
-
-        if (!maskCache.containsKey(image)) {
+        val nativeImage = image ?: return
+        val mask = maskCache.getOrPut(nativeImage) {
+            val image = nativeImage.managedImage
             val width = image.width
             val height = image.height
-
             val rgb = image.getRGB(0, 0, width, height, null, 0, width)
-            val rect = Rectangle()
-            val mask = Path2D.Double()
 
+            val rect = Rectangle(0, 0, 1, 1)
+            val mask = Path2D.Double()
             for (x in 0 until width) {
                 for (y in 0 until height) {
                     val color = Color(rgb[y * width + x], true)
                     if (color.alpha > 0) {
-                        rect.setBounds(x, y, 1, 1)
+                        rect.x = x
+                        rect.y = y
                         mask.append(rect, false)
                     }
                 }
             }
 
-            maskCache[image] = Area(mask)
+            Area(mask)
         }
 
-        maskCache[image]?.let {
-            if (!it.isEmpty) {
-                shape = it.createTransformedArea(
-                    AffineTransform.getTranslateInstance(
-                        offset.x.toDouble(),
-                        offset.y.toDouble()
-                    )
+        mask.takeUnless { it.isEmpty }?.let {
+            shape = it.createTransformedArea(
+                AffineTransform.getTranslateInstance(
+                    offset.x.toDouble(),
+                    offset.y.toDouble()
                 )
-            }
+            )
         }
     }
 }

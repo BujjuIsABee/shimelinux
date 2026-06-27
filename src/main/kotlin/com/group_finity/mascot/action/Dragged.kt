@@ -41,12 +41,12 @@ class Dragged(
     private var scaling = 0.0
     var timeToRegist = 0
 
-    private val offsetX
-        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
-    private val offsetY
-        get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class, DEFAULT_OFFSETY).toInt()
-    private val offsetType
-        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class, DEFAULT_OFFSETTYPE)
+    private val offsetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
+    private val offsetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
+    private val offsetType: String
+        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), DEFAULT_OFFSETTYPE)
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -94,9 +94,7 @@ class Dragged(
             cursor.y + offsetY
         )
 
-        if (time == timeToRegist - 1 && Math.random() >= 0.1) {
-            timeToRegist++
-        }
+        if (time == timeToRegist - 1 && Math.random() >= 0.1) timeToRegist++
     }
 
     override fun refreshHotspots() {

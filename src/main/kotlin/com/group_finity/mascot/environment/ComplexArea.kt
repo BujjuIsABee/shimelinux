@@ -27,32 +27,18 @@ import java.awt.Rectangle
 
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
-    val areas
+    val areas: Collection<Area>
         get() = areaMap.values
 
     fun set(rectangles: Map<String, Rectangle>) {
         retain(rectangles.keys)
-        for (entry in rectangles.entries) {
-            set(entry.key, entry.value)
-        }
+        rectangles.forEach { (key, value) -> set(key, value) }
     }
 
     fun set(name: String, value: Rectangle) {
-        for (area in areaMap.values) {
-            if (area.left == value.x &&
-                area.top == value.y &&
-                area.width == value.width &&
-                area.height == value.height
-            ) {
-                return
-            }
-        }
+        if (areaMap.values.any { it.left == value.x && it.top == value.y && it.width == value.width && it.height == value.height }) return
 
-        var area = areaMap[name]
-        if (area == null) {
-            area = Area()
-            areaMap[name] = area
-        }
+        val area = areaMap.getOrPut(name) { Area() }
         area.set(value)
     }
 

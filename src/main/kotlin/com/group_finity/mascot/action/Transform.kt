@@ -36,26 +36,28 @@ class Transform(
     animations: List<Animation>,
     params: VariableMap
 ) : Animate(schema, animations, params) {
-    private val transformBehavior
-        get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOUR), String::class, DEFAULT_TRANSFORMBEHAVIOUR)
-    private val transformMascot
-        get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), String::class, DEFAULT_TRANSFORMMASCOT)
+    private val transformBehavior: String
+        get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOR), DEFAULT_TRANSFORMBEHAVIOR)
+    private val transformMascot: String
+        get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), DEFAULT_TRANSFORMMASCOT)
 
     override fun tick() {
         super.tick()
 
         val canTransform = Main.instance.properties.getProperty("Transformation", "true").toBoolean()
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) transform()
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) {
+            transform()
+        }
     }
 
     private fun transform() {
         val childType = transformMascot.takeUnless { Main.instance.getConfiguration(it) == null } ?: mascot.imageSet
         try {
             mascot.imageSet = childType
-            mascot.behavior = Main.instance.getConfiguration(childType)?.buildBehavior(
-                transformBehavior,
-                mascot
-            )
+            mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(transformBehavior, mascot)
+        } catch (e: IllegalStateException) {
+            log.log(Level.SEVERE, "Fatal Error", e)
+            Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
         } catch (e: BehaviorInstantiationException) {
             log.log(Level.SEVERE, "Fatal Error", e)
             Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
@@ -68,8 +70,9 @@ class Transform(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        const val PARAMETER_TRANSFORMBEHAVIOUR = "TransformBehaviour"
-        private const val DEFAULT_TRANSFORMBEHAVIOUR = ""
+        @get:JvmName("PARAMETER_TRANSFORMBEHAVIOUR")
+        const val PARAMETER_TRANSFORMBEHAVIOR = "TransformBehavior"
+        private const val DEFAULT_TRANSFORMBEHAVIOR = ""
 
         const val PARAMETER_TRANSFORMMASCOT = "TransformMascot"
         private const val DEFAULT_TRANSFORMMASCOT = ""

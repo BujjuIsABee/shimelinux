@@ -35,22 +35,19 @@ open class Move(
     animations: List<Animation>,
     context: VariableMap
 ) : BorderedAction(schema, animations, context) {
+    internal open val hasTurningAnimation = animations.any { it.isTurn }
     internal var isTurning = false
-    override val animation
-        get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
-    internal open val hasTurningAnimation by lazy {
-        return@lazy animations.any { it.isTurn }
-    }
 
-    private val targetX
-        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY
-        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
+    override val animation: Animation?
+        get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
+
+    private val targetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+    private val targetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 
     override fun hasNext(): Boolean {
-        val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
-            (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
-
+        val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) || (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
         return super.hasNext() && (!hasNotReached || isTurning)
     }
 

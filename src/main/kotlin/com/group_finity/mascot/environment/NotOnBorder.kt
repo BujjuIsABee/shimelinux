@@ -32,6 +32,7 @@ class NotOnBorder : Border {
     override fun move(location: Point) = location
 
     companion object {
+        @JvmStatic
         val INSTANCE = NotOnBorder()
     }
 }

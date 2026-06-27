@@ -23,7 +23,9 @@
 package com.group_finity.mascot
 
 import com.group_finity.mascot.behavior.Behavior
+import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.environment.MascotEnvironment
+import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.MascotImage
@@ -54,6 +56,7 @@ class Mascot(var imageSet: String) {
     val variables = VariableMap()
     val affordances = mutableListOf<String>()
     val hotspots = mutableListOf<Hotspot>()
+    val isHotspotClicked get() = cursorPosition != null
     var manager: Manager? = null
     var anchor = Point(0, 0)
     var image: MascotImage? = null
@@ -63,8 +66,6 @@ class Mascot(var imageSet: String) {
     var isDragging = false
     private var isAnimating = true
         get() = field && !isPaused
-    val isHotspotClicked
-        get() = cursorPosition != null
     var cursorPosition: Point? = null
         set(value) {
             field = value
@@ -92,9 +93,9 @@ class Mascot(var imageSet: String) {
         }
     var time = 0
         private set
-    val count
+    val count: Int
         get() = manager?.getCount(imageSet) ?: 0
-    val totalCount
+    val totalCount: Int
         get() = manager?.count ?: 0
 
     init {
@@ -195,7 +196,7 @@ class Mascot(var imageSet: String) {
 
         val restoreWindowsMenu = JMenuItem(lang.getString("RestoreWindows"))
         restoreWindowsMenu.addActionListener {
-            NativeFactory.instance.getEnvironment().restoreIE()
+            NativeFactory.instance.environment.restoreIE()
         }
 
         val debugMenu = JMenuItem(lang.getString("RevealStatistics"))
@@ -237,8 +238,8 @@ class Mascot(var imageSet: String) {
             isPaused = !isPaused
         }
 
-        val behaviorsSubmenu = JMenu(lang.getString("SetBehaviour"))
-        val allowedSubmenu = JMenu(lang.getString("AllowedBehaviours"))
+        val behaviorsSubmenu = JMenu(lang.getString("SetBehavior"))
+        val allowedSubmenu = JMenu(lang.getString("AllowedBehaviors"))
         val config = checkNotNull(Main.instance.getConfiguration(imageSet))
         for (behaviorName in config.behaviorNames) {
             try {
@@ -251,7 +252,7 @@ class Mascot(var imageSet: String) {
                                 behavior = config.buildBehavior(behaviorName)
                             } catch (e: Exception) {
                                 log.log(Level.SEVERE, "Failed to set behavior ($this)")
-                                Main.showError(lang.getString("CouldNotSetBehaviourErrorMessage"), e)
+                                Main.showError(lang.getString("CouldNotSetBehaviorErrorMessage"), e)
                             }
                         }
                         behaviorsSubmenu.add(item)
@@ -303,7 +304,7 @@ class Mascot(var imageSet: String) {
                 behavior?.next()
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("CouldNotGetNextBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("CouldNotGetNextBehaviorErrorMessage"), e)
                 dispose()
             }
             time++
@@ -363,6 +364,22 @@ class Mascot(var imageSet: String) {
                 }
             }
         }
+    }
+
+    fun reset() {
+        anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+            Point(
+                (Math.random() * environment.screen.width).toInt() + environment.screen.left,
+                environment.screen.top - 256
+            )
+        } else {
+            Point(
+                (Math.random() * environment.workArea.width).toInt() + environment.workArea.left,
+                environment.workArea.top - 256
+            )
+        }
+
+        behavior = Main.instance.getConfiguration(imageSet)?.buildBehavior(UserBehavior.BEHAVIOR_FALL)
     }
 
     fun dispose() {

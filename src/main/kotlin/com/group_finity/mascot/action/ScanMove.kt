@@ -40,19 +40,18 @@ class ScanMove(
     params: VariableMap
 ) : BorderedAction(schema, animations, params) {
     private var target: Mascot? = null
+    internal val hasTurningAnimation = animations.any { it.isTurn }
     internal var isTurning = false
-    override val animation
-        get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
-    internal val hasTurningAnimation by lazy {
-        return@lazy animations.any { it.isTurn }
-    }
 
-    private val behavior
-        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior
-        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook
-        get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
+    override val animation: Animation?
+        get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
+
+    private val behavior: String
+        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+    private val targetBehavior: String
+        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+    private val targetLook: Boolean
+        get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -68,7 +67,9 @@ class ScanMove(
 
     override fun hasNext(): Boolean {
         if (mascot.manager == null) return super.hasNext()
-        return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) == true)
+
+        val hasAffordance = target?.affordances?.contains(affordance) == true
+        return super.hasNext() && (isTurning || hasAffordance)
     }
 
     override fun tick() {
@@ -111,14 +112,8 @@ class ScanMove(
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
-                    behavior,
-                    mascot
-                )
-                target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
-                    targetBehavior,
-                    target
-                )
+                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+                target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
@@ -127,10 +122,10 @@ class ScanMove(
                 Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             }
         }
     }
@@ -138,11 +133,13 @@ class ScanMove(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        const val PARAMETER_BEHAVIOUR = "Behaviour"
-        private const val DEFAULT_BEHAVIOUR = ""
+        @get:JvmName("PARAMETER_BEHAVIOUR")
+        const val PARAMETER_BEHAVIOR = "Behavior"
+        private const val DEFAULT_BEHAVIOR = ""
 
-        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour"
-        private const val DEFAULT_TARGETBEHAVIOUR = ""
+        @get:JvmName("PARAMETER_TARGETBEHAVIOUR")
+        const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
+        private const val DEFAULT_TARGETBEHAVIOR = ""
 
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false

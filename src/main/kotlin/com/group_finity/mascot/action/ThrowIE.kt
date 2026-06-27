@@ -33,16 +33,16 @@ class ThrowIE(
     animations: List<Animation>,
     params: VariableMap
 ) : Animate(schema, animations, params) {
-    private val initialVx
-        get() = eval(schema.getString(PARAMETER_INITIALVX), Number::class, DEFAULT_INITIALVX).toInt()
-    private val initialVy
-        get() = eval(schema.getString(PARAMETER_INITIALVY), Number::class, DEFAULT_INITIALVY).toInt()
-    private val gravity
-        get() = eval(schema.getString(PARAMETER_GRAVITY), Number::class, DEFAULT_GRAVITY).toDouble()
+    private val initialVx: Int
+        get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
+    private val initialVy: Int
+        get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()
+    private val gravity: Double
+        get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 
     override fun hasNext(): Boolean {
-        if (!Main.instance.properties.getProperty("Throwing", "true").toBoolean()) return false
-        return super.hasNext() && environment.activeIE.isVisible
+        val canThrow = Main.instance.properties.getProperty("Throwing", "true").toBoolean()
+        return super.hasNext() && environment.activeIE.isVisible && canThrow
     }
 
     override fun tick() {

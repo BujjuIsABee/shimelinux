@@ -40,38 +40,48 @@ class Breed(
     animations: List<Animation>,
     context: VariableMap
 ) : Animate(schema, animations, context) {
-    class Delegate(private val action: ActionBase) {
-        private val log = Logger.getLogger(this::class.java.name)
+    private val delegate = Delegate(this)
 
-        val isEnabled
-            get() = if (bornTransient) {
-                Main.instance.properties.getProperty("Transients", "true").toBoolean()
-            } else {
-                Main.instance.properties.getProperty("Breeding", "true").toBoolean()
-            }
-        val isIntervalFrame
+    override fun init(mascot: Mascot) {
+        super.init(mascot)
+
+        delegate.validateBornCount()
+    }
+
+    override fun tick() {
+        super.tick()
+
+        if (delegate.isPenultimateFrame && delegate.isEnabled) {
+            delegate.breed()
+        }
+    }
+
+    class Delegate(private val action: ActionBase) {
+        val isEnabled: Boolean
+            get() = Main.instance.properties.getProperty(if (bornTransient) "Transients" else "Breeding", "true").toBoolean()
+        val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
-        val isPenultimateFrame
+        val isPenultimateFrame: Boolean
             get() = action.animation?.let { action.time == it.duration - 1 } == true
 
-        private val bornX
-            get() = action.eval(action.schema.getString(PARAMETER_BORNX), Number::class, DEFAULT_BORNX).toInt()
-        private val bornY
-            get() = action.eval(action.schema.getString(PARAMETER_BORNY), Number::class, DEFAULT_BORNY).toInt()
-        private val bornBehavior
-            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), String::class, DEFAULT_BORNBEHAVIOUR)
-        private val bornMascot
-            get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), String::class, DEFAULT_BORNMASCOT)
-        private val bornTransient
-            get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), Boolean::class, DEFAULT_BORNTRANSIENT)
-        private val bornInterval
-            get() = action.eval(action.schema.getString(PARAMETER_BORNINTERVAL), Number::class, DEFAULT_BORNINTERVAL).toInt()
-        private val bornCount
-            get() = action.eval(action.schema.getString(PARAMETER_BORNCOUNT), Number::class, DEFAULT_BORNCOUNT).toInt()
+        private val bornX: Int
+            get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNX), DEFAULT_BORNX).toInt()
+        private val bornY: Int
+            get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNY), DEFAULT_BORNY).toInt()
+        private val bornBehavior: String
+            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOR), DEFAULT_BORNBEHAVIOR)
+        private val bornMascot: String
+            get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
+        private val bornTransient: Boolean
+            get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
+        private val bornInterval: Int
+            get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNINTERVAL), DEFAULT_BORNINTERVAL).toInt()
+        private val bornCount: Int
+            get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNCOUNT), DEFAULT_BORNCOUNT).toInt()
 
         fun breed() {
             val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
-            val childType = bornMascot.takeIf { Main.instance.getConfiguration(it) != null } ?: action.mascot.imageSet
+            val childType = bornMascot.takeUnless { Main.instance.getConfiguration(it) == null } ?: action.mascot.imageSet
 
             repeat(bornCount) {
                 val mascot = Mascot(childType)
@@ -92,11 +102,12 @@ class Breed(
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {
-                    mascot.behavior = Main.instance.getConfiguration(childType)?.buildBehavior(
-                        bornBehavior,
-                        action.mascot
-                    )
-                    action.mascot.manager?.add(mascot)
+                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(bornBehavior, action.mascot)
+                    checkNotNull(action.mascot.manager).add(mascot)
+                } catch (e: IllegalStateException) {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+                    mascot.dispose()
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
                     Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
@@ -122,14 +133,17 @@ class Breed(
         }
 
         companion object {
+            private val log = Logger.getLogger(this::class.java.name)
+
             const val PARAMETER_BORNX = "BornX"
             private const val DEFAULT_BORNX = 0
 
             const val PARAMETER_BORNY = "BornY"
             private const val DEFAULT_BORNY = 0
 
-            const val PARAMETER_BORNBEHAVIOUR = "BornBehaviour"
-            private const val DEFAULT_BORNBEHAVIOUR = ""
+            @get:JvmName("PARAMETER_BORNBEHAVIOUR")
+            const val PARAMETER_BORNBEHAVIOR = "BornBehavior"
+            private const val DEFAULT_BORNBEHAVIOR = ""
 
             const val PARAMETER_BORNMASCOT = "BornMascot"
             private const val DEFAULT_BORNMASCOT = ""
@@ -142,22 +156,6 @@ class Breed(
 
             const val PARAMETER_BORNCOUNT = "BornCount"
             private const val DEFAULT_BORNCOUNT = 1
-        }
-    }
-
-    private val delegate = Delegate(this)
-
-    override fun init(mascot: Mascot) {
-        super.init(mascot)
-
-        delegate.validateBornCount()
-    }
-
-    override fun tick() {
-        super.tick()
-
-        if (delegate.isPenultimateFrame && delegate.isEnabled) {
-            delegate.breed()
         }
     }
 }

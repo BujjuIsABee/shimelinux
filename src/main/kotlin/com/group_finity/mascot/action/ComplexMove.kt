@@ -43,26 +43,25 @@ class ComplexMove(
     private var target: Mascot? = null
     private var isBreedEnabled = false
     private var isScanEnabled = false
+    internal val hasTurningAnimation = animations.any { it.isTurn }
     internal var isTurning = false
         private set
-    override val animation
-        get() = animations.firstOrNull { it.isEffective(variables) && isTurning != it.isTurn }
-    internal val hasTurningAnimation by lazy {
-        return@lazy animations.any { it.isTurn }
-    }
 
-    private val characteristics
-        get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), String::class, DEFAULT_CHARACTERISTICS)
-    private val behavior
-        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior
-        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook
-        get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
-    private val targetX
-        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY
-        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
+    override val animation: Animation?
+        get() = animations.firstOrNull { it.isEffective(variables) && isTurning != it.isTurn }
+
+    private val characteristics: String
+        get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
+    private val behavior: String
+        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+    private val targetBehavior: String
+        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
+    private val targetLook: Boolean
+        get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
+    private val targetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+    private val targetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -95,17 +94,19 @@ class ComplexMove(
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
-            return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) == true)
-        } else {
-            val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) ||
-                (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
 
-            return super.hasNext() && hasNotReached
+            val hasAffordance = target?.affordances?.contains(affordance) == true
+            return super.hasNext() && (isTurning || hasAffordance)
+        } else {
+            val hasNotReached = (targetX != Int.MIN_VALUE && mascot.anchor.x == targetX) || (targetY != Int.MIN_VALUE && mascot.anchor.y == targetY)
+            return super.hasNext() && (!hasNotReached || isTurning)
         }
     }
 
     override fun tick() {
         super.tick()
+
+        val target = target
 
         if (isScanEnabled) {
             // Cannot broadcast while scanning for an affordance
@@ -117,9 +118,8 @@ class ComplexMove(
             throw LostGroundException()
         }
 
-        val target = checkNotNull(target)
-        val targetX = if (isScanEnabled) target.anchor.x else targetX
-        val targetY = if (isScanEnabled) target.anchor.y else targetY
+        val targetX = if (isScanEnabled && target != null) target.anchor.x else targetX
+        val targetY = if (isScanEnabled && target != null) target.anchor.y else targetY
 
         if (isScanEnabled) {
             putVariable(schema.getString(VARIABLE_TARGETX), targetX)
@@ -161,26 +161,20 @@ class ComplexMove(
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
-                    behavior,
-                    mascot
-                )
-                target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
-                    targetBehavior,
-                    target
-                )
+                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+                checkNotNull(target).behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
             } catch (e: IllegalStateException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             }
         }
     }
@@ -191,10 +185,12 @@ class ComplexMove(
         const val PARAMETER_CHARACTERISTICS = "Characteristics"
         private const val DEFAULT_CHARACTERISTICS = ""
 
-        const val PARAMETER_BEHAVIOUR = "Behaviour"
-        private const val DEFAULT_BEHAVIOUR = ""
+        @get:JvmName("PARAMETER_BEHAVIOUR")
+        const val PARAMETER_BEHAVIOR = "Behavior"
+        private const val DEFAULT_BEHAVIOR = ""
 
-        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour"
+        @get:JvmName("PARAMETER_TARGETBEHAVIOUR")
+        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehavior"
         private const val DEFAULT_TARGETBEHAVIOUR = ""
 
         const val PARAMETER_TARGETLOOK = "TargetLook"

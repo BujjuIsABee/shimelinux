@@ -26,28 +26,22 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
-import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 class NativeFactoryImpl : NativeFactory() {
-    private val environment: Environment = if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") {
-        KdeEnvironment()
-    } else {
-        GenericLinuxEnvironment()
-    }
-
-    override fun getEnvironment() = environment
+    override val environment: Environment =
+        if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") KdeEnvironment() else GenericLinuxEnvironment()
 
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
+        // Create the window with a LaF that supports transparency
         val previousLaf = UIManager.getLookAndFeel()
-
-        // Create the window using the default LaF because the other ones break transparency
-        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        val window = LinuxTranslucentWindow()
-        UIManager.setLookAndFeel(previousLaf)
-
-        return window
+        return try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+            LinuxTranslucentWindow()
+        } finally {
+            UIManager.setLookAndFeel(previousLaf)
+        }
     }
 }

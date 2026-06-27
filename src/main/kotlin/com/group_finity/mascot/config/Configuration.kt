@@ -29,6 +29,7 @@ import com.group_finity.mascot.behavior.Behavior
 import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
+import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
@@ -45,8 +46,7 @@ class Configuration {
     private val information = linkedMapOf<String, String>()
     lateinit var schema: ResourceBundle
 
-    val behaviorNames
-        get() = behaviorBuilders.keys
+    val behaviorNames get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {
         log.log(Level.INFO, "Reading configuration file")
@@ -76,7 +76,7 @@ class Configuration {
             loadActions(list, imageSet)
         }
 
-        for (list in configurationNode.selectChildren(schema.getString("BehaviourList"))) {
+        for (list in configurationNode.selectChildren(schema.getString("BehaviorList"))) {
             log.log(Level.INFO, "Reading behavior list")
 
             loadBehaviors(list, ArrayList())
@@ -92,10 +92,7 @@ class Configuration {
     private fun loadActions(list: Entry, imageSet: String) {
         for (node in list.selectChildren(schema.getString("Action"))) {
             val action = ActionBuilder(this, node, imageSet)
-            if (actionBuilders.containsKey(action.name)) {
-                throw ConfigurationException(Main.instance.languageBundle.getString("DuplicateActionErrorMessage") + ": ${action.name}")
-            }
-            actionBuilders[action.name] = action
+            actionBuilders.putIfAbsent(action.name, action) ?: ConfigurationException(Main.instance.languageBundle.getString("DuplicateActionErrorMessage") + ": ${action.name}")
         }
     }
 
@@ -105,7 +102,7 @@ class Configuration {
                 val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(schema.getString("Condition")))
                 loadBehaviors(node, newConditions)
-            } else if (node.name == schema.getString("Behaviour")) {
+            } else if (node.name == schema.getString("Behavior")) {
                 val behavior = BehaviorBuilder(this, node, conditions)
                 behaviorBuilders[behavior.name] = behavior
             }
@@ -138,12 +135,8 @@ class Configuration {
     }
 
     fun validate() {
-        for (builder in actionBuilders.values) {
-            builder.validate()
-        }
-        for (builder in behaviorBuilders.values) {
-            builder.validate()
-        }
+        actionBuilders.values.forEach { it.validate() }
+        behaviorBuilders.values.forEach { it.validate() }
     }
 
     fun buildAction(name: String, params: Map<String, String>): Action {
@@ -155,28 +148,19 @@ class Configuration {
 
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name]
-            ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
+            ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviorFoundErrorMessage") + " ($name)")
 
-        if (isBehaviorEnabled(name, mascot)) {
-            return factory.buildBehavior()
+        return if (isBehaviorEnabled(name, mascot)) {
+            factory.buildBehavior()
         } else {
-            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-                Point(
-                    (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
-                    mascot.environment.screen.top - 256
-                )
-            } else {
-                Point(
-                    (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
-                    mascot.environment.workArea.top - 256
-                )
-            }
-            return buildBehavior(schema.getString(UserBehavior.BEHAVIOR_FALL))
+            mascot.reset()
+            mascot.behavior
+                ?: throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitializeErrorMessage"))
         }
     }
 
     fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior()
-        ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + " ($name)")
+        ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviorFoundErrorMessage") + " ($name)")
 
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -216,19 +200,8 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-                Point(
-                    (Math.random() * (mascot.environment.screen.right - mascot.environment.screen.left)).toInt() + mascot.environment.screen.left,
-                    mascot.environment.screen.top - 256
-                )
-            } else {
-                Point(
-                    (Math.random() * (mascot.environment.workArea.right - mascot.environment.workArea.left)).toInt() + mascot.environment.workArea.left,
-                    mascot.environment.workArea.top - 256
-                )
-            }
-
-            return buildBehavior(schema.getString(UserBehavior.BEHAVIOR_FALL))
+            mascot.reset()
+            return mascot.behavior
         }
 
         // Randomly pick behavior from candidates

@@ -29,6 +29,7 @@ import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
 
 object SoundLoader {
+    @JvmStatic
     fun load(name: String, volume: Float) {
         if (Sounds.contains(name + volume)) return
 

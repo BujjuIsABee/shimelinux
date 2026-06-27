@@ -24,5 +24,12 @@ package io.github.bujjuisabee.shimelinux
 
 import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
+import java.util.Objects
 
-class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage
+class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage {
+    private val rgb = managedImage.getRGB(0, 0, managedImage.width, managedImage.height, null, 0, managedImage.width)
+
+    override fun hashCode() = Objects.hash(managedImage.width, managedImage.height)
+
+    override fun equals(other: Any?) = other is LinuxNativeImage && rgb.contentEquals(other.rgb)
+}

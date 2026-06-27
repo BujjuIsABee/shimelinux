@@ -130,31 +130,13 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
         }
     }
 
-    private fun createActions(): List<Action> {
-        val result = mutableListOf<Action>()
-        for (ref in actionRefs) {
-            result.add(ref.buildAction(hashMapOf()))
-        }
-        return result
-    }
+    private fun createActions() = actionRefs.map { it.buildAction(hashMapOf()) }
 
-    private fun createAnimations(): List<Animation> {
-        val result = mutableListOf<Animation>()
-        for (animationFactory in animationBuilders) {
-            result.add(animationFactory.buildAnimation())
-        }
-        return result
-    }
+    private fun createAnimations() = animationBuilders.map { it.buildAnimation() }
 
-    private fun createVariables(params: Map<String, String>): VariableMap {
-        val result = VariableMap()
-        for (param in this.params) {
-            result[param.key] = Variable.parse(param.value)
-        }
-        for (param in params) {
-            result[param.key] = Variable.parse(param.value)
-        }
-        return result
+    private fun createVariables(params: Map<String, String>) = VariableMap().apply {
+        putAll(this@ActionBuilder.params.mapValues { Variable.parse(it.value) })
+        putAll(params.mapValues { Variable.parse(it.value)})
     }
 
     override fun toString() = "Action ($name, $type, $className)"

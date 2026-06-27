@@ -28,20 +28,26 @@ import java.util.concurrent.ConcurrentHashMap
 object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
 
+    @JvmStatic
     fun load(fileName: String, imagePair: ImagePair) {
         imagePairs.putIfAbsent(fileName, imagePair)
     }
 
+    @JvmStatic
     fun getImagePair(fileName: String) = imagePairs[fileName]
 
+    @JvmStatic
     fun contains(fileName: String) = imagePairs.containsKey(fileName)
 
+    @JvmStatic
     fun getImage(fileName: String, isLookRight: Boolean) = imagePairs[fileName]?.getImage(isLookRight)
 
+    @JvmStatic
     fun clear() {
         imagePairs.clear()
     }
 
+    @JvmStatic
     fun removeAll(searchTerm: String) {
         imagePairs.entries.removeIf { searchTerm == Paths.get(it.key).getName(2).toString() }
     }

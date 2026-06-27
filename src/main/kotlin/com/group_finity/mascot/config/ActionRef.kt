@@ -29,7 +29,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 class ActionRef(private val configuration: Configuration, refNode: Entry) : IActionBuilder {
-    private val name = checkNotNull(refNode.getAttribute(configuration.schema.getString("Name")))
+    private val name = requireNotNull(refNode.getAttribute(configuration.schema.getString("Name")))
     private val params = linkedMapOf<String, String>()
 
     init {
@@ -39,7 +39,7 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
     override fun validate() {
         if (!configuration.actionBuilders.containsKey(name)) {
             log.log(Level.SEVERE, "There is no corresponding behavior: $this")
-            throw ConfigurationException(Main.instance.languageBundle.getString("NoBehaviourFoundErrorMessage") + ": $this")
+            throw ConfigurationException(Main.instance.languageBundle.getString("NoBehaviorFoundErrorMessage") + ": $this")
         }
     }
 

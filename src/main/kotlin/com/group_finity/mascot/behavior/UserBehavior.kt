@@ -58,7 +58,7 @@ class UserBehavior(
                 try {
                     mascot.behavior = configuration.buildNextBehavior(name, mascot)
                 } catch (e: BehaviorInstantiationException) {
-                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitialiseFollowingBehaviourErrorMessage"), e)
+                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                 }
             }
         } catch (e: VariableException) {
@@ -82,7 +82,7 @@ class UserBehavior(
                                 mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
                             }
                         } catch (e: BehaviorInstantiationException) {
-                            throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitialiseFollowingBehaviourErrorMessage"), e)
+                            throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                         }
                         break
                     }
@@ -101,22 +101,10 @@ class UserBehavior(
                     ) {
                         log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
 
-                        mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-                            Point(
-                                (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
-                                mascot.environment.screen.top - 256
-                            )
-                        } else {
-                            Point(
-                                (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
-                                mascot.environment.workArea.top - 256
-                            )
-                        }
-
                         try {
-                            mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
+                            mascot.reset()
                         } catch (e: BehaviorInstantiationException) {
-                            throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitialiseErrorMessage"), e)
+                            throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitializeErrorMessage"), e)
                         }
                     }
                 } else {
@@ -125,7 +113,7 @@ class UserBehavior(
                     try {
                         mascot.behavior = configuration.buildNextBehavior(name, mascot)
                     } catch (e: BehaviorInstantiationException) {
-                        throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitialiseFollowingActionsErrorMessage"), e)
+                        throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingActionsErrorMessage"), e)
                     }
                 }
             }
@@ -137,7 +125,7 @@ class UserBehavior(
                 mascot.isDragging = false
                 mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
             } catch (e: BehaviorInstantiationException) {
-                throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitialiseErrorMessage"), e)
+                throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitializeErrorMessage"), e)
             }
         } catch (e: VariableException) {
             throw CantBeAliveException(Main.instance.languageBundle.getString("VariableEvaluationErrorMessage"), e)
@@ -159,7 +147,7 @@ class UserBehavior(
                             mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
                         }
                     } catch (e: BehaviorInstantiationException) {
-                        throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitialiseFollowingBehaviourErrorMessage"), e)
+                        throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                     }
                     break
                 }
@@ -169,7 +157,7 @@ class UserBehavior(
                 try {
                     handled = !action.isDraggable
                 } catch (e: VariableException) {
-                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDragActionInitialiseErrorMessage"), e)
+                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDragActionInitializeErrorMessage"), e)
                 }
             }
 
@@ -177,7 +165,7 @@ class UserBehavior(
                 try {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {
-                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDragActionInitialiseErrorMessage"), e)
+                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDragActionInitializeErrorMessage"), e)
                 }
             }
         }
@@ -195,7 +183,7 @@ class UserBehavior(
                     mascot.isDragging = false
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_THROWN))
                 } catch (e: BehaviorInstantiationException) {
-                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDropActionInitialiseErrorMessage"), e)
+                    throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDropActionInitializeErrorMessage"), e)
                 }
             }
         }
@@ -208,8 +196,11 @@ class UserBehavior(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
+        @get:JvmName("BEHAVIOURNAME_FALL")
         const val BEHAVIOR_FALL = "Fall"
+        @get:JvmName("BEHAVIOURNAME_DRAGGED")
         const val BEHAVIOR_DRAGGED = "Dragged"
+        @get:JvmName("BEHAVIOURNAME_THROWN")
         const val BEHAVIOR_THROWN = "Thrown"
     }
 }

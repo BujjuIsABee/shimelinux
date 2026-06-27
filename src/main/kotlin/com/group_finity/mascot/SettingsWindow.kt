@@ -317,7 +317,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         backgroundColorRightPanel.add(backgroundColorButton)
 
         backgroundColorPanel = JPanel(BorderLayout())
-        backgroundColorPanel.add(JLabel(lang.getString("BackgroundColour")), BorderLayout.WEST)
+        backgroundColorPanel.add(JLabel(lang.getString("BackgroundColor")), BorderLayout.WEST)
         backgroundColorPanel.add(backgroundColorRightPanel, BorderLayout.EAST)
 
         textColorRightPanel = JPanel()
@@ -334,7 +334,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         textColorRightPanel.add(textColorButton)
 
         textColorPanel = JPanel(BorderLayout())
-        textColorPanel.add(JLabel(lang.getString("TextColour")), BorderLayout.WEST)
+        textColorPanel.add(JLabel(lang.getString("TextColor")), BorderLayout.WEST)
         textColorPanel.add(textColorRightPanel, BorderLayout.EAST)
 
         accentColorRightPanel = JPanel()
@@ -351,7 +351,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         accentColorRightPanel.add(accentColorButton)
 
         accentColorPanel = JPanel(BorderLayout())
-        accentColorPanel.add(JLabel(lang.getString("AccentColour")), BorderLayout.WEST)
+        accentColorPanel.add(JLabel(lang.getString("AccentColor")), BorderLayout.WEST)
         accentColorPanel.add(accentColorRightPanel, BorderLayout.EAST)
 
         flatThemeColorsPanel = JPanel()
@@ -522,7 +522,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
-            lang.getString("ChooseBackgroundColour"),
+            lang.getString("ChooseBackgroundColor"),
             Color.decode(selectedTheme.getProperty("@background", defaultColor)),
             false
         )
@@ -539,7 +539,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
-            lang.getString("ChooseTextColour"),
+            lang.getString("ChooseTextColor"),
             Color.decode(selectedTheme.getProperty("@foreground", defaultColor)),
             false
         )
@@ -557,7 +557,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val color = JColorChooser.showDialog(
             this@SettingsWindow,
-            lang.getString("ChooseAccentColour"),
+            lang.getString("ChooseAccentColor"),
             Color.decode(selectedTheme.getProperty("@accentColor", defaultColor)),
             false
         )

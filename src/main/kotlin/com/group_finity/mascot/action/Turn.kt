@@ -36,12 +36,14 @@ class Turn(
 ) : BorderedAction(schema, animations, params) {
     private var isTurning = false
 
-    private val isLookRight
-        get() = eval(schema.getString(PARAMETER_LOOKRIGHT), Boolean::class, !mascot.isLookRight)
+    private val isLookRight: Boolean
+        get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)
 
     override fun hasNext(): Boolean {
         isTurning = isTurning || isLookRight != mascot.isLookRight
-        return super.hasNext() && animation?.let { time < it.duration } == true && isTurning
+
+        val inTime = animation?.let { time < it.duration } == true
+        return super.hasNext() && inTime && isTurning
     }
 
     override fun tick() {

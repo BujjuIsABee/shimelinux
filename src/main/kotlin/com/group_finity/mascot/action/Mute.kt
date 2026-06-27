@@ -31,29 +31,18 @@ class Mute(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
-    private val sound
-        get() = eval(schema.getString(PARAMETER_SOUND), String::class, DEFAULT_SOUND).takeUnless { it == DEFAULT_SOUND }
+    private val sound: String?
+        get() = eval(schema.getString(PARAMETER_SOUND), DEFAULT_SOUND)
 
     override fun apply() {
         val sound = sound
         if (sound != null) {
-            var clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", sound).toString())
+            val clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", sound).toString())
+                .ifEmpty { Sounds.getSoundsIgnoringVolume(Main.getPath("sound", mascot.imageSet, sound).toString()) }
+                .ifEmpty { Sounds.getSoundsIgnoringVolume(Main.getPath("img", mascot.imageSet, "sound", sound).toString()) }
+
             if (clips.isNotEmpty()) {
-                for (clip in clips.filter { it.isRunning }) {
-                    clip.stop()
-                }
-            } else {
-                clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", mascot.imageSet, sound).toString())
-                if (clips.isNotEmpty()) {
-                    for (clip in clips.filter { it.isRunning }) {
-                        clip.stop()
-                    }
-                } else {
-                    clips = Sounds.getSoundsIgnoringVolume(Main.getPath("img", mascot.imageSet, "sound", sound).toString())
-                    for (clip in clips.filter { it.isRunning }) {
-                        clip.stop()
-                    }
-                }
+                clips.filter { it.isRunning }.forEach { it.stop() }
             }
         } else {
             if (!Sounds.isMuted) {
@@ -65,6 +54,6 @@ class Mute(
 
     companion object {
         const val PARAMETER_SOUND = "Sound"
-        private const val DEFAULT_SOUND = "null"
+        private val DEFAULT_SOUND = null
     }
 }

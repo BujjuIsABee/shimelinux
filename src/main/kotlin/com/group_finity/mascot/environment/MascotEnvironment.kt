@@ -28,7 +28,7 @@ import com.group_finity.mascot.NativeFactory
 import java.awt.Point
 
 class MascotEnvironment(private val mascot: Mascot) {
-    private val impl = NativeFactory.instance.getEnvironment()
+    private val impl = NativeFactory.instance.environment
     private var currentWorkArea: Area? = null
 
     val workArea

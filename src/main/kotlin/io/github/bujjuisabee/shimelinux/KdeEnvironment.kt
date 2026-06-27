@@ -34,7 +34,7 @@ import java.awt.Rectangle
 import java.io.File
 
 class KdeEnvironment : Environment() {
-    override val workArea
+    override val workArea: Area
         get() = screen
 
     override val activeIE = Area()

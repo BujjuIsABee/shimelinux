@@ -66,7 +66,7 @@ class DebugWindow(imageSet: String) : JFrame() {
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
-        behaviorLabel = JLabel(lang.getString("Behaviour"))
+        behaviorLabel = JLabel(lang.getString("Behavior"))
         behaviorLabel.font = behaviorLabel.font.deriveFont(Font.BOLD)
         behaviorValue = JLabel("N/A")
         behaviorValue.alignmentX = LEFT_ALIGNMENT

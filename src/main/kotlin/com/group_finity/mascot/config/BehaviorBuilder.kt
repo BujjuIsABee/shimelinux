@@ -38,9 +38,9 @@ class BehaviorBuilder(
     behaviorNode: Entry,
     private var conditions: MutableList<String?>
 ) {
-    val name = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name")))
+    val name = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name")))
     private val actionName = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
-    val frequency = checkNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))).toInt()
+    val frequency = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))).toInt()
     val isHidden = behaviorNode.getAttribute(configuration.schema.getString("Hidden")).toBoolean()
     val isToggleable: Boolean
     val isNextAdditive: Boolean
@@ -72,7 +72,9 @@ class BehaviorBuilder(
 
         var isNextAdditive = true
 
-        for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviourList"))) {
+        for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviorList"))) {
+            log.log(Level.INFO, "Lists the following behaviors:")
+
             isNextAdditive = nextList.getAttribute(configuration.schema.getString("Add")).toBoolean()
             loadBehaviors(nextList, mutableListOf())
         }
@@ -88,7 +90,7 @@ class BehaviorBuilder(
                 val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(configuration.schema.getString("Condition")))
                 loadBehaviors(node, newConditions)
-            } else if (node.name == configuration.schema.getString("BehaviourReference")) {
+            } else if (node.name == configuration.schema.getString("BehaviorReference")) {
                 val behavior = BehaviorBuilder(configuration, node, conditions)
                 nextBehaviorBuilders.add(behavior)
             }
@@ -107,16 +109,15 @@ class BehaviorBuilder(
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
         } catch (e: ActionInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)", e)
-            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("FailedInitialiseCorrespondingActionErrorMessage") + " ($this)", e)
+            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("FailedInitializeCorrespondingActionErrorMessage") + " ($this)", e)
         }
     }
 
     fun isEffective(context: VariableMap): Boolean {
         if (frequency == 0) return false
-        for (condition in conditions) {
-            if (condition != null && Variable.parse(condition)?.get(context) as? Boolean == false) return false
+        return conditions.none { condition ->
+            condition?.let { Variable.parse(it)?.get(context) } as? Boolean == false
         }
-        return true
     }
 
     override fun toString() = "Behavior ($name, $frequency, $actionName)"

@@ -33,22 +33,14 @@ class MoveWithTurn(
     params: VariableMap
 ) : Move(schema, animations, params) {
     override val animation: Animation?
-        get() {
-            if (isTurning) {
-                return animations[animations.size - 1]
-            } else {
-                for (index in 0 until animations.size - 1) {
-                    if (animations[index].isEffective(variables)) return animations[index]
-                }
-            }
-            return null
+        get() = if (isTurning) {
+            animations[animations.size - 1]
+        } else {
+            animations.dropLast(1).find { it.isEffective(variables) }
         }
-    override val hasTurningAnimation
-        get() = true
+    override val hasTurningAnimation = true
 
     init {
-        if (animations.size < 2) {
-            throw IllegalArgumentException("Not enough animations")
-        }
+        require (animations.size > 2)
     }
 }

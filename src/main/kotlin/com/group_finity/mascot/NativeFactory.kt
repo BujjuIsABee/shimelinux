@@ -28,7 +28,7 @@ import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
 abstract class NativeFactory {
-    abstract fun getEnvironment(): Environment
+    abstract val environment: Environment
 
     abstract fun newNativeImage(src: BufferedImage): NativeImage
 

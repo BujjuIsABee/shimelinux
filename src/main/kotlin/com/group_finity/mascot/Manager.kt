@@ -69,7 +69,7 @@ class Manager {
     }
 
     fun tick() {
-        NativeFactory.instance.getEnvironment().tick()
+        NativeFactory.instance.environment.tick()
 
         synchronized(mascots) {
             // Add added mascots
@@ -124,11 +124,11 @@ class Manager {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Failed to set behavior.", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                     mascot.dispose()
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                     mascot.dispose()
                 }
             }
@@ -144,11 +144,11 @@ class Manager {
                     }
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                     mascot.dispose()
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                     mascot.dispose()
                 }
             }

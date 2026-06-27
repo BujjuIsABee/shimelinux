@@ -34,13 +34,7 @@ class Animation(
     val isTurn: Boolean
 ) {
     val duration: Int
-        get() {
-            var result = 0
-            for (pose in poses) {
-                result += pose.duration
-            }
-            return result
-        }
+        get() = poses.sumOf { it.duration }
 
     init {
         require(poses.isNotEmpty())
@@ -62,10 +56,9 @@ class Animation(
 
     fun getPoseAt(time: Int): Pose? {
         var t = time % duration
-        for (pose in poses) {
-            t -= pose.duration
-            if (t < 0) return pose
+        return poses.find {
+            t -= it.duration
+            t < 0
         }
-        return null
     }
 }

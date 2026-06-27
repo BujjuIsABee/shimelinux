@@ -33,7 +33,7 @@ class Entry(private val element: Element) {
     val text: String
         get() = element.textContent
 
-    val attributes by lazy {
+    val attributes: Map<String, String> by lazy {
         val result = linkedMapOf<String, String>()
         val attrs = element.attributes
         for (i in 0 until attrs.length) {
@@ -42,7 +42,7 @@ class Entry(private val element: Element) {
         }
         return@lazy result
     }
-    val children by lazy {
+    val children: List<Entry> by lazy {
         val result = mutableListOf<Entry>()
         val childNodes = element.childNodes
         for (i in 0 until childNodes.length) {
@@ -58,18 +58,5 @@ class Entry(private val element: Element) {
 
     fun hasChild(name: String) = children.any { it.name == name }
 
-    fun selectChildren(name: String): List<Entry> {
-        var result = selected[name]
-        if (result != null) return result
-
-        result = mutableListOf()
-        for (child in children) {
-            if (child.name == name) {
-                result.add(child)
-            }
-        }
-
-        selected[name] = result
-        return result
-    }
+    fun selectChildren(name: String) = selected.getOrPut(name) { children.filter { it.name == name } }
 }

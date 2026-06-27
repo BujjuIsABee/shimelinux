@@ -30,10 +30,10 @@ class Offset(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
-    private val offsetX
-        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
-    private val offsetY
-        get() = eval(schema.getString(PARAMETER_OFFSETY), Number::class, DEFAULT_OFFSETY).toInt()
+    private val offsetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
+    private val offsetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
 
     override fun apply() {
         mascot.anchor = Point(

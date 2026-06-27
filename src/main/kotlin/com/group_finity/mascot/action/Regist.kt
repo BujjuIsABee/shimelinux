@@ -40,10 +40,10 @@ class Regist(
 ) : ActionBase(schema, animations, context) {
     private var scaling = 0.0
 
-    private val offsetX
-        get() = eval(schema.getString(PARAMETER_OFFSETX), Number::class, DEFAULT_OFFSETX).toInt()
-    private val offsetType
-        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), String::class, DEFAULT_OFFSETTYPE)
+    private val offsetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
+    private val offsetType: String
+        get() = eval(schema.getString(PARAMETER_OFFSETTYPE), DEFAULT_OFFSETTYPE)
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -59,7 +59,8 @@ class Regist(
             (offsetX * scaling).roundToInt()
         }
 
-        return super.hasNext() && abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
+        val notMoved = abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
+        return super.hasNext() && notMoved
     }
 
     override fun tick() {

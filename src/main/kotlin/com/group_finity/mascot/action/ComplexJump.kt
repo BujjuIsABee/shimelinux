@@ -45,20 +45,20 @@ class ComplexJump(
     private var isBreedEnabled = false
     private var isScanEnabled = false
 
-    private val characteristics
-        get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), String::class, DEFAULT_CHARACTERISTICS)
-    private val behavior
-        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
-    private val targetBehavior
-        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), String::class, DEFAULT_TARGETBEHAVIOUR)
-    private val targetLook
-        get() = eval(schema.getString(PARAMETER_TARGETLOOK), Boolean::class, DEFAULT_TARGETLOOK)
-    private val velocity
-        get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()
-    private val targetX
-        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY
-        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
+    private val characteristics: String
+        get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
+    private val behavior: String
+        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOUR)
+    private val targetBehavior: String
+        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+    private val targetLook: Boolean
+        get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
+    private val velocity: Double
+        get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
+    private val targetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+    private val targetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -91,7 +91,9 @@ class ComplexJump(
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
-            return super.hasNext() && target?.affordances?.contains(affordance) == true
+
+            val hasAffordance = target?.affordances?.contains(affordance) == true
+            return super.hasNext() && hasAffordance
         } else {
             val distanceX = (targetX - mascot.anchor.x).toDouble()
             val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
@@ -102,14 +104,14 @@ class ComplexJump(
     }
 
     override fun tick() {
+        val target = target
         var targetX: Int
         var targetY: Int
 
-        if (isScanEnabled) {
+        if (isScanEnabled && target != null) {
             // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
-            val target = checkNotNull(target)
             targetX = target.anchor.x
             targetY = target.anchor.y
 
@@ -150,27 +152,20 @@ class ComplexJump(
 
             if (isScanEnabled) {
                 try {
-                    val target = checkNotNull(target)
-                    mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
-                        behavior,
-                        mascot
-                    )
-                    target.behavior = Main.instance.getConfiguration(target.imageSet)?.buildBehavior(
-                        targetBehavior,
-                        target
-                    )
+                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+                    checkNotNull(target).behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
                 } catch (e: IllegalStateException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
                 }
             }
         }
@@ -186,11 +181,13 @@ class ComplexJump(
         const val PARAMETER_CHARACTERISTICS = "Characteristics"
         private const val DEFAULT_CHARACTERISTICS = ""
 
-        const val PARAMETER_BEHAVIOUR = "Behaviour"
+        @get:JvmName("PARAMETER_BEHAVIOUR")
+        const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOUR = ""
 
-        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour"
-        private const val DEFAULT_TARGETBEHAVIOUR = ""
+        @get:JvmName("PARAMETER_TARGETBEHAVIOUR")
+        const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
+        private const val DEFAULT_TARGETBEHAVIOR = ""
 
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false

@@ -34,6 +34,8 @@ class SelfDestruct(
     override fun tick() {
         super.tick()
 
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true) mascot.dispose()
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true) {
+            mascot.dispose()
+        }
     }
 }

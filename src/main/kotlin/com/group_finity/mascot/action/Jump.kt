@@ -34,12 +34,12 @@ open class Jump(
     animations: List<Animation>,
     context: VariableMap
 ) : ActionBase(schema, animations, context) {
-    private val velocity
-        get() = eval(schema.getString(PARAMETER_VELOCITY), Number::class, DEFAULT_VELOCITY).toDouble()
-    private val targetX
-        get() = eval(schema.getString(PARAMETER_TARGETX), Number::class, DEFAULT_TARGETX).toInt()
-    private val targetY
-        get() = eval(schema.getString(PARAMETER_TARGETY), Number::class, DEFAULT_TARGETY).toInt()
+    private val velocity: Double
+        get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
+    private val targetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+    private val targetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 
     override fun hasNext(): Boolean {
         val distanceX = (targetX - mascot.anchor.x).toDouble()

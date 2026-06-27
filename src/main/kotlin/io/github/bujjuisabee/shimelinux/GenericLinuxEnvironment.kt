@@ -27,7 +27,7 @@ import com.group_finity.mascot.environment.Environment
 import java.awt.Point
 
 class GenericLinuxEnvironment : Environment() {
-    override val workArea
+    override val workArea: Area
         get() = screen
 
     override val activeIE = Area()

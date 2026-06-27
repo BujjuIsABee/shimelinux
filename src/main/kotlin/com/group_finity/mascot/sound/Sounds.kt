@@ -29,6 +29,7 @@ import javax.sound.sampled.Clip
 object Sounds {
     private val sounds = ConcurrentHashMap<String, Clip>()
 
+    @JvmStatic
     var isMuted
         get() = !Main.instance.properties.getProperty("Sounds", "true").toBoolean()
         set(value) {
@@ -39,13 +40,17 @@ object Sounds {
             }
         }
 
+    @JvmStatic
     fun load(fileName: String, clip: Clip) {
         sounds.putIfAbsent(fileName, clip)
     }
 
+    @JvmStatic
     fun contains(fileName: String) = sounds.containsKey(fileName)
 
+    @JvmStatic
     fun getSound(fileName: String) = sounds[fileName]
 
+    @JvmStatic
     fun getSoundsIgnoringVolume(fileName: String) = sounds.filter { it.key.startsWith(fileName) }.values.toMutableList()
 }

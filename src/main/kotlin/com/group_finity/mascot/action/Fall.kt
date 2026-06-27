@@ -39,16 +39,16 @@ open class Fall(
     private var modX = 0.0
     private var modY = 0.0
 
-    private val initialVx
-        get() = eval(schema.getString(PARAMETER_INITIALVX), Number::class, DEFAULT_INITIALVX).toInt()
-    private val initialVy
-        get() = eval(schema.getString(PARAMETER_INITIALVY), Number::class, DEFAULT_INITIALVY).toInt()
-    private val gravity
-        get() = eval(schema.getString(PARAMETER_GRAVITY), Number::class, DEFAULT_GRAVITY).toDouble()
-    private val resistanceX
-        get() = eval(schema.getString(PARAMETER_RESISTANCEX), Number::class, DEFAULT_RESISTANCEX).toDouble()
-    private val resistanceY
-        get() = eval(schema.getString(PARAMETER_RESISTANCEY), Number::class, DEFAULT_RESISTANCEY).toDouble()
+    private val initialVx: Int
+        get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
+    private val initialVy: Int
+        get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()
+    private val gravity: Double
+        get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
+    private val resistanceX: Double
+        get() = eval<Number>(schema.getString(PARAMETER_RESISTANCEX), DEFAULT_RESISTANCEX).toDouble()
+    private val resistanceY: Double
+        get() = eval<Number>(schema.getString(PARAMETER_RESISTANCEY), DEFAULT_RESISTANCEY).toDouble()
 
     override fun init(mascot: Mascot) {
         super.init(mascot)
@@ -58,10 +58,8 @@ open class Fall(
     }
 
     override fun hasNext(): Boolean {
-        val isOnBorder = environment.floor.isOn(mascot.anchor) ||
-            environment.wall.isOn(mascot.anchor)
-
-        return super.hasNext() && !isOnBorder
+        val onBorder = (environment.floor.isOn(mascot.anchor) || environment.wall.isOn(mascot.anchor))
+        return super.hasNext() && !onBorder
     }
 
     override fun tick() {
@@ -119,7 +117,7 @@ open class Fall(
         private const val DEFAULT_RESISTANCEY = 0.1
 
         const val PARAMETER_GRAVITY = "Gravity"
-        private const val DEFAULT_GRAVITY = 2
+        private const val DEFAULT_GRAVITY = 2.0
 
         const val VARIABLE_VELOCITYX = "VelocityX"
         const val VARIABLE_VELOCITYY = "VelocityY"

@@ -35,7 +35,6 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
-import java.awt.Toolkit
 import java.io.File
 import java.nio.file.Path
 import java.util.Locale
@@ -379,7 +378,7 @@ class Main {
         }
 
         val restoreWindowsMenu = MenuItem(languageBundle.getString("RestoreWindows")) {
-            NativeFactory.instance.getEnvironment().restoreIE()
+            NativeFactory.instance.environment.restoreIE()
         }
 
         val breedingMenu = Checkbox(languageBundle.getString("BreedingCloning")) {
@@ -418,7 +417,7 @@ class Main {
         }
         multiscreenMenu.checked = properties.getProperty("Multiscreen", "true").toBoolean()
 
-        val allowedBehaviorsSubmenu = Menu(languageBundle.getString("AllowedBehaviours"))
+        val allowedBehaviorsSubmenu = Menu(languageBundle.getString("AllowedBehaviors"))
         allowedBehaviorsSubmenu.add(breedingMenu)
         allowedBehaviorsSubmenu.add(transientMenu)
         allowedBehaviorsSubmenu.add(transformationMenu)
@@ -465,7 +464,7 @@ class Main {
                 manager.isExitOnLastRemoved = isExitOnLastRemoved
             }
             if (settings.isInteractiveWindowReloadRequired) {
-                NativeFactory.instance.getEnvironment().refreshCache()
+                NativeFactory.instance.environment.refreshCache()
             }
 
             if (manager.isPaused) {
@@ -657,11 +656,11 @@ class Main {
             manager.add(mascot)
         } catch (e: BehaviorInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the first action", e)
-            showError(languageBundle.getString("FailedInitialiseFirstActionErrorMessage"), e)
+            showError(languageBundle.getString("FailedInitializeFirstActionErrorMessage"), e)
             mascot.dispose()
         } catch (e: CantBeAliveException) {
             log.log(Level.SEVERE, "Fatal Error", e)
-            showError(languageBundle.getString("FailedInitialiseFirstActionErrorMessage"), e)
+            showError(languageBundle.getString("FailedInitializeFirstActionErrorMessage"), e)
             mascot.dispose()
         } catch (e: Exception) {
             log.log(Level.SEVERE, "Could not be started ($imageSet)", e)

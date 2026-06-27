@@ -149,7 +149,7 @@ class AnimationBuilder(
         val shapeText = checkNotNull(frameNode.getAttribute(schema.getString("Shape")))
         val originText = checkNotNull(frameNode.getAttribute(schema.getString("Origin")))
         val sizeText = checkNotNull(frameNode.getAttribute(schema.getString("Size")))
-        val behaviorText = frameNode.getAttribute(schema.getString("Behaviour"))
+        val behaviorText = frameNode.getAttribute(schema.getString("Behavior"))
 
         val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
 
@@ -165,18 +165,19 @@ class AnimationBuilder(
             (sizeCoordinates[1].toInt() * scaling).roundToInt()
         )
 
-        val shape = if (shapeText.equals("Rectangle", true)) {
-            Rectangle(origin, size)
-        } else if (shapeText.equals("Ellipse", true)) {
-            Ellipse2D.Float(
+        val shape = when {
+            shapeText.equals("Rectangle", true) -> Rectangle(origin, size)
+            shapeText.equals("Ellipse", true) -> Ellipse2D.Float(
                 origin.x.toFloat(),
                 origin.y.toFloat(),
                 size.width.toFloat(),
                 size.height.toFloat()
             )
-        } else {
-            log.log(Level.SEVERE, "Failed to load hotspot shape: $shapeText")
-            throw ConfigurationException(Main.instance.languageBundle.getString("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
+
+            else -> {
+                log.log(Level.SEVERE, "Failed to load hotspot shape: $shapeText")
+                throw ConfigurationException(Main.instance.languageBundle.getString("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
+            }
         }
 
         val hotspot = Hotspot(behaviorText, shape)

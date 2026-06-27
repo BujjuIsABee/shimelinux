@@ -29,8 +29,8 @@ class Look(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
-    private val isLookRight
-        get() = eval(schema.getString(PARAMETER_LOOKRIGHT), Boolean::class, !mascot.isLookRight)
+    private val isLookRight: Boolean
+        get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)
 
     override fun apply() {
         mascot.isLookRight = isLookRight

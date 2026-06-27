@@ -36,27 +36,30 @@ class Interact(
     animations: List<Animation>,
     context: VariableMap
 ) : Animate(schema, animations, context) {
-    private val behavior
-        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), String::class, DEFAULT_BEHAVIOUR)
+    private val behavior: String
+        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 
-    override fun hasNext() = super.hasNext() && mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
+    override fun hasNext(): Boolean {
+        val overlapping = mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
+        return super.hasNext() && overlapping
+    }
 
     override fun tick() {
         super.tick()
 
         val animation = animation ?: return
-        if ((time == animation.duration - 1 || animation.duration == 1) && (!behavior.trim().isEmpty())) {
+        if ((time == animation.duration - 1 || animation.duration == 1) && behavior.isNotBlank()) {
             try {
-                mascot.behavior = Main.instance.getConfiguration(mascot.imageSet)?.buildBehavior(
-                    behavior,
-                    mascot
-                )
+                mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+            } catch (e: IllegalStateException) {
+                log.log(Level.SEVERE, "Fatal Error", e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviourErrorMessage"), e)
+                Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
             }
         }
     }
@@ -64,7 +67,8 @@ class Interact(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        const val PARAMETER_BEHAVIOUR = "Behaviour"
-        private const val DEFAULT_BEHAVIOUR = ""
+        @get:JvmName("PARAMETER_BEHAVIOUR")
+        const val PARAMETER_BEHAVIOR = "Behavior"
+        private const val DEFAULT_BEHAVIOR = ""
     }
 }

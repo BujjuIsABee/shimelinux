@@ -38,7 +38,7 @@ abstract class InstantAction(
 
     override fun hasNext() = false
 
-    override fun tick() { }
+    override fun tick() {}
 
     internal abstract fun apply()
 }

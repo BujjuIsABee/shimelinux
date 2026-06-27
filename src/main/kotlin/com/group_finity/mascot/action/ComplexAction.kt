@@ -38,8 +38,11 @@ abstract class ComplexAction(
                 action.init(mascot)
             }
         }
-    internal val action
+    internal val action: Action
         get() = actions[currentAction]
+
+    override val isDraggable: Boolean
+        get() = if (currentAction < actions.size) (actions[currentAction] as? ActionBase)?.isDraggable ?: true else true
 
     init {
         require(actions.isNotEmpty())
@@ -61,13 +64,6 @@ abstract class ComplexAction(
             action.next()
         }
     }
-
-    override val isDraggable
-        get() = if (currentAction < actions.size && actions[currentAction] is ActionBase) {
-            (actions[currentAction] as ActionBase).isDraggable
-        } else {
-            true
-        }
 
     internal fun seek() {
         if (super.hasNext()) {

@@ -37,7 +37,7 @@ abstract class Environment {
     var complexScreen = ComplexArea()
     var screen = Area()
     var cursor = Location()
-    val screens
+    val screens: Collection<Area>
         get() = complexScreen.areas
 
     fun init() {
@@ -86,7 +86,7 @@ abstract class Environment {
     companion object {
         internal var screenRect = Rectangle(Point(0, 0), Toolkit.getDefaultToolkit().screenSize)
         internal var screenRects = hashMapOf<String, Rectangle>()
-        private val cursorPos
+        private val cursorPos: Point
             get() = MouseInfo.getPointerInfo()?.location ?: Point(0, 0)
 
         fun updateScreenRect() {
@@ -100,7 +100,7 @@ abstract class Environment {
             }
 
             this.screenRects = screenRects
-            screenRect = virtualBounds
+            this.screenRect = virtualBounds
         }
     }
 }
