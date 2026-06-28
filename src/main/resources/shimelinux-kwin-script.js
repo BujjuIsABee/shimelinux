@@ -25,18 +25,14 @@ const clientPath = "/KWinClient";
 const interfaceName = "io.github.bujjuisabee.shimelinux";
 
 let activeWindow = null;
-let frameGeometryChangedHandler = null;
-let windowClosedOrMinimizedHandler = null;
-let moveResizedChangedHandler = null;
 
 function setActiveWindow(window) {
-    const bounds = window.frameGeometry;
     callDBus(
         busName, clientPath, interfaceName,
         "setActiveWindow",
         window.caption,
-        bounds.x, bounds.y,
-        bounds.width, bounds.height,
+        window.x, window.y,
+        window.width, window.height,
         () => {}
     );
 }
@@ -49,7 +45,7 @@ function resetActiveWindow() {
     );
 }
 
-function tick() {
+function update() {
     // Move windows
     callDBus(
         busName, clientPath, interfaceName,
@@ -60,12 +56,11 @@ function tick() {
             const x = response.x;
             const y = response.y;
 
-            const bounds = activeWindow.frameGeometry;
             activeWindow.frameGeometry = {
                 x: x,
                 y: y,
-                width: bounds.width,
-                height: bounds.height
+                width: activeWindow.width,
+                height: activeWindow.height
             };
         }
     );
@@ -107,51 +102,29 @@ function onWindowActivated(window) {
 
     if (activeWindow != window) {
         activeWindow = window;
-
-        frameGeometryChangedHandler = setActiveWindow.bind(null, window);
-        windowClosedOrMinimizedHandler = resetActiveWindow.bind(null);
-        moveResizedChangedHandler = onMoveResizedChanged.bind(null, window);
-
-        window.frameGeometryChanged.connect(frameGeometryChangedHandler);
-        window.closed.connect(windowClosedOrMinimizedHandler);
-        window.minimizedChanged.connect(windowClosedOrMinimizedHandler);
-        window.moveResizedChanged.connect(moveResizedChangedHandler);
+        window.frameGeometryChanged.connect(setActiveWindow.bind(null, window));
+        window.closed.connect(resetActiveWindow.bind(null));
+        window.minimizedChanged.connect(resetActiveWindow.bind(null));
     }
 }
 
 function onWindowDeactivated() {
     resetActiveWindow();
-
-    activeWindow.frameGeometryChanged.disconnect(frameGeometryChangedHandler);
-    activeWindow.closed.disconnect(windowClosedOrMinimizedHandler);
-    activeWindow.minimizedChanged.disconnect(windowClosedOrMinimizedHandler);
-    activeWindow.moveResizedChanged.disconnect(moveResizedChangedHandler);
-
-    frameGeometryChangedHandler = null;
-    windowClosedOrMinimizedHandler = null;
-    moveResizedChangedHandler = null;
-}
-
-function onMoveResizedChanged(window) {
-    // Reset the active window if it was moved by the user so the Shimeji doesn't stand in midair
-    if (window.move) onWindowActivated(null);
 }
 
 function isWindowOnscreen(window) {
-    const windowBounds = window.frameGeometry;
-    const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
+    const screen = workspace.clientArea(KWin.MaximizeArea, window);
 
-    return windowBounds.y + windowBounds.height >= screenBounds.y &&
-        windowBounds.x + windowBounds.width >= screenBounds.x &&
-        windowBounds.y <= screenBounds.y + screenBounds.height &&
-        windowBounds.x <= screenBounds.x + screenBounds.width;
+    return window.y + window.height >= screen.y &&
+        window.x + window.width >= screen.x &&
+        window.y <= screen.y + screen.height &&
+        window.x <= screen.x + screen.width;
 }
 
 workspace.windowActivated.connect(onWindowActivated);
-onWindowActivated(workspace.activeWindow);
 
-// Start a timer to call tick() every 40 milliseconds
+// Start a timer to call update() every 40 milliseconds
 const timer = new QTimer();
 timer.interval = 40;
-timer.timeout.connect(tick);
+timer.timeout.connect(update);
 timer.start();

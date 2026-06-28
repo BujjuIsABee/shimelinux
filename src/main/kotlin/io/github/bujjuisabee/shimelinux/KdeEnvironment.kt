@@ -46,6 +46,9 @@ class KdeEnvironment : Environment() {
 
     private val client = KWinClientImpl()
     private val windowCache = mutableMapOf<String, Boolean>()
+    private var activeWindow: Window? = null
+    private var windowPosition: Point? = null
+    private var restoreWindows: Boolean = false
 
     init {
         try {
@@ -87,7 +90,7 @@ class KdeEnvironment : Environment() {
     override fun tick() {
         super.tick()
 
-        val activeWindow = client.activeWindow
+        val activeWindow = activeWindow
         if (activeWindow != null && isIE(activeWindow)) {
             activeIE.set(activeWindow.bounds)
             activeIETitle = activeWindow.title
@@ -102,11 +105,11 @@ class KdeEnvironment : Environment() {
     }
 
     override fun moveActiveIE(point: Point) {
-        client.windowPosition = point
+        windowPosition = point
     }
 
     override fun restoreIE() {
-        client.restoreWindows = true
+        restoreWindows = true
     }
 
     override fun refreshCache() {
@@ -187,11 +190,7 @@ class KdeEnvironment : Environment() {
         fun getRestoreWindows(): Boolean
     }
 
-    class KWinClientImpl : KWinClient {
-        @JvmField var activeWindow: Window? = null
-        @JvmField var windowPosition: Point? = null
-        @JvmField var restoreWindows: Boolean = false
-
+    inner class KWinClientImpl : KWinClient {
         override fun setActiveWindow(
             caption: String,
             x: Int,
@@ -210,23 +209,22 @@ class KdeEnvironment : Environment() {
         }
 
         override fun getWindowPosition(): Map<String, Int>? {
-            val activeWindow = activeWindow
-            val windowPosition = windowPosition
-            if (activeWindow == null || windowPosition == null) return null
+            if (activeWindow == null) return null
 
-            val result = mapOf(
-                "x" to windowPosition.x,
-                "y" to windowPosition.y
-            )
-
-            this.windowPosition = null
-            return result
+            return windowPosition?.let {
+                mapOf(
+                    "x" to it.x,
+                    "y" to it.y
+                )
+            }.also {
+                windowPosition = null
+            }
         }
 
         override fun getRestoreWindows(): Boolean {
-            val restoreWindows = restoreWindows
-            this.restoreWindows = false
-            return restoreWindows
+            return restoreWindows.also {
+                restoreWindows = false
+            }
         }
 
         override fun getObjectPath() = "/KWinClient"
