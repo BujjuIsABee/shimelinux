@@ -57,6 +57,8 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
+const val VERSION = "v1.0.2"
+
 fun main(args: Array<String>) {
     try {
         if (!args.contains("DEBUG")) {

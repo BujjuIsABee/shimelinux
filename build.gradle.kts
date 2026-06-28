@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "io.github.bujjuisabee"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -28,9 +28,7 @@ tasks.jar {
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    from (sourceSets.main.get().output)
-
+    from(sourceSets.main.get().output)
     dependsOn(configurations.runtimeClasspath)
     from({
         configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
