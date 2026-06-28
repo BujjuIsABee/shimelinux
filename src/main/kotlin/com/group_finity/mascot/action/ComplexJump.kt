@@ -35,6 +35,7 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+@Suppress("unused")
 class ComplexJump(
     schema: ResourceBundle,
     animations: List<Animation>,

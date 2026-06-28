@@ -45,15 +45,17 @@ class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
         get() = area.width
 
     override fun isOn(location: Point) =
-        area.isVisible && (y == location.y) && (left <= location.x) && (location.x <= right)
+        area.isVisible && y == location.y && left <= location.x && location.x <= right
 
     override fun move(location: Point): Point {
         if (!area.isVisible) return location
 
-        val d = right - dright - (left - dleft)
-        if (d == 0) return location
-
+        val d = (right - dright - (left - dleft)).takeUnless { it == 0 } ?: return location
         val newLocation = Point((location.x - (left - dleft)) * ((right - left) / d) + left, location.y + dy)
-        return if (abs(newLocation.x - location.x) >= 80 || newLocation.y - location.y > 20 || newLocation.y - location.y < -80) location else newLocation
+        return if (abs(newLocation.x - location.x) >= 80 || newLocation.y - location.y > 20 || newLocation.y - location.y < -80) {
+            location
+        } else {
+            newLocation
+        }
     }
 }

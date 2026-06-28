@@ -26,12 +26,13 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.behavior.Behavior
+import com.group_finity.mascot.behavior.UserBehavior.Companion.BEHAVIOR_FALL
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
-import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
+import java.awt.Point
 import java.util.Locale
 import java.util.ResourceBundle
 import java.util.logging.Level
@@ -151,9 +152,19 @@ class Configuration {
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
         } else {
-            mascot.reset()
-            mascot.behavior
-                ?: throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitializeErrorMessage"))
+            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                Point(
+                    (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
+                    mascot.environment.screen.top - 256
+                )
+            } else {
+                Point(
+                    (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
+                    mascot.environment.workArea.top - 256
+                )
+            }
+
+            buildBehavior(schema.getString(BEHAVIOR_FALL))
         }
     }
 
@@ -198,8 +209,19 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            mascot.reset()
-            return mascot.behavior
+            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                Point(
+                    (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
+                    mascot.environment.screen.top - 256
+                )
+            } else {
+                Point(
+                    (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
+                    mascot.environment.workArea.top - 256
+                )
+            }
+
+            return buildBehavior(schema.getString(BEHAVIOR_FALL))
         }
 
         // Randomly pick behavior from candidates

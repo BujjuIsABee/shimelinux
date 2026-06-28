@@ -58,7 +58,7 @@ open class Fall(
     }
 
     override fun hasNext(): Boolean {
-        val onBorder = (environment.floor.isOn(mascot.anchor) || environment.wall.isOn(mascot.anchor))
+        val onBorder = environment.floor.isOn(mascot.anchor) || environment.wall.isOn(mascot.anchor)
         return super.hasNext() && !onBorder
     }
 

@@ -52,27 +52,13 @@ abstract class Environment {
     }
 
     fun isScreenTopBottom(location: Point): Boolean {
-        var count = 0
-
-        for (area in screens) {
-            if (area.topBorder.isOn(location)) count++
-            if (area.bottomBorder.isOn(location)) count++
-        }
-
-        if (count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))) return true
-        return count == 1
+        val count = screens.count { it.topBorder.isOn(location) } + screens.count { it.bottomBorder.isOn(location) }
+        return (count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))) || count == 1
     }
 
     fun isScreenLeftRight(location: Point): Boolean {
-        var count = 0
-
-        for (area in screens) {
-            if (area.leftBorder.isOn(location)) count++
-            if (area.rightBorder.isOn(location)) count++
-        }
-
-        if (count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))) return true
-        return count == 1
+        val count = screens.count { it.leftBorder.isOn(location) } + screens.count { it.rightBorder.isOn(location) }
+        return (count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))) || count == 1
     }
 
     abstract fun moveActiveIE(point: Point)

@@ -83,9 +83,9 @@ class AnimationBuilder(
         val leftImagePath = if (!leftImageText.isNullOrEmpty()) getPath("img", imageSet, leftImageText) else null
         val rightImageText = frameNode.getAttribute(schema.getString("ImageRight"))
         val rightImagePath = if (!rightImageText.isNullOrEmpty()) getPath("img", imageSet, rightImageText) else null
-        val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
-        val moveText = checkNotNull(frameNode.getAttribute(schema.getString("Velocity")))
-        val durationText = checkNotNull(frameNode.getAttribute(schema.getString("Duration")))
+        val anchorText = requireNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
+        val moveText = requireNotNull(frameNode.getAttribute(schema.getString("Velocity")))
+        val durationText = requireNotNull(frameNode.getAttribute(schema.getString("Duration")))
         var soundText = frameNode.getAttribute(schema.getString("Sound"))
         val volumeText = frameNode.getAttribute(schema.getString("Volume")) ?: "0"
 
@@ -123,13 +123,9 @@ class AnimationBuilder(
 
         if (soundText != null) {
             try {
-                soundText = if (getPath("sound", soundText).exists()) {
-                    getPath("sound", soundText).toString()
-                } else if (getPath("sound", imageSet, soundText).exists()) {
-                    getPath("sound", imageSet, soundText).toString()
-                } else {
+                soundText = getPath("sound", soundText).takeIf { it.exists() }?.toString() ?:
+                    getPath("sound", imageSet, soundText).takeIf { it.exists() }?.toString() ?:
                     getPath("img", imageSet, "sound", soundText).toString()
-                }
 
                 SoundLoader.load(soundText, volumeText.toFloat())
                 soundText += volumeText.toFloat()
@@ -139,17 +135,15 @@ class AnimationBuilder(
             }
         }
 
-        val pose = Pose(leftImagePath, rightImagePath, moveX, moveY, duration, soundText)
-
-        log.log(Level.INFO, "Loaded pose: $pose")
-
-        return pose
+        return Pose(leftImagePath, rightImagePath, moveX, moveY, duration, soundText).also {
+            log.log(Level.INFO, "Loaded pose: $it")
+        }
     }
 
     private fun loadHotspot(frameNode: Entry): Hotspot {
-        val shapeText = checkNotNull(frameNode.getAttribute(schema.getString("Shape")))
-        val originText = checkNotNull(frameNode.getAttribute(schema.getString("Origin")))
-        val sizeText = checkNotNull(frameNode.getAttribute(schema.getString("Size")))
+        val shapeText = requireNotNull(frameNode.getAttribute(schema.getString("Shape")))
+        val originText = requireNotNull(frameNode.getAttribute(schema.getString("Origin")))
+        val sizeText = requireNotNull(frameNode.getAttribute(schema.getString("Size")))
         val behaviorText = frameNode.getAttribute(schema.getString("Behavior"))
 
         val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
@@ -181,11 +175,9 @@ class AnimationBuilder(
             }
         }
 
-        val hotspot = Hotspot(behaviorText, shape)
-
-        log.log(Level.INFO, "Loaded hotspot: $hotspot")
-
-        return hotspot
+        return Hotspot(behaviorText, shape).also {
+            log.log(Level.INFO, "Loaded hotspot: $it")
+        }
     }
 
     fun buildAnimation(): Animation {

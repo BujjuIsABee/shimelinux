@@ -99,6 +99,7 @@ class Breed(
                         action.mascot.anchor.y + (bornY * scaling).roundToInt()
                     )
                 }
+
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {

@@ -29,6 +29,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("unused")
 class Turn(
     schema: ResourceBundle,
     animations: List<Animation>,

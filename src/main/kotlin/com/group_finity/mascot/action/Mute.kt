@@ -27,6 +27,7 @@ import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
 import java.util.ResourceBundle
 
+@Suppress("unused")
 class Mute(
     schema: ResourceBundle,
     params: VariableMap

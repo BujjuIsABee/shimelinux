@@ -34,6 +34,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("unused")
 class ScanMove(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -83,7 +84,7 @@ class ScanMove(
             throw LostGroundException()
         }
 
-        val target = checkNotNull(target)
+        val target = target ?: return
         val targetX = target.anchor.x
         val targetY = target.anchor.y
 

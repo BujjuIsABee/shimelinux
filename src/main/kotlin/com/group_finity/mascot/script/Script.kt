@@ -53,15 +53,11 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
 
     @Synchronized
     override fun get(variables: VariableMap): Any? {
-        if (value != null) return value
-
-        try {
-            value = compiled.eval(variables)
+        return value ?: try {
+            value = compiled.eval(variables); value
         } catch (e: ScriptException) {
             throw VariableException(Main.instance.languageBundle.getString("ScriptEvaluationErrorMessage") + ": $source", e)
         }
-
-        return value
     }
 
     override fun toString() = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"

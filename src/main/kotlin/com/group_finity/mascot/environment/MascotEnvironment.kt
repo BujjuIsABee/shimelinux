@@ -45,6 +45,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         get() = impl.activeIETitle
     val screen
         get() = impl.screen
+    @Suppress("unused")
     val complexScreen
         get() = impl.complexScreen
     val cursor
@@ -132,6 +133,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         impl.moveActiveIE(point)
     }
 
+    @Suppress("unused")
     fun restoreIE() {
         impl.restoreIE()
     }

@@ -33,6 +33,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("unused")
 class ScanInteract(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -88,7 +89,7 @@ class ScanInteract(
 
         val target = target
         val animation = animation
-        if (target?.affordances?.contains(affordance) ?: false && animation != null) {
+        if (target?.affordances?.contains(affordance) == true && animation != null) {
             if (mascot.anchor.x != target.anchor.x) {
                 isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
                 mascot.isLookRight = mascot.anchor.x < target.anchor.x

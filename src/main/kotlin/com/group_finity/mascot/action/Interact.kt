@@ -31,6 +31,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+@Suppress("unused")
 class Interact(
     schema: ResourceBundle,
     animations: List<Animation>,

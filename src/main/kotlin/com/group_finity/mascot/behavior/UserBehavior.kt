@@ -76,13 +76,13 @@ class UserBehavior(
                 for (hotspot in mascot.hotspots) {
                     if (hotspot.contains(mascot, checkNotNull(mascot.cursorPosition))) {
                         hotspotResult = HotspotResult.ACTIVE_NULL
-                        try {
-                            if (hotspot.behavior != null) {
-                                hotspotResult = HotspotResult.ACTIVE
+                        if (hotspot.behavior != null) {
+                            hotspotResult = HotspotResult.ACTIVE
+                            try {
                                 mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
+                            } catch (e: BehaviorInstantiationException) {
+                                throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                             }
-                        } catch (e: BehaviorInstantiationException) {
-                            throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                         }
                         break
                     }
@@ -101,8 +101,20 @@ class UserBehavior(
                     ) {
                         log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
 
+                        mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+                            Point(
+                                (Math.random() * environment.screen.width).toInt() + environment.screen.left,
+                                environment.screen.top - 256
+                            )
+                        } else {
+                            Point(
+                                (Math.random() * environment.workArea.width).toInt() + environment.workArea.left,
+                                environment.workArea.top - 256
+                            )
+                        }
+
                         try {
-                            mascot.reset()
+                            mascot.behavior = configuration.buildBehavior(BEHAVIOR_FALL)
                         } catch (e: BehaviorInstantiationException) {
                             throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitializeErrorMessage"), e)
                         }
@@ -120,9 +132,10 @@ class UserBehavior(
         } catch (_: LostGroundException) {
             log.log(Level.INFO, "Lost ground ($mascot, $this)")
 
+            mascot.cursorPosition = null
+            mascot.isDragging = false
+
             try {
-                mascot.cursorPosition = null
-                mascot.isDragging = false
                 mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
             } catch (e: BehaviorInstantiationException) {
                 throw CantBeAliveException(Main.instance.languageBundle.getString("FailedFallingActionInitializeErrorMessage"), e)
@@ -138,16 +151,16 @@ class UserBehavior(
             var handled = false
 
             for (hotspot in mascot.hotspots) {
-                val behaviorEnabled = Main.instance.getConfiguration(mascot.imageSet)?.isBehaviorEnabled(hotspot.behavior, mascot) == true
+                val behaviorEnabled = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).isBehaviorEnabled(hotspot.behavior, mascot)
                 if (hotspot.contains(mascot, e.point) && behaviorEnabled) {
                     handled = true
-                    try {
-                        mascot.cursorPosition = e.point
-                        if (hotspot.behavior != null) {
+                    mascot.cursorPosition = e.point
+                    if (hotspot.behavior != null) {
+                        try {
                             mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
+                        } catch (e: BehaviorInstantiationException) {
+                            throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                         }
-                    } catch (e: BehaviorInstantiationException) {
-                        throw CantBeAliveException(Main.instance.languageBundle.getString("FailedInitializeFollowingBehaviorErrorMessage"), e)
                     }
                     break
                 }
@@ -179,8 +192,8 @@ class UserBehavior(
             }
 
             if (mascot.isDragging) {
+                mascot.isDragging = false
                 try {
-                    mascot.isDragging = false
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_THROWN))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(Main.instance.languageBundle.getString("FailedDropActionInitializeErrorMessage"), e)

@@ -34,9 +34,7 @@ object Sounds {
         get() = !Main.instance.properties.getProperty("Sounds", "true").toBoolean()
         set(value) {
             if (value) {
-                for (sound in sounds.values) {
-                    sound.stop()
-                }
+                sounds.values.forEach { it.stop() }
             }
         }
 

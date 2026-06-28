@@ -23,9 +23,7 @@
 package com.group_finity.mascot
 
 import com.group_finity.mascot.behavior.Behavior
-import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.environment.MascotEnvironment
-import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.MascotImage
@@ -93,8 +91,10 @@ class Mascot(var imageSet: String) {
         }
     var time = 0
         private set
+    @Suppress("unused")
     val count: Int
         get() = manager?.getCount(imageSet) ?: 0
+    @Suppress("unused")
     val totalCount: Int
         get() = manager?.count ?: 0
 
@@ -364,22 +364,6 @@ class Mascot(var imageSet: String) {
                 }
             }
         }
-    }
-
-    fun reset() {
-        anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
-            Point(
-                (Math.random() * environment.screen.width).toInt() + environment.screen.left,
-                environment.screen.top - 256
-            )
-        } else {
-            Point(
-                (Math.random() * environment.workArea.width).toInt() + environment.workArea.left,
-                environment.workArea.top - 256
-            )
-        }
-
-        behavior = Main.instance.getConfiguration(imageSet)?.buildBehavior(UserBehavior.BEHAVIOR_FALL)
     }
 
     fun dispose() {

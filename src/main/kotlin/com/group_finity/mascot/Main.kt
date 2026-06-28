@@ -769,6 +769,7 @@ class Main {
         updateConfigFile()
     }
 
+    @Suppress("SameParameterValue")
     private fun toggleBooleanSetting(propertyName: String, defaultValue: Boolean) {
         if (properties.getProperty(propertyName, defaultValue.toString()).toBoolean()) {
             properties.setProperty(propertyName, "false")

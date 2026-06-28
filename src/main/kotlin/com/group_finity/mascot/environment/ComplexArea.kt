@@ -25,6 +25,7 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 import java.awt.Rectangle
 
+@Suppress("unused")
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
     val areas: Collection<Area>
@@ -80,7 +81,7 @@ class ComplexArea {
         var result: Wall? = null
         for (area in areaMap.values) {
             if (area.leftBorder.isOn(location)) {
-                result = area.rightBorder // i think this should be left border but i won't mess with it
+                result = area.leftBorder
             }
         }
         for (area in areaMap.values) {

@@ -62,8 +62,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.text.replace
 
-const val VERSION = "v1.0.2"
-
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val lang = Main.instance.languageBundle
 
@@ -142,13 +140,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         layout = BorderLayout()
 
         try {
-            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
-                darkTheme.load(it)
-            }
-
-            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
-                lightTheme.load(it)
-            }
+            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { darkTheme.load(it) }
+            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { lightTheme.load(it) }
         } catch (_: Exception) {
         }
 
@@ -677,13 +670,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun refreshTheme() {
-        getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
-            darkTheme.store(it, "Flat Dark Theme")
-        }
-
-        getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
-            lightTheme.store(it, "Flat Light Theme")
-        }
+        getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use { darkTheme.store(it, "Flat Dark Theme") }
+        getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use { lightTheme.store(it, "Flat Light Theme") }
 
         UIManager.setLookAndFeel(
             when (theme) {
@@ -705,6 +693,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     companion object {
+        private const val VERSION = "v1.0.2"
+
         private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
         private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
         private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"

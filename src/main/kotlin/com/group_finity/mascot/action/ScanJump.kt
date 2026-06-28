@@ -35,6 +35,7 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+@Suppress("unused")
 class ScanJump(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -74,7 +75,7 @@ class ScanJump(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        val target = checkNotNull(target)
+        val target = target ?: return
         val targetX = target.anchor.x
         val targetY = target.anchor.y
 

@@ -50,10 +50,12 @@ class Wall(val area: Area, val isRight: Boolean) : Border {
     override fun move(location: Point): Point {
         if (!area.isVisible) return location
 
-        val d = bottom - dbottom - (top - dtop)
-        if (d == 0) return location
-
+        val d = (bottom - dbottom - (top - dtop)).takeUnless { it == 0 } ?: return location
         val newLocation = Point(location.x + dx, (location.y - (top - dtop)) * (bottom - top) / d + top)
-        return if (abs(newLocation.x - location.x) >= 80 || abs(newLocation.y - location.y) >= 80) location else newLocation
+        return if (abs(newLocation.x - location.x) >= 80 || abs(newLocation.y - location.y) >= 80) {
+            location
+        } else {
+            newLocation
+        }
     }
 }

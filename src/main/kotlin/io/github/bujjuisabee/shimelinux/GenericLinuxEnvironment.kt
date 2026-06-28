@@ -37,11 +37,11 @@ class GenericLinuxEnvironment : Environment() {
         activeIE.isVisible = false
     }
 
-    override fun moveActiveIE(point: Point) { }
+    override fun moveActiveIE(point: Point) {}
 
-    override fun restoreIE() { }
+    override fun restoreIE() {}
 
-    override fun refreshCache() { }
+    override fun refreshCache() {}
 
-    override fun dispose() { }
+    override fun dispose() {}
 }

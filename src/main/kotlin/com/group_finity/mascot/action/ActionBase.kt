@@ -36,10 +36,10 @@ abstract class ActionBase(
 ) : Action {
     internal lateinit var mascot: Mascot
         private set
-    internal open val animation: Animation?
-        get() = animations.firstOrNull { it.isEffective(variables) }
     internal val environment: MascotEnvironment
         get() = mascot.environment
+    internal open val animation: Animation?
+        get() = animations.firstOrNull { it.isEffective(variables) }
     var time = 0
         get() = mascot.time - field
         set(value) {

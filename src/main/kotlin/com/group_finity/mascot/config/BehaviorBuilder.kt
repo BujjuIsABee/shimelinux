@@ -63,17 +63,21 @@ class BehaviorBuilder(
         }
 
         params.putAll(behaviorNode.attributes)
-        params.remove(configuration.schema.getString("Name"))
-        params.remove(configuration.schema.getString("Action"))
-        params.remove(configuration.schema.getString("Frequency"))
-        params.remove(configuration.schema.getString("Hidden"))
-        params.remove(configuration.schema.getString("Condition"))
-        params.remove(configuration.schema.getString("Toggleable"))
+        params.keys.removeAll(
+            setOf(
+                configuration.schema.getString("Name"),
+                configuration.schema.getString("Action"),
+                configuration.schema.getString("Frequency"),
+                configuration.schema.getString("Hidden"),
+                configuration.schema.getString("Condition"),
+                configuration.schema.getString("Toggleable")
+            )
+        )
 
         var isNextAdditive = true
 
         for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviorList"))) {
-            log.log(Level.INFO, "Lists the following behaviors:")
+            log.log(Level.INFO, "Lists the following behaviors...")
 
             isNextAdditive = nextList.getAttribute(configuration.schema.getString("Add")).toBoolean()
             loadBehaviors(nextList, mutableListOf())
