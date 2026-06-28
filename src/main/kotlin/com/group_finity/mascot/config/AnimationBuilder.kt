@@ -28,6 +28,7 @@ import com.group_finity.mascot.animation.Pose
 import com.group_finity.mascot.exception.AnimationInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
+import com.group_finity.mascot.getPath
 import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.ImagePairLoader
 import com.group_finity.mascot.script.Variable
@@ -79,9 +80,9 @@ class AnimationBuilder(
 
     private fun loadPose(frameNode: Entry): Pose {
         val leftImageText = frameNode.getAttribute(schema.getString("Image"))
-        val leftImagePath = if (!leftImageText.isNullOrEmpty()) Main.getPath("img", imageSet, leftImageText) else null
+        val leftImagePath = if (!leftImageText.isNullOrEmpty()) getPath("img", imageSet, leftImageText) else null
         val rightImageText = frameNode.getAttribute(schema.getString("ImageRight"))
-        val rightImagePath = if (!rightImageText.isNullOrEmpty()) Main.getPath("img", imageSet, rightImageText) else null
+        val rightImagePath = if (!rightImageText.isNullOrEmpty()) getPath("img", imageSet, rightImageText) else null
         val anchorText = checkNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
         val moveText = checkNotNull(frameNode.getAttribute(schema.getString("Velocity")))
         val durationText = checkNotNull(frameNode.getAttribute(schema.getString("Duration")))
@@ -122,12 +123,12 @@ class AnimationBuilder(
 
         if (soundText != null) {
             try {
-                soundText = if (Main.getPath("sound", soundText).exists()) {
-                    Main.getPath("sound", soundText).toString()
-                } else if (Main.getPath("sound", imageSet, soundText).exists()) {
-                    Main.getPath("sound", imageSet, soundText).toString()
+                soundText = if (getPath("sound", soundText).exists()) {
+                    getPath("sound", soundText).toString()
+                } else if (getPath("sound", imageSet, soundText).exists()) {
+                    getPath("sound", imageSet, soundText).toString()
                 } else {
-                    Main.getPath("img", imageSet, "sound", soundText).toString()
+                    getPath("img", imageSet, "sound", soundText).toString()
                 }
 
                 SoundLoader.load(soundText, volumeText.toFloat())

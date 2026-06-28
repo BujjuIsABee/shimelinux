@@ -22,7 +22,7 @@
 
 package com.group_finity.mascot.action
 
-import com.group_finity.mascot.Main
+import com.group_finity.mascot.getPath
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
 import java.util.ResourceBundle
@@ -37,9 +37,9 @@ class Mute(
     override fun apply() {
         val sound = sound
         if (sound != null) {
-            val clips = Sounds.getSoundsIgnoringVolume(Main.getPath("sound", sound).toString())
-                .ifEmpty { Sounds.getSoundsIgnoringVolume(Main.getPath("sound", mascot.imageSet, sound).toString()) }
-                .ifEmpty { Sounds.getSoundsIgnoringVolume(Main.getPath("img", mascot.imageSet, "sound", sound).toString()) }
+            val clips = Sounds.getSoundsIgnoringVolume(getPath("sound", sound).toString())
+                .ifEmpty { Sounds.getSoundsIgnoringVolume(getPath("sound", mascot.imageSet, sound).toString()) }
+                .ifEmpty { Sounds.getSoundsIgnoringVolume(getPath("img", mascot.imageSet, "sound", sound).toString()) }
 
             if (clips.isNotEmpty()) {
                 clips.filter { it.isRunning }.forEach { it.stop() }

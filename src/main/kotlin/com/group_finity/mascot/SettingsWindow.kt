@@ -62,6 +62,8 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.text.replace
 
+const val VERSION = "v1.0.2"
+
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val lang = Main.instance.languageBundle
 
@@ -140,11 +142,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         layout = BorderLayout()
 
         try {
-            Main.getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
+            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
                 darkTheme.load(it)
             }
 
-            Main.getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
+            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
                 lightTheme.load(it)
             }
         } catch (_: Exception) {
@@ -616,7 +618,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         Main.instance.properties.setProperty("InteractiveWindows", whitelist)
         Main.instance.properties.setProperty("InteractiveWindowsBlacklist", blacklist)
 
-        Main.getPath("conf", "settings.properties").outputStream().use {
+        getPath("conf", "settings.properties").outputStream().use {
             Main.instance.properties.store(it, "Configuration Options")
         }
 
@@ -675,11 +677,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun refreshTheme() {
-        Main.getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
+        getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
             darkTheme.store(it, "Flat Dark Theme")
         }
 
-        Main.getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
+        getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
             lightTheme.store(it, "Flat Light Theme")
         }
 

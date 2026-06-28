@@ -62,7 +62,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         val splashImage = requireNotNull(config.getInformation("SplashImage"))
         splashImageLabel = JLabel()
         splashImageLabel.alignmentX = CENTER_ALIGNMENT
-        splashImageLabel.icon = ImageIcon(Main.getPath("img", imageSet, splashImage).toString())
+        splashImageLabel.icon = ImageIcon(getPath("img", imageSet, splashImage).toString())
 
         imagePanel = JPanel()
         imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)

@@ -57,14 +57,19 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-const val VERSION = "v1.0.2"
-
 fun main(args: Array<String>) {
     try {
         if (!args.contains("DEBUG")) {
-            Main.configureLogging()
+            try {
+                Main::class.java.getResourceAsStream("/conf/logging.properties").use {
+                    LogManager.getLogManager().readConfiguration(it)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
+        Main.instance.createConfigDirectory()
         Main.instance.init()
 
         SwingUtilities.invokeLater {
@@ -81,6 +86,11 @@ fun main(args: Array<String>) {
     }
 }
 
+fun getPath(vararg paths: String): Path {
+    val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
+    return Path(dir.toString(), *paths)
+}
+
 class Main {
     private val manager = Manager()
     private var imageSets = mutableListOf<String>()
@@ -94,8 +104,6 @@ class Main {
 
     fun init() {
         try {
-            createConfigDirectory()
-
             // Load properties
             properties = Properties()
             getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
@@ -185,6 +193,83 @@ class Main {
         }
 
         manager.start()
+    }
+
+    fun createConfigDirectory() {
+        try {
+            // Create conf directory
+            val confDir = getPath("conf")
+            if (!confDir.exists() || !confDir.isDirectory()) {
+                confDir.createDirectories()
+
+                // Copy actions.xml
+                confDir.resolve("actions.xml").outputStream().use { output ->
+                    this::class.java.getResourceAsStream("/conf/actions.xml")?.use { input ->
+                        input.copyTo(output)
+                    }
+                }
+
+                // Copy behaviors.xml
+                confDir.resolve("behaviors.xml").outputStream().use { output ->
+                    this::class.java.getResourceAsStream("/conf/behaviors.xml")?.use { input ->
+                        input.copyTo(output)
+                    }
+                }
+
+                // Copy settings.properties
+                confDir.resolve("settings.properties").outputStream().use { output ->
+                    this::class.java.getResourceAsStream("/conf/settings.properties")?.use { input ->
+                        input.copyTo(output)
+                    }
+                }
+            }
+
+            // Create theme directory
+            val themeDir = confDir.resolve("theme")
+            if (!themeDir.exists() || !themeDir.isDirectory()) {
+                themeDir.createDirectories()
+
+                // Copy FlatLightLaf.properties
+                themeDir.resolve("FlatLightLaf.properties").outputStream().use { output ->
+                    this::class.java.getResourceAsStream("/conf/theme/FlatLightLaf.properties")?.use { input ->
+                        input.copyTo(output)
+                    }
+                }
+
+                // Copy FlatDarkLaf.properties
+                themeDir.resolve("FlatDarkLaf.properties").outputStream().use { output ->
+                    this::class.java.getResourceAsStream("/conf/theme/FlatDarkLaf.properties")?.use { input ->
+                        input.copyTo(output)
+                    }
+                }
+            }
+
+            // Create img directory
+            val imgDir = getPath("img")
+            if (!imgDir.exists() || !imgDir.isDirectory()) {
+                imgDir.createDirectories()
+
+                // Copy default mascot
+                val defaultMascotDir = imgDir.resolve("Shimeji")
+                defaultMascotDir.createDirectories()
+                for (i in 1 until 47) {
+                    getPath("img", "Shimeji", "shime$i.png").outputStream().use { output ->
+                        this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+            }
+
+            // Create unused directory
+            val unusedDir = imgDir.resolve("unused")
+            if (!unusedDir.exists() || !unusedDir.isDirectory()) {
+                unusedDir.createDirectories()
+            }
+        } catch (e: Exception) {
+            showError("Failed to create the config directory.", e)
+            exitProcess(0)
+        }
     }
 
     private fun loadConfiguration(imageSet: String): Boolean {
@@ -884,98 +969,6 @@ class Main {
 
         @JvmStatic
         val instance = Main()
-
-        fun createConfigDirectory() {
-            try {
-                // Create conf directory
-                val confDir = getPath("conf")
-                if (!confDir.exists() || !confDir.isDirectory()) {
-                    confDir.createDirectories()
-
-                    // Copy actions.xml
-                    confDir.resolve("actions.xml").outputStream().use { output ->
-                        this::class.java.getResourceAsStream("/conf/actions.xml")?.use { input ->
-                            input.copyTo(output)
-                        }
-                    }
-
-                    // Copy behaviors.xml
-                    confDir.resolve("behaviors.xml").outputStream().use { output ->
-                        this::class.java.getResourceAsStream("/conf/behaviors.xml")?.use { input ->
-                            input.copyTo(output)
-                        }
-                    }
-
-                    // Copy settings.properties
-                    confDir.resolve("settings.properties").outputStream().use { output ->
-                        this::class.java.getResourceAsStream("/conf/settings.properties")?.use { input ->
-                            input.copyTo(output)
-                        }
-                    }
-                }
-
-                // Create theme directory
-                val themeDir = confDir.resolve("theme")
-                if (!themeDir.exists() || !themeDir.isDirectory()) {
-                    themeDir.createDirectories()
-
-                    // Copy FlatLightLaf.properties
-                    themeDir.resolve("FlatLightLaf.properties").outputStream().use { output ->
-                        this::class.java.getResourceAsStream("/conf/theme/FlatLightLaf.properties")?.use { input ->
-                            input.copyTo(output)
-                        }
-                    }
-
-                    // Copy FlatDarkLaf.properties
-                    themeDir.resolve("FlatDarkLaf.properties").outputStream().use { output ->
-                        this::class.java.getResourceAsStream("/conf/theme/FlatDarkLaf.properties")?.use { input ->
-                            input.copyTo(output)
-                        }
-                    }
-                }
-
-                // Create img directory
-                val imgDir = getPath("img")
-                if (!imgDir.exists() || !imgDir.isDirectory()) {
-                    imgDir.createDirectories()
-
-                    // Copy default mascot
-                    val defaultMascotDir = imgDir.resolve("Shimeji")
-                    defaultMascotDir.createDirectories()
-                    for (i in 1 until 47) {
-                        getPath("img", "Shimeji", "shime$i.png").outputStream().use { output ->
-                            this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.use { input ->
-                                input.copyTo(output)
-                            }
-                        }
-                    }
-                }
-
-                // Create unused directory
-                val unusedDir = imgDir.resolve("unused")
-                if (!unusedDir.exists() || !unusedDir.isDirectory()) {
-                    unusedDir.createDirectories()
-                }
-            } catch (e: Exception) {
-                showError("Failed to create the config directory.", e)
-                exitProcess(0)
-            }
-        }
-
-        fun configureLogging() {
-            try {
-                this::class.java.getResourceAsStream("/conf/logging.properties").use {
-                    LogManager.getLogManager().readConfiguration(it)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        fun getPath(vararg paths: String): Path {
-            val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
-            return Path(dir.toString(), *paths)
-        }
 
         @JvmStatic
         fun showError(message: String) {

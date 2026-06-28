@@ -25,6 +25,7 @@ package com.group_finity.mascot.imagesetchooser
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
+import com.group_finity.mascot.getPath
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Desktop
@@ -70,8 +71,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val useAllButton: JButton
     private val cancelButton: JButton
 
-    private val confPath = Main.getPath("conf", "settings.properties")
-    private val topDir = Main.getPath("img")
+    private val confPath = getPath("conf", "settings.properties")
+    private val topDir = getPath("img")
     private var imageSets = ArrayList<String>()
     private var selectAllSets = false
     private var cancelled = true
@@ -160,13 +161,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         for (imageSet in children) {
             // Determine actions file
-            var filePath = Main.getPath("conf")
+            var filePath = getPath("conf")
             var actionsPath = filePath.resolve("actions.xml")
             if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
                 actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
             }
 
-            filePath = Main.getPath("conf", imageSet)
+            filePath = getPath("conf", imageSet)
             if (filePath.resolve("actions.xml").exists()) {
                 actionsPath = filePath.resolve("actions.xml")
             } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -183,7 +184,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 actionsPath = filePath.resolve("1.xml")
             }
 
-            filePath = Main.getPath("img", imageSet, "conf")
+            filePath = getPath("img", imageSet, "conf")
             if (filePath.resolve("actions.xml").exists()) {
                 actionsPath = filePath.resolve("actions.xml")
             } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
@@ -203,13 +204,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             val actionsFile = "./${actionsPath.subpath(4, actionsPath.nameCount)}"
 
             // Determine behaviors file
-            filePath = Main.getPath("conf")
+            filePath = getPath("conf")
             var behaviorsPath = filePath.resolve("behaviors.xml")
             if (filePath.resolve("\u884C\u52D5.xml").exists()) {
                 behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
             }
 
-            filePath = Main.getPath("conf", imageSet)
+            filePath = getPath("conf", imageSet)
             if (filePath.resolve("behaviors.xml").exists()) {
                 behaviorsPath = filePath.resolve("behaviors.xml")
             } else if (filePath.resolve("behavior.xml").exists()) {
@@ -228,7 +229,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 behaviorsPath = filePath.resolve("2.xml")
             }
 
-            filePath = Main.getPath("img", imageSet, "conf")
+            filePath = getPath("img", imageSet, "conf")
             if (filePath.resolve("behaviors.xml").exists()) {
                 behaviorsPath = filePath.resolve("behaviors.xml")
             } else if (filePath.resolve("behavior.xml").exists()) {
@@ -250,15 +251,15 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             val behaviorsFile = "./${behaviorsPath.subpath(4, behaviorsPath.nameCount)}"
 
             // Determine information file
-            filePath = Main.getPath("conf")
+            filePath = getPath("conf")
             var infoPath = filePath.resolve("info.xml")
 
-            filePath = Main.getPath("conf", imageSet)
+            filePath = getPath("conf", imageSet)
             if (filePath.resolve("info.xml").exists()) {
                 infoPath = filePath.resolve("info.xml")
             }
 
-            filePath = Main.getPath("img", imageSet, "conf")
+            filePath = getPath("img", imageSet, "conf")
             if (filePath.resolve("info.xml").exists()) {
                 infoPath = filePath.resolve("info.xml")
             }
@@ -357,13 +358,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private fun handleMore() {
         val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
         try {
-            checkNotNull(desktop).open(Main.getPath("img").toFile())
+            checkNotNull(desktop).open(getPath("img").toFile())
             cancelled = true
             dispose()
         } catch (_: Exception) {
             JOptionPane.showMessageDialog(
                 this@ImageSetChooser,
-                Main.getPath("img").toString(),
+                getPath("img").toString(),
                 "Add Shimeji Here:",
                 JOptionPane.PLAIN_MESSAGE
             )
