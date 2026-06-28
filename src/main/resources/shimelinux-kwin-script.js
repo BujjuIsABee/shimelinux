@@ -105,6 +105,7 @@ function onWindowActivated(window) {
         window.frameGeometryChanged.connect(setActiveWindow.bind(null, window));
         window.closed.connect(resetActiveWindow.bind(null));
         window.minimizedChanged.connect(resetActiveWindow.bind(null));
+        window.moveResizedChanged.connect(resetActiveWindow.bind(null));
     }
 }
 
