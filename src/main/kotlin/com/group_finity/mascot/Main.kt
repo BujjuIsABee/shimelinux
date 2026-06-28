@@ -35,6 +35,7 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
+import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Path
 import java.util.Locale
@@ -44,6 +45,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.LogManager
 import java.util.logging.Logger
+import javax.imageio.ImageIO
+import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.SwingUtilities
@@ -971,8 +974,15 @@ class Main {
         val instance = Main()
 
         @JvmStatic
+        val frame: JFrame by lazy {
+            JFrame().apply {
+                iconImage = Main::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+            }
+        }
+
+        @JvmStatic
         fun showError(message: String) {
-            JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
+            JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE)
         }
 
         @JvmStatic

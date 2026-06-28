@@ -36,9 +36,18 @@ import java.awt.Rectangle
 import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Path2D
+import java.awt.image.BufferedImage
+import javax.swing.JFrame
 import javax.swing.JWindow
 
-class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
+private val frame: JFrame by lazy {
+    JFrame().apply {
+        // Use blank image for the icon
+        iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+    }
+}
+
+class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var offset = Point(0, 0)
@@ -49,6 +58,8 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow() {
         GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
 
     init {
+        name = ""
+
         // Make the window translucent
         background = Color(0, 0, 0, 0)
 
