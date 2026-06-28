@@ -22,8 +22,8 @@
 
 package com.group_finity.mascot.image
 
-import java.nio.file.Paths
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.io.path.Path
 
 object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
@@ -49,6 +49,6 @@ object ImagePairs {
 
     @JvmStatic
     fun removeAll(searchTerm: String) {
-        imagePairs.entries.removeIf { searchTerm == Paths.get(it.key).getName(2).toString() }
+        imagePairs.entries.removeIf { searchTerm == Path(it.key).getName(2).toString() }
     }
 }

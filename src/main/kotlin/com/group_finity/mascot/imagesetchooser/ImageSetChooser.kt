@@ -161,92 +161,46 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         for (imageSet in children) {
             // Determine actions file
+            val actionsNames = listOf(
+                "actions.xml",
+                "\u52D5\u4F5C.xml",
+                "\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml",
+                "\u00A6-\u00BA@.xml",
+                "\u00F4\u00AB\u00EC\u00FD.xml",
+                "one.xml",
+                "1.xml"
+            )
+
             var filePath = getPath("conf")
-            var actionsPath = filePath.resolve("actions.xml")
-            if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
-                actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
-            }
+            var actionsPath = filePath.resolve("\u52D5\u4F5C.xml").takeIf { it.exists() } ?: filePath.resolve("actions.xml")
 
             filePath = getPath("conf", imageSet)
-            if (filePath.resolve("actions.xml").exists()) {
-                actionsPath = filePath.resolve("actions.xml")
-            } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
-                actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
-            } else if (filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml").exists()) {
-                actionsPath = filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml")
-            } else if (filePath.resolve("\u00A6-\u00BA@.xml").exists()) {
-                actionsPath = filePath.resolve("\u00A6-\u00BA@.xml")
-            } else if (filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml").exists()) {
-                actionsPath = filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml")
-            } else if (filePath.resolve("one.xml").exists()) {
-                actionsPath = filePath.resolve("one.xml")
-            } else if (filePath.resolve("1.xml").exists()) {
-                actionsPath = filePath.resolve("1.xml")
-            }
+            actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
             filePath = getPath("img", imageSet, "conf")
-            if (filePath.resolve("actions.xml").exists()) {
-                actionsPath = filePath.resolve("actions.xml")
-            } else if (filePath.resolve("\u52D5\u4F5C.xml").exists()) {
-                actionsPath = filePath.resolve("\u52D5\u4F5C.xml")
-            } else if (filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml").exists()) {
-                actionsPath = filePath.resolve("\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml")
-            } else if (filePath.resolve("\u00A6-\u00BA@.xml").exists()) {
-                actionsPath = filePath.resolve("\u00A6-\u00BA@.xml")
-            } else if (filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml").exists()) {
-                actionsPath = filePath.resolve("\u00F4\u00AB\u00EC\u00FD.xml")
-            } else if (filePath.resolve("one.xml").exists()) {
-                actionsPath = filePath.resolve("one.xml")
-            } else if (filePath.resolve("1.xml").exists()) {
-                actionsPath = filePath.resolve("1.xml")
-            }
+            actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
             val actionsFile = "./${actionsPath.subpath(4, actionsPath.nameCount)}"
 
             // Determine behaviors file
+            val behaviorsNames = listOf(
+                "behaviors.xml",
+                "\u884C\u52D5.xml",
+                "\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml",
+                "\u00AA\u00B5\u00A6-.xml",
+                "\u00ECs\u00F4\u00AB.xml",
+                "two.xml",
+                "2.xml"
+            )
+
             filePath = getPath("conf")
-            var behaviorsPath = filePath.resolve("behaviors.xml")
-            if (filePath.resolve("\u884C\u52D5.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
-            }
+            var behaviorsPath = filePath.resolve("\u884C\u52D5.xml").takeIf { it.exists() } ?: filePath.resolve("behaviors.xml")
 
             filePath = getPath("conf", imageSet)
-            if (filePath.resolve("behaviors.xml").exists()) {
-                behaviorsPath = filePath.resolve("behaviors.xml")
-            } else if (filePath.resolve("behavior.xml").exists()) {
-                behaviorsPath = filePath.resolve("behavior.xml")
-            } else if (filePath.resolve("\u884C\u52D5.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
-            } else if (filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml")
-            } else if (filePath.resolve("\u00AA\u00B5\u00A6-.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u00AA\u00B5\u00A6-.xml")
-            } else if (filePath.resolve("\u00ECs\u00F4\u00AB.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u00ECs\u00F4\u00AB.xml")
-            } else if (filePath.resolve("two.xml").exists()) {
-                behaviorsPath = filePath.resolve("two.xml")
-            } else if (filePath.resolve("2.xml").exists()) {
-                behaviorsPath = filePath.resolve("2.xml")
-            }
+            behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
             filePath = getPath("img", imageSet, "conf")
-            if (filePath.resolve("behaviors.xml").exists()) {
-                behaviorsPath = filePath.resolve("behaviors.xml")
-            } else if (filePath.resolve("behavior.xml").exists()) {
-                behaviorsPath = filePath.resolve("behavior.xml")
-            } else if (filePath.resolve("\u884C\u52D5.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u884C\u52D5.xml")
-            } else if (filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml")
-            } else if (filePath.resolve("\u00AA\u00B5\u00A6-.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u00AA\u00B5\u00A6-.xml")
-            } else if (filePath.resolve("\u00ECs\u00F4\u00AB.xml").exists()) {
-                behaviorsPath = filePath.resolve("\u00ECs\u00F4\u00AB.xml")
-            } else if (filePath.resolve("two.xml").exists()) {
-                behaviorsPath = filePath.resolve("two.xml")
-            } else if (filePath.resolve("2.xml").exists()) {
-                behaviorsPath = filePath.resolve("2.xml")
-            }
+            behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
             val behaviorsFile = "./${behaviorsPath.subpath(4, behaviorsPath.nameCount)}"
 
@@ -255,33 +209,26 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             var infoPath = filePath.resolve("info.xml")
 
             filePath = getPath("conf", imageSet)
-            if (filePath.resolve("info.xml").exists()) {
-                infoPath = filePath.resolve("info.xml")
-            }
+            infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
 
             filePath = getPath("img", imageSet, "conf")
-            if (filePath.resolve("info.xml").exists()) {
-                infoPath = filePath.resolve("info.xml")
-            }
+            infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
 
             var imageFile = topDir.resolve(Path(imageSet, "shime1.png")).toString()
             var caption = imageSet
 
             try {
-                val config = Configuration()
+                val configuration = Configuration()
 
                 if (infoPath.exists()) {
-                    val information = infoPath.inputStream().use {
-                        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
-                    }
-
-                    config.load(Entry(information.documentElement), imageSet)
+                    val information = infoPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+                    configuration.load(Entry(information.documentElement), imageSet)
                 }
 
-                config.getInformation(config.schema.getString("Name"))?.let {
+                configuration.getInformation(configuration.schema.getString("Name"))?.let {
                     caption = it
                 }
-                config.getInformation(config.schema.getString("PreviewImage"))?.let {
+                configuration.getInformation(configuration.schema.getString("PreviewImage"))?.let {
                     imageFile = topDir.resolve(Path(imageSet, it)).toString()
                 }
             } catch (_: Exception) {
