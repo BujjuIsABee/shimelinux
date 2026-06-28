@@ -29,7 +29,6 @@ import com.group_finity.mascot.action.Move
 import com.group_finity.mascot.action.Select
 import com.group_finity.mascot.action.Sequence
 import com.group_finity.mascot.action.Stay
-import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.AnimationInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException

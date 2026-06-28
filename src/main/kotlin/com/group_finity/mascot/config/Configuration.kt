@@ -26,14 +26,12 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.behavior.Behavior
-import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.Locale
 import java.util.ResourceBundle
 import java.util.logging.Level
