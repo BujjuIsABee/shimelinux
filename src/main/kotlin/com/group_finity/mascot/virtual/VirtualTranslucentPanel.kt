@@ -20,32 +20,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot
+package com.group_finity.mascot.virtual
 
-import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import java.awt.image.BufferedImage
+import javax.swing.JPanel
 
-abstract class NativeFactory {
-    abstract val environment: Environment
+class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
+    private var image: VirtualNativeImage? = null
 
-    abstract fun newNativeImage(src: BufferedImage): NativeImage
+    override fun asComponent() = this
 
-    abstract fun newTransparentWindow(): TranslucentWindow
+    override fun setImage(image: NativeImage) {
+        this.image = image as VirtualNativeImage
+    }
 
-    companion object {
-        @JvmStatic
-        lateinit var instance: NativeFactory
+    override fun setAlwaysOnTop(onTop: Boolean) {}
 
-        init {
-            resetInstance()
+    override fun dispose() {
+        val parent = this.parent
+        if (parent != null) {
+            parent.remove(this)
+            parent.repaint()
         }
+    }
 
-        @JvmStatic
-        fun resetInstance() {
-            // instance = io.github.bujjuisabee.shimelinux.NativeFactoryImpl()
-            instance = com.group_finity.mascot.virtual.NativeFactoryImpl()
+    override fun updateImage() {
+        repaint()
+    }
+
+    override fun contains(x: Int, y: Int): Boolean {
+        if (super.contains(x, y)) {
+            try {
+                // return image.managedImage.getRGB(x, y) and 0xff000000 >>> 24 > 0
+            } catch (_: Exception) {
+                return false
+            }
         }
+        return false
     }
 }

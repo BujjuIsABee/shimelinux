@@ -20,32 +20,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot
+package com.group_finity.mascot.virtual
 
-import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
-import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
-abstract class NativeFactory {
-    abstract val environment: Environment
-
-    abstract fun newNativeImage(src: BufferedImage): NativeImage
-
-    abstract fun newTransparentWindow(): TranslucentWindow
-
-    companion object {
-        @JvmStatic
-        lateinit var instance: NativeFactory
-
-        init {
-            resetInstance()
-        }
-
-        @JvmStatic
-        fun resetInstance() {
-            // instance = io.github.bujjuisabee.shimelinux.NativeFactoryImpl()
-            instance = com.group_finity.mascot.virtual.NativeFactoryImpl()
-        }
-    }
+class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage {
 }

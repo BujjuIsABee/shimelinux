@@ -20,32 +20,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot
+package com.group_finity.mascot.virtual
 
-import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.image.NativeImage
+import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
-abstract class NativeFactory {
-    abstract val environment: Environment
+class NativeFactoryImpl : NativeFactory() {
+    override val environment = VirtualEnvironment()
 
-    abstract fun newNativeImage(src: BufferedImage): NativeImage
+    override fun newNativeImage(src: BufferedImage) = VirtualNativeImage(src)
 
-    abstract fun newTransparentWindow(): TranslucentWindow
-
-    companion object {
-        @JvmStatic
-        lateinit var instance: NativeFactory
-
-        init {
-            resetInstance()
-        }
-
-        @JvmStatic
-        fun resetInstance() {
-            // instance = io.github.bujjuisabee.shimelinux.NativeFactoryImpl()
-            instance = com.group_finity.mascot.virtual.NativeFactoryImpl()
-        }
+    override fun newTransparentWindow(): TranslucentWindow {
+        val panel = VirtualTranslucentPanel()
+        environment.addShimeji(panel)
+        return panel
     }
 }
