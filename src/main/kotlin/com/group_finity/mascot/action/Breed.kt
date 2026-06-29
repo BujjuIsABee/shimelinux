@@ -28,6 +28,10 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.VariableException
+import com.group_finity.mascot.tryGetConfiguration
+import com.group_finity.mascot.getConfiguration
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
@@ -58,7 +62,7 @@ class Breed(
 
     class Delegate(private val action: ActionBase) {
         val isEnabled: Boolean
-            get() = Main.instance.properties.getProperty(if (bornTransient) "Transients" else "Breeding", "true").toBoolean()
+            get() = getProperty<Boolean>(if (bornTransient) "Transients" else "Breeding", "true")
         val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
         val isPenultimateFrame: Boolean
@@ -80,8 +84,8 @@ class Breed(
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNCOUNT), DEFAULT_BORNCOUNT).toInt()
 
         fun breed() {
-            val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
-            val childType = bornMascot.takeUnless { Main.instance.getConfiguration(it) == null } ?: action.mascot.imageSet
+            val scaling = getProperty<Double>("Scaling", "1.0")
+            val childType = bornMascot.takeUnless { tryGetConfiguration(it) == null } ?: action.mascot.imageSet
 
             repeat(bornCount) {
                 val mascot = Mascot(childType)
@@ -103,19 +107,19 @@ class Breed(
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(bornBehavior, action.mascot)
+                    mascot.behavior = getConfiguration(childType).buildBehavior(bornBehavior, action.mascot)
                     checkNotNull(action.mascot.manager).add(mascot)
                 } catch (e: IllegalStateException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+                    Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
                     mascot.dispose()
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+                    Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
                     mascot.dispose()
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+                    Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
                     mascot.dispose()
                 }
             }

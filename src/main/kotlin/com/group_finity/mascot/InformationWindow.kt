@@ -43,8 +43,6 @@ import javax.swing.UIManager
 import javax.swing.event.HyperlinkEvent
 
 class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
-    private val lang = Main.instance.languageBundle
-
     private val imagePanel: JPanel
     private val splashImageLabel: JLabel
     private val editorPane: JEditorPane
@@ -52,9 +50,9 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     private val closeButton: JButton
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
-        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else lang.getString("Information")
+        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else "Information".localize()
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
@@ -68,7 +66,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
         imagePanel.add(splashImageLabel)
 
-        closeButton = JButton(lang.getString("Close"))
+        closeButton = JButton("Close".localize())
         closeButton.minimumSize = Dimension(95, 23)
         closeButton.maximumSize = Dimension(130, 26)
         closeButton.preferredSize = Dimension(130, 26)
@@ -109,7 +107,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
             append("\">")
 
             if (config.containsInformationKey("ArtistName")) {
-                append(lang.getString("ArtBy")).append(" ")
+                append("ArtBy".localize()).append(" ")
                 if (config.containsInformationKey("ArtistURL")) {
                     append("<a href=\"").append(config.getInformation("ArtistURL")).append("\" ")
 
@@ -137,7 +135,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     append(" - ")
                 }
 
-                append(lang.getString("ScriptedBy")).append(" ")
+                append("ScriptedBy".localize()).append(" ")
                 if (config.containsInformationKey("ScripterURL")) {
                     append("<a href=\"").append(config.getInformation("ScripterURL")).append("\" ")
 
@@ -167,7 +165,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     append(" - ")
                 }
 
-                append(lang.getString("CommissionedBy")).append(" ")
+                append("CommissionedBy".localize()).append(" ")
                 if (config.containsInformationKey("CommissionerURL")) {
                     append("<a href=\"").append(config.getInformation("CommissionerURL")).append("\" ")
 
@@ -198,7 +196,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     append(" - ")
                 }
 
-                append(lang.getString("SupportAt")).append(" ")
+                append("SupportAt".localize()).append(" ")
                 if (config.containsInformationKey("SupportURL")) {
                     append("<a href=\"").append(config.getInformation("SupportURL")).append("\" ")
 
@@ -238,9 +236,9 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 val url = st.nextToken()
                 val response = JOptionPane.showConfirmDialog(
                     this@InformationWindow,
-                    lang.getString("ConfirmVisitWebsiteMessage") + "\n" +
-                    lang.getString("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
-                    lang.getString("VisitWebsite"),
+                    "ConfirmVisitWebsiteMessage".localize() + "\n" +
+                    "ExerciseCautionAndBewareSusLinksMessage".localize() + "\n$url",
+                    "VisitWebsite".localize(),
                     JOptionPane.YES_NO_OPTION
                 )
 
@@ -251,7 +249,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     } catch (_: Exception) {
                         JOptionPane.showMessageDialog(
                             this@InformationWindow,
-                            lang.getString("FailedOpenWebBrowserErrorMessage") + "\n$url",
+                            "FailedOpenWebBrowserErrorMessage".localize() + "\n$url",
                             "Error",
                             JOptionPane.PLAIN_MESSAGE
                         )

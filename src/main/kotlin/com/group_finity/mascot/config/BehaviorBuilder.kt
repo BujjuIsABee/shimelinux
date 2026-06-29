@@ -22,12 +22,12 @@
 
 package com.group_finity.mascot.config
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.behavior.Behavior
 import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
 import java.util.logging.Level
@@ -104,7 +104,7 @@ class BehaviorBuilder(
     fun validate() {
         if (!configuration.actionBuilders.containsKey(actionName)) {
             log.log(Level.SEVERE, "There is no corresponding action ($this)")
-            throw ConfigurationException(Main.instance.languageBundle.getString("NoActionFoundErrorMessage") + " ($this)")
+            throw ConfigurationException("NoActionFoundErrorMessage".localize() + " ($this)")
         }
     }
 
@@ -113,7 +113,7 @@ class BehaviorBuilder(
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
         } catch (e: ActionInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)", e)
-            throw BehaviorInstantiationException(Main.instance.languageBundle.getString("FailedInitializeCorrespondingActionErrorMessage") + " ($this)", e)
+            throw BehaviorInstantiationException("FailedInitializeCorrespondingActionErrorMessage".localize() + " ($this)", e)
         }
     }
 

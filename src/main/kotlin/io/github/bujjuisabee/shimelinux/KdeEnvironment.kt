@@ -22,9 +22,10 @@
 
 package io.github.bujjuisabee.shimelinux
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.loadResource
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
@@ -59,7 +60,7 @@ class KdeEnvironment : Environment() {
 
             val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
             scriptFile.deleteOnExit()
-            this::class.java.getResourceAsStream("/shimelinux-kwin-script.js")?.use { input ->
+            loadResource("/shimelinux-kwin-script.js")?.use { input ->
                 scriptFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
@@ -133,7 +134,7 @@ class KdeEnvironment : Environment() {
         }
 
         var blacklistInUse = false
-        val blacklist = Main.instance.properties.getProperty("InteractiveWindowsBlacklist", "").split('/')
+        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split('/')
         for (title in blacklist) {
             if (title.isNotBlank()) {
                 blacklistInUse = true
@@ -145,7 +146,7 @@ class KdeEnvironment : Environment() {
         }
 
         var whitelistInUse = false
-        val whitelist = Main.instance.properties.getProperty("InteractiveWindows", "").split('/')
+        val whitelist = getProperty("InteractiveWindows", "").split('/')
         for (title in whitelist) {
             if (title.isNotBlank()) {
                 whitelistInUse = true

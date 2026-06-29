@@ -28,6 +28,8 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
+import com.group_finity.mascot.getConfiguration
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Level
@@ -104,22 +106,22 @@ class ScanInteract(
 
             if (!isTurning && (time == animation.duration - 1 || animation.duration == 1) && behavior.isNotBlank()) {
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
+                    mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
                     if (targetBehavior.isNotBlank()) {
-                        target.behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
+                        target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                     }
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
                 } catch (e: IllegalStateException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                 }
             }
         }

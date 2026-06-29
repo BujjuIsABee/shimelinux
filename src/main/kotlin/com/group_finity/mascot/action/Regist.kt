@@ -22,10 +22,10 @@
 
 package com.group_finity.mascot.action
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.LostGroundException
+import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Level
@@ -48,7 +48,7 @@ class Regist(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
+        scaling = getProperty<Double>("Scaling", "1.0")
     }
 
     override fun hasNext(): Boolean {

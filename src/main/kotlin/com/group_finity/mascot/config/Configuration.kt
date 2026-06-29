@@ -22,7 +22,6 @@
 
 package com.group_finity.mascot.config
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.behavior.Behavior
@@ -31,6 +30,8 @@ import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.Locale
@@ -91,7 +92,7 @@ class Configuration {
     private fun loadActions(list: Entry, imageSet: String) {
         for (node in list.selectChildren(schema.getString("Action"))) {
             val action = ActionBuilder(this, node, imageSet)
-            actionBuilders.putIfAbsent(action.name, action) ?: ConfigurationException(Main.instance.languageBundle.getString("DuplicateActionErrorMessage") + ": ${action.name}")
+            actionBuilders.putIfAbsent(action.name, action) ?: ConfigurationException("DuplicateActionErrorMessage".localize() + ": ${action.name}")
         }
     }
 
@@ -140,19 +141,19 @@ class Configuration {
 
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name]
-            ?: throw ActionInstantiationException(Main.instance.languageBundle.getString("NoCorrespondingActionFoundErrorMessage") + ": $name")
+            ?: throw ActionInstantiationException("NoCorrespondingActionFoundErrorMessage".localize() + ": $name")
 
         return factory.buildAction(params)
     }
 
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name]
-            ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviorFoundErrorMessage") + " ($name)")
+            ?: throw BehaviorInstantiationException("NoBehaviorFoundErrorMessage".localize() + " ($name)")
 
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
         } else {
-            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+            mascot.anchor = if (getProperty<Boolean>("Multiscreen", "true")) {
                 Point(
                     (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                     mascot.environment.screen.top - 256
@@ -169,7 +170,7 @@ class Configuration {
     }
 
     fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior()
-        ?: throw BehaviorInstantiationException(Main.instance.languageBundle.getString("NoBehaviorFoundErrorMessage") + " ($name)")
+        ?: throw BehaviorInstantiationException("NoBehaviorFoundErrorMessage".localize() + " ($name)")
 
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -209,7 +210,7 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            mascot.anchor = if (Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+            mascot.anchor = if (getProperty<Boolean>("Multiscreen", "true")) {
                 Point(
                     (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                     mascot.environment.screen.top - 256
@@ -235,7 +236,7 @@ class Configuration {
 
     fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean {
         if (builder.isToggleable) {
-            for (behavior in Main.instance.properties.getProperty("DisabledBehaviours." + mascot.imageSet, "").split('/')) {
+            for (behavior in getProperty("DisabledBehaviours." + mascot.imageSet, "").split('/')) {
                 if (behavior == builder.name) return false
             }
         }

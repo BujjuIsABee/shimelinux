@@ -26,7 +26,11 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
+import com.group_finity.mascot.getConfiguration
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
+import com.group_finity.mascot.tryGetConfiguration
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -45,26 +49,27 @@ class Transform(
     override fun tick() {
         super.tick()
 
-        val canTransform = Main.instance.properties.getProperty("Transformation", "true").toBoolean()
+        val canTransform = getProperty<Boolean>("Transformation", "true")
         if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) {
             transform()
         }
     }
 
     private fun transform() {
-        val childType = transformMascot.takeUnless { Main.instance.getConfiguration(it) == null } ?: mascot.imageSet
+        val childType = transformMascot.takeUnless { tryGetConfiguration(it) == null } ?: mascot.imageSet
+
         try {
             mascot.imageSet = childType
-            mascot.behavior = checkNotNull(Main.instance.getConfiguration(childType)).buildBehavior(transformBehavior, mascot)
+            mascot.behavior = getConfiguration(childType).buildBehavior(transformBehavior, mascot)
         } catch (e: IllegalStateException) {
             log.log(Level.SEVERE, "Fatal Error", e)
-            Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
         } catch (e: BehaviorInstantiationException) {
             log.log(Level.SEVERE, "Fatal Error", e)
-            Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
         } catch (e: CantBeAliveException) {
             log.log(Level.SEVERE, "Fatal Error", e)
-            Main.showError(Main.instance.languageBundle.getString("FailedCreateNewShimejiErrorMessage"), e)
+            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
         }
     }
 

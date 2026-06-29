@@ -22,7 +22,7 @@
 
 package com.group_finity.mascot.sound
 
-import com.group_finity.mascot.Main
+import com.group_finity.mascot.getProperty
 import java.util.concurrent.ConcurrentHashMap
 import javax.sound.sampled.Clip
 
@@ -31,7 +31,7 @@ object Sounds {
 
     @JvmStatic
     var isMuted
-        get() = !Main.instance.properties.getProperty("Sounds", "true").toBoolean()
+        get() = !getProperty<Boolean>("Sounds", "true")
         set(value) {
             if (value) {
                 sounds.values.forEach { it.stop() }

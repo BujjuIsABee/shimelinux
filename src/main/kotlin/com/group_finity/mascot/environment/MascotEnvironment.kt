@@ -22,9 +22,9 @@
 
 package com.group_finity.mascot.environment
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.getProperty
 import java.awt.Point
 
 class MascotEnvironment(private val mascot: Mascot) {
@@ -34,7 +34,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     val workArea
         get() = getWorkArea(false)
     val activeIE
-        get() = if (!Main.instance.properties.getProperty("Multiscreen", "true").toBoolean() &&
+        get() = if (!getProperty<Boolean>("Multiscreen", "true") &&
             currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false
         ) {
             Area()
@@ -45,6 +45,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         get() = impl.activeIETitle
     val screen
         get() = impl.screen
+
     @Suppress("unused")
     val complexScreen
         get() = impl.complexScreen
@@ -71,7 +72,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         var currentWorkArea = currentWorkArea
 
         if (currentWorkArea != null) {
-            if (ignoreSettings || Main.instance.properties.getProperty("Multiscreen", "true").toBoolean()) {
+            if (ignoreSettings || getProperty<Boolean>("Multiscreen", "true")) {
                 if (currentWorkArea != impl.workArea &&
                     currentWorkArea.toRectangle().contains(impl.workArea.toRectangle()) &&
                     impl.workArea.contains(mascot.anchor.x, mascot.anchor.y)
