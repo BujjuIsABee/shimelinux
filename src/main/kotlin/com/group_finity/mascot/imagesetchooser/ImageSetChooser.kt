@@ -26,6 +26,10 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.loadResource
+import com.group_finity.mascot.localize
+import com.group_finity.mascot.setProperty
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Desktop
@@ -55,8 +59,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
-    private val lang = Main.instance.languageBundle
-
     private val headerPanel: JPanel
     private val labelsPanel: JPanel
     private val clearAllLabel: JLabel
@@ -78,9 +80,9 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var cancelled = true
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
-        title = lang.getString("ShimejiImageSetChooser")
+        title = "ShimejiImageSetChooser".localize()
         minimumSize = Dimension(670, 495)
         contentPane.layout = BorderLayout()
         defaultCloseOperation = DISPOSE_ON_CLOSE
@@ -96,7 +98,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         listScrollPane.preferredSize = Dimension(518, 100)
         listScrollPane.verticalScrollBar.unitIncrement = 10
 
-        clearAllLabel = JLabel("<html><u>" + lang.getString("ClearAll") + "</u></html>")
+        clearAllLabel = JLabel("<html><u>" + "ClearAll".localize() + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
         clearAllLabel.font = clearAllLabel.font.deriveFont(Font.BOLD)
@@ -107,7 +109,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         })
 
-        selectAllLabel = JLabel("<html><u>" + lang.getString("SelectAll") + "</u></html>")
+        selectAllLabel = JLabel("<html><u>" + "SelectAll".localize() + "</u></html>")
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
         selectAllLabel.font = selectAllLabel.font.deriveFont(Font.BOLD)
@@ -125,22 +127,22 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         labelsPanel.add(selectAllLabel)
 
         headerPanel = JPanel(BorderLayout())
-        headerPanel.add(JLabel(lang.getString("SelectImageSetsToUse")), BorderLayout.WEST)
+        headerPanel.add(JLabel("SelectImageSetsToUse".localize()), BorderLayout.WEST)
         headerPanel.add(labelsPanel, BorderLayout.EAST)
 
-        moreButton = JButton(lang.getString("More"))
+        moreButton = JButton("More".localize())
         moreButton.addActionListener { handleMore() }
 
-        useSelectedButton = JButton(lang.getString("UseSelected"))
+        useSelectedButton = JButton("UseSelected".localize())
         useSelectedButton.addActionListener { handleUseSelected() }
 
-        useAllButton = JButton(lang.getString("UseAll"))
+        useAllButton = JButton("UseAll".localize())
         useAllButton.addActionListener {
             cancelled = false
             dispose()
         }
 
-        cancelButton = JButton(lang.getString("Cancel"))
+        cancelButton = JButton("Cancel".localize())
         cancelButton.addActionListener { dispose() }
 
         footerPanel = JPanel(FlowLayout(FlowLayout.CENTER))
@@ -284,20 +286,21 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun readConfigFile(): MutableList<String> {
         val activeImageSets = mutableListOf<String>()
-        activeImageSets.addAll(Main.instance.properties.getProperty("ActiveShimeji", "").split('/'))
+        activeImageSets.addAll(getProperty("ActiveShimeji", "").split('/'))
         selectAllSets = activeImageSets[0].trim().isEmpty()
         return activeImageSets
     }
 
     private fun updateConfigFile() {
         runCatching {
-            val activeShimeji = imageSets
-                .toString()
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", "/")
-
-            Main.instance.properties.setProperty("ActiveShimeji", activeShimeji)
+            setProperty(
+                "ActiveShimeji",
+                imageSets
+                    .toString()
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(", ", "/")
+            )
             confPath.outputStream().use { Main.instance.properties.store(it, "Configuration Options") }
         }
     }

@@ -35,9 +35,7 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
-import java.awt.image.BufferedImage
 import java.io.File
-import java.nio.file.Path
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -52,7 +50,6 @@ import javax.swing.JSeparator
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
@@ -64,7 +61,7 @@ fun main(args: Array<String>) {
     try {
         if (!args.contains("DEBUG")) {
             try {
-                Main::class.java.getResourceAsStream("/conf/logging.properties").use {
+                Main.loadResource("/conf/logging.properties").use {
                     LogManager.getLogManager().readConfiguration(it)
                 }
             } catch (e: Exception) {
@@ -89,11 +86,6 @@ fun main(args: Array<String>) {
     }
 }
 
-fun getPath(vararg paths: String): Path {
-    val dir = Path(System.getProperty("user.home"), ".config", "shimelinux")
-    return Path(dir.toString(), *paths)
-}
-
 class Main {
     private val manager = Manager()
     private var imageSets = mutableListOf<String>()
@@ -112,8 +104,8 @@ class Main {
             getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
 
             // Set menu scaling
-            val menuScaling = properties.getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1").toInt()
-            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+            val menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1")
+            System.setProperty("sun.java2d.uiScale", menuScaling)
         } catch (_: Exception) {
         }
 
@@ -122,7 +114,7 @@ class Main {
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
             UIManager.setLookAndFeel(
-                when (properties.getProperty("Theme", "FlatDark")) {
+                when (getProperty("Theme", "FlatDark")) {
                     "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
                     "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
                     "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
@@ -137,7 +129,7 @@ class Main {
         // Load languages
         try {
             val systemLocale = Locale.getDefault().toLanguageTag()
-            val locale = Locale.forLanguageTag(properties.getProperty("Language", systemLocale))
+            val locale = Locale.forLanguageTag(getProperty("Language", systemLocale))
             languageBundle = ResourceBundle.getBundle("conf.language", locale)
         } catch (_: Exception) {
             showError("The default language file could not be loaded.")
@@ -147,7 +139,7 @@ class Main {
 
     fun run() {
         // Get the image sets to use
-        if (!properties.getProperty("AlwaysShowShimejiChooser", "false").toBoolean()) {
+        if (!getProperty<Boolean>("AlwaysShowShimejiChooser", "false")) {
             for (set in properties.getProperty("ActiveShimeji", "").split('/')) {
                 if (set.trim().isNotEmpty()) {
                     imageSets.add(set.trim())
@@ -182,8 +174,8 @@ class Main {
 
         // Create the first mascot
         for (imageSet in imageSets) {
-            val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
-            val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
+            val infoAlreadySeen = getProperty("InformationDismissed", "")
+            val alwaysShowInfo = getProperty<Boolean>("AlwaysShowInformationScreen", "false")
             configurations[imageSet]?.let { config ->
                 if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
                     val info = InformationWindow(imageSet, config)
@@ -207,21 +199,21 @@ class Main {
 
                 // Copy actions.xml
                 confDir.resolve("actions.xml").outputStream().use { output ->
-                    this::class.java.getResourceAsStream("/conf/actions.xml")?.use { input ->
+                    loadResource("/conf/actions.xml")?.use { input ->
                         input.copyTo(output)
                     }
                 }
 
                 // Copy behaviors.xml
                 confDir.resolve("behaviors.xml").outputStream().use { output ->
-                    this::class.java.getResourceAsStream("/conf/behaviors.xml")?.use { input ->
+                    loadResource("/conf/behaviors.xml")?.use { input ->
                         input.copyTo(output)
                     }
                 }
 
                 // Copy settings.properties
                 confDir.resolve("settings.properties").outputStream().use { output ->
-                    this::class.java.getResourceAsStream("/conf/settings.properties")?.use { input ->
+                    loadResource("/conf/settings.properties")?.use { input ->
                         input.copyTo(output)
                     }
                 }
@@ -234,14 +226,14 @@ class Main {
 
                 // Copy FlatLightLaf.properties
                 themeDir.resolve("FlatLightLaf.properties").outputStream().use { output ->
-                    this::class.java.getResourceAsStream("/conf/theme/FlatLightLaf.properties")?.use { input ->
+                    loadResource("/conf/theme/FlatLightLaf.properties")?.use { input ->
                         input.copyTo(output)
                     }
                 }
 
                 // Copy FlatDarkLaf.properties
                 themeDir.resolve("FlatDarkLaf.properties").outputStream().use { output ->
-                    this::class.java.getResourceAsStream("/conf/theme/FlatDarkLaf.properties")?.use { input ->
+                    loadResource("/conf/theme/FlatDarkLaf.properties")?.use { input ->
                         input.copyTo(output)
                     }
                 }
@@ -257,7 +249,7 @@ class Main {
                 defaultMascotDir.createDirectories()
                 for (i in 1 until 47) {
                     getPath("img", "Shimeji", "shime$i.png").outputStream().use { output ->
-                        this::class.java.getResourceAsStream("/img/Shimeji/shime$i.png")?.use { input ->
+                        loadResource("/img/Shimeji/shime$i.png")?.use { input ->
                             input.copyTo(output)
                         }
                     }
@@ -377,7 +369,7 @@ class Main {
             return true
         } catch (e: Exception) {
             log.log(Level.SEVERE, "Failed to load configuration files", e)
-            showError(languageBundle.getString("FailedLoadConfigErrorMessage"), e)
+            showError("FailedLoadConfigErrorMessage".localize(), e)
         }
 
         return false
@@ -388,66 +380,66 @@ class Main {
 
         val icon = SystemTray.get()
         if (icon != null) {
-            this::class.java.getResourceAsStream("/img/icon.png").use { icon.setImage(it) }
+            loadResource("/img/icon.png").use { icon.setImage(it) }
             icon.setStatus("ShimeLinux")
         } else {
             log.log(Level.SEVERE, "Failed to create tray icon")
-            showError(languageBundle.getString("FailedDisplaySystemTrayErrorMessage"))
+            showError("FailedDisplaySystemTrayErrorMessage".localize())
         }
 
-        val callShimejiMenu = MenuItem(languageBundle.getString("CallShimeji")) {
+        val callShimejiMenu = MenuItem("CallShimeji".localize()) {
             createMascot()
         }
 
-        val followCursorMenu = MenuItem(languageBundle.getString("FollowCursor")) {
+        val followCursorMenu = MenuItem("FollowCursor".localize()) {
             manager.setBehaviorAll("ChaseMouse")
         }
 
-        val reduceToOneMenu = MenuItem(languageBundle.getString("ReduceToOne")) {
+        val reduceToOneMenu = MenuItem("ReduceToOne".localize()) {
             manager.remainOne()
         }
 
-        val restoreWindowsMenu = MenuItem(languageBundle.getString("RestoreWindows")) {
+        val restoreWindowsMenu = MenuItem("RestoreWindows".localize()) {
             NativeFactory.instance.environment.restoreIE()
         }
 
-        val breedingMenu = Checkbox(languageBundle.getString("BreedingCloning")) {
+        val breedingMenu = Checkbox("BreedingCloning".localize()) {
             toggleBooleanSetting("Breeding", true)
             updateConfigFile()
         }
-        breedingMenu.checked = properties.getProperty("Breeding", "true").toBoolean()
+        breedingMenu.checked = getProperty<Boolean>("Breeding", "true")
 
-        val transientMenu = Checkbox(languageBundle.getString("BreedingTransient")) {
+        val transientMenu = Checkbox("BreedingTransient".localize()) {
             toggleBooleanSetting("Transients", true)
             updateConfigFile()
         }
-        transientMenu.checked = properties.getProperty("Transients", "true").toBoolean()
+        transientMenu.checked = getProperty<Boolean>("Transients", "true")
 
-        val transformationMenu = Checkbox(languageBundle.getString("Transformation")) {
+        val transformationMenu = Checkbox("Transformation".localize()) {
             toggleBooleanSetting("Transformation", true)
             updateConfigFile()
         }
-        transformationMenu.checked = properties.getProperty("Transformation", "true").toBoolean()
+        transformationMenu.checked = getProperty<Boolean>("Transformation", "true")
 
-        val throwingMenu = Checkbox(languageBundle.getString("ThrowingWindows")) {
+        val throwingMenu = Checkbox("ThrowingWindows".localize()) {
             toggleBooleanSetting("Throwing", true)
             updateConfigFile()
         }
-        throwingMenu.checked = properties.getProperty("Throwing", "true").toBoolean()
+        throwingMenu.checked = getProperty<Boolean>("Throwing", "true")
 
-        val soundsMenu = Checkbox(languageBundle.getString("SoundEffects")) {
+        val soundsMenu = Checkbox("SoundEffects".localize()) {
             toggleBooleanSetting("Sounds", true)
             updateConfigFile()
         }
-        soundsMenu.checked = properties.getProperty("Sounds", "true").toBoolean()
+        soundsMenu.checked = getProperty<Boolean>("Sounds", "true")
 
-        val multiscreenMenu = Checkbox(languageBundle.getString("Multiscreen")) {
+        val multiscreenMenu = Checkbox("Multiscreen".localize()) {
             toggleBooleanSetting("Multiscreen", true)
             updateConfigFile()
         }
-        multiscreenMenu.checked = properties.getProperty("Multiscreen", "true").toBoolean()
+        multiscreenMenu.checked = getProperty<Boolean>("Multiscreen", "true")
 
-        val allowedBehaviorsSubmenu = Menu(languageBundle.getString("AllowedBehaviors"))
+        val allowedBehaviorsSubmenu = Menu("AllowedBehaviors".localize())
         allowedBehaviorsSubmenu.add(breedingMenu)
         allowedBehaviorsSubmenu.add(transientMenu)
         allowedBehaviorsSubmenu.add(transformationMenu)
@@ -455,12 +447,12 @@ class Main {
         allowedBehaviorsSubmenu.add(soundsMenu)
         allowedBehaviorsSubmenu.add(multiscreenMenu)
 
-        val chooseShimejiMenu = MenuItem(languageBundle.getString("ChooseShimeji")) {
+        val chooseShimejiMenu = MenuItem("ChooseShimeji".localize()) {
             val chooser = ImageSetChooser(null, true)
             setActiveImageSets(chooser.display())
         }
 
-        val settingsMenu = MenuItem(languageBundle.getString("Settings")) {
+        val settingsMenu = MenuItem("Settings".localize()) {
             if (!manager.isPaused) {
                 manager.togglePauseAll()
             }
@@ -607,7 +599,7 @@ class Main {
             updateConfigFile()
         }
 
-        val languageSubmenu = Menu(languageBundle.getString("Language"))
+        val languageSubmenu = Menu("Language".localize())
         languageSubmenu.add(englishMenu)
         languageSubmenu.add(arabicMenu)
         languageSubmenu.add(catalanMenu)
@@ -631,11 +623,11 @@ class Main {
         languageSubmenu.add(japaneseMenu)
 
         var pauseAllMenu: MenuItem? = null
-        pauseAllMenu = MenuItem(languageBundle.getString("PauseAnimations")) {
+        pauseAllMenu = MenuItem("PauseAnimations".localize()) {
             pauseAllMenu?.let { pauseMenuClicked(it) }
         }
 
-        val dismissAllMenu = MenuItem(languageBundle.getString("DismissAll")) {
+        val dismissAllMenu = MenuItem("DismissAll".localize()) {
             exit()
         }
 
@@ -658,9 +650,9 @@ class Main {
 
         // Update pause menu item text
         pauseMenuItem.text = if (manager.isPaused) {
-            languageBundle.getString("ResumeAnimations")
+            "ResumeAnimations".localize()
         } else {
-            languageBundle.getString("PauseAnimations")
+            "PauseAnimations".localize()
         }
     }
 
@@ -682,26 +674,26 @@ class Main {
         mascot.isLookRight = Math.random() < 0.5
 
         try {
-            mascot.behavior = getConfiguration(imageSet)?.buildNextBehavior(null, mascot)
+            mascot.behavior = checkNotNull(getConfiguration(imageSet)).buildNextBehavior(null, mascot)
             manager.add(mascot)
         } catch (e: BehaviorInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the first action", e)
-            showError(languageBundle.getString("FailedInitializeFirstActionErrorMessage"), e)
+            showError("FailedInitializeFirstActionErrorMessage".localize(), e)
             mascot.dispose()
         } catch (e: CantBeAliveException) {
             log.log(Level.SEVERE, "Fatal Error", e)
-            showError(languageBundle.getString("FailedInitializeFirstActionErrorMessage"), e)
+            showError("FailedInitializeFirstActionErrorMessage".localize(), e)
             mascot.dispose()
         } catch (e: Exception) {
             log.log(Level.SEVERE, "Could not be started ($imageSet)", e)
-            showError(languageBundle.getString("CouldNotCreateShimejiErrorMessage") + " ($imageSet)", e)
+            showError("CouldNotCreateShimejiErrorMessage".localize() + " ($imageSet)", e)
             mascot.dispose()
         }
     }
 
     private fun updateLanguage(language: String) {
-        if (properties.getProperty("Language", "en-GB") != language) {
-            properties.setProperty("Language", language)
+        if (getProperty("Language", "en-GB") != language) {
+            setProperty("Language", language)
             refreshLanguage()
         }
     }
@@ -710,7 +702,7 @@ class Main {
         try {
             // Refresh the language bundle
             val systemLocale = Locale.getDefault().toLanguageTag()
-            val locale = Locale.forLanguageTag(properties.getProperty("Language", systemLocale))
+            val locale = Locale.forLanguageTag(getProperty("Language", systemLocale))
             languageBundle = ResourceBundle.getBundle("conf.language", locale)
 
             // Refresh the mascots
@@ -742,7 +734,7 @@ class Main {
 
     fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
         val list = mutableListOf<String>()
-        val data = properties.getProperty("DisabledBehaviours.${mascot.imageSet}", "").split('/')
+        val data = getProperty("DisabledBehaviours.${mascot.imageSet}", "").split('/')
 
         if (data.isNotEmpty() && data[0] != "") {
             list.addAll(data)
@@ -755,7 +747,7 @@ class Main {
         }
 
         if (list.isNotEmpty()) {
-            properties.setProperty(
+            setProperty(
                 "DisabledBehaviours.${mascot.imageSet}",
                 list.toString()
                     .replace("[", "")
@@ -771,16 +763,16 @@ class Main {
 
     @Suppress("SameParameterValue")
     private fun toggleBooleanSetting(propertyName: String, defaultValue: Boolean) {
-        if (properties.getProperty(propertyName, defaultValue.toString()).toBoolean()) {
-            properties.setProperty(propertyName, "false")
+        if (getProperty<Boolean>(propertyName, defaultValue.toString())) {
+            setProperty(propertyName, "false")
         } else {
-            properties.setProperty(propertyName, "true")
+            setProperty(propertyName, "true")
         }
     }
 
     private fun setMascotInformationDismissed(imageSet: String) {
         val list = mutableListOf<String>()
-        val data = properties.getProperty("InformationDismissed", "").split('/')
+        val data = getProperty("InformationDismissed", "").split('/')
 
         if (data.isNotEmpty() && data[0].isNotEmpty()) {
             list.addAll(data.toList())
@@ -789,18 +781,19 @@ class Main {
             list.add(imageSet)
         }
 
-        val value = list.toString()
-            .replace("[", "")
-            .replace("]", "")
-            .replace(", ", "/")
-
-        properties.setProperty("InformationDismissed", value)
+        setProperty(
+            "InformationDismissed",
+            list.toString()
+                .replace("[", "")
+                .replace("]", "")
+                .replace(", ", "/")
+        )
     }
 
     private fun updateConfigFile() {
         try {
             getPath("conf", "settings.properties").outputStream().use {
-                properties.store(it, "Configuration Options")
+                storeProperties(it, "Configuration Options")
             }
         } catch (_: Exception) {
         }
@@ -880,12 +873,10 @@ class Main {
             if (loadConfiguration(imageSet)) {
                 imageSets.add(imageSet)
 
-                val infoAlreadySeen = properties.getProperty("InformationDismissed", "")
-                val alwaysShowInfo = properties.getProperty("AlwaysShowInformationScreen", "false").toBoolean()
+                val infoAlreadySeen = getProperty("InformationDismissed", "")
+                val alwaysShowInfo = getProperty<Boolean>("AlwaysShowInformationScreen", "false")
                 configurations[imageSet]?.let { config ->
-                    if (config.containsInformationKey("SplashImage") &&
-                        (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
-                    ) {
+                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
                         val info = InformationWindow(imageSet, config)
                         info.isVisible = true
                         setMascotInformationDismissed(imageSet)
@@ -917,7 +908,7 @@ class Main {
         @JvmStatic
         val frame: JFrame by lazy {
             JFrame().apply {
-                iconImage = Main::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+                iconImage = loadResource("/img/icon.png").use { ImageIO.read(it) }
             }
         }
 
@@ -934,7 +925,7 @@ class Main {
                 "\n${exception.message}"
             }
 
-            showError(m + "\n${instance.languageBundle.getString("SeeLogForDetails")}")
+            showError(m + "\n${"SeeLogForDetails".localize()}")
         }
     }
 }

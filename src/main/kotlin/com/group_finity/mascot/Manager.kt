@@ -120,15 +120,15 @@ class Manager {
         synchronized(mascots) {
             for (mascot in mascots) {
                 try {
-                    val configuration = checkNotNull(Main.instance.getConfiguration(mascot.imageSet))
+                    val configuration = getConfiguration(mascot.imageSet)
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Failed to set behavior.", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                     mascot.dispose()
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                     mascot.dispose()
                 }
             }
@@ -144,11 +144,11 @@ class Manager {
                     }
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                     mascot.dispose()
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                     mascot.dispose()
                 }
             }

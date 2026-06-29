@@ -27,6 +27,8 @@ import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
+import com.group_finity.mascot.getConfiguration
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
@@ -153,20 +155,20 @@ class ComplexJump(
 
             if (isScanEnabled) {
                 try {
-                    mascot.behavior = checkNotNull(Main.instance.getConfiguration(mascot.imageSet)).buildBehavior(behavior, mascot)
-                    checkNotNull(target).behavior = checkNotNull(Main.instance.getConfiguration(target.imageSet)).buildBehavior(targetBehavior, target)
+                    mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
+                    checkNotNull(target).behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
                 } catch (e: IllegalStateException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                 } catch (e: BehaviorInstantiationException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                 } catch (e: CantBeAliveException) {
                     log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError(Main.instance.languageBundle.getString("FailedSetBehaviorErrorMessage"), e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
                 }
             }
         }

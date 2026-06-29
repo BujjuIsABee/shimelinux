@@ -22,15 +22,16 @@
 
 package com.group_finity.mascot.config
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.animation.Pose
 import com.group_finity.mascot.exception.AnimationInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.getPath
+import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.ImagePairLoader
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.sound.SoundLoader
 import java.awt.Dimension
@@ -62,7 +63,7 @@ class AnimationBuilder(
                 poses.add(loadPose(frameNode))
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load pose: ${frameNode.attributes}", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadPoseErrorMessage") + ": ${frameNode.attributes}", e)
+                throw ConfigurationException("FailedLoadPoseErrorMessage".localize() + ": ${frameNode.attributes}", e)
             }
         }
 
@@ -71,7 +72,7 @@ class AnimationBuilder(
                 hotspots.add(loadHotspot(frameNode))
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load hotspot: ${frameNode.attributes}", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadHotspotErrorMessage") + ": ${frameNode.attributes}", e)
+                throw ConfigurationException("FailedLoadHotspotErrorMessage".localize() + ": ${frameNode.attributes}", e)
             }
         }
 
@@ -89,10 +90,10 @@ class AnimationBuilder(
         var soundText = frameNode.getAttribute(schema.getString("Sound"))
         val volumeText = frameNode.getAttribute(schema.getString("Volume")) ?: "0"
 
-        val opacity = Main.instance.properties.getProperty("Opacity", "1.0").toDouble()
-        val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
+        val opacity = getProperty<Double>("Opacity", "1.0")
+        val scaling = getProperty<Double>("Scaling", "1.0")
 
-        val filterText = Main.instance.properties.getProperty("Filter", "Nearest")
+        val filterText = getProperty("Filter", "Nearest")
         val filter = when (filterText) {
             "Nearest" -> ImagePairLoader.Filter.NEAREST_NEIGHBOR
             "Bicubic" -> ImagePairLoader.Filter.BICUBIC
@@ -108,7 +109,7 @@ class AnimationBuilder(
                 ImagePairLoader.load(leftImagePath, rightImagePath, anchor, scaling, filter, opacity)
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadImageErrorMessage") + ": $leftImagePath, ${rightImagePath ?: ""}", e)
+                throw ConfigurationException("FailedLoadImageErrorMessage".localize() + ": $leftImagePath, ${rightImagePath ?: ""}", e)
             }
         }
 
@@ -131,7 +132,7 @@ class AnimationBuilder(
                 soundText += volumeText.toFloat()
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load sound: $soundText", e)
-                throw ConfigurationException(Main.instance.languageBundle.getString("FailedLoadSoundErrorMessage") + ": $soundText", e)
+                throw ConfigurationException("FailedLoadSoundErrorMessage".localize() + ": $soundText", e)
             }
         }
 
@@ -146,7 +147,7 @@ class AnimationBuilder(
         val sizeText = requireNotNull(frameNode.getAttribute(schema.getString("Size")))
         val behaviorText = frameNode.getAttribute(schema.getString("Behavior"))
 
-        val scaling = Main.instance.properties.getProperty("Scaling", "1.0").toDouble()
+        val scaling = getProperty<Double>("Scaling", "1.0")
 
         val originCoordinates = originText.split(",")
         val origin = Point(
@@ -171,7 +172,7 @@ class AnimationBuilder(
 
             else -> {
                 log.log(Level.SEVERE, "Failed to load hotspot shape: $shapeText")
-                throw ConfigurationException(Main.instance.languageBundle.getString("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
+                throw ConfigurationException("HotspotShapeNotSupportedErrorMessage".localize() + ": $shapeText")
             }
         }
 
@@ -189,7 +190,7 @@ class AnimationBuilder(
                 turn.toBoolean()
             )
         } catch (e: VariableException) {
-            throw AnimationInstantiationException(Main.instance.languageBundle.getString("FailedConditionEvaluationErrorMessage"), e)
+            throw AnimationInstantiationException("FailedConditionEvaluationErrorMessage".localize(), e)
         }
     }
 

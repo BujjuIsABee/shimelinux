@@ -91,9 +91,11 @@ class Mascot(var imageSet: String) {
         }
     var time = 0
         private set
+
     @Suppress("unused")
     val count: Int
         get() = manager?.getCount(imageSet) ?: 0
+
     @Suppress("unused")
     val totalCount: Int
         get() = manager?.count ?: 0
@@ -115,7 +117,7 @@ class Mascot(var imageSet: String) {
                             behavior.mousePressed(e)
                         } catch (e: CantBeAliveException) {
                             log.log(Level.SEVERE, "Fatal Error", e)
-                            Main.showError(Main.instance.languageBundle.getString("SevereShimejiErrorErrorMessage"), e)
+                            Main.showError("SevereShimejiErrorErrorMessage".localize(), e)
                             dispose()
                         }
                     }
@@ -134,7 +136,7 @@ class Mascot(var imageSet: String) {
                             behavior.mouseReleased(e)
                         } catch (e: CantBeAliveException) {
                             log.log(Level.SEVERE, "Fatal Error", e)
-                            Main.showError(Main.instance.languageBundle.getString("SevereShimejiErrorErrorMessage"), e)
+                            Main.showError("SevereShimejiErrorErrorMessage".localize(), e)
                             dispose()
                         }
                     }
@@ -170,10 +172,9 @@ class Mascot(var imageSet: String) {
 
     private fun showPopup(x: Int, y: Int) {
         val popup = JPopupMenu()
-        val lang = Main.instance.languageBundle
 
         popup.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuCanceled(e: PopupMenuEvent) { }
+            override fun popupMenuCanceled(e: PopupMenuEvent) {}
 
             override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
                 isAnimating = true
@@ -184,22 +185,22 @@ class Mascot(var imageSet: String) {
             }
         })
 
-        val callAnotherMenu = JMenuItem(lang.getString("CallAnother"))
+        val callAnotherMenu = JMenuItem("CallAnother".localize())
         callAnotherMenu.addActionListener {
             Main.instance.createMascot(imageSet)
         }
 
-        val followCursorMenu = JMenuItem(lang.getString("FollowCursor"))
+        val followCursorMenu = JMenuItem("FollowCursor".localize())
         followCursorMenu.addActionListener {
-            manager?.setBehaviorAll(checkNotNull(Main.instance.getConfiguration(imageSet)), "ChaseMouse", imageSet)
+            manager?.setBehaviorAll(getConfiguration(imageSet), "ChaseMouse", imageSet)
         }
 
-        val restoreWindowsMenu = JMenuItem(lang.getString("RestoreWindows"))
+        val restoreWindowsMenu = JMenuItem("RestoreWindows".localize())
         restoreWindowsMenu.addActionListener {
             NativeFactory.instance.environment.restoreIE()
         }
 
-        val debugMenu = JMenuItem(lang.getString("RevealStatistics"))
+        val debugMenu = JMenuItem("RevealStatistics".localize())
         debugMenu.addActionListener {
             if (debugWindow == null) {
                 debugWindow = DebugWindow(imageSet)
@@ -207,52 +208,52 @@ class Mascot(var imageSet: String) {
             debugWindow?.isVisible = true
         }
 
-        val dismissMenu = JMenuItem(lang.getString("Dismiss"))
+        val dismissMenu = JMenuItem("Dismiss".localize())
         dismissMenu.addActionListener {
             dispose()
         }
 
-        val dismissOthersMenu = JMenuItem(lang.getString("DismissOthers"))
+        val dismissOthersMenu = JMenuItem("DismissOthers".localize())
         dismissOthersMenu.addActionListener {
             manager?.remainOne(imageSet)
         }
 
-        val dismissAllOthersMenu = JMenuItem(lang.getString("DismissAllOthers"))
+        val dismissAllOthersMenu = JMenuItem("DismissAllOthers".localize())
         dismissAllOthersMenu.addActionListener {
             manager?.remainOne(this)
         }
 
-        val dismissAllMenu = JMenuItem(lang.getString("DismissAll"))
+        val dismissAllMenu = JMenuItem("DismissAll".localize())
         dismissAllMenu.addActionListener {
-            Main.instance.exit()
+            exit()
         }
 
         val pauseMenu = JMenuItem(
             if (isAnimating) {
-                lang.getString("PauseAnimations")
+                "PauseAnimations".localize()
             } else {
-                lang.getString("ResumeAnimations")
+                "ResumeAnimations".localize()
             }
         )
         pauseMenu.addActionListener {
             isPaused = !isPaused
         }
 
-        val behaviorsSubmenu = JMenu(lang.getString("SetBehavior"))
-        val allowedSubmenu = JMenu(lang.getString("AllowedBehaviors"))
-        val config = checkNotNull(Main.instance.getConfiguration(imageSet))
+        val behaviorsSubmenu = JMenu("SetBehavior".localize())
+        val allowedSubmenu = JMenu("AllowedBehaviors".localize())
+        val config = getConfiguration(imageSet)
         for (behaviorName in config.behaviorNames) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
                     val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
                     if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
-                        val item = JMenuItem(if (lang.containsKey(behaviorName)) lang.getString(behaviorName) else caption)
+                        val item = JMenuItem(if (Main.instance.languageBundle.containsKey(behaviorName)) behaviorName.localize() else caption)
                         item.addActionListener {
                             try {
                                 behavior = config.buildBehavior(behaviorName)
                             } catch (e: Exception) {
                                 log.log(Level.SEVERE, "Failed to set behavior ($this)")
-                                Main.showError(lang.getString("CouldNotSetBehaviorErrorMessage"), e)
+                                Main.showError("CouldNotSetBehaviorErrorMessage".localize(), e)
                             }
                         }
                         behaviorsSubmenu.add(item)
@@ -304,7 +305,7 @@ class Mascot(var imageSet: String) {
                 behavior?.next()
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError(Main.instance.languageBundle.getString("CouldNotGetNextBehaviorErrorMessage"), e)
+                Main.showError("CouldNotGetNextBehaviorErrorMessage".localize(), e)
                 dispose()
             }
             time++
@@ -383,7 +384,7 @@ class Mascot(var imageSet: String) {
     private fun refreshCursor(position: Point) {
         var useHand = false
         for (hotspot in hotspots) {
-            val isEnabled = checkNotNull(Main.instance.getConfiguration(imageSet)).isBehaviorEnabled(hotspot.behavior, this)
+            val isEnabled = getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)
             if (hotspot.contains(this, position) && isEnabled) {
                 useHand = true
                 break

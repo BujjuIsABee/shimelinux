@@ -22,9 +22,9 @@
 
 package com.group_finity.mascot.config
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.exception.ConfigurationException
+import com.group_finity.mascot.localize
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -39,7 +39,7 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
     override fun validate() {
         if (!configuration.actionBuilders.containsKey(name)) {
             log.log(Level.SEVERE, "There is no corresponding behavior: $this")
-            throw ConfigurationException(Main.instance.languageBundle.getString("NoBehaviorFoundErrorMessage") + ": $this")
+            throw ConfigurationException("NoBehaviorFoundErrorMessage".localize() + ": $this")
         }
     }
 

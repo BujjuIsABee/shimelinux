@@ -22,7 +22,6 @@
 
 package com.group_finity.mascot.config
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.action.Animate
 import com.group_finity.mascot.action.Move
@@ -33,6 +32,7 @@ import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.AnimationInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.exception.VariableException
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
@@ -67,9 +67,9 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
             }
         } catch (e: ConfigurationException) {
             val message = buildString {
-                append(Main.instance.languageBundle.getString("FailedLoadActionErrorMessage"))
+                append("FailedLoadActionErrorMessage".localize())
                 append(" \"$name\" ")
-                append(Main.instance.languageBundle.getString("ForShimeji"))
+                append("ForShimeji".localize())
                 append(" \"$imageSet.\"")
             }
 
@@ -101,11 +101,11 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                             cls.getConstructor().newInstance()
                         }
                     } catch (e: InstantiationException) {
-                        throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedClassActionInitialiseErrorMessage") + " ($this)", e)
+                        throw ActionInstantiationException("FailedClassActionInitialiseErrorMessage".localize() + " ($this)", e)
                     } catch (e: IllegalAccessException) {
-                        throw ActionInstantiationException(Main.instance.languageBundle.getString("CannotAccessClassActionErrorMessage") + " ($this)", e)
+                        throw ActionInstantiationException("CannotAccessClassActionErrorMessage".localize() + " ($this)", e)
                     } catch (e: ClassNotFoundException) {
-                        throw ActionInstantiationException(Main.instance.languageBundle.getString("ClassNotFoundErrorMessage") + " ($this)", e)
+                        throw ActionInstantiationException("ClassNotFoundErrorMessage".localize() + " ($this)", e)
                     }
                 }
 
@@ -114,12 +114,12 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 "Animate" -> Animate(schema, animations, variables)
                 "Sequence" -> Sequence(schema, variables, *actions.toTypedArray())
                 "Select" -> Select(schema, variables, *actions.toTypedArray())
-                else -> throw ActionInstantiationException(Main.instance.languageBundle.getString("UnknownActionTypeErrorMessage") + " ($this)")
+                else -> throw ActionInstantiationException("UnknownActionTypeErrorMessage".localize() + " ($this)")
             }
         } catch (e: AnimationInstantiationException) {
-            throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedCreateAnimationErrorMessage") + ": $this", e)
+            throw ActionInstantiationException("FailedCreateAnimationErrorMessage".localize() + ": $this", e)
         } catch (e: VariableException) {
-            throw ActionInstantiationException(Main.instance.languageBundle.getString("FailedParameterEvaluationErrorMessage") + ": $this", e)
+            throw ActionInstantiationException("FailedParameterEvaluationErrorMessage".localize() + ": $this", e)
         }
     }
 
@@ -135,7 +135,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
 
     private fun createVariables(params: Map<String, String>) = VariableMap().apply {
         putAll(this@ActionBuilder.params.mapValues { Variable.parse(it.value) })
-        putAll(params.mapValues { Variable.parse(it.value)})
+        putAll(params.mapValues { Variable.parse(it.value) })
     }
 
     override fun toString() = "Action ($name, $type, $className)"

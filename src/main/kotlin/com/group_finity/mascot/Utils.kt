@@ -20,49 +20,52 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.script
+package com.group_finity.mascot
 
-import com.group_finity.mascot.exception.VariableException
-import com.group_finity.mascot.localize
-import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory
-import javax.script.Compilable
-import javax.script.CompiledScript
-import javax.script.ScriptException
+import com.group_finity.mascot.config.Configuration
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Path
+import kotlin.io.path.Path
 
-class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
-    private val compiled: CompiledScript
-    private var value: Any? = null
+fun getPath(vararg paths: String): Path = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
 
-    init {
-        try {
-            compiled = (engine as Compilable).compile(source)
-        } catch (e: ScriptException) {
-            throw VariableException("ScriptCompilationErrorMessage".localize() + ": $source", e)
-        }
+fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
+
+fun String.localize(): String = Main.instance.languageBundle.getString(this)
+
+fun tryGetConfiguration(imageSet: String): Configuration? = Main.instance.getConfiguration(imageSet)
+
+fun getConfiguration(imageSet: String): Configuration = checkNotNull(Main.instance.getConfiguration(imageSet))
+
+fun getProperty(key: String, defaultValue: String): String = Main.instance.properties.getProperty(key, defaultValue)
+
+inline fun <reified T> getProperty(key: String, defaultValue: String): T =
+    getProperty(key, defaultValue).let { value ->
+        when (T::class) {
+            Int::class -> value.toInt()
+            Double::class -> value.toDouble()
+            Boolean::class -> value.toBoolean()
+            else -> value
+        } as T
     }
 
-    override fun init() {
-        value = null
-    }
+fun setProperty(key: String, value: String) {
+    Main.instance.properties.setProperty(key, value)
+}
 
-    override fun initFrame() {
-        if (isClearAtInitFrame) {
-            value = null
-        }
-    }
+fun storeProperties(stream: OutputStream, comments: String) {
+    Main.instance.properties.store(stream, comments)
+}
 
-    @Synchronized
-    override fun get(variables: VariableMap): Any? {
-        return value ?: try {
-            value = compiled.eval(variables); value
-        } catch (e: ScriptException) {
-            throw VariableException("ScriptEvaluationErrorMessage".localize() + ": $source", e)
-        }
-    }
+fun showError(message: String) {
+    Main.showError(message)
+}
 
-    override fun toString() = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
+fun showError(message: String, exception: Throwable) {
+    Main.showError(message, exception)
+}
 
-    companion object {
-        private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter())
-    }
+fun exit() {
+    Main.instance.exit()
 }
