@@ -1,8 +1,7 @@
-===== NOTE =====
-
 ShimeLinux is an unofficial Linux port/Kotlin rewrite of Shimeji-ee by Kilkakon
 (https://kilkakon.com/shimeji). This project also incorporates work from
-hqx-java by Arcnor and FlatLaf by FormDev.
+hqx-java by Arcnor (https://github.com/Arcnor/hqx-java) and FlatLaf by FormDev
+(https://formdev.com/flatlaf).
 
 Here are the original licenses:
 
