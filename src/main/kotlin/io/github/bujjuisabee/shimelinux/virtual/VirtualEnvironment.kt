@@ -20,12 +20,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.virtual
+package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.virtual.VirtualContentPanel.Mode
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.loadResource
+import io.github.bujjuisabee.shimelinux.virtual.VirtualContentPanel.Mode
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.MouseInfo
@@ -33,7 +35,6 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
-import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
@@ -50,6 +51,8 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
+        display.title = "ShimeLinux"
+        display.isAutoRequestFocus = false
         display.addWindowListener(object : WindowListener {
             override fun windowOpened(e: WindowEvent) {}
 
@@ -67,33 +70,23 @@ class VirtualEnvironment : Environment() {
 
             override fun windowDeactivated(e: WindowEvent) {}
         })
-        display.isAutoRequestFocus = false
-        display.title = "ShimeLinux"
 
-        val windowArray = Main.instance.properties.getProperty("WindowSize", "600x500").split('x')
-        var image: BufferedImage? = null
-        try {
-            if (Main.instance.properties.getProperty("BackgroundImage", "").isNotEmpty()) {
-                image = ImageIO.read(File(Main.instance.properties.getProperty("BackgroundImage", "")))
-            }
-        } catch (_: Exception) {
-        }
+        val windowArray = getProperty("WindowSize", "600x500").split('x')
 
         display.contentPane = VirtualContentPanel(
             Dimension(windowArray[0].toInt(), windowArray[1].toInt()),
-            Color.decode(Main.instance.properties.getProperty("Background", "#00FF00")),
-            image,
-            when (Main.instance.properties.getProperty("BackgroundMode", "Center")) {
+            Color.decode(getProperty("Background", "#00FF00")),
+            runCatching { ImageIO.read(File(getProperty("BackgroundImage", ""))) }.getOrNull(),
+            when (getProperty("BackgroundMode", "Center")) {
                 "Center" -> Mode.CENTER
                 "Fit" -> Mode.FIT
                 "Stretch" -> Mode.STRETCH
                 "Fill" -> Mode.FILL
-                else -> error("Invalid mode")
+                else -> Mode.CENTER
             }
         )
-        display.background = display.contentPane.background
 
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         display.iconImage = icon
 
         SwingUtilities.invokeLater {

@@ -20,28 +20,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux
+package io.github.bujjuisabee.shimelinux.virtual
 
-import com.group_finity.mascot.environment.Area
-import com.group_finity.mascot.environment.Environment
-import java.awt.Point
+import com.group_finity.mascot.image.NativeImage
+import java.awt.image.BufferedImage
 
-class GenericLinuxEnvironment : Environment() {
-    override val workArea: Area
-        get() = screen
-
-    override val activeIE = Area()
-    override val activeIETitle = ""
-
-    init {
-        activeIE.isVisible = false
-    }
-
-    override fun moveActiveIE(point: Point) {}
-
-    override fun restoreIE() {}
-
-    override fun refreshCache() {}
-
-    override fun dispose() {}
-}
+class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage

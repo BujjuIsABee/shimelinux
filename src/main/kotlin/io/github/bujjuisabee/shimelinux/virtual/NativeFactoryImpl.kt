@@ -20,43 +20,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.virtual
+package io.github.bujjuisabee.shimelinux.virtual
 
-import com.group_finity.mascot.image.NativeImage
-import com.group_finity.mascot.image.TranslucentWindow
-import javax.swing.JPanel
+import com.group_finity.mascot.NativeFactory
+import java.awt.image.BufferedImage
 
-class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
-    private var image: VirtualNativeImage? = null
+@Suppress("unused")
+class NativeFactoryImpl : NativeFactory() {
+    override val environment = VirtualEnvironment()
 
-    override fun asComponent() = this
+    override fun newNativeImage(src: BufferedImage) = VirtualNativeImage(src)
 
-    override fun setImage(image: NativeImage) {
-        this.image = image as VirtualNativeImage
-    }
-
-    override fun setAlwaysOnTop(onTop: Boolean) {}
-
-    override fun dispose() {
-        val parent = this.parent
-        if (parent != null) {
-            parent.remove(this)
-            parent.repaint()
-        }
-    }
-
-    override fun updateImage() {
-        repaint()
-    }
-
-    override fun contains(x: Int, y: Int): Boolean {
-        if (super.contains(x, y)) {
-            try {
-                // return image.managedImage.getRGB(x, y) and 0xff000000 >>> 24 > 0
-            } catch (_: Exception) {
-                return false
-            }
-        }
-        return false
-    }
+    override fun newTransparentWindow() = VirtualTranslucentPanel().also { environment.addShimeji(it) }
 }

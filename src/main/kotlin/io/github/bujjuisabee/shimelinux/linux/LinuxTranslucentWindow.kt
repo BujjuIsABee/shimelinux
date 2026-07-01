@@ -20,7 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux
+package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.NativeImage

@@ -20,25 +20,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux
+package io.github.bujjuisabee.shimelinux.virtual
 
-import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import java.awt.image.BufferedImage
-import javax.swing.UIManager
+import java.awt.Graphics
+import javax.swing.JPanel
 
-class NativeFactoryImpl : NativeFactory() {
-    override val environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-        "KDE" -> KdeEnvironment()
-        else -> GenericLinuxEnvironment()
+class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
+    private var image: VirtualNativeImage? = null
+
+    override fun asComponent() = this
+
+    override fun setAlwaysOnTop(onTop: Boolean) {}
+
+    override fun setImage(image: NativeImage) {
+        if (image is VirtualNativeImage) {
+            this.image = image
+        }
     }
 
-    override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
+    override fun updateImage() {
+        repaint()
+    }
 
-    override fun newTransparentWindow(): TranslucentWindow {
-        // Create the window with a LaF that supports transparency
-        val previousLaf = UIManager.getLookAndFeel()
-        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        return LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
+    override fun paintComponent(g: Graphics) {
+        val image = image?.managedImage ?: return
+        g.drawImage(image, 0, 0, null)
+    }
+
+    override fun dispose() {
+        val parent = this.parent
+        if (parent != null) {
+            parent.remove(this)
+            parent.repaint()
+        }
     }
 }

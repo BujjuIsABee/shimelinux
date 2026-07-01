@@ -20,20 +20,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.virtual
+package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
+import javax.swing.UIManager
 
+@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = VirtualEnvironment()
+    override val environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+        "KDE" -> KdeEnvironment()
+        else -> GenericLinuxEnvironment()
+    }
 
-    override fun newNativeImage(src: BufferedImage) = VirtualNativeImage(src)
+    override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
-        val panel = VirtualTranslucentPanel()
-        environment.addShimeji(panel)
-        return panel
+        // Create the window with a LaF that supports transparency
+        val previousLaf = UIManager.getLookAndFeel()
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        return LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
     }
 }

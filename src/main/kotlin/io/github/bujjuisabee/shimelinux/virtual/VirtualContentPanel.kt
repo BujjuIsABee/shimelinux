@@ -20,7 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.virtual
+package io.github.bujjuisabee.shimelinux.virtual
 
 import java.awt.Color
 import java.awt.Dimension
@@ -39,31 +39,29 @@ class VirtualContentPanel(
     private var resizedImage: Image? = null
 
     init {
-        this.layout = null
+        layout = null
         this.preferredSize = preferredSize
         this.background = background
-        this.resizedImage = image
+        resizedImage = image
 
         addComponentListener(object : ComponentListener {
             override fun componentResized(e: ComponentEvent) {
-                if (image != null) {
-                    if (mode == Mode.STRETCH) {
-                        resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
-                    } else if (mode != Mode.CENTER) {
-                        val scaledWidth = width / image.getWidth(null).toDouble()
-                        val scaledHeight = height / image.getHeight(null).toDouble()
-                        val factor = if (mode == Mode.FIT) {
-                            scaledWidth.coerceAtMost(scaledHeight)
-                        } else {
-                            scaledWidth.coerceAtLeast(scaledHeight)
-                        }
+                if (image == null) return
 
-                        resizedImage = image.getScaledInstance(
-                            (factor * image.getWidth(null)).toInt(),
-                            (factor * image.getHeight(null)).toInt(),
-                            Image.SCALE_SMOOTH
-                        )
-                    }
+                if (mode == Mode.STRETCH) {
+                    resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
+                } else if (mode != Mode.CENTER) {
+                    val scaledWidth = width / image.getWidth(null).toDouble()
+                    val scaledHeight = height / image.getHeight(null).toDouble()
+                    val factor =
+                        if (mode == Mode.FIT) scaledWidth.coerceAtMost(scaledHeight)
+                        else scaledWidth.coerceAtLeast(scaledHeight)
+
+                    resizedImage = image.getScaledInstance(
+                        (factor * image.getWidth(null)).toInt(),
+                        (factor * image.getHeight(null)).toInt(),
+                        Image.SCALE_SMOOTH
+                    )
                 }
             }
 
@@ -77,25 +75,33 @@ class VirtualContentPanel(
 
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
-        val resizedImage = resizedImage
-        if (resizedImage != null) {
-            val (width, height) = when (mode) {
-                Mode.STRETCH -> 0 to 0
-                Mode.CENTER -> (if (resizedImage.getWidth(null) > getWidth()) {
-                    (resizedImage.getWidth(null) - getWidth()) / -2
-                } else {
-                    (getWidth() - resizedImage.getWidth(null)) / 2
-                }) to (if (resizedImage.getHeight(null) > getHeight()) {
-                    (resizedImage.getHeight(null) - getHeight()) / -2
-                } else {
-                    (getHeight() - resizedImage.getHeight(null)) / 2
-                })
 
-                else -> (width - resizedImage.getWidth(null)) / 2 to (height - resizedImage.getHeight(null)) / 2
+        val resizedImage = resizedImage ?: return
+        var resizedWidth: Int
+        var resizedHeight: Int
+
+        when (mode) {
+            Mode.STRETCH -> {
+                resizedWidth = 0
+                resizedHeight = 0
             }
 
-            g.drawImage(resizedImage, width, height, null)
+            Mode.CENTER -> {
+                resizedWidth =
+                    if (resizedImage.getWidth(null) > width) (resizedImage.getWidth(null) - width) / -2
+                    else (width - resizedImage.getWidth(null)) / 2
+                resizedHeight =
+                    if (resizedImage.getHeight(null) > height) (resizedImage.getHeight(null) - height) / -2
+                    else (height - resizedImage.getHeight(null)) / 2
+            }
+
+            else -> {
+                resizedWidth = (width - resizedImage.getWidth(null)) / 2
+                resizedHeight = (height - resizedImage.getHeight(null)) / 2
+            }
         }
+
+        g.drawImage(resizedImage, resizedWidth, resizedHeight, null)
     }
 
     enum class Mode { CENTER, FIT, STRETCH, FILL }
