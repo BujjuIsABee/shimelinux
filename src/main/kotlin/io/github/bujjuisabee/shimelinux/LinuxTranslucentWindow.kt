@@ -40,31 +40,20 @@ import java.awt.image.BufferedImage
 import javax.swing.JFrame
 import javax.swing.JWindow
 
-private val frame: JFrame by lazy {
-    JFrame().apply {
-        // Use blank image for the icon
-        iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
-    }
-}
-
 class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var offset = Point(0, 0)
     private val maskCache = mutableMapOf<LinuxNativeImage, Area>()
-
-    // Get a graphics configuration that supports transparency
-    private val gc: GraphicsConfiguration =
-        GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.first { it.isTranslucencyCapable }
+    private val gc: GraphicsConfiguration = GraphicsEnvironment
+        .getLocalGraphicsEnvironment().defaultScreenDevice.configurations
+        .firstOrNull { it.isTranslucencyCapable } ?: super.getGraphicsConfiguration()
 
     init {
+        background = Color(0, 0, 0, 0)
         name = ""
 
-        // Make the window translucent
-        background = Color(0, 0, 0, 0)
-
-        // Prevents flickering when the background is repainted
-        System.setProperty("sun.awt.noerasebackground", "true")
+        System.setProperty("sun.awt.noerasebackground", "true") // Reduces flickering
     }
 
     override fun getGraphicsConfiguration() = gc
@@ -76,9 +65,14 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
         val windowBounds = Rectangle(x, y, width, height)
         val newBounds = screenBounds.intersection(windowBounds)
 
-        // Allow mascots to go partially offscreen by resizing the window and offsetting the image
-        super.setBounds(newBounds.x, newBounds.y, newBounds.width, newBounds.height)
+        // Allow mascots to go partially offscreen by offsetting the image and resizing the window
         offset = Point(windowBounds.x - newBounds.x, windowBounds.y - newBounds.y)
+        super.setBounds(
+            newBounds.x,
+            newBounds.y,
+            newBounds.width,
+            newBounds.height
+        )
     }
 
     override fun setImage(image: NativeImage) {
@@ -89,7 +83,8 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
     }
 
     override fun updateImage() {
-        // Redraw the image if it has been changed
+        setWindowMask()
+
         if (imageChanged) {
             repaint()
             imageChanged = false
@@ -97,48 +92,44 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
     }
 
     override fun paint(g: Graphics) {
-        val image = image?.managedImage
-        if (image != null) {
-            setWindowMask()
-
-            val g2d = g as Graphics2D
-            g2d.composite = AlphaComposite.Src
-            g2d.drawImage(image, offset.x, offset.y, null)
-            g2d.dispose()
-        }
+        val g2d = g as Graphics2D
+        g2d.composite = AlphaComposite.Src
+        g2d.drawImage(image?.managedImage, offset.x, offset.y, null)
+        g2d.dispose()
     }
 
     private fun setWindowMask() {
-        val nativeImage = image ?: return
-        val mask = maskCache.getOrPut(nativeImage) {
-            val image = nativeImage.managedImage
-            val width = image.width
-            val height = image.height
-            val rgb = image.getRGB(0, 0, width, height, null, 0, width)
+        val image = image ?: return
+        val width = image.width
+        val height = image.height
+        val rgb = image.rgb
 
-            val rect = Rectangle(0, 0, 1, 1)
+        maskCache.getOrPut(image) {
             val mask = Path2D.Double()
-            for (x in 0 until width) {
-                for (y in 0 until height) {
-                    val color = Color(rgb[y * width + x], true)
-                    if (color.alpha > 0) {
-                        rect.x = x
-                        rect.y = y
-                        mask.append(rect, false)
-                    }
+            val rect = Rectangle(0, 0, 1, 1)
+            for (i in 0 until width * height) {
+                if ((rgb[i] shr 24) and 0xFF > 0) {
+                    rect.x = i % width
+                    rect.y = i / width
+                    mask.append(rect, false)
                 }
             }
-
-            Area(mask)
-        }
-
-        mask.takeUnless { it.isEmpty }?.let {
+            return@getOrPut Area(mask)
+        }.takeUnless { it.isEmpty }?.let {
             shape = it.createTransformedArea(
                 AffineTransform.getTranslateInstance(
                     offset.x.toDouble(),
                     offset.y.toDouble()
                 )
             )
+        }
+    }
+
+    companion object {
+        private val frame: JFrame by lazy {
+            return@lazy JFrame().apply {
+                iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            }
         }
     }
 }

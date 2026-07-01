@@ -50,15 +50,12 @@ function update() {
     callDBus(
         busName, clientPath, interfaceName,
         "getWindowPosition",
-        (response) => {
-            if (!response || !activeWindow) return;
-
-            const x = response.x;
-            const y = response.y;
+        (windowPosition) => {
+            if (!windowPosition || !activeWindow) return;
 
             activeWindow.frameGeometry = {
-                x: x,
-                y: y,
+                x: windowPosition.x,
+                y: windowPosition.y,
                 width: activeWindow.width,
                 height: activeWindow.height
             };
@@ -69,23 +66,22 @@ function update() {
     callDBus(
         busName, clientPath, interfaceName,
         "getRestoreWindows",
-        (response) => {
-            if (!response) return;
+        (restoreWindows) => {
+            if (!restoreWindows) return;
 
             const windows = workspace.windowList();
             for (const window of windows) {
                 if (!window || !window.normalWindow || isWindowOnscreen(window)) continue;
 
-                const windowBounds = window.frameGeometry;
-                const screenBounds = workspace.clientArea(KWin.MaximizeArea, window);
-                const centerX = (screenBounds.width / 2) - (windowBounds.width / 2);
-                const centerY = (screenBounds.height / 2) - (windowBounds.height / 2);
+                const screen = workspace.clientArea(KWin.MaximizeArea, window);
+                const centerX = (screen.width / 2) - (window.width / 2);
+                const centerY = (screen.height / 2) - (window.height / 2);
 
                 window.frameGeometry = {
                     x: centerX,
                     y: centerY,
-                    width: windowBounds.width,
-                    height: windowBounds.height
+                    width: window.width,
+                    height: window.height
                 };
             }
         }
@@ -94,7 +90,7 @@ function update() {
 
 function onWindowActivated(window) {
     if (!window || !window.normalWindow || window.minimized) {
-        if (activeWindow) onWindowDeactivated();
+        onWindowDeactivated();
         return;
     }
 

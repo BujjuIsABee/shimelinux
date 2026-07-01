@@ -34,7 +34,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     val workArea
         get() = getWorkArea(false)
     val activeIE
-        get() = if (!getProperty<Boolean>("Multiscreen", "true") &&
+        get() = if (!getProperty("Multiscreen", true) &&
             currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false
         ) {
             Area()
@@ -72,7 +72,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         var currentWorkArea = currentWorkArea
 
         if (currentWorkArea != null) {
-            if (ignoreSettings || getProperty<Boolean>("Multiscreen", "true")) {
+            if (ignoreSettings || getProperty("Multiscreen", true)) {
                 if (currentWorkArea != impl.workArea &&
                     currentWorkArea.toRectangle().contains(impl.workArea.toRectangle()) &&
                     impl.workArea.contains(mascot.anchor.x, mascot.anchor.y)

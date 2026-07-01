@@ -55,6 +55,6 @@ class Mute(
 
     companion object {
         const val PARAMETER_SOUND = "Sound"
-        private val DEFAULT_SOUND = null
+        private val DEFAULT_SOUND: String? = null
     }
 }

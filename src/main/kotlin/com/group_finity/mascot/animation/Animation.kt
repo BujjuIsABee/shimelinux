@@ -33,14 +33,13 @@ class Animation(
     val hotspots: Array<Hotspot>,
     val isTurn: Boolean
 ) {
-    val duration: Int
-        get() = poses.sumOf { it.duration }
+    val duration = poses.sumOf { it.duration }
 
     init {
         require(poses.isNotEmpty())
     }
 
-    fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
+    fun isEffective(variables: VariableMap) = condition.get(variables) as? Boolean == true
 
     fun init() {
         condition.init()

@@ -51,8 +51,7 @@ class Dragged(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        scaling = getProperty<Double>("Scaling", "1.0")
-
+        scaling = getProperty("Scaling", 1.0)
         footX = (environment.cursor.x + (offsetX * scaling).roundToInt()).toDouble()
         timeToRegist = 250
     }

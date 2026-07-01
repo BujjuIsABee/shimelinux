@@ -104,8 +104,8 @@ class Main {
             getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
 
             // Set menu scaling
-            val menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1")
-            System.setProperty("sun.java2d.uiScale", menuScaling)
+            val menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1)
+            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
         } catch (_: Exception) {
         }
 
@@ -139,8 +139,8 @@ class Main {
 
     fun run() {
         // Get the image sets to use
-        if (!getProperty<Boolean>("AlwaysShowShimejiChooser", "false")) {
-            for (set in properties.getProperty("ActiveShimeji", "").split('/')) {
+        if (!getProperty("AlwaysShowShimejiChooser", false)) {
+            for (set in getProperty("ActiveShimeji", "").split('/')) {
                 if (set.trim().isNotEmpty()) {
                     imageSets.add(set.trim())
                 }
@@ -175,7 +175,7 @@ class Main {
         // Create the first mascot
         for (imageSet in imageSets) {
             val infoAlreadySeen = getProperty("InformationDismissed", "")
-            val alwaysShowInfo = getProperty<Boolean>("AlwaysShowInformationScreen", "false")
+            val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
             configurations[imageSet]?.let { config ->
                 if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
                     val info = InformationWindow(imageSet, config)
@@ -407,37 +407,37 @@ class Main {
             toggleBooleanSetting("Breeding", true)
             updateConfigFile()
         }
-        breedingMenu.checked = getProperty<Boolean>("Breeding", "true")
+        breedingMenu.checked = getProperty("Breeding", true)
 
         val transientMenu = Checkbox("BreedingTransient".localize()) {
             toggleBooleanSetting("Transients", true)
             updateConfigFile()
         }
-        transientMenu.checked = getProperty<Boolean>("Transients", "true")
+        transientMenu.checked = getProperty("Transients", true)
 
         val transformationMenu = Checkbox("Transformation".localize()) {
             toggleBooleanSetting("Transformation", true)
             updateConfigFile()
         }
-        transformationMenu.checked = getProperty<Boolean>("Transformation", "true")
+        transformationMenu.checked = getProperty("Transformation", true)
 
         val throwingMenu = Checkbox("ThrowingWindows".localize()) {
             toggleBooleanSetting("Throwing", true)
             updateConfigFile()
         }
-        throwingMenu.checked = getProperty<Boolean>("Throwing", "true")
+        throwingMenu.checked = getProperty("Throwing", true)
 
         val soundsMenu = Checkbox("SoundEffects".localize()) {
             toggleBooleanSetting("Sounds", true)
             updateConfigFile()
         }
-        soundsMenu.checked = getProperty<Boolean>("Sounds", "true")
+        soundsMenu.checked = getProperty("Sounds", true)
 
         val multiscreenMenu = Checkbox("Multiscreen".localize()) {
             toggleBooleanSetting("Multiscreen", true)
             updateConfigFile()
         }
-        multiscreenMenu.checked = getProperty<Boolean>("Multiscreen", "true")
+        multiscreenMenu.checked = getProperty("Multiscreen", true)
 
         val allowedBehaviorsSubmenu = Menu("AllowedBehaviors".localize())
         allowedBehaviorsSubmenu.add(breedingMenu)
@@ -763,7 +763,7 @@ class Main {
 
     @Suppress("SameParameterValue")
     private fun toggleBooleanSetting(propertyName: String, defaultValue: Boolean) {
-        if (getProperty<Boolean>(propertyName, defaultValue.toString())) {
+        if (getProperty(propertyName, defaultValue)) {
             setProperty(propertyName, "false")
         } else {
             setProperty(propertyName, "true")
@@ -874,7 +874,7 @@ class Main {
                 imageSets.add(imageSet)
 
                 val infoAlreadySeen = getProperty("InformationDismissed", "")
-                val alwaysShowInfo = getProperty<Boolean>("AlwaysShowInformationScreen", "false")
+                val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
                 configurations[imageSet]?.let { config ->
                     if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
                         val info = InformationWindow(imageSet, config)

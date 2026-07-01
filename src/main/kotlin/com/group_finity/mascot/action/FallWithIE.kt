@@ -41,10 +41,7 @@ class FallWithIE(
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETY), DEFAULT_IEOFFSETY).toInt()
 
-    override fun hasNext(): Boolean {
-        val canThrow = getProperty<Boolean>("Throwing", "true")
-        return super.hasNext() && canThrow
-    }
+    override fun hasNext() = super.hasNext() && getProperty("Throwing", true)
 
     override fun tick() {
         val activeIE = environment.activeIE
@@ -54,20 +51,12 @@ class FallWithIE(
             throw LostGroundException()
         }
 
-        if (mascot.isLookRight) {
-            if (mascot.anchor.x - offsetX != activeIE.left ||
-                mascot.anchor.y + offsetY != activeIE.bottom
-            ) {
-                log.log(Level.INFO, "Lost ground ($mascot, $this)")
-                throw LostGroundException()
-            }
-        } else {
-            if (mascot.anchor.x + offsetX != activeIE.right ||
-                mascot.anchor.y + offsetY != activeIE.bottom
-            ) {
-                log.log(Level.INFO, "Lost ground ($mascot, $this)")
-                throw LostGroundException()
-            }
+        if (mascot.isLookRight && (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom)) {
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            throw LostGroundException()
+        } else if (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom) {
+            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            throw LostGroundException()
         }
 
         super.tick()

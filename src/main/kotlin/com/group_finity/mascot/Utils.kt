@@ -22,32 +22,33 @@
 
 package com.group_finity.mascot
 
-import com.group_finity.mascot.config.Configuration
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.file.Path
 import kotlin.io.path.Path
 
-fun getPath(vararg paths: String): Path = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
+fun getPath(vararg paths: String) = Path(
+    System.getProperty("user.home"),
+    ".config", "shimelinux", *paths
+)
 
 fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
 
 fun String.localize(): String = Main.instance.languageBundle.getString(this)
 
-fun tryGetConfiguration(imageSet: String): Configuration? = Main.instance.getConfiguration(imageSet)
+fun tryGetConfiguration(imageSet: String) = Main.instance.getConfiguration(imageSet)
 
-fun getConfiguration(imageSet: String): Configuration = checkNotNull(Main.instance.getConfiguration(imageSet))
+fun getConfiguration(imageSet: String) = checkNotNull(Main.instance.getConfiguration(imageSet))
 
 fun getProperty(key: String, defaultValue: String): String = Main.instance.properties.getProperty(key, defaultValue)
 
-inline fun <reified T> getProperty(key: String, defaultValue: String): T =
-    getProperty(key, defaultValue).let { value ->
+inline fun <reified T> getProperty(key: String, defaultValue: T): T =
+    getProperty(key, defaultValue.toString()).let { value ->
         when (T::class) {
             Int::class -> value.toInt()
             Double::class -> value.toDouble()
             Boolean::class -> value.toBoolean()
             else -> value
-        } as T
+        } as? T ?: defaultValue
     }
 
 fun setProperty(key: String, value: String) {
@@ -56,16 +57,4 @@ fun setProperty(key: String, value: String) {
 
 fun storeProperties(stream: OutputStream, comments: String) {
     Main.instance.properties.store(stream, comments)
-}
-
-fun showError(message: String) {
-    Main.showError(message)
-}
-
-fun showError(message: String, exception: Throwable) {
-    Main.showError(message, exception)
-}
-
-fun exit() {
-    Main.instance.exit()
 }

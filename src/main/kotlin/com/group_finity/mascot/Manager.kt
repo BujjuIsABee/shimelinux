@@ -256,6 +256,6 @@ class Manager {
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
-        const val TICK_INTERVAL = 40L
+        const val TICK_INTERVAL: Long = 40
     }
 }

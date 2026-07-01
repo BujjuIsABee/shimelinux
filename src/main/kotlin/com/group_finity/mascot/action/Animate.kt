@@ -45,10 +45,7 @@ open class Animate(
         animation?.next(mascot, time)
     }
 
-    override fun hasNext(): Boolean {
-        val inTime = animation?.let { time < it.duration } == true
-        return super.hasNext() && inTime
-    }
+    override fun hasNext() = super.hasNext() && animation?.let { time < it.duration } == true
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

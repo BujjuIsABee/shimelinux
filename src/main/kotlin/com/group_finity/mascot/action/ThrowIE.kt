@@ -41,7 +41,7 @@ class ThrowIE(
         get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 
     override fun hasNext(): Boolean {
-        val canThrow = getProperty<Boolean>("Throwing", "true")
+        val canThrow = getProperty("Throwing", true)
         return super.hasNext() && environment.activeIE.isVisible && canThrow
     }
 

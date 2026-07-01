@@ -156,7 +156,6 @@ class DebugWindow(imageSet: String) : JFrame() {
         setLocationRelativeTo(null)
     }
 
-    // region Setters
     fun setShimejiX(x: Int) {
         shimejiXValue.text = x.toString()
     }
@@ -204,5 +203,4 @@ class DebugWindow(imageSet: String) : JFrame() {
     fun setWindowTitle(title: String) {
         activeIEValue.text = title
     }
-    //endregion
 }

@@ -62,7 +62,7 @@ class Breed(
 
     class Delegate(private val action: ActionBase) {
         val isEnabled: Boolean
-            get() = getProperty<Boolean>(if (bornTransient) "Transients" else "Breeding", "true")
+            get() = getProperty(if (bornTransient) "Transients" else "Breeding", true)
         val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
         val isPenultimateFrame: Boolean
@@ -84,7 +84,7 @@ class Breed(
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNCOUNT), DEFAULT_BORNCOUNT).toInt()
 
         fun breed() {
-            val scaling = getProperty<Double>("Scaling", "1.0")
+            val scaling = getProperty("Scaling", 1.0)
             val childType = bornMascot.takeUnless { tryGetConfiguration(it) == null } ?: action.mascot.imageSet
 
             repeat(bornCount) {
@@ -146,7 +146,6 @@ class Breed(
             const val PARAMETER_BORNY = "BornY"
             private const val DEFAULT_BORNY = 0
 
-            @get:JvmName("PARAMETER_BORNBEHAVIOUR")
             const val PARAMETER_BORNBEHAVIOR = "BornBehavior"
             private const val DEFAULT_BORNBEHAVIOR = ""
 

@@ -57,10 +57,7 @@ open class Fall(
         velocityY = initialVy.toDouble()
     }
 
-    override fun hasNext(): Boolean {
-        val onBorder = environment.floor.isOn(mascot.anchor) || environment.wall.isOn(mascot.anchor)
-        return super.hasNext() && !onBorder
-    }
+    override fun hasNext() = super.hasNext() && !environment.floor.isOn(mascot.anchor) && !environment.wall.isOn(mascot.anchor)
 
     override fun tick() {
         if (velocityX != 0.0) {

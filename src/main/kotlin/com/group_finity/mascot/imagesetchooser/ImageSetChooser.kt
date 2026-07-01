@@ -22,7 +22,6 @@
 
 package com.group_finity.mascot.imagesetchooser
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
@@ -30,6 +29,7 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.setProperty
+import com.group_finity.mascot.storeProperties
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Desktop
@@ -301,7 +301,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                     .replace("]", "")
                     .replace(", ", "/")
             )
-            confPath.outputStream().use { Main.instance.properties.store(it, "Configuration Options") }
+            confPath.outputStream().use { storeProperties(it, "Configuration Options") }
         }
     }
 

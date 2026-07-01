@@ -95,8 +95,7 @@ class ComplexJump(
         if (isScanEnabled) {
             if (mascot.manager == null) return super.hasNext()
 
-            val hasAffordance = target?.affordances?.contains(affordance) == true
-            return super.hasNext() && hasAffordance
+            return super.hasNext() && target?.affordances?.contains(affordance) == true
         } else {
             val distanceX = (targetX - mascot.anchor.x).toDouble()
             val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
@@ -153,10 +152,10 @@ class ComplexJump(
         if (distance <= velocity) {
             mascot.anchor = Point(targetX, targetY)
 
-            if (isScanEnabled) {
+            if (isScanEnabled && target != null) {
                 try {
                     mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
-                    checkNotNull(target).behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
+                    target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
@@ -184,11 +183,9 @@ class ComplexJump(
         const val PARAMETER_CHARACTERISTICS = "Characteristics"
         private const val DEFAULT_CHARACTERISTICS = ""
 
-        @get:JvmName("PARAMETER_BEHAVIOUR")
         const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOUR = ""
 
-        @get:JvmName("PARAMETER_TARGETBEHAVIOUR")
         const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
         private const val DEFAULT_TARGETBEHAVIOR = ""
 
