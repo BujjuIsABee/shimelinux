@@ -90,8 +90,8 @@ class AnimationBuilder(
         var soundText = frameNode.getAttribute(schema.getString("Sound"))
         val volumeText = frameNode.getAttribute(schema.getString("Volume")) ?: "0"
 
-        val opacity = getProperty<Double>("Opacity", "1.0")
-        val scaling = getProperty<Double>("Scaling", "1.0")
+        val opacity = getProperty("Opacity", 1.0)
+        val scaling = getProperty("Scaling", 1.0)
 
         val filterText = getProperty("Filter", "Nearest")
         val filter = when (filterText) {
@@ -147,7 +147,7 @@ class AnimationBuilder(
         val sizeText = requireNotNull(frameNode.getAttribute(schema.getString("Size")))
         val behaviorText = frameNode.getAttribute(schema.getString("Behavior"))
 
-        val scaling = getProperty<Double>("Scaling", "1.0")
+        val scaling = getProperty("Scaling", 1.0)
 
         val originCoordinates = originText.split(",")
         val origin = Point(

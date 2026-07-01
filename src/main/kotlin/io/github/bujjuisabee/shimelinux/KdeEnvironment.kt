@@ -44,12 +44,11 @@ class KdeEnvironment : Environment() {
     private var dbus: DBusConnection? = null
     private var scripting: KWinScripting? = null
     private var script: KWinScript? = null
-
     private val client = KWinClientImpl()
-    private val windowCache = mutableMapOf<String, Boolean>()
     private var activeWindow: Window? = null
     private var windowPosition: Point? = null
     private var restoreWindows: Boolean = false
+    private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
         try {
@@ -84,6 +83,7 @@ class KdeEnvironment : Environment() {
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
+            // Ensure the DBus connection is closed when the program shuts down
             Runtime.getRuntime().addShutdownHook(Thread { dispose() })
         }
     }
@@ -95,11 +95,9 @@ class KdeEnvironment : Environment() {
         if (activeWindow != null && isIE(activeWindow)) {
             activeIE.set(activeWindow.bounds)
             activeIETitle = activeWindow.title
-
             activeIE.isVisible = true
         } else {
             activeIE.isVisible = false
-
             activeIE.set(Rectangle(0, 0, 0, 0))
             activeIETitle = ""
         }
@@ -127,12 +125,7 @@ class KdeEnvironment : Environment() {
         }
     }
 
-    private fun isIE(window: Window): Boolean {
-        val cachedResult = windowCache[window.title]
-        if (cachedResult != null) {
-            return cachedResult
-        }
-
+    private fun isIE(window: Window) = windowCache.getOrPut(window.title) {
         var blacklistInUse = false
         val blacklist = getProperty("InteractiveWindowsBlacklist", "").split('/')
         for (title in blacklist) {
@@ -140,7 +133,7 @@ class KdeEnvironment : Environment() {
                 blacklistInUse = true
                 if (window.title.contains(title, true)) {
                     windowCache[window.title] = false
-                    return false
+                    return@getOrPut false
                 }
             }
         }
@@ -152,12 +145,12 @@ class KdeEnvironment : Environment() {
                 whitelistInUse = true
                 if (window.title.contains(title, true)) {
                     windowCache[window.title] = true
-                    return true
+                    return@getOrPut true
                 }
             }
         }
 
-        return blacklistInUse || !whitelistInUse
+        return@getOrPut blacklistInUse || !whitelistInUse
     }
 
     @DBusInterfaceName("org.kde.kwin.Scripting")
@@ -231,8 +224,5 @@ class KdeEnvironment : Environment() {
         override fun getObjectPath() = "/KWinClient"
     }
 
-    data class Window(
-        val title: String,
-        val bounds: Rectangle
-    )
+    data class Window(val title: String, val bounds: Rectangle)
 }

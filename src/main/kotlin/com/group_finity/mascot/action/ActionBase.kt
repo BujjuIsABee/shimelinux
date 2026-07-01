@@ -40,10 +40,12 @@ abstract class ActionBase(
         get() = mascot.environment
     internal open val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) }
-    var time = 0
-        get() = mascot.time - field
+
+    private var _startTime = 0
+    var time: Int
+        get() = mascot.time - _startTime
         set(value) {
-            field = mascot.time - value
+            _startTime = mascot.time - value
         }
 
     open val isDraggable: Boolean
@@ -59,15 +61,13 @@ abstract class ActionBase(
 
     override fun init(mascot: Mascot) {
         this.mascot = mascot
-        this.time = 0
+        time = 0
 
         variables["mascot"] = mascot
         variables["action"] = this
         variables.init()
 
-        for (animation in animations) {
-            animation.init()
-        }
+        animations.forEach { it.init() }
     }
 
     override fun hasNext() = isEffective && time < duration
@@ -89,10 +89,7 @@ abstract class ActionBase(
 
     private fun initFrame() {
         variables.initFrame()
-
-        for (animation in animations) {
-            animation.initFrame()
-        }
+        animations.forEach { it.initFrame() }
     }
 
     internal open fun refreshHotspots() {
@@ -114,7 +111,7 @@ abstract class ActionBase(
 
     internal inline fun <reified T> eval(name: String, defaultValue: T): T {
         synchronized(variables) {
-            return variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue
+            return variables.rawMap[name]?.get(variables) as? T ?: defaultValue
         }
     }
 
@@ -138,6 +135,6 @@ abstract class ActionBase(
         private const val DEFAULT_AFFORDANCE = ""
 
         const val PARAMETER_NAME = "Name"
-        private val DEFAULT_NAME = null
+        private val DEFAULT_NAME: String? = null
     }
 }

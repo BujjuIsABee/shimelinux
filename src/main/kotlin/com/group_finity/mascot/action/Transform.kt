@@ -49,8 +49,7 @@ class Transform(
     override fun tick() {
         super.tick()
 
-        val canTransform = getProperty<Boolean>("Transformation", "true")
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && canTransform) {
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && getProperty("Transformation", true)) {
             transform()
         }
     }
@@ -76,7 +75,6 @@ class Transform(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        @get:JvmName("PARAMETER_TRANSFORMBEHAVIOUR")
         const val PARAMETER_TRANSFORMBEHAVIOR = "TransformBehavior"
         private const val DEFAULT_TRANSFORMBEHAVIOR = ""
 

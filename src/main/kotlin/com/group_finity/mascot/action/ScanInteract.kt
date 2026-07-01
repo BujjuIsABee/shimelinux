@@ -66,10 +66,7 @@ class ScanInteract(
         putVariable(schema.getString(VARIABLE_TARGETY), null)
     }
 
-    override fun hasNext(): Boolean {
-        val inTime = animation?.let { time < it.duration } == true
-        return super.hasNext() && isTurning || inTime
-    }
+    override fun hasNext() = super.hasNext() && (isTurning || animation?.let { time < it.duration } == true)
 
     override fun tick() {
         super.tick()
@@ -130,11 +127,9 @@ class ScanInteract(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        @get:JvmName("PARAMETER_BEHAVIOUR")
         const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOR = ""
 
-        @get:JvmName("PARAMETER_TARGETBEHAVIOUR")
         const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
         private const val DEFAULT_TARGETBEHAVIOR = ""
 

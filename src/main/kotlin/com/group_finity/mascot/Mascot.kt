@@ -67,7 +67,6 @@ class Mascot(var imageSet: String) {
     var cursorPosition: Point? = null
         set(value) {
             field = value
-
             if (value == null) {
                 refreshCursor(false)
             } else {
@@ -225,7 +224,7 @@ class Mascot(var imageSet: String) {
 
         val dismissAllMenu = JMenuItem("DismissAll".localize())
         dismissAllMenu.addActionListener {
-            exit()
+            Main.instance.exit()
         }
 
         val pauseMenu = JMenuItem(

@@ -26,8 +26,7 @@ import javax.swing.DefaultListModel
 import javax.swing.JList
 import javax.swing.ListCellRenderer
 
-class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) :
-    JList<ImageSetChooserPanel>(model) {
+class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) : JList<ImageSetChooserPanel>(model) {
     init {
         cellRenderer = CellRenderer()
     }

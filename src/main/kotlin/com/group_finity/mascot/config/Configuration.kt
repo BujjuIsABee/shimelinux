@@ -153,7 +153,7 @@ class Configuration {
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
         } else {
-            mascot.anchor = if (getProperty<Boolean>("Multiscreen", "true")) {
+            mascot.anchor = if (getProperty("Multiscreen", true)) {
                 Point(
                     (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                     mascot.environment.screen.top - 256
@@ -210,7 +210,7 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            mascot.anchor = if (getProperty<Boolean>("Multiscreen", "true")) {
+            mascot.anchor = if (getProperty("Multiscreen", true)) {
                 Point(
                     (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
                     mascot.environment.screen.top - 256

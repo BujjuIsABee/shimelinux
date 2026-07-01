@@ -25,7 +25,6 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 import java.awt.Rectangle
 
-@Suppress("unused")
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
     val areas: Collection<Area>
@@ -47,6 +46,7 @@ class ComplexArea {
         areaMap.entries.removeIf { !deviceNames.contains(it.key) }
     }
 
+    @Suppress("unused")
     fun getBottomBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
         for (area in areaMap.values) {
@@ -62,6 +62,7 @@ class ComplexArea {
         return result
     }
 
+    @Suppress("unused")
     fun getTopBorder(location: Point): FloorCeiling? {
         var result: FloorCeiling? = null
         for (area in areaMap.values) {
@@ -77,6 +78,7 @@ class ComplexArea {
         return result
     }
 
+    @Suppress("unused")
     fun getLeftBorder(location: Point): Wall? {
         var result: Wall? = null
         for (area in areaMap.values) {
@@ -92,6 +94,7 @@ class ComplexArea {
         return result
     }
 
+    @Suppress("unused")
     fun getRightBorder(location: Point): Wall? {
         var result: Wall? = null
         for (area in areaMap.values) {

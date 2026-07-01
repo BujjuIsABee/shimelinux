@@ -51,7 +51,6 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
         }
     }
 
-    @Synchronized
     override fun get(variables: VariableMap): Any? {
         return value ?: try {
             value = compiled.eval(variables); value

@@ -42,10 +42,7 @@ class Interact(
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 
-    override fun hasNext(): Boolean {
-        val overlapping = mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
-        return super.hasNext() && overlapping
-    }
+    override fun hasNext() = super.hasNext() && mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
 
     override fun tick() {
         super.tick()
@@ -71,7 +68,6 @@ class Interact(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        @get:JvmName("PARAMETER_BEHAVIOUR")
         const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOR = ""
     }

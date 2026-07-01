@@ -33,7 +33,9 @@ abstract class InstantAction(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        if (super.hasNext()) apply()
+        if (super.hasNext()) {
+            apply()
+        }
     }
 
     override fun hasNext() = false

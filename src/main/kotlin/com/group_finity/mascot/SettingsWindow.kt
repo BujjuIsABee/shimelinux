@@ -110,13 +110,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val doneButton: JButton
     private val cancelButton: JButton
 
-    private var alwaysShowShimejiChooser = getProperty<Boolean>("AlwaysShowShimejiChooser", "false")
-    private var alwaysShowInformationScreen = getProperty<Boolean>("AlwaysShowInformationScreen", "false")
-    private var scaling = getProperty<Double>("Scaling", "1.0")
-    private var opacity = getProperty<Double>("Opacity", "1.0")
+    private var alwaysShowShimejiChooser = getProperty("AlwaysShowShimejiChooser", false)
+    private var alwaysShowInformationScreen = getProperty("AlwaysShowInformationScreen", false)
+    private var scaling = getProperty("Scaling", 1.0)
+    private var opacity = getProperty("Opacity", 1.0)
     private var filter = getProperty("Filter", "Nearest")
     private var theme = getProperty("Theme", "FlatDark")
-    private var menuScaling = getProperty<Int>("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1")
+    private var menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1)
     private val initialTheme = theme
     private val darkTheme = Properties()
     private val lightTheme = Properties()

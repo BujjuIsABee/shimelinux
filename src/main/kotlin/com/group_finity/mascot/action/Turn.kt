@@ -43,8 +43,7 @@ class Turn(
     override fun hasNext(): Boolean {
         isTurning = isTurning || isLookRight != mascot.isLookRight
 
-        val inTime = animation?.let { time < it.duration } == true
-        return super.hasNext() && inTime && isTurning
+        return super.hasNext() && animation?.let { time < it.duration } == true && isTurning
     }
 
     override fun tick() {

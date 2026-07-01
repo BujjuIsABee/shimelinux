@@ -31,7 +31,7 @@ object Sounds {
 
     @JvmStatic
     var isMuted
-        get() = !getProperty<Boolean>("Sounds", "true")
+        get() = !getProperty("Sounds", true)
         set(value) {
             if (value) {
                 sounds.values.forEach { it.stop() }

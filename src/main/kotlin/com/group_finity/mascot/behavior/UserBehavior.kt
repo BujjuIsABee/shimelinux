@@ -71,7 +71,9 @@ class UserBehavior(
     @Synchronized
     override fun next() {
         try {
-            if (action.hasNext()) action.next()
+            if (action.hasNext()) {
+                action.next()
+            }
 
             var hotspotResult = HotspotResult.INACTIVE
             if (mascot.isHotspotClicked) {
@@ -103,7 +105,7 @@ class UserBehavior(
                     ) {
                         log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
 
-                        mascot.anchor = if (getProperty<Boolean>("Multiscreen", "true")) {
+                        mascot.anchor = if (getProperty("Multiscreen", true)) {
                             Point(
                                 (Math.random() * environment.screen.width).toInt() + environment.screen.left,
                                 environment.screen.top - 256
@@ -132,8 +134,6 @@ class UserBehavior(
                 }
             }
         } catch (_: LostGroundException) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
-
             mascot.cursorPosition = null
             mascot.isDragging = false
 
@@ -211,13 +211,8 @@ class UserBehavior(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        @get:JvmName("BEHAVIOURNAME_FALL")
         const val BEHAVIOR_FALL = "Fall"
-
-        @get:JvmName("BEHAVIOURNAME_DRAGGED")
         const val BEHAVIOR_DRAGGED = "Dragged"
-
-        @get:JvmName("BEHAVIOURNAME_THROWN")
         const val BEHAVIOR_THROWN = "Thrown"
     }
 }

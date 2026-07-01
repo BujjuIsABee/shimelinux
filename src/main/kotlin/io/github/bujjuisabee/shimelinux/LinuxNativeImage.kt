@@ -27,7 +27,13 @@ import java.awt.image.BufferedImage
 import java.util.Objects
 
 class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage {
-    private val rgb = managedImage.getRGB(0, 0, managedImage.width, managedImage.height, null, 0, managedImage.width)
+    val width = managedImage.width
+    val height = managedImage.height
+    val rgb: IntArray = managedImage.getRGB(
+        0, 0,
+        managedImage.width, managedImage.height,
+        null, 0, managedImage.width
+    )
 
     override fun hashCode() = Objects.hash(managedImage.width, managedImage.height)
 

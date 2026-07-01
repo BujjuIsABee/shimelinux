@@ -48,7 +48,7 @@ class Regist(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        scaling = getProperty<Double>("Scaling", "1.0")
+        scaling = getProperty("Scaling", 1.0)
     }
 
     override fun hasNext(): Boolean {
@@ -59,8 +59,7 @@ class Regist(
             (offsetX * scaling).roundToInt()
         }
 
-        val notMoved = abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
-        return super.hasNext() && notMoved
+        return super.hasNext() && abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
     }
 
     override fun tick() {

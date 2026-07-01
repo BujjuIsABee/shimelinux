@@ -69,8 +69,7 @@ class ScanJump(
     override fun hasNext(): Boolean {
         if (mascot.manager == null) return super.hasNext()
 
-        val hasAffordance = target?.affordances?.contains(affordance) == true
-        return super.hasNext() && hasAffordance
+        return super.hasNext() && target?.affordances?.contains(affordance) == true
     }
 
     override fun tick() {
@@ -132,11 +131,9 @@ class ScanJump(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        @get:JvmName("PARAMETER_BEHAVIOUR")
         const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOR = ""
 
-        @get:JvmName("PARAMETER_TARGETBEHAVIOUR")
         const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
         private const val DEFAULT_TARGETBEHAVIOR = ""
 
