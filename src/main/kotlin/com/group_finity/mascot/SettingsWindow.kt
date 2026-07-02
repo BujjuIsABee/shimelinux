@@ -83,6 +83,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val addInteractiveWindowButton: JButton
     private val removeInteractiveWindowButton: JButton
     private val menuTab: JPanel
+    private val menuScalingPanel: JPanel
+    private val menuScalingSlider: JSlider
     private val themeComboBox: JComboBox<String>
     private val flatThemePanel: JPanel
     private val flatThemeColorsPanel: JPanel
@@ -97,8 +99,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val accentColorButton: JButton
     private val gtkThemePanel: JPanel
     private val themePanel: JPanel
-    private val menuScalingPanel: JPanel
-    private val menuScalingSlider: JSlider
     private val resetButtonPanel: JPanel
     private val resetButton: JButton
     private val aboutTab: JPanel
@@ -106,6 +106,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val aboutImageLabel: JLabel
     private val shimelinuxLabel: JLabel
     private val versionLabel: JLabel
+    private val windowModeTab: JPanel
+    private val windowModeCheckBox: JCheckBox
     private val footerPanel: JPanel
     private val doneButton: JButton
     private val cancelButton: JButton
@@ -115,8 +117,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var scaling = getProperty("Scaling", 1.0)
     private var opacity = getProperty("Opacity", 1.0)
     private var filter = getProperty("Filter", "Nearest")
-    private var theme = getProperty("Theme", "FlatDark")
     private var menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1)
+    private var theme = getProperty("Theme", "FlatDark")
+    private var environment = getProperty("Environment", "linux")
     private val initialTheme = theme
     private val darkTheme = Properties()
     private val lightTheme = Properties()
@@ -127,6 +130,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val initialLightTextColor: String
     private val initialLightAccentColor: String
 
+    var isEnvironmentReloadRequired = false
     var isRestartRequired = false
     var isImageReloadRequired = false
     var isInteractiveWindowReloadRequired = false
@@ -282,6 +286,33 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         interactiveWindowsTab.add(interactiveWindowsTabs, BorderLayout.CENTER)
         interactiveWindowsTab.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
 
+        menuScalingSlider = JSlider()
+        menuScalingSlider.minimum = 1
+        menuScalingSlider.maximum = 3
+        menuScalingSlider.majorTickSpacing = 1
+        menuScalingSlider.paintTicks = true
+        menuScalingSlider.snapToTicks = true
+        menuScalingSlider.paintLabels = true
+        menuScalingSlider.labelTable = Hashtable(
+            mapOf(
+                1 to JLabel("1x"),
+                2 to JLabel("2x"),
+                3 to JLabel("3x")
+            )
+        )
+        menuScalingSlider.value = menuScaling
+        menuScalingSlider.addChangeListener {
+            if (menuScalingSlider.value != menuScaling) {
+                menuScaling = menuScalingSlider.value
+                isRestartRequired = true
+            }
+        }
+
+        menuScalingPanel = JPanel()
+        menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
+        menuScalingPanel.border = BorderFactory.createTitledBorder("MenuScaling".localize())
+        menuScalingPanel.add(menuScalingSlider)
+
         themeComboBox = JComboBox<String>()
         themeComboBox.addItem("Flat Dark")
         themeComboBox.addItem("Flat Light")
@@ -391,37 +422,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         themePanel.add(flatThemePanel)
         themePanel.add(gtkThemePanel)
 
-        menuScalingSlider = JSlider()
-        menuScalingSlider.minimum = 1
-        menuScalingSlider.maximum = 3
-        menuScalingSlider.majorTickSpacing = 1
-        menuScalingSlider.paintTicks = true
-        menuScalingSlider.snapToTicks = true
-        menuScalingSlider.paintLabels = true
-        menuScalingSlider.labelTable = Hashtable(
-            mapOf(
-                1 to JLabel("1x"),
-                2 to JLabel("2x"),
-                3 to JLabel("3x")
-            )
-        )
-        menuScalingSlider.value = menuScaling
-        menuScalingSlider.addChangeListener {
-            if (menuScalingSlider.value != menuScaling) {
-                menuScaling = menuScalingSlider.value
-                isRestartRequired = true
-            }
-        }
-
-        menuScalingPanel = JPanel()
-        menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
-        menuScalingPanel.border = BorderFactory.createTitledBorder("MenuScaling".localize())
-        menuScalingPanel.add(menuScalingSlider)
-
         menuTab = JPanel(BorderLayout())
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        menuTab.add(themePanel, BorderLayout.CENTER)
         menuTab.add(menuScalingPanel, BorderLayout.NORTH)
+        menuTab.add(themePanel, BorderLayout.CENTER)
 
         aboutImageLabel = JLabel()
         aboutImageLabel.icon = ImageIcon(icon.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
@@ -443,10 +447,24 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab = JPanel(GridBagLayout())
         aboutTab.add(infoPanel)
 
+        windowModeCheckBox = JCheckBox("Windowed Mode Enabled")
+        windowModeCheckBox.isSelected = environment == "virtual"
+        windowModeCheckBox.addActionListener {
+            val newEnvironment = if (windowModeCheckBox.isSelected) "virtual" else "linux"
+            if (environment != newEnvironment) {
+                environment = newEnvironment
+                isEnvironmentReloadRequired = true
+            }
+        }
+
+        windowModeTab = JPanel()
+        windowModeTab.add(windowModeCheckBox)
+
         mainTabs = JTabbedPane()
         mainTabs.addTab("General".localize(), generalTab)
         mainTabs.addTab("InteractiveWindows".localize(), interactiveWindowsTab)
         mainTabs.addTab("Menu".localize(), menuTab)
+        mainTabs.addTab("Window Mode", windowModeTab)
         mainTabs.addTab("About".localize(), aboutTab)
 
         // Don't show interactive windows tab unless the KDE environment is used
@@ -591,8 +609,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setProperty("Scaling", scaling.toString())
         setProperty("Opacity", opacity.toString())
         setProperty("Filter", filter)
-        setProperty("Theme", theme)
         setProperty("MenuScaling", menuScaling.toString())
+        setProperty("Theme", theme)
+        setProperty("Environment", environment)
 
         val whitelist = whitelistModel.elements().toList().toString()
             .replace("[", "")
