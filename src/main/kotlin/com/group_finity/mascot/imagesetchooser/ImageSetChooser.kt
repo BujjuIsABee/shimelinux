@@ -101,7 +101,6 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         clearAllLabel = JLabel("<html><u>" + "ClearAll".localize() + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
-        clearAllLabel.font = clearAllLabel.font.deriveFont(Font.BOLD)
         clearAllLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 list1.clearSelection()
@@ -112,7 +111,6 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         selectAllLabel = JLabel("<html><u>" + "SelectAll".localize() + "</u></html>")
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
-        selectAllLabel.font = selectAllLabel.font.deriveFont(Font.BOLD)
         selectAllLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 list1.setSelectionInterval(0, list1.model.size - 1)
@@ -314,8 +312,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         } catch (_: Exception) {
             JOptionPane.showMessageDialog(
                 this@ImageSetChooser,
-                getPath("img").toString(),
-                "Add Shimeji Here:",
+                "FailedOpenFileBrowserErrorMessage".localize() + "\n${getPath("img")}",
+                "Error",
                 JOptionPane.PLAIN_MESSAGE
             )
         }

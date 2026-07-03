@@ -45,7 +45,7 @@ abstract class NativeFactory {
         @JvmStatic
         fun resetInstance() {
             val basepkg = "io.github.bujjuisabee.shimelinux"
-            val subpkg = getProperty("Environment", "virtual") // TODO: Replace "virtual" with "linux"
+            val subpkg = getProperty("Environment", "linux")
             val className = buildString {
                 append(basepkg)
                 append('.')

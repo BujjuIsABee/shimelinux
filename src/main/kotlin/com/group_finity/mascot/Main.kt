@@ -461,14 +461,17 @@ class Main {
             settings.isVisible = true
 
             if (settings.isRestartRequired) {
-                // Restart
                 val jarPath = this::class.java.protectionDomain.codeSource.location.path
                 val restartProcess = ProcessBuilder("java", "-jar", jarPath)
                 restartProcess.directory(File(System.getProperty("user.dir")))
                 restartProcess.start()
                 exit()
             }
-            if (settings.isImageReloadRequired) {
+            if (settings.isEnvironmentReloadRequired) {
+                NativeFactory.instance.environment.dispose()
+                NativeFactory.resetInstance()
+            }
+            if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
                 val isExitOnLastRemoved = manager.isExitOnLastRemoved
                 manager.isExitOnLastRemoved = false
                 manager.disposeAll()
@@ -919,13 +922,13 @@ class Main {
 
         @JvmStatic
         fun showError(message: String, exception: Throwable) {
-            val m = message + if (exception is SAXParseException) {
+            val message = message + if (exception is SAXParseException) {
                 "\nLine ${exception.lineNumber}: ${exception.message}"
             } else {
                 "\n${exception.message}"
             }
 
-            showError(m + "\n${"SeeLogForDetails".localize()}")
+            showError(message + "\n${"SeeLogForDetails".localize()}")
         }
     }
 }

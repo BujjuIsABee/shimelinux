@@ -121,7 +121,7 @@ class ScanMove(
                 }
             } catch (e: IllegalStateException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviourErrorMessage".localize(), e)
+                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
             } catch (e: BehaviorInstantiationException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
                 Main.showError("FailedSetBehaviorErrorMessage".localize(), e)

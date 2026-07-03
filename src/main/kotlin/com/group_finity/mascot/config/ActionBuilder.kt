@@ -101,7 +101,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                             cls.getConstructor().newInstance()
                         }
                     } catch (e: InstantiationException) {
-                        throw ActionInstantiationException("FailedClassActionInitialiseErrorMessage".localize() + " ($this)", e)
+                        throw ActionInstantiationException("FailedClassActionInitializeErrorMessage".localize() + " ($this)", e)
                     } catch (e: IllegalAccessException) {
                         throw ActionInstantiationException("CannotAccessClassActionErrorMessage".localize() + " ($this)", e)
                     } catch (e: ClassNotFoundException) {

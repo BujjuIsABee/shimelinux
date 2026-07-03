@@ -200,7 +200,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        nearestNeighborRadioButton = JRadioButton("NearestNeighbour".localize())
+        nearestNeighborRadioButton = JRadioButton("NearestNeighbor".localize())
         nearestNeighborRadioButton.isSelected = filter == "Nearest"
         nearestNeighborRadioButton.addChangeListener {
             if (nearestNeighborRadioButton.isSelected && filter != "Nearest") {
@@ -218,7 +218,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        hqxRadioButton = JRadioButton("Filter".localize())
+        hqxRadioButton = JRadioButton("HqxFilter".localize())
         hqxRadioButton.isSelected = filter == "Hqx"
         hqxRadioButton.addChangeListener {
             if (hqxRadioButton.isSelected && filter != "Hqx") {
@@ -244,7 +244,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         generalTab.add(JLabel("Opacity".localize()))
         generalTab.add(opacitySlider)
         generalTab.add(Box.createVerticalStrut(10))
-        generalTab.add(JLabel("FilterOptions".localize()))
+        generalTab.add(JLabel("Filter".localize()))
         generalTab.add(nearestNeighborRadioButton)
         generalTab.add(bicubicRadioButton)
         generalTab.add(hqxRadioButton)
@@ -314,9 +314,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuScalingPanel.add(menuScalingSlider)
 
         themeComboBox = JComboBox<String>()
-        themeComboBox.addItem("Flat Dark")
-        themeComboBox.addItem("Flat Light")
-        themeComboBox.addItem("GTK")
+        themeComboBox.addItem("FlatDark".localize())
+        themeComboBox.addItem("FlatLight".localize())
+        themeComboBox.addItem("Gtk".localize())
 
         backgroundColorButton = JButton("Change".localize())
         backgroundColorButton.addActionListener { handleChangeBackgroundColorButtonAction() }
@@ -447,7 +447,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab = JPanel(GridBagLayout())
         aboutTab.add(infoPanel)
 
-        windowModeCheckBox = JCheckBox("Windowed Mode Enabled")
+        windowModeCheckBox = JCheckBox("WindowedModeEnabled".localize())
         windowModeCheckBox.isSelected = environment == "virtual"
         windowModeCheckBox.addActionListener {
             val newEnvironment = if (windowModeCheckBox.isSelected) "virtual" else "linux"
@@ -464,7 +464,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         mainTabs.addTab("General".localize(), generalTab)
         mainTabs.addTab("InteractiveWindows".localize(), interactiveWindowsTab)
         mainTabs.addTab("Menu".localize(), menuTab)
-        mainTabs.addTab("Window Mode", windowModeTab)
+        mainTabs.addTab("WindowMode".localize(), windowModeTab)
         mainTabs.addTab("About".localize(), aboutTab)
 
         // Don't show interactive windows tab unless the KDE environment is used

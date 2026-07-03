@@ -79,7 +79,7 @@ class DebugWindow(imageSet: String) : JFrame() {
         shimejiYValue = JLabel("N/A")
         shimejiYValue.alignmentX = LEFT_ALIGNMENT
 
-        activeIELabel = JLabel("ActiveIE".localize())
+        activeIELabel = JLabel("WindowTitle".localize())
         activeIELabel.font = activeIELabel.font.deriveFont(Font.BOLD)
         activeIEValue = JLabel("N/A")
         activeIEValue.alignmentX = LEFT_ALIGNMENT
