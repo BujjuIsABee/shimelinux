@@ -3,18 +3,18 @@ plugins {
 }
 
 group = "io.github.bujjuisabee"
-version = "1.0.2"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation("org.openjdk.nashorn:nashorn-core:15.7")
     implementation("com.dorkbox:SystemTray:4.4")
     implementation("com.formdev:flatlaf:3.7.1")
     implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
     implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
+    implementation("org.openjdk.nashorn:nashorn-core:15.7")
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.14.11")
