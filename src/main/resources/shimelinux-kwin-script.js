@@ -51,7 +51,7 @@ function update() {
         busName, clientPath, interfaceName,
         "getWindowPosition",
         (windowPosition) => {
-            if (!windowPosition || !activeWindow) return;
+            if (windowPosition.hasValue == 0 || !activeWindow) return;
 
             activeWindow.frameGeometry = {
                 x: windowPosition.x,

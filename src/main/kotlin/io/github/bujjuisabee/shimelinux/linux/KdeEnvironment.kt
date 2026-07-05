@@ -50,6 +50,8 @@ class KdeEnvironment : Environment() {
     private var restoreWindows: Boolean = false
     private val windowCache = mutableMapOf<String, Boolean>()
 
+    private val shutdownThread = Thread { dispose() }
+
     init {
         try {
             dbus = DBusConnectionBuilder.forSessionBus().build().also {
@@ -84,7 +86,7 @@ class KdeEnvironment : Environment() {
             e.printStackTrace()
         } finally {
             // Ensure the DBus connection is closed when the program shuts down
-            Runtime.getRuntime().addShutdownHook(Thread { dispose() })
+            Runtime.getRuntime().addShutdownHook(shutdownThread)
         }
     }
 
@@ -120,6 +122,8 @@ class KdeEnvironment : Environment() {
             script?.stop()
             scripting?.unloadScript("shimelinux-kwin-script")
             dbus?.disconnect()
+
+            Runtime.getRuntime().removeShutdownHook(shutdownThread)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -179,7 +183,7 @@ class KdeEnvironment : Environment() {
 
         fun resetActiveWindow()
 
-        fun getWindowPosition(): Map<String, Int>?
+        fun getWindowPosition(): Map<String, Int>
 
         fun getRestoreWindows(): Boolean
     }
@@ -202,16 +206,23 @@ class KdeEnvironment : Environment() {
             activeWindow = null
         }
 
-        override fun getWindowPosition(): Map<String, Int>? {
-            if (activeWindow == null) return null
+        override fun getWindowPosition(): Map<String, Int> {
+            val windowPosition = windowPosition.also {
+                this@KdeEnvironment.windowPosition = null
+            }
 
-            return windowPosition?.let {
+            return if (windowPosition == null) {
                 mapOf(
-                    "x" to it.x,
-                    "y" to it.y
+                    "hasValue" to 0,
+                    "x" to -1,
+                    "y" to -1
                 )
-            }.also {
-                windowPosition = null
+            } else {
+                mapOf(
+                    "hasValue" to 1,
+                    "x" to windowPosition.x,
+                    "y" to windowPosition.y
+                )
             }
         }
 
