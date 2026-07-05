@@ -27,7 +27,6 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
-import io.github.bujjuisabee.shimelinux.virtual.VirtualContentPanel.Mode
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.MouseInfo
@@ -35,7 +34,6 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
-import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
@@ -76,14 +74,6 @@ class VirtualEnvironment : Environment() {
         display.contentPane = VirtualContentPanel(
             Dimension(windowArray[0].toInt(), windowArray[1].toInt()),
             Color.decode(getProperty("Background", "#00FF00")),
-            runCatching { ImageIO.read(File(getProperty("BackgroundImage", ""))) }.getOrNull(),
-            when (getProperty("BackgroundMode", "Center")) {
-                "Center" -> Mode.CENTER
-                "Fit" -> Mode.FIT
-                "Stretch" -> Mode.STRETCH
-                "Fill" -> Mode.FILL
-                else -> Mode.CENTER
-            }
         )
 
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
