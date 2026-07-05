@@ -2,7 +2,7 @@
   <configuration default="false" name="Debug" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.group_finity.mascot.MainKt" />
     <module name="shimelinux.main" />
-    <option name="PROGRAM_PARAMETERS" value="DEBUG" />
+    <option name="PROGRAM_PARAMETERS" value="-d" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />

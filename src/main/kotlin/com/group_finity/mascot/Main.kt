@@ -47,19 +47,20 @@ import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
-import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
-import kotlin.io.path.isDirectory
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     try {
-        if (!args.contains("DEBUG")) {
+        val isDebug = args.contains("--debug") || args.contains("-d")
+
+        if (!isDebug) {
             try {
                 Main.loadResource("/conf/logging.properties").use {
                     LogManager.getLogManager().readConfiguration(it)
@@ -69,12 +70,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        Main.instance.createConfigDirectory()
-        Main.instance.init()
-
-        SwingUtilities.invokeLater {
-            Main.instance.run()
-        }
+        Main.instance.run()
     } catch (_: OutOfMemoryError) {
         Main.showError(
             "Out of Memory. There are probably too many\n" +
@@ -97,17 +93,54 @@ class Main {
     lateinit var languageBundle: ResourceBundle
         private set
 
-    fun init() {
+    fun run() {
+        // Set up config directory
         try {
-            // Load properties
-            properties = Properties()
-            getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
+            val resources = mutableListOf(
+                "/conf/actions.xml",
+                "/conf/behaviors.xml",
+                "/conf/settings.properties",
+                "/conf/theme/FlatDarkLaf.properties",
+                "/conf/theme/FlatLightLaf.properties",
+                "/img/unused/"
+            )
 
-            // Set menu scaling
-            val menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1)
-            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
-        } catch (_: Exception) {
+            if (!getPath("img").exists()) {
+                resources += (1..46).map { "/img/Shimeji/shime$it.png" }
+            }
+
+            for (resource in resources) {
+                val destination = getPath().resolve(resource.removePrefix("/"))
+
+                if (resource.endsWith('/')) {
+                    destination.createDirectories()
+                } else if (!destination.exists()) {
+                    destination.createParentDirectories()
+                    destination.outputStream().use { output ->
+                        loadResource(resource)?.use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            showError("Failed to create the config directory.", e)
+            exitProcess(0)
         }
+
+        // Load properties
+        properties = Properties().apply {
+            runCatching {
+                getPath("conf", "settings.properties").inputStream().use {
+                    load(it)
+                }
+            }
+        }
+
+        // Set menu scaling
+        val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
+        val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
+        System.setProperty("sun.java2d.uiScale", menuScaling.toString())
 
         // Set theme
         try {
@@ -128,16 +161,14 @@ class Main {
 
         // Load languages
         try {
-            val systemLocale = Locale.getDefault().toLanguageTag()
-            val locale = Locale.forLanguageTag(getProperty("Language", systemLocale))
+            val defaultLocale = Locale.getDefault().toLanguageTag()
+            val locale = Locale.forLanguageTag(getProperty("Language", defaultLocale))
             languageBundle = ResourceBundle.getBundle("conf.language", locale)
         } catch (_: Exception) {
             showError("The default language file could not be loaded.")
             exit()
         }
-    }
 
-    fun run() {
         // Get the image sets to use
         if (!getProperty("AlwaysShowShimejiChooser", false)) {
             for (set in getProperty("ActiveShimeji", "").split('/')) {
@@ -147,6 +178,7 @@ class Main {
             }
         }
         do {
+            // If no image sets are selected, show the image set chooser
             if (imageSets.isEmpty()) {
                 val selectedImageSets = ImageSetChooser(null, true).display()
                 if (selectedImageSets != null) {
@@ -188,83 +220,6 @@ class Main {
         }
 
         manager.start()
-    }
-
-    fun createConfigDirectory() {
-        try {
-            // Create conf directory
-            val confDir = getPath("conf")
-            if (!confDir.exists() || !confDir.isDirectory()) {
-                confDir.createDirectories()
-
-                // Copy actions.xml
-                confDir.resolve("actions.xml").outputStream().use { output ->
-                    loadResource("/conf/actions.xml")?.use { input ->
-                        input.copyTo(output)
-                    }
-                }
-
-                // Copy behaviors.xml
-                confDir.resolve("behaviors.xml").outputStream().use { output ->
-                    loadResource("/conf/behaviors.xml")?.use { input ->
-                        input.copyTo(output)
-                    }
-                }
-
-                // Copy settings.properties
-                confDir.resolve("settings.properties").outputStream().use { output ->
-                    loadResource("/conf/settings.properties")?.use { input ->
-                        input.copyTo(output)
-                    }
-                }
-            }
-
-            // Create theme directory
-            val themeDir = confDir.resolve("theme")
-            if (!themeDir.exists() || !themeDir.isDirectory()) {
-                themeDir.createDirectories()
-
-                // Copy FlatLightLaf.properties
-                themeDir.resolve("FlatLightLaf.properties").outputStream().use { output ->
-                    loadResource("/conf/theme/FlatLightLaf.properties")?.use { input ->
-                        input.copyTo(output)
-                    }
-                }
-
-                // Copy FlatDarkLaf.properties
-                themeDir.resolve("FlatDarkLaf.properties").outputStream().use { output ->
-                    loadResource("/conf/theme/FlatDarkLaf.properties")?.use { input ->
-                        input.copyTo(output)
-                    }
-                }
-            }
-
-            // Create img directory
-            val imgDir = getPath("img")
-            if (!imgDir.exists() || !imgDir.isDirectory()) {
-                imgDir.createDirectories()
-
-                // Copy default mascot
-                val defaultMascotDir = imgDir.resolve("Shimeji")
-                defaultMascotDir.createDirectories()
-                for (i in 1 until 47) {
-                    getPath("img", "Shimeji", "shime$i.png").outputStream().use { output ->
-                        loadResource("/img/Shimeji/shime$i.png")?.use { input ->
-                            input.copyTo(output)
-                        }
-                    }
-                }
-            }
-
-            // Create unused directory
-            val unusedDir = imgDir.resolve("unused")
-            if (!unusedDir.exists() || !unusedDir.isDirectory()) {
-                unusedDir.createDirectories()
-            }
-        } catch (e: Exception) {
-            showError("Failed to create the config directory.", e)
-            exitProcess(0)
-        }
     }
 
     private fun loadConfiguration(imageSet: String): Boolean {
@@ -796,7 +751,7 @@ class Main {
     private fun updateConfigFile() {
         try {
             getPath("conf", "settings.properties").outputStream().use {
-                storeProperties(it, "Configuration Options")
+                properties.store(it, "Configuration Options")
             }
         } catch (_: Exception) {
         }

@@ -23,13 +23,9 @@
 package com.group_finity.mascot
 
 import java.io.InputStream
-import java.io.OutputStream
 import kotlin.io.path.Path
 
-fun getPath(vararg paths: String) = Path(
-    System.getProperty("user.home"),
-    ".config", "shimelinux", *paths
-)
+fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
 
 fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
 
@@ -53,8 +49,4 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
 
 fun setProperty(key: String, value: String) {
     Main.instance.properties.setProperty(key, value)
-}
-
-fun storeProperties(stream: OutputStream, comments: String) {
-    Main.instance.properties.store(stream, comments)
 }

@@ -53,7 +53,7 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
 
     override fun get(variables: VariableMap): Any? {
         return value ?: try {
-            value = compiled.eval(variables); value
+            compiled.eval(variables).also { value = it }
         } catch (e: ScriptException) {
             throw VariableException("ScriptEvaluationErrorMessage".localize() + ": $source", e)
         }

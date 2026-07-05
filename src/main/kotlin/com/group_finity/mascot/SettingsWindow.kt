@@ -757,7 +757,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setProperty("InteractiveWindowsBlacklist", blacklist)
 
         getPath("conf", "settings.properties").outputStream().use {
-            storeProperties(it, "Configuration Options")
+            Main.instance.properties.store(it, "Configuration Options")
         }
 
         dispose()
