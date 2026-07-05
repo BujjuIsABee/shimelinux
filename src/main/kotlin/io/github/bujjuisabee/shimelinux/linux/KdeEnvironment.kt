@@ -50,7 +50,8 @@ class KdeEnvironment : Environment() {
     private var restoreWindows: Boolean = false
     private val windowCache = mutableMapOf<String, Boolean>()
 
-    private val shutdownThread = Thread { dispose() }
+    private val shutdownThread = Thread { handleShutdown() }
+    private var isShuttingDown = false
 
     init {
         try {
@@ -123,10 +124,17 @@ class KdeEnvironment : Environment() {
             scripting?.unloadScript("shimelinux-kwin-script")
             dbus?.disconnect()
 
-            Runtime.getRuntime().removeShutdownHook(shutdownThread)
+            if (!isShuttingDown) {
+                Runtime.getRuntime().removeShutdownHook(shutdownThread)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun handleShutdown() {
+        isShuttingDown = true
+        dispose()
     }
 
     private fun isIE(window: Window) = windowCache.getOrPut(window.title) {
