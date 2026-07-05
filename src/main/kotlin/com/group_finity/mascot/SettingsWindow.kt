@@ -167,7 +167,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             alwaysShowInformationScreen = alwaysShowInformationScreenCheckBox.isSelected
         }
 
-        scalingSlider = JSlider()
+        scalingSlider = object : JSlider() {
+            override fun getPreferredSize() = Dimension(450, super.preferredSize.height)
+        }
+        scalingSlider.alignmentX = LEFT_ALIGNMENT
         scalingSlider.maximum = 80
         scalingSlider.majorTickSpacing = 10
         scalingSlider.minorTickSpacing = 5
@@ -186,7 +189,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        opacitySlider = JSlider()
+        opacitySlider = object : JSlider() {
+            override fun getPreferredSize() = Dimension(450, super.preferredSize.height)
+        }
+        opacitySlider.alignmentX = LEFT_ALIGNMENT
         opacitySlider.majorTickSpacing = 10
         opacitySlider.minorTickSpacing = 5
         opacitySlider.paintLabels = true
@@ -234,7 +240,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         generalTab = JPanel()
         generalTab.layout = BoxLayout(generalTab, BoxLayout.Y_AXIS)
-        generalTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         generalTab.add(alwaysShowShimejiChooserCheckBox)
         generalTab.add(alwaysShowInformationScreenCheckBox)
         generalTab.add(Box.createVerticalStrut(10))
@@ -660,7 +665,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         init {
             isOpaque = false
 
-            putClientProperty(FlatClientProperties.STYLE, "arc: 16")
+            putClientProperty(FlatClientProperties.STYLE, "arc: 6")
         }
 
         override fun getPreferredSize() = Dimension(
@@ -680,7 +685,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             Insets(15, 15, 15, 15),
             UIManager.getColor("Component.borderColor"),
             1.0f,
-            16
+            6
         )
     }
 
