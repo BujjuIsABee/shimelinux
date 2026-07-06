@@ -39,3 +39,17 @@ If none of these options work for you, you can download the `.jar` file [here](h
 ## How to use
 
 When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click the tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want. Shimeji in the `unused` folder will be ignored.
+
+## Compatibility
+
+> [!WARNING]
+> ShimeLinux does not work on tiling window managers. Try [wl_shimeji by CluelessCatBurger](https://github.com/CluelessCatBurger/wl_shimeji).
+
+ShimeLinux has been tested on the following distributions/desktop environments:
+
+| Distro          | Desktop Environment(s)                     |
+|-----------------|--------------------------------------------|
+| Arch Linux      | KDE Plasma 6.6/6.7, GNOME 50, Cinnamon 6.6 |
+| Fedora 44       | KDE Plasma 6.7                             |
+| Linux Mint 22.3 | Cinnamon 6.6                               |
+| Ubuntu 26.04    | GNOME 50                                   |
