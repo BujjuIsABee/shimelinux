@@ -5,7 +5,7 @@
 <img width="1280" height="720" alt="Shimeji" src="https://github.com/user-attachments/assets/eb7c5939-7cd2-4fab-8891-eab648211d64" />
 
 > [!NOTE]
-> ShimeLinux is an unofficial Linux port/Kotlin rewrite of [Shimeji-ee by Kilkakon](https://kilkakon.com/shimeji). This project also incorporates work from [hqx-java by Arcnor](https://github.com/Arcnor/hqx-java) and [FlatLaf by FormDev](https://github.com/JFormDesigner/FlatLaf). You can view the licenses for these projects [here](https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE-ORIGINAL).
+> ShimeLinux is an unofficial Linux port/Kotlin rewrite of [Shimeji-ee by Kilkakon](https://kilkakon.com/shimeji). This project also incorporates work from [SystemTray by dorkbox](https://github.com/dorkbox/SystemTray), [FlatLaf by FormDev](https://github.com/JFormDesigner/FlatLaf), [hqx-java by Arcnor](https://github.com/Arcnor/hqx-java), and [dbus-java by hypfvieh](https://github.com/hypfvieh/dbus-java). You can view the licenses for these projects [here](https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE-ORIGINAL).
 
 ## How to install
 
