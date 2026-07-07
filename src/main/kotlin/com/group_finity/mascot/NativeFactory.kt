@@ -44,19 +44,11 @@ abstract class NativeFactory {
 
         @JvmStatic
         fun resetInstance() {
-            val basepkg = "io.github.bujjuisabee.shimelinux"
-            val subpkg = getProperty("Environment", "linux")
-            val className = buildString {
-                append(basepkg)
-                append('.')
-                append(subpkg)
-                append(".NativeFactoryImpl")
+            instance = when (getProperty("Environment", "linux")) {
+                "linux" -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
+                "virtual" -> io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl()
+                else -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
             }
-
-            @Suppress("UNCHECKED_CAST")
-            val impl = Class.forName(className) as Class<out NativeFactory>
-
-            instance = impl.getConstructor().newInstance()
         }
     }
 }
