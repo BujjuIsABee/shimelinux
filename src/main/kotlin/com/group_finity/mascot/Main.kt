@@ -36,6 +36,7 @@ import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.BorderLayout
 import java.awt.Point
+import java.awt.image.BufferedImage
 import java.io.File
 import java.util.Locale
 import java.util.Properties
@@ -983,7 +984,7 @@ class Main {
         @JvmStatic
         val frame: JFrame by lazy {
             JFrame().apply {
-                iconImage = loadResource("/img/icon.png").use { ImageIO.read(it) }
+                iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
             }
         }
 
