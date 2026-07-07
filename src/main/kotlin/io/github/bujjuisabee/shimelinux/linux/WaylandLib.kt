@@ -22,32 +22,23 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.NativeFactory
-import com.group_finity.mascot.image.TranslucentWindow
-import java.awt.image.BufferedImage
-import javax.swing.UIManager
-import kotlin.concurrent.thread
+import com.group_finity.mascot.loadResource
+import java.io.File
 
-@Suppress("unused")
-class NativeFactoryImpl : NativeFactory() {
-    override val environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-        "KDE" -> KdeEnvironment()
-        else -> GenericLinuxEnvironment()
-    }
+class WaylandLib {
+    external fun createLayer()
 
-    init {
-        thread(start = true, name = "WaylandLib") {
-            val lib = WaylandLib()
-            lib.createLayer()
+    companion object {
+        init {
+            val libFile = File.createTempFile("libshimelinux_wayland", ".so")
+            libFile.deleteOnExit()
+            loadResource("/libshimelinux_wayland.so")?.use { input ->
+                libFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            System.load(libFile.absolutePath)
         }
-    }
-
-    override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
-
-    override fun newTransparentWindow(): TranslucentWindow {
-        // Create the window with a LaF that supports transparency
-        val previousLaf = UIManager.getLookAndFeel()
-        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        return LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
     }
 }
