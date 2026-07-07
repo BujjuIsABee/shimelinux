@@ -6,3 +6,16 @@ Icon=shimelinux
 Type=Application
 Categories=Graphics;
 Exec=/usr/bin/shimelinux
+Actions=ChooseLang;ChooseShimeji;Settings
+
+[Desktop Action ChooseLang]
+Name=Choose Language
+Exec=/usr/bin/shimelinux --language-chooser
+
+[Desktop Action ChooseShimeji]
+Name=Choose Shimeji
+Exec=/usr/bin/shimelinux --shimeji-chooser
+
+[Desktop Action Settings]
+Name=Settings
+Exec=/usr/bin/shimelinux --settings
