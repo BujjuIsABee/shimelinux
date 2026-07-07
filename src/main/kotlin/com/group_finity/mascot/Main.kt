@@ -58,9 +58,10 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     try {
-        val isDebug = args.contains("--debug") || args.contains("-d")
+        val debug = args.contains("--debug") || args.contains("-d")
+        val noTrayIcon = args.contains("--no-tray-icon") || args.contains("-t")
 
-        if (!isDebug) {
+        if (!debug) {
             try {
                 Main.loadResource("/conf/logging.properties").use {
                     LogManager.getLogManager().readConfiguration(it)
@@ -69,6 +70,8 @@ fun main(args: Array<String>) {
                 e.printStackTrace()
             }
         }
+
+        Main.instance.noTrayIcon = noTrayIcon
 
         Main.instance.run()
     } catch (_: OutOfMemoryError) {
@@ -87,6 +90,8 @@ class Main {
     private var imageSets = mutableListOf<String>()
     private val configurations = ConcurrentHashMap<String, Configuration>()
     private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
+
+    var noTrayIcon = false
 
     lateinit var properties: Properties
         private set
@@ -202,7 +207,9 @@ class Main {
         } while (imageSets.isEmpty())
 
         // Create the tray icon
-        createTrayIcon()
+        if (!noTrayIcon) {
+            createTrayIcon()
+        }
 
         // Create the first mascot
         for (imageSet in imageSets) {
@@ -403,53 +410,11 @@ class Main {
         allowedBehaviorsSubmenu.add(multiscreenMenu)
 
         val chooseShimejiMenu = MenuItem("ChooseShimeji".localize()) {
-            val chooser = ImageSetChooser(null, true)
-            setActiveImageSets(chooser.display())
+            chooseShimejiMenuClicked()
         }
 
         val settingsMenu = MenuItem("Settings".localize()) {
-            if (!manager.isPaused) {
-                manager.togglePauseAll()
-            }
-
-            val settings = SettingsWindow(null, true)
-            settings.isVisible = true
-
-            if (settings.isRestartRequired) {
-                val jarPath = this::class.java.protectionDomain.codeSource.location.path
-                val restartProcess = ProcessBuilder("java", "-jar", jarPath)
-                restartProcess.directory(File(System.getProperty("user.dir")))
-                restartProcess.start()
-                exit()
-            }
-            if (settings.isEnvironmentReloadRequired) {
-                NativeFactory.instance.environment.dispose()
-                NativeFactory.resetInstance()
-            }
-            if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
-                val isExitOnLastRemoved = manager.isExitOnLastRemoved
-                manager.isExitOnLastRemoved = false
-                manager.disposeAll()
-
-                ImagePairs.clear()
-                configurations.clear()
-
-                for (imageSet in imageSets) {
-                    loadConfiguration(imageSet)
-                }
-                for (imageSet in imageSets) {
-                    createMascot(imageSet)
-                }
-
-                manager.isExitOnLastRemoved = isExitOnLastRemoved
-            }
-            if (settings.isInteractiveWindowReloadRequired) {
-                NativeFactory.instance.environment.refreshCache()
-            }
-
-            if (manager.isPaused) {
-                manager.togglePauseAll()
-            }
+            settingsMenuClicked()
         }
 
         val englishMenu = MenuItem("English") {
@@ -603,6 +568,56 @@ class Main {
         icon.menu.add(dismissAllMenu)
     }
 
+    fun chooseShimejiMenuClicked() {
+        val chooser = ImageSetChooser(null, true)
+        setActiveImageSets(chooser.display())
+    }
+
+    fun settingsMenuClicked() {
+        if (!manager.isPaused) {
+            manager.togglePauseAll()
+        }
+
+        val settings = SettingsWindow(null, true)
+        settings.isVisible = true
+
+        if (settings.isRestartRequired) {
+            val jarPath = this::class.java.protectionDomain.codeSource.location.path
+            val restartProcess = ProcessBuilder("java", "-jar", jarPath)
+            restartProcess.directory(File(System.getProperty("user.dir")))
+            restartProcess.start()
+            exit()
+        }
+        if (settings.isEnvironmentReloadRequired) {
+            NativeFactory.instance.environment.dispose()
+            NativeFactory.resetInstance()
+        }
+        if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
+            val isExitOnLastRemoved = manager.isExitOnLastRemoved
+            manager.isExitOnLastRemoved = false
+            manager.disposeAll()
+
+            ImagePairs.clear()
+            configurations.clear()
+
+            for (imageSet in imageSets) {
+                loadConfiguration(imageSet)
+            }
+            for (imageSet in imageSets) {
+                createMascot(imageSet)
+            }
+
+            manager.isExitOnLastRemoved = isExitOnLastRemoved
+        }
+        if (settings.isInteractiveWindowReloadRequired) {
+            NativeFactory.instance.environment.refreshCache()
+        }
+
+        if (manager.isPaused) {
+            manager.togglePauseAll()
+        }
+    }
+
     private fun pauseMenuClicked(pauseMenuItem: MenuItem) {
         manager.togglePauseAll()
 
@@ -679,11 +694,13 @@ class Main {
             manager.isExitOnLastRemoved = isExitOnLastRemoved
 
             // Refresh the tray icon
-            val icon = SystemTray.get()
-            for (entry in icon.menu.entries) {
-                icon.menu.remove(entry)
+            if (!noTrayIcon) {
+                val icon = SystemTray.get()
+                for (entry in icon.menu.entries) {
+                    icon.menu.remove(entry)
+                }
+                createTrayIcon()
             }
-            createTrayIcon()
         } catch (_: Exception) {
             showError("Failed to set the new language.")
             exit()

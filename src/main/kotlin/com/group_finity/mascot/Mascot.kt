@@ -184,6 +184,16 @@ class Mascot(var imageSet: String) {
             }
         })
 
+        val chooseShimejiMenu = JMenuItem("ChooseShimeji".localize())
+        chooseShimejiMenu.addActionListener {
+            Main.instance.chooseShimejiMenuClicked()
+        }
+
+        val settingsMenu = JMenuItem("Settings".localize())
+        settingsMenu.addActionListener {
+            Main.instance.settingsMenuClicked()
+        }
+
         val callAnotherMenu = JMenuItem("CallAnother".localize())
         callAnotherMenu.addActionListener {
             Main.instance.createMascot(imageSet)
@@ -271,6 +281,12 @@ class Mascot(var imageSet: String) {
                 }
             } catch (_: Exception) {
             }
+        }
+
+        if (Main.instance.noTrayIcon) {
+            popup.add(chooseShimejiMenu)
+            popup.add(settingsMenu)
+            popup.addSeparator()
         }
 
         popup.add(callAnotherMenu)
