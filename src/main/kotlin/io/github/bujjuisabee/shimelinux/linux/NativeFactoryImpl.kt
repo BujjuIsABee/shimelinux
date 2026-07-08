@@ -26,20 +26,12 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 import javax.swing.UIManager
-import kotlin.concurrent.thread
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
     override val environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
         "KDE" -> KdeEnvironment()
         else -> GenericLinuxEnvironment()
-    }
-
-    init {
-        thread(start = true, name = "WaylandLib") {
-            val lib = WaylandLib()
-            lib.createLayer()
-        }
     }
 
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)

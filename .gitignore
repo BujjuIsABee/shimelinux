@@ -1,6 +1,5 @@
 .gradle
 build/
-target/
 distribution/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/

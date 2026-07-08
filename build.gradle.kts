@@ -24,32 +24,6 @@ kotlin {
     jvmToolchain(21)
 }
 
-val waylandLibOutput = layout.buildDirectory.dir("wayland-lib-output")
-
-tasks.register("buildWaylandLib", Exec::class) {
-    description = "Builds the Wayland lib"
-
-    commandLine("cargo", "build")
-}
-
-tasks.register("copyWaylandLib", Copy::class) {
-    description = "Copies the Wayland lib to resources"
-
-    from(File("$projectDir/target/debug/libshimelinux_wayland.so"))
-    into(waylandLibOutput)
-}
-
-sourceSets {
-    main {
-        resources.srcDir(waylandLibOutput)
-    }
-}
-
-tasks.processResources {
-    dependsOn("buildWaylandLib")
-    dependsOn("copyWaylandLib")
-}
-
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "com.group_finity.mascot.MainKt"
