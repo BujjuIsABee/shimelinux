@@ -26,9 +26,14 @@ import com.group_finity.mascot.loadResource
 import java.io.File
 
 class WaylandLib {
-    external fun test()
+    external fun createMascot(): Int
+
+    @Suppress("LocalVariableName")
+    external fun setBounds(sender_index: Int, x: Int, y: Int, width: Int, height: Int)
 
     companion object {
+        val INSTANCE = WaylandLib()
+
         init {
             val libFile = File.createTempFile("libshimelinux_wayland", ".so")
             libFile.deleteOnExit()

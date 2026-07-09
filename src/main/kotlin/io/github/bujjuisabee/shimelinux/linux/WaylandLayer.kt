@@ -22,7 +22,57 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-fun main() {
-    val lib = WaylandLib()
-    lib.test()
+import com.group_finity.mascot.image.NativeImage
+import com.group_finity.mascot.image.TranslucentWindow
+import java.awt.Component
+import java.awt.Rectangle
+import java.awt.event.MouseListener
+
+class WaylandLayer : TranslucentWindow, Component() {
+    private val component = object : Component() {
+        override fun isVisible(): Boolean {
+            return true
+        }
+
+        override fun setVisible(b: Boolean) {
+        }
+
+        override fun getBounds(): Rectangle {
+            return Rectangle(0, 0, 0, 0)
+        }
+
+        override fun setBounds(r: Rectangle) {
+            lib.setBounds(sender, r.x, r.y, r.width, r.height)
+        }
+
+        override fun addMouseListener(l: MouseListener?) {
+        }
+
+        override fun requestFocus() {
+        }
+    }
+
+    private val lib = WaylandLib.INSTANCE
+    private val sender: Int = lib.createMascot()
+    private var image: LinuxNativeImage? = null
+
+    override fun asComponent() = component
+
+    override fun setImage(image: NativeImage) {
+        if (image is LinuxNativeImage) {
+            this.image = image
+        }
+    }
+
+    override fun updateImage() {
+
+    }
+
+    override fun setAlwaysOnTop(onTop: Boolean) {
+
+    }
+
+    override fun dispose() {
+
+    }
 }

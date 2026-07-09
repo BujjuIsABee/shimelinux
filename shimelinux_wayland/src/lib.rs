@@ -20,79 +20,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::num::NonZeroU32;
+use std::sync::{Mutex, mpsc::{Sender, channel}};
 
 use jni::{EnvUnowned, objects::JClass};
-use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_layer, delegate_output, delegate_registry, delegate_shm, output::{self, OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, shell::{WaylandSurface, wlr_layer::{self, Anchor, Layer, LayerShell, LayerShellHandler, LayerSurface}}, shm::{Shm, ShmHandler, slot::SlotPool}};
-use wayland_client::{Connection, QueueHandle, globals::registry_queue_init, protocol::{wl_output, wl_shm::Format, wl_surface}};
+use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_layer, delegate_output, delegate_registry, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, shell::{WaylandSurface, wlr_layer::{Anchor, KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface, LayerSurfaceConfigure}}, shm::{Shm, ShmHandler, slot::SlotPool}};
+use wayland_client::{Connection, QueueHandle, globals::registry_queue_init, protocol::{wl_output::{Transform, WlOutput}, wl_shm::Format, wl_surface::WlSurface}};
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_test<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-) {
-    let connection = Connection::connect_to_env().unwrap();
-    let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
-    let qh = event_queue.handle();
-
-    let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to create layer shell");
-    let shm = Shm::bind(&globals, &qh).expect("Failed to create shm");
-    let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to create pool");
-
-    let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
-    let surface = compositor_state.create_surface(&qh);
-    let layer_surface = layer_shell.create_layer_surface(&qh, surface, Layer::Top, Some("shimelinux"), None);
-
-    layer_surface.set_anchor(Anchor::TOP | Anchor::LEFT);
-    layer_surface.set_size(128, 128);
-    layer_surface.set_keyboard_interactivity(wlr_layer::KeyboardInteractivity::None);
-    layer_surface.commit();
-
-    let mut layer = ShimejiiLayer {
-        registry_state: RegistryState::new(&globals),
-        output_state: OutputState::new(&globals, &qh),
-        layer: layer_surface,
-        exit: false,
-        width: 128,
-        height: 128,
-        shm: shm,
-        pool: pool,
-        first_configure: true,
-    };
-
-    loop {
-        event_queue.blocking_dispatch(&mut layer).expect("Failed to dispatch");
-
-        if layer.exit {
-            break;
-        }
-    }
+enum Event {
+    SetBounds(i32, i32, i32, i32),
 }
 
-struct ShimejiiLayer {
+struct Mascot {
     registry_state: RegistryState,
     output_state: OutputState,
-    layer: LayerSurface,
-    exit: bool,
-    width: u32,
-    height: u32,
     shm: Shm,
     pool: SlotPool,
-    first_configure: bool,
+    layer: LayerSurface,
+    width: u32,
+    height: u32,
+    configured: bool,
 }
 
-impl ShmHandler for ShimejiiLayer {
-    fn shm_state(&mut self) -> &mut Shm {
-        &mut self.shm
-    }
-}
-
-impl CompositorHandler for ShimejiiLayer {
+delegate_compositor!(Mascot);
+impl CompositorHandler for Mascot {
     fn scale_factor_changed(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
+        _surface: &WlSurface,
         _new_factor: i32,
     ) {
     }
@@ -101,8 +56,8 @@ impl CompositorHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
-        _new_transform: wl_output::Transform,
+        _surface: &WlSurface,
+        _new_transform: Transform,
     ) {
     }
 
@@ -110,7 +65,7 @@ impl CompositorHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
+        _surface: &WlSurface,
         _time: u32,
     ) {
         self.draw(qh);
@@ -120,8 +75,8 @@ impl CompositorHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
-        _output: &wl_output::WlOutput,
+        _surface: &WlSurface,
+        _output: &WlOutput,
     ) {
     }
 
@@ -129,14 +84,15 @@ impl CompositorHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _surface: &wl_surface::WlSurface,
-        _output: &wl_output::WlOutput,
+        _surface: &WlSurface,
+        _output: &WlOutput,
     ) {
     }
 }
 
-impl OutputHandler for ShimejiiLayer {
-    fn output_state(&mut self) -> &mut output::OutputState {
+delegate_output!(Mascot);
+impl OutputHandler for Mascot {
+    fn output_state(&mut self) -> &mut OutputState {
         &mut self.output_state
     }
 
@@ -144,7 +100,7 @@ impl OutputHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: wl_output::WlOutput,
+        _output: WlOutput,
     ) {
     }
 
@@ -152,7 +108,7 @@ impl OutputHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: wl_output::WlOutput,
+        _output: WlOutput,
     ) {
     }
 
@@ -160,75 +116,160 @@ impl OutputHandler for ShimejiiLayer {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: wl_output::WlOutput,
+        _output: WlOutput,
     ) {
     }
 }
 
-impl LayerShellHandler for ShimejiiLayer {
-    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &wlr_layer::LayerSurface) {
-        self.exit = true;
+delegate_layer!(Mascot);
+impl LayerShellHandler for Mascot {
+    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {
     }
 
     fn configure(
         &mut self,
         _conn: &Connection,
         qh: &QueueHandle<Self>,
-        _layer: &wlr_layer::LayerSurface,
-        configure: wlr_layer::LayerSurfaceConfigure,
+        _layer: &LayerSurface,
+        configure: LayerSurfaceConfigure,
         _serial: u32,
     ) {
-        self.width = NonZeroU32::new(configure.new_size.0).map_or(128, NonZeroU32::get);
-        self.height = NonZeroU32::new(configure.new_size.1).map_or(128, NonZeroU32::get);
+        let (width, height) = configure.new_size;
+        self.width = width;
+        self.height = height;
 
-        if self.first_configure {
-            self.first_configure = false;
+        if !self.configured {
+            self.configured = true;
             self.draw(qh);
         }
     }
 }
 
-impl ProvidesRegistryState for ShimejiiLayer {
+delegate_shm!(Mascot);
+impl ShmHandler for Mascot {
+    fn shm_state(&mut self) -> &mut Shm {
+        &mut self.shm
+    }
+}
+
+delegate_registry!(Mascot);
+impl ProvidesRegistryState for Mascot {
     fn registry(&mut self) -> &mut RegistryState {
         &mut self.registry_state
     }
+
     registry_handlers![];
 }
 
-impl ShimejiiLayer {
-    pub fn draw(&mut self, qh: &QueueHandle<Self>) {
-        let width = self.width;
-        let height = self.height;
-        let stride = self.width as i32 * 4;
+static SENDERS: Mutex<Vec<Sender<Event>>> = Mutex::new(Vec::new());
 
-        let (buffer, canvas) = self
-            .pool
-            .create_buffer(width as i32, height as i32, stride, Format::Argb8888)
+impl Mascot {
+    fn draw(&mut self, qh: &QueueHandle<Self>) {
+        let width = self.width as i32;
+        let height = self.height as i32;
+        let stride = width * 4;
+
+        let (buffer, canvas) = self.
+            pool
+            .create_buffer(width, height, stride, Format::Argb8888)
             .expect("Failed to create buffer");
 
         canvas.chunks_exact_mut(4).enumerate().for_each(|(_index, chunk)| {
-            let a = 0xFF as u32;
-            let r = 0xFF as u32;
-            let g = 0xFF as u32;
-            let b = 0xFF as u32;
-            let color = (a << 24) + (r << 16) + (g << 8) + b;
+            let a = 0xFF;
+            let r = 0xFF;
+            let g = 0xFF;
+            let b = 0xFF;
+            let color: u32 = (a << 24) + (r << 16) + (g << 8) + b;
 
             let array: &mut [u8; 4] = chunk.try_into().unwrap();
             *array = color.to_le_bytes();
         });
 
-        self.layer.wl_surface().damage_buffer(0, 0, width as i32, height as i32);
-
+        self.layer.wl_surface().damage_buffer(0, 0, width, height);
         self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
-
         buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
-
         self.layer.commit();
     }
 }
 
-delegate_registry!(ShimejiiLayer);
-delegate_layer!(ShimejiiLayer);
-delegate_compositor!(ShimejiiLayer);
-delegate_output!(ShimejiiLayer);
-delegate_shm!(ShimejiiLayer);
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createMascot<'caller>(
+    mut _unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+) -> i32 {
+    let (sender, receiver) = channel::<Event>();
+    let mut senders = SENDERS.lock().unwrap();
+    senders.push(sender);
+    let sender_index = senders.len() - 1;
+
+    let connection = Connection::connect_to_env().unwrap();
+    let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
+    let qh = event_queue.handle();
+
+    let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
+    let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to create layer shell");
+
+    let shm = Shm::bind(&globals, &qh).expect("Failed to create shm");
+    let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to create pool");
+    let surface = compositor_state.create_surface(&qh);
+    let layer = layer_shell.create_layer_surface(
+        &qh,
+        surface,
+        Layer::Top,
+        Some("shimeji"),
+        None,
+    );
+
+    layer.set_anchor(Anchor::TOP | Anchor::LEFT);
+    layer.set_size(128, 128);
+    layer.set_keyboard_interactivity(KeyboardInteractivity::None);
+    layer.commit();
+
+    let mut mascot = Mascot {
+        registry_state: RegistryState::new(&globals),
+        output_state: OutputState::new(&globals, &qh),
+        shm,
+        pool,
+        layer: layer,
+        width: 128,
+        height: 128,
+        configured: false,
+    };
+
+    std::thread::spawn(move || {
+        loop {
+            while let Ok(event) = receiver.try_recv() {
+                match event {
+                    Event::SetBounds(x, y, width, height) => {
+                        mascot.layer.set_size(width as u32, height as u32);
+                        mascot.layer.set_margin(y, 0, 0, x);
+                    }
+                }
+            }
+
+            event_queue.blocking_dispatch(&mut mascot).expect("Failed to dispatch");
+        }
+    });
+
+    sender_index as i32
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setBounds<'caller>(
+    mut _unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+    sender_index: i32,
+    x: i32,
+    y: i32,
+    width: i32,
+    height: i32,
+) {
+    let senders = SENDERS.lock().unwrap();
+    if let Some(sender) = senders.get(sender_index as usize) {
+        let _ = sender.send(Event::SetBounds(
+            x, y,
+            if width <= 0 { 1 } else { width },
+            if height <= 0 { 1 } else { height },
+        ));
+    }
+}

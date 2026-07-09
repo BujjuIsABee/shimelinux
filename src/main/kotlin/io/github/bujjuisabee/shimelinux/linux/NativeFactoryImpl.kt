@@ -37,9 +37,11 @@ class NativeFactoryImpl : NativeFactory() {
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
+        return WaylandLayer()
+
         // Create the window with a LaF that supports transparency
-        val previousLaf = UIManager.getLookAndFeel()
-        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        return LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
+        // val previousLaf = UIManager.getLookAndFeel()
+        // UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        // return LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
     }
 }
