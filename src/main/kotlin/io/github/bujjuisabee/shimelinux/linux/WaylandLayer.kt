@@ -55,17 +55,22 @@ class WaylandLayer : TranslucentWindow, Component() {
     private val lib = WaylandLib.INSTANCE
     private val sender: Int = lib.createMascot()
     private var image: LinuxNativeImage? = null
+    private var imageChanged = false
 
     override fun asComponent() = component
 
     override fun setImage(image: NativeImage) {
-        if (image is LinuxNativeImage) {
+        if (image is LinuxNativeImage && this.image != image) {
             this.image = image
+            imageChanged = true
         }
     }
 
     override fun updateImage() {
-
+        if (imageChanged && image != null) {
+            imageChanged = false
+            lib.updateImage(sender, image!!.rgb)
+        }
     }
 
     override fun setAlwaysOnTop(onTop: Boolean) {

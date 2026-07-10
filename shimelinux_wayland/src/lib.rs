@@ -20,14 +20,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::sync::{Mutex, mpsc::{Sender, channel}};
+use std::{
+    cmp::max,
+    sync::{
+        Mutex,
+        mpsc::{Sender, channel},
+    },
+};
 
-use jni::{EnvUnowned, objects::JClass};
-use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_layer, delegate_output, delegate_registry, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, shell::{WaylandSurface, wlr_layer::{Anchor, KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface, LayerSurfaceConfigure}}, shm::{Shm, ShmHandler, slot::SlotPool}};
-use wayland_client::{Connection, QueueHandle, globals::registry_queue_init, protocol::{wl_output::{Transform, WlOutput}, wl_shm::Format, wl_surface::WlSurface}};
+use jni::{
+    EnvUnowned,
+    elements::ReleaseMode,
+    errors::{Error, ThrowRuntimeExAndDefault},
+    objects::{JClass, JIntArray},
+};
+use smithay_client_toolkit::{
+    compositor::{CompositorHandler, CompositorState},
+    delegate_compositor, delegate_layer, delegate_output, delegate_registry, delegate_shm,
+    output::{OutputHandler, OutputState},
+    registry::{ProvidesRegistryState, RegistryState},
+    registry_handlers,
+    shell::{
+        WaylandSurface,
+        wlr_layer::{
+            Anchor, KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface,
+            LayerSurfaceConfigure,
+        },
+    },
+    shm::{Shm, ShmHandler, slot::SlotPool},
+};
+use wayland_client::{
+    Connection, QueueHandle,
+    globals::registry_queue_init,
+    protocol::{
+        wl_output::{Transform, WlOutput},
+        wl_shm::Format,
+        wl_surface::WlSurface,
+    },
+};
 
 enum Event {
     SetBounds(i32, i32, i32, i32),
+    UpdateImage(Vec<i32>),
 }
 
 struct Mascot {
@@ -38,7 +72,8 @@ struct Mascot {
     layer: LayerSurface,
     width: u32,
     height: u32,
-    configured: bool,
+    first_configure: bool,
+    rgb: Vec<i32>,
 }
 
 delegate_compositor!(Mascot);
@@ -100,7 +135,7 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput,
+        _output: WlOutput
     ) {
     }
 
@@ -108,7 +143,7 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput,
+        _output: WlOutput
     ) {
     }
 
@@ -116,15 +151,14 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput,
+        _output: WlOutput
     ) {
     }
 }
 
 delegate_layer!(Mascot);
 impl LayerShellHandler for Mascot {
-    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {
-    }
+    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {}
 
     fn configure(
         &mut self,
@@ -138,8 +172,9 @@ impl LayerShellHandler for Mascot {
         self.width = width;
         self.height = height;
 
-        if !self.configured {
-            self.configured = true;
+        // Draw the mascot for the first time if this is the first configure
+        if self.first_configure {
+            self.first_configure = false;
             self.draw(qh);
         }
     }
@@ -169,21 +204,19 @@ impl Mascot {
         let height = self.height as i32;
         let stride = width * 4;
 
-        let (buffer, canvas) = self.
-            pool
+        let (buffer, canvas) = self
+            .pool
             .create_buffer(width, height, stride, Format::Argb8888)
             .expect("Failed to create buffer");
 
-        canvas.chunks_exact_mut(4).enumerate().for_each(|(_index, chunk)| {
-            let a = 0xFF;
-            let r = 0xFF;
-            let g = 0xFF;
-            let b = 0xFF;
-            let color: u32 = (a << 24) + (r << 16) + (g << 8) + b;
-
-            let array: &mut [u8; 4] = chunk.try_into().unwrap();
-            *array = color.to_le_bytes();
-        });
+        // Copy the RGB data to the canvas
+        unsafe {
+            std::ptr::copy(
+                self.rgb.as_ptr() as *const u8,
+                canvas.as_mut_ptr(),
+                self.rgb.len() * 4,
+            );
+        }
 
         self.layer.wl_surface().damage_buffer(0, 0, width, height);
         self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
@@ -206,19 +239,13 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
     let qh = event_queue.handle();
 
-    let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
+    let compositor_state =CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
     let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to create layer shell");
 
     let shm = Shm::bind(&globals, &qh).expect("Failed to create shm");
     let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to create pool");
     let surface = compositor_state.create_surface(&qh);
-    let layer = layer_shell.create_layer_surface(
-        &qh,
-        surface,
-        Layer::Top,
-        Some("shimeji"),
-        None,
-    );
+    let layer = layer_shell.create_layer_surface(&qh, surface, Layer::Top, Some("shimeji"), None);
 
     layer.set_anchor(Anchor::TOP | Anchor::LEFT);
     layer.set_size(128, 128);
@@ -233,16 +260,21 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         layer: layer,
         width: 128,
         height: 128,
-        configured: false,
+        first_configure: true,
+        rgb: Vec::new(),
     };
 
     std::thread::spawn(move || {
         loop {
+            // Handle events
             while let Ok(event) = receiver.try_recv() {
                 match event {
                     Event::SetBounds(x, y, width, height) => {
                         mascot.layer.set_size(width as u32, height as u32);
                         mascot.layer.set_margin(y, 0, 0, x);
+                    }
+                    Event::UpdateImage(rgb) => {
+                        mascot.rgb = rgb;
                     }
                 }
             }
@@ -266,10 +298,28 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 ) {
     let senders = SENDERS.lock().unwrap();
     if let Some(sender) = senders.get(sender_index as usize) {
-        let _ = sender.send(Event::SetBounds(
-            x, y,
-            if width <= 0 { 1 } else { width },
-            if height <= 0 { 1 } else { height },
-        ));
+        let _ = sender.send(Event::SetBounds(x, y, max(1, width), max(1, height)));
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_updateImage<'caller>(
+    mut unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+    sender_index: i32,
+    rgb: JIntArray,
+) {
+    let senders = SENDERS.lock().unwrap();
+    if let Some(sender) = senders.get(sender_index as usize) {
+        let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
+            let rgb = unsafe {
+                rgb.get_elements(env, ReleaseMode::NoCopyBack).unwrap().to_vec()
+            };
+
+            _ = sender.send(Event::UpdateImage(rgb));
+            Ok(())
+        });
+
+        outcome.resolve::<ThrowRuntimeExAndDefault>();
     }
 }

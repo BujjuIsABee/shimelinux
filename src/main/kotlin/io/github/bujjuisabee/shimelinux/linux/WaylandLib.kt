@@ -31,6 +31,9 @@ class WaylandLib {
     @Suppress("LocalVariableName")
     external fun setBounds(sender_index: Int, x: Int, y: Int, width: Int, height: Int)
 
+    @Suppress("LocalVariableName")
+    external fun updateImage(sender_index: Int, rgb: IntArray)
+
     companion object {
         val INSTANCE = WaylandLib()
 
