@@ -83,7 +83,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setIconImage(icon)
         title = "ShimejiImageSetChooser".localize()
         minimumSize = Dimension(670, 495)
-        contentPane.layout = BorderLayout()
+        layout = BorderLayout()
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
         list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())

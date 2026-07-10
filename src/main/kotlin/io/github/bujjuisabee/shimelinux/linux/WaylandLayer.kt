@@ -67,7 +67,7 @@ class WaylandLayer : TranslucentWindow, Component() {
     }
 
     override fun updateImage() {
-        if (imageChanged && image != null) {
+        if (image != null) {
             imageChanged = false
             lib.updateImage(sender, image!!.rgb)
         }

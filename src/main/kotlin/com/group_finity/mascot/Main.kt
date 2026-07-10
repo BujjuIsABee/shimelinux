@@ -34,7 +34,6 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
-import java.awt.BorderLayout
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.io.File
@@ -45,10 +44,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.LogManager
 import java.util.logging.Logger
-import javax.imageio.ImageIO
-import javax.swing.JButton
-import javax.swing.JComboBox
-import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
@@ -64,7 +59,6 @@ import kotlin.system.exitProcess
 fun main(args: Array<String>) {
     try {
         val debug = args.contains("--debug") || args.contains("-d")
-        val openLanguageChooser = args.contains("--language-chooser")
         val openShimejiChooser = args.contains("--shimeji-chooser")
         val openSettings = args.contains("--settings")
 
@@ -78,7 +72,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        Main.instance.run(openLanguageChooser, openShimejiChooser, openSettings)
+        Main.instance.run(openShimejiChooser, openSettings)
     } catch (_: OutOfMemoryError) {
         Main.showError(
             "Out of Memory. There are probably too many\n" +
@@ -101,7 +95,7 @@ class Main {
     lateinit var languageBundle: ResourceBundle
         private set
 
-    fun run(openLanguageChooser: Boolean, openShimejiChooser: Boolean, openSettings: Boolean) {
+    fun run(openShimejiChooser: Boolean, openSettings: Boolean) {
         // Set up config directory
         try {
             val resources = mutableListOf(
@@ -179,88 +173,6 @@ class Main {
             exit()
         }
 
-        if (openLanguageChooser) {
-            val languageChooser = object : JDialog(null as JFrame?, true) {
-                init {
-                    val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
-                    setIconImage(icon)
-                    title = "Language".localize()
-                    layout = BorderLayout()
-
-                    val localeMap = arrayOf(
-                        "en-US",
-                        "en-GB",
-                        "ar-SA",
-                        "ca-ES",
-                        "de-DE",
-                        "es-ES",
-                        "fr-FR",
-                        "hr-HR",
-                        "it-IT",
-                        "nl-NL",
-                        "pl-PL",
-                        "pt-PT",
-                        "pt-BR",
-                        "ru-RU",
-                        "ro-RO",
-                        "sr-RS",
-                        "fi-FI",
-                        "vi-VN",
-                        "zh-CN",
-                        "zh-TW",
-                        "ko-KR",
-                        "ja-JP",
-                    )
-
-                    val comboBox = JComboBox<String>()
-                    comboBox.addItem("English (US)")
-                    comboBox.addItem("English (UK)")
-                    comboBox.addItem("\u0639\u0631\u0628\u064A")
-                    comboBox.addItem("Catal\u00E0")
-                    comboBox.addItem("Deutsch")
-                    comboBox.addItem("Espa\u00F1ol")
-                    comboBox.addItem("Fran\u00E7ais")
-                    comboBox.addItem("Hrvatski")
-                    comboBox.addItem("Italiano")
-                    comboBox.addItem("Nederlands")
-                    comboBox.addItem("Polski")
-                    comboBox.addItem("Portugu\u00eas")
-                    comboBox.addItem("Portugu\u00eas Brasileiro")
-                    comboBox.addItem("\u0440\u0443\u0301\u0441\u0441\u043a\u0438\u0439 \u044f\u0437\u044b\u0301\u043a")
-                    comboBox.addItem("Rom\u00e2n\u0103")
-                    comboBox.addItem("Srpski")
-                    comboBox.addItem("Suomi")
-                    comboBox.addItem("ti\u1ebfng Vi\u1ec7t")
-                    comboBox.addItem("\u7b80\u4f53\u4e2d\u6587")
-                    comboBox.addItem("\u7E41\u9AD4\u4E2D\u6587")
-                    comboBox.addItem("\ud55c\uad6d\uc5b4")
-                    comboBox.addItem("\u65E5\u672C\u8A9E")
-                    comboBox.selectedIndex = localeMap.indexOf(getProperty("Language", "en-US"))
-
-                    val doneButton = JButton("Done".localize())
-                    doneButton.addActionListener {
-                        setProperty("Language", localeMap[comboBox.selectedIndex])
-                        updateConfigFile()
-                        dispose()
-                    }
-
-                    add(comboBox, BorderLayout.CENTER)
-                    add(doneButton, BorderLayout.SOUTH)
-
-                    pack()
-                    setLocationRelativeTo(null)
-                }
-            }
-
-            languageChooser.isVisible = true
-
-            if (openShimejiChooser || openSettings) {
-                val systemLocale = Locale.getDefault().toLanguageTag()
-                val locale = Locale.forLanguageTag(getProperty("Language", systemLocale))
-                languageBundle = ResourceBundle.getBundle("conf.language", locale)
-            }
-        }
-
         if (openShimejiChooser) {
             ImageSetChooser(null, true).display()
         }
@@ -270,7 +182,7 @@ class Main {
             settings.isVisible = true
         }
 
-        if (openLanguageChooser || openShimejiChooser || openSettings) {
+        if (openShimejiChooser || openSettings) {
             exit()
         }
 
