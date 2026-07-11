@@ -39,15 +39,13 @@ tasks.register("copyWaylandLib", Copy::class) {
     into(layout.buildDirectory.dir("wayland-lib"))
 }
 
-sourceSets {
-    main {
-        resources.srcDir(layout.buildDirectory.dir("wayland-lib"))
-    }
-}
-
 tasks.processResources {
     dependsOn("buildWaylandLib")
     dependsOn("copyWaylandLib")
+
+    from(layout.buildDirectory.dir("wayland-lib")) {
+        into("lib")
+    }
 }
 
 tasks.jar {

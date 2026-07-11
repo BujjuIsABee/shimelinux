@@ -23,14 +23,18 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 import javax.swing.UIManager
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    private val isWayland = System.getenv("XDG_SESSION_TYPE") == "wayland"
-    override val environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+    private val useWaylandWindows = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+        "hyprland", "niri", "sway" -> true
+        else -> false
+    }
+    override val environment: Environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
         "KDE" -> KdeEnvironment()
         else -> GenericLinuxEnvironment()
     }
@@ -38,8 +42,8 @@ class NativeFactoryImpl : NativeFactory() {
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
-        if (isWayland) {
-            return WaylandLayer()
+        if (useWaylandWindows) {
+            return WaylandTranslucentWindow()
         } else {
             // Create the window with a LaF that supports transparency
             val previousLaf = UIManager.getLookAndFeel()

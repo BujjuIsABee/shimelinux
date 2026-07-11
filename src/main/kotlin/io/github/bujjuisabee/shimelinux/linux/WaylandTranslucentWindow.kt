@@ -26,34 +26,24 @@ import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.Component
 import java.awt.Rectangle
-import java.awt.event.MouseListener
 
-class WaylandLayer : TranslucentWindow, Component() {
+class WaylandTranslucentWindow : TranslucentWindow {
     private val component = object : Component() {
-        override fun isVisible(): Boolean {
-            return true
-        }
+        private var bounds = super.bounds
 
-        override fun setVisible(b: Boolean) {
-        }
+        override fun isVisible() = true
 
-        override fun getBounds(): Rectangle {
-            return Rectangle(0, 0, 0, 0)
-        }
+        override fun setVisible(b: Boolean) {}
+
+        override fun getBounds() = bounds
 
         override fun setBounds(r: Rectangle) {
-            lib.setBounds(sender, r.x, r.y, r.width, r.height)
-        }
-
-        override fun addMouseListener(l: MouseListener?) {
-        }
-
-        override fun requestFocus() {
+            bounds = r
+            WaylandLib.INSTANCE.setBounds(senderIndex, r.x, r.y, r.width, r.height)
         }
     }
 
-    private val lib = WaylandLib.INSTANCE
-    private val sender: Int = lib.createMascot()
+    private val senderIndex: Int = WaylandLib.INSTANCE.createMascot()
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
 
@@ -69,15 +59,13 @@ class WaylandLayer : TranslucentWindow, Component() {
     override fun updateImage() {
         if (image != null) {
             imageChanged = false
-            lib.updateImage(sender, image!!.rgb)
+            WaylandLib.INSTANCE.updateImage(senderIndex, image!!.rgb)
         }
     }
 
-    override fun setAlwaysOnTop(onTop: Boolean) {
-
-    }
+    override fun setAlwaysOnTop(onTop: Boolean) {}
 
     override fun dispose() {
-
+        WaylandLib.INSTANCE.dispose(senderIndex)
     }
 }

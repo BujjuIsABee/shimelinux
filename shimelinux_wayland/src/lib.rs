@@ -35,23 +35,35 @@ use jni::{
     objects::{JClass, JIntArray},
 };
 use smithay_client_toolkit::{
-    compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::pointer::{PointerEvent, PointerEventKind, PointerHandler}, shell::{
+    compositor::{CompositorHandler, CompositorState},
+    delegate_compositor, delegate_layer, delegate_output, delegate_registry, delegate_shm,
+    output::{OutputHandler, OutputState},
+    registry::{ProvidesRegistryState, RegistryState},
+    registry_handlers,
+    shell::{
         WaylandSurface,
         wlr_layer::{
             Anchor, KeyboardInteractivity, Layer, LayerShell, LayerShellHandler, LayerSurface,
             LayerSurfaceConfigure,
         },
-    }, shm::{Shm, ShmHandler, slot::SlotPool},
+    },
+    shm::{Shm, ShmHandler, slot::SlotPool},
 };
 use wayland_client::{
-    Connection, QueueHandle, delegate_noop, globals::registry_queue_init, protocol::{
-        wl_output::{Transform, WlOutput}, wl_pointer::WlPointer, wl_region, wl_shm::Format, wl_surface::WlSurface,
+    Connection, QueueHandle, delegate_noop,
+    globals::registry_queue_init,
+    protocol::{
+        wl_output::{Transform, WlOutput},
+        wl_region,
+        wl_shm::Format,
+        wl_surface::WlSurface,
     },
 };
 
 enum Event {
     SetBounds(i32, i32, i32, i32),
     UpdateImage(Vec<i32>),
+    Dispose(),
 }
 
 struct Mascot {
@@ -171,32 +183,6 @@ impl LayerShellHandler for Mascot {
     }
 }
 
-delegate_pointer!(Mascot);
-impl PointerHandler for Mascot {
-    fn pointer_frame(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _pointer: &WlPointer,
-        events: &[PointerEvent],
-    ) {
-        use PointerEventKind::*;
-        for event in events {
-            if &event.surface != self.layer.wl_surface() {
-                continue;
-            }
-            match event.kind {
-                Enter { .. } => {},
-                Leave { .. } => {},
-                Motion { .. } => {},
-                Press { .. } => {},
-                Release { .. } => {},
-                Axis { .. } => {todo!()},
-            }
-        }
-    }
-}
-
 delegate_shm!(Mascot);
 impl ShmHandler for Mascot {
     fn shm_state(&mut self) -> &mut Shm {
@@ -228,18 +214,23 @@ impl Mascot {
             .create_buffer(width, height, stride, Format::Argb8888)
             .expect("Failed to create buffer");
 
-        // Copy the RGB data to the canvas
-        canvas.chunks_exact_mut(4).zip(&self.rgb).for_each(|(chunk, color)| {
-            chunk.copy_from_slice(&color.to_le_bytes());
-        });
+        if self.rgb.len() > 0 {
+            // Copy the RGB data to the canvas
+            for (chunk, rgb) in canvas.chunks_exact_mut(4).zip(self.rgb.iter()) {
+                chunk[3] = (rgb >> 24) as u8;
+                chunk[2] = (rgb >> 16) as u8;
+                chunk[1] = (rgb >> 8) as u8;
+                chunk[0] = (rgb >> 0) as u8;
+            }
 
-        let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
-        
-        for (x, y, width, height) in get_window_mask(&self.rgb, self.width, self.height) {
-            shape.add(x, y, width, height);
+            // Set the mask shape
+            let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
+            for (x, y, width, height) in get_window_mask(&self.rgb, self.width, self.height) {
+                shape.add(x, y, width, height);
+            }
+            self.layer.set_input_region(Some(&shape));
         }
-        
-        self.layer.set_input_region(Some(&shape));
+
         self.layer.wl_surface().damage_buffer(0, 0, width, height);
         self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
         buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
@@ -249,10 +240,6 @@ impl Mascot {
 
 fn get_window_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
     let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
-
-    if rgb.len() == 0 {
-        return rects;
-    }
 
     for y in 0..height {
         for x in 0..width {
@@ -309,20 +296,23 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 
     std::thread::spawn(move || {
         loop {
+            _ = event_queue.blocking_dispatch(&mut mascot);
+
             // Handle events
             while let Ok(event) = receiver.try_recv() {
                 match event {
                     Event::SetBounds(x, y, width, height) => {
                         mascot.layer.set_size(width as u32, height as u32);
                         mascot.layer.set_margin(y, 0, 0, x);
-                    }
+                    },
                     Event::UpdateImage(rgb) => {
                         mascot.rgb = rgb;
-                    }
+                    },
+                    Event::Dispose() => {
+                        mascot.layer.wl_surface().destroy();
+                    },
                 }
             }
-
-            _ = event_queue.blocking_dispatch(&mut mascot);
         }
     });
 
@@ -364,5 +354,17 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_up
         });
 
         outcome.resolve::<ThrowRuntimeExAndDefault>();
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_dispose<'caller>(
+    mut _unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+    sender_index: i32,
+) {
+    let senders = SENDERS.lock().unwrap();
+    if let Some(sender) = senders.get(sender_index as usize) {
+        _ = sender.send(Event::Dispose());
     }
 }

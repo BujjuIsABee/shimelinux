@@ -22,31 +22,24 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.loadResource
-import java.io.File
+import com.group_finity.mascot.getPath
+import kotlin.io.path.absolute
 
 class WaylandLib {
     external fun createMascot(): Int
 
-    @Suppress("LocalVariableName")
-    external fun setBounds(sender_index: Int, x: Int, y: Int, width: Int, height: Int)
+    external fun setBounds(senderIndex: Int, x: Int, y: Int, width: Int, height: Int)
 
-    @Suppress("LocalVariableName")
-    external fun updateImage(sender_index: Int, rgb: IntArray)
+    external fun updateImage(senderIndex: Int, rgb: IntArray)
+
+    external fun dispose(senderIndex: Int)
 
     companion object {
         val INSTANCE = WaylandLib()
 
         init {
-            val libFile = File.createTempFile("libshimelinux_wayland", ".so")
-            libFile.deleteOnExit()
-            loadResource("/libshimelinux_wayland.so")?.use { input ->
-                libFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-
-            System.load(libFile.absolutePath)
+            // Load the Wayland library
+            System.load(getPath("lib", "libshimelinux_wayland.so").absolute().toString())
         }
     }
 }

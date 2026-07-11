@@ -104,7 +104,8 @@ class Main {
                 "/conf/settings.properties",
                 "/conf/theme/FlatDarkLaf.properties",
                 "/conf/theme/FlatLightLaf.properties",
-                "/img/unused/"
+                "/img/unused/",
+                "/lib/libshimelinux_wayland.so"
             )
 
             if (!getPath("img").exists()) {
