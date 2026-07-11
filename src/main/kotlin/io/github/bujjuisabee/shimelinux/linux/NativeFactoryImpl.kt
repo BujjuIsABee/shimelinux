@@ -30,8 +30,9 @@ import javax.swing.UIManager
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    private val useWaylandWindows = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-        "hyprland", "niri", "sway" -> true
+    val waylandLibExists = this::class.java.getResource("/lib/libshimelinux_wayland.so") != null
+    private val useWaylandLayers = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+        "Hyprland", "niri" -> true
         else -> false
     }
     override val environment: Environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
@@ -42,7 +43,7 @@ class NativeFactoryImpl : NativeFactory() {
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
     override fun newTransparentWindow(): TranslucentWindow {
-        if (useWaylandWindows) {
+        if (useWaylandLayers && waylandLibExists) {
             return WaylandTranslucentWindow()
         } else {
             // Create the window with a LaF that supports transparency

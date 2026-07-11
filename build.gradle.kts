@@ -27,8 +27,9 @@ kotlin {
 tasks.register("buildWaylandLib", Exec::class) {
     description = "Builds the Wayland library"
 
-    workingDir = File("$projectDir/shimelinux_wayland")
+    isIgnoreExitValue = true
 
+    workingDir = File("$projectDir/shimelinux_wayland")
     commandLine("cargo", "build")
 }
 

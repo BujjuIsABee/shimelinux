@@ -172,8 +172,8 @@ impl LayerShellHandler for Mascot {
         _serial: u32,
     ) {
         let (width, height) = configure.new_size;
-        self.width = width;
-        self.height = height;
+        self.width = max(1, width);
+        self.height = max(1, height);
 
         // Draw the mascot for the first time if this is the first configure
         if self.first_configure {
@@ -302,7 +302,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
             while let Ok(event) = receiver.try_recv() {
                 match event {
                     Event::SetBounds(x, y, width, height) => {
-                        mascot.layer.set_size(width as u32, height as u32);
+                        mascot.layer.set_size(max(1, width as u32), max(1, height as u32));
                         mascot.layer.set_margin(y, 0, 0, x);
                     },
                     Event::UpdateImage(rgb) => {
