@@ -28,6 +28,8 @@ import java.awt.Component
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
+import java.util.logging.Level
+import java.util.logging.Logger
 import kotlin.concurrent.timer
 
 class WaylandTranslucentWindow : TranslucentWindow {
@@ -104,6 +106,7 @@ class WaylandTranslucentWindow : TranslucentWindow {
         // Store the initial position
         if (leftPressed) {
             initialLocation = Point(component.bounds.x, component.bounds.y)
+            Logger.getAnonymousLogger().log(Level.INFO, "${initialLocation.x}, ${initialLocation.y}")
         }
 
         previousMousePos = currentMousePos
@@ -141,7 +144,7 @@ class WaylandTranslucentWindow : TranslucentWindow {
             ))
         }
         if (mouseMoved) {
-            mousePos = Point(positionX + initialLocation.x, positionY + initialLocation.y)
+            cursorPos = Point(positionX + initialLocation.x, positionY + initialLocation.y)
             component.dispatchEvent(MouseEvent(
                 component,
                 if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
@@ -157,6 +160,6 @@ class WaylandTranslucentWindow : TranslucentWindow {
     }
 
     companion object {
-        var mousePos: Point? = null
+        var cursorPos: Point? = null
     }
 }

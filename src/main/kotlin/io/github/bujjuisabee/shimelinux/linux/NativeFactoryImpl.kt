@@ -31,7 +31,7 @@ import javax.swing.UIManager
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
     val waylandLibExists = this::class.java.getResource("/lib/libshimelinux_wayland.so") != null
-    private val useWaylandLayers = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+    val useWaylandLayers = when (System.getenv("XDG_CURRENT_DESKTOP")) {
         "Hyprland", "niri" -> true
         else -> false
     }

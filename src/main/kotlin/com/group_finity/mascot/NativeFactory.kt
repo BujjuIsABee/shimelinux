@@ -25,6 +25,9 @@ package com.group_finity.mascot
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
+import io.github.bujjuisabee.shimelinux.linux.WaylandTranslucentWindow
+import java.awt.MouseInfo
+import java.awt.Point
 import java.awt.image.BufferedImage
 
 abstract class NativeFactory {
@@ -37,6 +40,16 @@ abstract class NativeFactory {
     companion object {
         @JvmStatic
         lateinit var instance: NativeFactory
+
+        val usingWaylandLayers: Boolean by lazy {
+            (instance as? io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl)?.let { it.useWaylandLayers && it.waylandLibExists } == true
+        }
+        val cursorPos: Point?
+            get() = if (usingWaylandLayers) {
+                WaylandTranslucentWindow.cursorPos
+            } else {
+                MouseInfo.getPointerInfo()?.location
+            }
 
         init {
             resetInstance()

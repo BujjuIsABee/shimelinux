@@ -87,6 +87,8 @@ struct Mascot {
     first_configure: bool,
     sender_index: i32,
     pointer: Option<WlPointer>,
+    logical_x: i32,
+    logical_y: i32,
     rgb: Vec<i32>,
 }
 
@@ -95,8 +97,8 @@ struct MouseState {
     right_pressed: bool,
     left_released: bool,
     right_released: bool,
-    position_x: f64,
-    position_y: f64,
+    position_x: i32,
+    position_y: i32,
 }
 
 delegate_compositor!(Mascot);
@@ -158,16 +160,26 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput
+        output: WlOutput
     ) {
+        if let Some(info) = self.output_state.info(&output) {
+            let logical_pos = info.logical_position.expect("Failed to get logical position");
+            self.logical_x = logical_pos.0;
+            self.logical_y = logical_pos.1;
+        }
     }
 
     fn update_output(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput
+        output: WlOutput
     ) {
+        if let Some(info) = self.output_state.info(&output) {
+            let logical_pos = info.logical_position.expect("Failed to get logical position");
+            self.logical_x = logical_pos.0;
+            self.logical_y = logical_pos.1;
+        }
     }
 
     fn output_destroyed(
@@ -269,8 +281,8 @@ impl PointerHandler for Mascot {
                             right_pressed: right_pressed,
                             left_released: false,
                             right_released: false,
-                            position_x: 0.0,
-                            position_y: 0.0,
+                            position_x: 0,
+                            position_y: 0,
                         });
                 },
                 Release { button, .. } => {
@@ -288,14 +300,14 @@ impl PointerHandler for Mascot {
                             right_pressed: false,
                             left_released: left_released,
                             right_released: right_released,
-                            position_x: 0.0,
-                            position_y: 0.0,
+                            position_x: 0,
+                            position_y: 0,
                         });
                 },
 
                 Motion { .. } => {
-                    let position_x = event.position.0;
-                    let position_y = event.position.1;
+                    let position_x = (event.position.0 as i32) + self.logical_x;
+                    let position_y = (event.position.1 as i32) + self.logical_y;
                     let mut mouse_states = MOUSE_STATES.lock().unwrap();
                     mouse_states
                         .entry(self.sender_index)
@@ -420,6 +432,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         first_configure: true,
         sender_index: sender_index,
         pointer: None,
+        logical_x: 0,
+        logical_y: 0,
         rgb: Vec::new(),
     };
 
@@ -501,8 +515,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
                 mouse_state.right_pressed as i32,
                 mouse_state.left_released as i32,
                 mouse_state.right_released as i32,
-                mouse_state.position_x as i32,
-                mouse_state.position_y as i32,
+                mouse_state.position_x,
+                mouse_state.position_y,
             ]).expect("Failed to set array");
 
             mouse_state.left_pressed = false;

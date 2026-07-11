@@ -23,6 +23,7 @@
 package com.group_finity.mascot.imagesetchooser
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
@@ -85,6 +86,11 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         minimumSize = Dimension(670, 495)
         layout = BorderLayout()
         defaultCloseOperation = DISPOSE_ON_CLOSE
+
+        if (NativeFactory.usingWaylandLayers) {
+            maximumSize = Dimension(670, 495)
+            isResizable = false
+        }
 
         list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
         list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
@@ -273,6 +279,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         add(headerPanel, BorderLayout.NORTH)
         add(listScrollPane, BorderLayout.CENTER)
         add(footerPanel, BorderLayout.SOUTH)
+        pack()
         setLocationRelativeTo(null)
     }
 
