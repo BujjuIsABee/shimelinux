@@ -107,10 +107,6 @@ class Main {
                 "/img/unused/",
             )
 
-            if (this::class.java.getResource("/lib/libshimelinux_wayland.so") != null) {
-                resources.add("/lib/libshimelinux_wayland.so")
-            }
-
             if (!getPath("img").exists()) {
                 resources += (1..46).map { "/img/Shimeji/shime$it.png" }
             }

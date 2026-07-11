@@ -23,7 +23,9 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.getPath
+import com.group_finity.mascot.loadResource
 import kotlin.io.path.absolute
+import kotlin.io.path.outputStream
 
 class WaylandLib {
     external fun createMascot(): Int
@@ -32,12 +34,21 @@ class WaylandLib {
 
     external fun updateImage(senderIndex: Int, rgb: IntArray)
 
+    external fun getMouseState(senderIndex: Int): IntArray
+
     external fun dispose(senderIndex: Int)
 
     companion object {
         val INSTANCE = WaylandLib()
 
         init {
+            // Copy the library
+            getPath("lib", "libshimelinux_wayland.so").outputStream().use { output ->
+                loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
+                    input.copyTo(output)
+                }
+            }
+
             // Load the Wayland library
             System.load(getPath("lib", "libshimelinux_wayland.so").absolute().toString())
         }

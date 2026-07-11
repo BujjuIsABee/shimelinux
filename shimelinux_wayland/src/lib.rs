@@ -22,8 +22,9 @@
 
 use std::{
     cmp::max,
+    collections::HashMap,
     sync::{
-        Mutex,
+        LazyLock, Mutex,
         mpsc::{Sender, channel},
     },
 };
@@ -36,10 +37,15 @@ use jni::{
 };
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
-    delegate_compositor, delegate_layer, delegate_output, delegate_registry, delegate_shm,
+    delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
+    delegate_seat, delegate_shm,
     output::{OutputHandler, OutputState},
     registry::{ProvidesRegistryState, RegistryState},
     registry_handlers,
+    seat::{
+        Capability, SeatHandler, SeatState,
+        pointer::{BTN_LEFT, BTN_RIGHT, PointerEventKind, PointerHandler},
+    },
     shell::{
         WaylandSurface,
         wlr_layer::{
@@ -54,7 +60,9 @@ use wayland_client::{
     globals::registry_queue_init,
     protocol::{
         wl_output::{Transform, WlOutput},
+        wl_pointer::WlPointer,
         wl_region,
+        wl_seat::WlSeat,
         wl_shm::Format,
         wl_surface::WlSurface,
     },
@@ -70,13 +78,25 @@ struct Mascot {
     compositor_state: CompositorState,
     registry_state: RegistryState,
     output_state: OutputState,
+    seat_state: SeatState,
     shm: Shm,
     pool: SlotPool,
     layer: LayerSurface,
     width: u32,
     height: u32,
     first_configure: bool,
+    sender_index: i32,
+    pointer: Option<WlPointer>,
     rgb: Vec<i32>,
+}
+
+struct MouseState {
+    left_pressed: bool,
+    right_pressed: bool,
+    left_released: bool,
+    right_released: bool,
+    position_x: f64,
+    position_y: f64,
 }
 
 delegate_compositor!(Mascot);
@@ -183,6 +203,125 @@ impl LayerShellHandler for Mascot {
     }
 }
 
+delegate_seat!(Mascot);
+impl SeatHandler for Mascot {
+    fn seat_state(&mut self) -> &mut SeatState {
+        &mut self.seat_state
+    }
+
+    fn new_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
+
+    fn new_capability(
+        &mut self,
+        _conn: &Connection,
+        qh: &QueueHandle<Self>,
+        seat: WlSeat,
+        capability: Capability,
+    ) {
+        if capability == Capability::Pointer && self.pointer.is_none() {
+            let pointer = self.seat_state.get_pointer(qh, &seat).expect("Failed to get pointer");
+            self.pointer = Some(pointer);
+        }
+    }
+
+    fn remove_capability(
+        &mut self,
+        _conn: &Connection,
+        _qh: &QueueHandle<Self>,
+        _seat: WlSeat,
+        capability: Capability,
+    ) {
+        if capability == Capability::Pointer && self.pointer.is_none() {
+            self.pointer.take().unwrap().release();
+        }
+    }
+
+    fn remove_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
+}
+
+delegate_pointer!(Mascot);
+impl PointerHandler for Mascot {
+    fn pointer_frame(
+        &mut self,
+        _conn: &Connection,
+        _qh: &QueueHandle<Self>,
+        _pointer: &WlPointer,
+        events: &[smithay_client_toolkit::seat::pointer::PointerEvent],
+    ) {
+        use PointerEventKind::*;
+        for event in events {
+            if &event.surface != self.layer.wl_surface() {
+                continue;
+            }
+            match event.kind {
+                Press { button, .. } => {
+                    let left_pressed = button == BTN_LEFT;
+                    let right_pressed = button == BTN_RIGHT;
+                    let mut mouse_states = MOUSE_STATES.lock().unwrap();
+                    mouse_states
+                        .entry(self.sender_index)
+                        .and_modify(|m| {
+                            m.left_pressed = left_pressed;
+                            m.right_pressed = right_pressed;
+                        })
+                        .or_insert(MouseState {
+                            left_pressed: left_pressed,
+                            right_pressed: right_pressed,
+                            left_released: false,
+                            right_released: false,
+                            position_x: 0.0,
+                            position_y: 0.0,
+                        });
+                },
+                Release { button, .. } => {
+                    let left_released = button == BTN_LEFT;
+                    let right_released = button == BTN_RIGHT;
+                    let mut mouse_states = MOUSE_STATES.lock().unwrap();
+                    mouse_states
+                        .entry(self.sender_index)
+                        .and_modify(|m| {
+                            m.left_released = left_released;
+                            m.right_released = right_released;
+                        })
+                        .or_insert(MouseState {
+                            left_pressed: false,
+                            right_pressed: false,
+                            left_released: left_released,
+                            right_released: right_released,
+                            position_x: 0.0,
+                            position_y: 0.0,
+                        });
+                },
+
+                Motion { .. } => {
+                    let position_x = event.position.0;
+                    let position_y = event.position.1;
+                    let mut mouse_states = MOUSE_STATES.lock().unwrap();
+                    mouse_states
+                        .entry(self.sender_index)
+                        .and_modify(|m| {
+                            m.position_x = position_x;
+                            m.position_y = position_y;
+                        })
+                        .or_insert(MouseState {
+                            left_pressed: false,
+                            right_pressed: false,
+                            left_released: false,
+                            right_released: false,
+                            position_x: position_x,
+                            position_y: position_y,
+                        });
+                },
+
+                // unused
+                Enter { .. } => {},
+                Leave { .. } => {},
+                Axis { .. } => {},
+            }
+        }
+    }
+}
+
 delegate_shm!(Mascot);
 impl ShmHandler for Mascot {
     fn shm_state(&mut self) -> &mut Shm {
@@ -200,9 +339,6 @@ impl ProvidesRegistryState for Mascot {
 }
 
 delegate_noop!(Mascot: ignore wl_region::WlRegion);
-
-static SENDERS: Mutex<Vec<Sender<Event>>> = Mutex::new(Vec::new());
-
 impl Mascot {
     fn draw(&mut self, qh: &QueueHandle<Self>) {
         let width = self.width as i32;
@@ -238,20 +374,10 @@ impl Mascot {
     }
 }
 
-fn get_window_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
-    let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
-
-    for y in 0..height {
-        for x in 0..width {
-            let index = ((y * width) + x) as usize;
-            if (rgb[index] >> 24) & 0xFF > 0 {
-                rects.push((x as i32, y as i32, 1, 1));
-            }
-        }
-    }
-
-    rects
-}
+static SENDERS: Mutex<Vec<Sender<Event>>> = Mutex::new(Vec::new());
+static MOUSE_STATES: LazyLock<Mutex<HashMap<i32, MouseState>>> = LazyLock::new(|| {
+    Mutex::new(HashMap::new())
+});
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createMascot<'caller>(
@@ -261,7 +387,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     let (sender, receiver) = channel::<Event>();
     let mut senders = SENDERS.lock().unwrap();
     senders.push(sender);
-    let sender_index = senders.len() - 1;
+    let sender_index = (senders.len() - 1) as i32;
 
     let connection = Connection::connect_to_env().unwrap();
     let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
@@ -285,12 +411,15 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         compositor_state: compositor_state,
         registry_state: RegistryState::new(&globals),
         output_state: OutputState::new(&globals, &qh),
+        seat_state: SeatState::new(&globals, &qh),
         shm,
         pool,
         layer: layer,
         width: 128,
         height: 128,
         first_configure: true,
+        sender_index: sender_index,
+        pointer: None,
         rgb: Vec::new(),
     };
 
@@ -316,7 +445,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         }
     });
 
-    sender_index as i32
+    sender_index
 }
 
 #[unsafe(no_mangle)]
@@ -358,6 +487,39 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_up
 }
 
 #[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getMouseState<'caller>(
+    mut unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+    sender_index: i32,
+) -> JIntArray<'caller> {
+    let mut mouse_states = MOUSE_STATES.lock().unwrap();
+    let result = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
+        let array = JIntArray::new(env, 6).expect("Failed to get array");
+        if let Some(mouse_state) = mouse_states.get_mut(&sender_index) {
+            array.set_region(env, 0, &[
+                mouse_state.left_pressed as i32,
+                mouse_state.right_pressed as i32,
+                mouse_state.left_released as i32,
+                mouse_state.right_released as i32,
+                mouse_state.position_x as i32,
+                mouse_state.position_y as i32,
+            ]).expect("Failed to set array");
+
+            mouse_state.left_pressed = false;
+            mouse_state.right_pressed = false;
+            mouse_state.left_released = false;
+            mouse_state.right_released = false;
+        } else {
+            array.set_region(env, 0, &[0, 0, 0, 0, 0, 0]).expect("Failed to set array");
+        }
+
+        Ok(array)
+    });
+
+    result.resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_dispose<'caller>(
     mut _unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
@@ -367,4 +529,19 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_di
     if let Some(sender) = senders.get(sender_index as usize) {
         _ = sender.send(Event::Dispose());
     }
+}
+
+fn get_window_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
+    let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
+
+    for y in 0..height {
+        for x in 0..width {
+            let index = ((y * width) + x) as usize;
+            if (rgb[index] >> 24) & 0xFF > 0 {
+                rects.push((x as i32, y as i32, 1, 1));
+            }
+        }
+    }
+
+    rects
 }

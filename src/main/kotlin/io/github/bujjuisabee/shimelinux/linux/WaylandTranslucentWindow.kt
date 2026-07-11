@@ -25,7 +25,10 @@ package io.github.bujjuisabee.shimelinux.linux
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.Component
+import java.awt.Point
 import java.awt.Rectangle
+import java.awt.event.MouseEvent
+import kotlin.concurrent.timer
 
 class WaylandTranslucentWindow : TranslucentWindow {
     private val component = object : Component() {
@@ -35,17 +38,29 @@ class WaylandTranslucentWindow : TranslucentWindow {
 
         override fun setVisible(b: Boolean) {}
 
+        override fun isShowing() = true
+
         override fun getBounds() = bounds
 
         override fun setBounds(r: Rectangle) {
             bounds = r
             WaylandLib.INSTANCE.setBounds(senderIndex, r.x, r.y, r.width, r.height)
         }
+
+        override fun getLocationOnScreen() = Point(bounds.x, bounds.y)
     }
 
     private val senderIndex: Int = WaylandLib.INSTANCE.createMascot()
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
+
+    private var currentMousePos = Point(0, 0)
+    private var previousMousePos = Point(0, 0)
+    private var initialLocation = Point(0, 0)
+
+    init {
+        timer("UpdateMouse", true, period = 40) { updateMouse() }
+    }
 
     override fun asComponent() = component
 
@@ -67,5 +82,81 @@ class WaylandTranslucentWindow : TranslucentWindow {
 
     override fun dispose() {
         WaylandLib.INSTANCE.dispose(senderIndex)
+    }
+
+    @Suppress("KotlinConstantConditions")
+    fun updateMouse() {
+        val mouseState = WaylandLib.INSTANCE.getMouseState(senderIndex)
+        val (leftPressed, rightPressed, leftReleased, rightReleased) = mouseState.slice(0..3).map { it == 1 }
+        val (positionX, positionY) = mouseState.slice(4..5)
+
+        var modifiers = MouseEvent.NOBUTTON
+        var button = MouseEvent.NOBUTTON
+        if (leftPressed || leftReleased) {
+            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
+            button = button or MouseEvent.BUTTON1
+        }
+        if (rightPressed || rightReleased) {
+            modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
+            button = button or MouseEvent.BUTTON3
+        }
+
+        // Store the initial position
+        if (leftPressed) {
+            initialLocation = Point(component.bounds.x, component.bounds.y)
+        }
+
+        previousMousePos = currentMousePos
+        currentMousePos = Point(
+            positionX + initialLocation.x,
+            positionY + initialLocation.y
+        )
+
+        val mouseMoved = currentMousePos != previousMousePos
+
+        if (leftPressed || rightPressed) {
+            component.dispatchEvent(MouseEvent(
+                component,
+                MouseEvent.MOUSE_PRESSED,
+                System.currentTimeMillis(),
+                modifiers,
+                positionX,
+                positionY,
+                1,
+                false,
+                button
+            ))
+        }
+        if (leftReleased || rightReleased) {
+            component.dispatchEvent(MouseEvent(
+                component,
+                MouseEvent.MOUSE_RELEASED,
+                System.currentTimeMillis(),
+                modifiers,
+                positionX,
+                positionY,
+                1,
+                rightReleased,
+                button
+            ))
+        }
+        if (mouseMoved) {
+            mousePos = Point(positionX + initialLocation.x, positionY + initialLocation.y)
+            component.dispatchEvent(MouseEvent(
+                component,
+                if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
+                System.currentTimeMillis(),
+                modifiers,
+                positionX,
+                positionY,
+                1,
+                false,
+                button
+            ))
+        }
+    }
+
+    companion object {
+        var mousePos: Point? = null
     }
 }
