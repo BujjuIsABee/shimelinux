@@ -84,6 +84,7 @@ struct Mascot {
     layer: LayerSurface,
     width: u32,
     height: u32,
+    image_width: u32,
     first_configure: bool,
     sender_index: i32,
     pointer: Option<WlPointer>,
@@ -364,16 +365,19 @@ impl Mascot {
 
         if self.rgb.len() > 0 {
             // Draw the image to the canvas
-            for (chunk, rgb) in canvas.chunks_exact_mut(4).zip(self.rgb.iter()) {
-                chunk[3] = (rgb >> 24) as u8;
-                chunk[2] = (rgb >> 16) as u8;
-                chunk[1] = (rgb >> 8) as u8;
-                chunk[0] = (rgb >> 0) as u8;
+            let image_width = self.image_width as i32;
+            let canvas_width = width;
+            for y in 0..height {
+                for x in 0..canvas_width {
+                    let color = self.rgb[((y * image_width) + x) as usize];
+                    let index = (((y * width) + x) * 4) as usize;
+                    canvas[index..index + 4].copy_from_slice(&color.to_le_bytes());
+                }
             }
 
             // Set the mask shape
             let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
-            for (x, y, width, height) in get_mask(&self.rgb, self.width, self.height) {
+            for (x, y, width, height) in get_mask(&self.rgb, self.image_width, self.height) {
                 shape.add(x, y, width, height);
             }
             self.layer.set_input_region(Some(&shape));
@@ -429,6 +433,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         layer: layer,
         width: 128,
         height: 128,
+        image_width: 128,
         first_configure: true,
         sender_index: sender_index,
         pointer: None,
@@ -446,7 +451,10 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                 match event {
                     Event::SetBounds(x, y, width, height) => {
                         mascot.layer.set_size(max(1, width as u32), max(1, height as u32));
-                        mascot.layer.set_margin(y, 0, 0, x);
+
+                        // The y position is clamped to -width + 1 so it doesn't go offscreen, which causes issues on niri
+                        mascot.layer.set_margin(max(-width + 1, y), 0, 0, x);
+                        mascot.image_width = width as u32;
                     },
                     Event::UpdateImage(rgb) => {
                         mascot.rgb = rgb;
