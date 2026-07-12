@@ -24,6 +24,7 @@ package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.loadResource
+import com.group_finity.mascot.setProperty
 import kotlin.io.path.absolute
 import kotlin.io.path.outputStream
 
@@ -42,14 +43,16 @@ class WaylandLib {
         val INSTANCE = WaylandLib()
 
         init {
-            // Copy the library
+            // Ignore scale settings
+            setProperty("Scaling", "1.0")
+            setProperty("MenuScaling", "1.0")
+
+            // Load the Wayland library
             getPath("lib", "libshimelinux_wayland.so").outputStream().use { output ->
                 loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
                     input.copyTo(output)
                 }
             }
-
-            // Load the Wayland library
             System.load(getPath("lib", "libshimelinux_wayland.so").absolute().toString())
         }
     }

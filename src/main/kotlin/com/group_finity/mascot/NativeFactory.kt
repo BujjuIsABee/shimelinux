@@ -42,7 +42,8 @@ abstract class NativeFactory {
         lateinit var instance: NativeFactory
 
         val usingWaylandLayers: Boolean by lazy {
-            (instance as? io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl)?.let { it.useWaylandLayers && it.waylandLibExists } == true
+            val linuxImpl = (instance as? io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl) ?: return@lazy false
+            return@lazy linuxImpl.isTilingWM && linuxImpl.waylandLibExists
         }
         val cursorPos: Point?
             get() = if (usingWaylandLayers) {

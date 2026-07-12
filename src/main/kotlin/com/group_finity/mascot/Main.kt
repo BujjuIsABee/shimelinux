@@ -59,8 +59,8 @@ import kotlin.system.exitProcess
 fun main(args: Array<String>) {
     try {
         val debug = args.contains("--debug") || args.contains("-d")
-        val openShimejiChooser = args.contains("--shimeji-chooser")
-        val openSettings = args.contains("--settings")
+        val openChooser = args.contains("--chooser") || args.contains("-c")
+        val openSettings = args.contains("--settings") || args.contains("-s")
 
         if (!debug) {
             try {
@@ -72,7 +72,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        Main.instance.run(openShimejiChooser, openSettings)
+        Main.instance.run(openChooser, openSettings)
     } catch (_: OutOfMemoryError) {
         Main.showError(
             "Out of Memory. There are probably too many\n" +
@@ -95,7 +95,7 @@ class Main {
     lateinit var languageBundle: ResourceBundle
         private set
 
-    fun run(openShimejiChooser: Boolean, openSettings: Boolean) {
+    fun run(openChooser: Boolean, openSettings: Boolean) {
         // Set up config directory
         try {
             val resources = mutableListOf(
@@ -107,6 +107,7 @@ class Main {
                 "/img/unused/",
             )
 
+            // Only add default mascot if the entire image directory is missing
             if (!getPath("img").exists()) {
                 resources += (1..46).map { "/img/Shimeji/shime$it.png" }
             }
@@ -173,7 +174,7 @@ class Main {
             exit()
         }
 
-        if (openShimejiChooser) {
+        if (openChooser) {
             ImageSetChooser(null, true).display()
         }
 
@@ -182,7 +183,7 @@ class Main {
             settings.isVisible = true
         }
 
-        if (openShimejiChooser || openSettings) {
+        if (openChooser || openSettings) {
             exit()
         }
 

@@ -363,7 +363,7 @@ impl Mascot {
             .expect("Failed to create buffer");
 
         if self.rgb.len() > 0 {
-            // Copy the RGB data to the canvas
+            // Draw the image to the canvas
             for (chunk, rgb) in canvas.chunks_exact_mut(4).zip(self.rgb.iter()) {
                 chunk[3] = (rgb >> 24) as u8;
                 chunk[2] = (rgb >> 16) as u8;
@@ -373,7 +373,7 @@ impl Mascot {
 
             // Set the mask shape
             let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
-            for (x, y, width, height) in get_window_mask(&self.rgb, self.width, self.height) {
+            for (x, y, width, height) in get_mask(&self.rgb, self.width, self.height) {
                 shape.add(x, y, width, height);
             }
             self.layer.set_input_region(Some(&shape));
@@ -545,7 +545,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_di
     }
 }
 
-fn get_window_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
+fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
     let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
 
     for y in 0..height {

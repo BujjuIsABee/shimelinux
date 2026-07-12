@@ -40,14 +40,14 @@ class WaylandTranslucentWindow : TranslucentWindow {
 
         override fun setVisible(b: Boolean) {}
 
-        override fun isShowing() = true
-
         override fun getBounds() = bounds
 
         override fun setBounds(r: Rectangle) {
             bounds = r
             WaylandLib.INSTANCE.setBounds(senderIndex, r.x, r.y, r.width, r.height)
         }
+
+        override fun isShowing() = true
 
         override fun getLocationOnScreen() = Point(bounds.x, bounds.y)
     }
@@ -115,8 +115,6 @@ class WaylandTranslucentWindow : TranslucentWindow {
             positionY + initialLocation.y
         )
 
-        val mouseMoved = currentMousePos != previousMousePos
-
         if (leftPressed || rightPressed) {
             component.dispatchEvent(MouseEvent(
                 component,
@@ -143,7 +141,7 @@ class WaylandTranslucentWindow : TranslucentWindow {
                 button
             ))
         }
-        if (mouseMoved) {
+        if (currentMousePos != previousMousePos) {
             cursorPos = Point(positionX + initialLocation.x, positionY + initialLocation.y)
             component.dispatchEvent(MouseEvent(
                 component,
