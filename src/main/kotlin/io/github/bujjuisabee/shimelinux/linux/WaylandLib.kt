@@ -45,7 +45,7 @@ class WaylandLib {
         init {
             // Ignore scale settings
             setProperty("Scaling", "1.0")
-            setProperty("MenuScaling", "1.0")
+            setProperty("MenuScaling", "1")
 
             // Load the Wayland library
             getPath("lib", "libshimelinux_wayland.so").outputStream().use { output ->
