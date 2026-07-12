@@ -24,6 +24,31 @@ kotlin {
     jvmToolchain(21)
 }
 
+tasks.register("buildWaylandLib", Exec::class) {
+    description = "Builds the Wayland library"
+
+    isIgnoreExitValue = true
+
+    workingDir = File("$projectDir/shimelinux_wayland")
+    commandLine("cargo", "build")
+}
+
+tasks.register("copyWaylandLib", Copy::class) {
+    description = "Copies the Wayland library to resources"
+
+    from("$projectDir/shimelinux_wayland/target/debug/libshimelinux_wayland.so")
+    into(layout.buildDirectory.dir("wayland-lib"))
+}
+
+tasks.processResources {
+    dependsOn("buildWaylandLib")
+    dependsOn("copyWaylandLib")
+
+    from(layout.buildDirectory.dir("wayland-lib")) {
+        into("lib")
+    }
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "com.group_finity.mascot.MainKt"

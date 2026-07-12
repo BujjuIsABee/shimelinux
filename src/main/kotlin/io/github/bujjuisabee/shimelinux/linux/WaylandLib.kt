@@ -20,49 +20,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot
+package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.image.NativeImage
-import com.group_finity.mascot.image.TranslucentWindow
-import io.github.bujjuisabee.shimelinux.linux.WaylandTranslucentWindow
-import java.awt.MouseInfo
-import java.awt.Point
-import java.awt.image.BufferedImage
+import com.group_finity.mascot.getPath
+import com.group_finity.mascot.loadResource
+import com.group_finity.mascot.setProperty
+import kotlin.io.path.absolute
+import kotlin.io.path.outputStream
 
-abstract class NativeFactory {
-    abstract val environment: Environment
+class WaylandLib {
+    external fun createMascot(): Int
 
-    abstract fun newNativeImage(src: BufferedImage): NativeImage
+    external fun setBounds(senderIndex: Int, x: Int, y: Int, width: Int, height: Int)
 
-    abstract fun newTransparentWindow(): TranslucentWindow
+    external fun updateImage(senderIndex: Int, rgb: IntArray)
+
+    external fun getMouseState(senderIndex: Int): IntArray
+
+    external fun dispose(senderIndex: Int)
 
     companion object {
-        @JvmStatic
-        lateinit var instance: NativeFactory
-
-        val usingWaylandLayers: Boolean by lazy {
-            val linuxImpl = (instance as? io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl) ?: return@lazy false
-            return@lazy linuxImpl.isTilingWM && linuxImpl.waylandLibExists
-        }
-        val cursorPos: Point?
-            get() = if (usingWaylandLayers) {
-                WaylandTranslucentWindow.cursorPos
-            } else {
-                MouseInfo.getPointerInfo()?.location
-            }
+        val INSTANCE = WaylandLib()
 
         init {
-            resetInstance()
-        }
+            // Ignore scale settings
+            setProperty("Scaling", "1.0")
+            setProperty("MenuScaling", "1")
 
-        @JvmStatic
-        fun resetInstance() {
-            instance = when (getProperty("Environment", "linux")) {
-                "linux" -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
-                "virtual" -> io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl()
-                else -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
+            // Load the Wayland library
+            getPath("lib", "libshimelinux_wayland.so").outputStream().use { output ->
+                loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
+                    input.copyTo(output)
+                }
             }
+            System.load(getPath("lib", "libshimelinux_wayland.so").absolute().toString())
         }
     }
 }

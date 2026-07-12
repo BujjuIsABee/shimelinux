@@ -1,0 +1,12 @@
+[package]
+name = "shimelinux_wayland"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+jni = "0.22"
+smithay-client-toolkit = "0.20.0"
+wayland-client = "0.31.14"
+
+[lib]
+crate-type = ["cdylib"]

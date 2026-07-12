@@ -22,6 +22,7 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
@@ -36,11 +37,9 @@ import java.awt.Rectangle
 import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Path2D
-import java.awt.image.BufferedImage
-import javax.swing.JFrame
 import javax.swing.JWindow
 
-class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
+class LinuxTranslucentWindow : TranslucentWindow, JWindow(Main.frame) {
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var offset = Point(0, 0)
@@ -86,8 +85,8 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
         setWindowMask()
 
         if (imageChanged) {
-            repaint()
             imageChanged = false
+            repaint()
         }
     }
 
@@ -122,14 +121,6 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(frame) {
                     offset.y.toDouble()
                 )
             )
-        }
-    }
-
-    companion object {
-        private val frame: JFrame by lazy {
-            return@lazy JFrame().apply {
-                iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
-            }
         }
     }
 }

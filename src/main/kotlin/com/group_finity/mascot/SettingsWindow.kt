@@ -157,6 +157,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         title = "Settings".localize()
         layout = BorderLayout()
 
+        if (NativeFactory.usingWaylandLayers) {
+            isResizable = false
+        }
+
         try {
             getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { darkTheme.load(it) }
             getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { lightTheme.load(it) }
