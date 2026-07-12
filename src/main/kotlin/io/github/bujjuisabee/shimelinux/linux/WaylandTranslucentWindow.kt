@@ -28,7 +28,6 @@ import java.awt.Component
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
-import kotlin.concurrent.timer
 
 class WaylandTranslucentWindow : TranslucentWindow {
     private val component = object : Component() {
@@ -40,9 +39,9 @@ class WaylandTranslucentWindow : TranslucentWindow {
 
         override fun getBounds() = bounds
 
-        override fun setBounds(r: Rectangle) {
-            bounds = r
-            WaylandLib.INSTANCE.setBounds(senderIndex, r.x, r.y, r.width, r.height)
+        override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
+            bounds = Rectangle(x, y, width, height)
+            WaylandLib.INSTANCE.setBounds(senderIndex, x, y, width, height)
         }
 
         override fun isShowing() = true
@@ -53,14 +52,8 @@ class WaylandTranslucentWindow : TranslucentWindow {
     private val senderIndex: Int = WaylandLib.INSTANCE.createMascot()
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
-
-    private var currentMousePos = Point(0, 0)
-    private var previousMousePos = Point(0, 0)
-    private var initialLocation = Point(0, 0)
-
-    init {
-        timer("UpdateMouse", true, period = 40) { updateMouse() }
-    }
+    private var previousMousePosition = Point(0, 0)
+    private var grabStart = Point(0, 0)
 
     override fun asComponent() = component
 
@@ -69,6 +62,8 @@ class WaylandTranslucentWindow : TranslucentWindow {
             this.image = image
             imageChanged = true
         }
+
+        updateMouse()
     }
 
     override fun updateImage() {
@@ -86,9 +81,13 @@ class WaylandTranslucentWindow : TranslucentWindow {
 
     @Suppress("KotlinConstantConditions")
     fun updateMouse() {
-        val mouseState = WaylandLib.INSTANCE.getMouseState(senderIndex)
-        val (leftPressed, rightPressed, leftReleased, rightReleased) = mouseState.slice(0..3).map { it == 1 }
-        val (positionX, positionY) = mouseState.slice(4..5)
+        val (leftPressed, rightPressed, leftReleased, rightReleased) = WaylandLib.INSTANCE.getMouseState(senderIndex)
+        val (positionX, positionY) = WaylandLib.INSTANCE.getMousePosition(senderIndex)
+
+        if (leftPressed) {
+            grabStart = component.bounds.location
+        }
+        val newMousePosition = Point(positionX + grabStart.x, positionY + grabStart.y)
 
         var modifiers = MouseEvent.NOBUTTON
         var button = MouseEvent.NOBUTTON
@@ -100,17 +99,6 @@ class WaylandTranslucentWindow : TranslucentWindow {
             modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
             button = button or MouseEvent.BUTTON3
         }
-
-        // Store the initial position
-        if (leftPressed) {
-            initialLocation = Point(component.bounds.x, component.bounds.y)
-        }
-
-        previousMousePos = currentMousePos
-        currentMousePos = Point(
-            positionX + initialLocation.x,
-            positionY + initialLocation.y
-        )
 
         if (leftPressed || rightPressed) {
             component.dispatchEvent(MouseEvent(
@@ -138,8 +126,9 @@ class WaylandTranslucentWindow : TranslucentWindow {
                 button
             ))
         }
-        if (currentMousePos != previousMousePos) {
-            cursorPos = Point(positionX + initialLocation.x, positionY + initialLocation.y)
+        if (previousMousePosition != newMousePosition) {
+            previousMousePosition = newMousePosition
+            mousePosition = newMousePosition
             component.dispatchEvent(MouseEvent(
                 component,
                 if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
@@ -155,6 +144,7 @@ class WaylandTranslucentWindow : TranslucentWindow {
     }
 
     companion object {
-        var cursorPos: Point? = null
+        var mousePosition: Point? = null
+            private set
     }
 }

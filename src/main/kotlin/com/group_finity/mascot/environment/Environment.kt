@@ -22,8 +22,9 @@
 
 package com.group_finity.mascot.environment
 
-import com.group_finity.mascot.NativeFactory
+import io.github.bujjuisabee.shimelinux.linux.WaylandTranslucentWindow
 import java.awt.GraphicsEnvironment
+import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.Toolkit
@@ -73,7 +74,7 @@ abstract class Environment {
         internal var screenRect = Rectangle(Point(0, 0), Toolkit.getDefaultToolkit().screenSize)
         internal var screenRects = hashMapOf<String, Rectangle>()
         private val cursorPos: Point
-            get() = NativeFactory.cursorPos ?: Point(0, 0)
+            get() = WaylandTranslucentWindow.mousePosition ?: MouseInfo.getPointerInfo()?.location ?: Point(0, 0)
 
         fun updateScreenRect() {
             var virtualBounds = Rectangle()
