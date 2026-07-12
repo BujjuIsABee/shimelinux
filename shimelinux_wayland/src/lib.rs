@@ -420,7 +420,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 
     layer.set_exclusive_zone(-1);
     layer.set_anchor(Anchor::TOP | Anchor::LEFT);
-    layer.set_size(128, 128);
+    layer.set_size(1, 1);
     layer.set_keyboard_interactivity(KeyboardInteractivity::None);
     layer.commit();
 
@@ -432,9 +432,9 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         shm,
         pool,
         layer: layer,
-        width: 128,
-        height: 128,
-        image_width: 128,
+        width: 0,
+        height: 0,
+        image_width: 0,
         first_configure: true,
         sender_index: sender_index,
         pointer: None,
@@ -454,8 +454,9 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                     Event::SetBounds(x, y, width, height) => {
                         mascot.layer.set_size(max(1, width as u32), max(1, height as u32));
 
-                        // The y position is clamped to -width + 1 so it doesn't go offscreen, which causes issues on niri
-                        mascot.layer.set_margin(max(-width + 1, y), 0, 0, x);
+                        // The y position has a minimum value so it does not go above the top of the screen, which causes issues on niri.
+                        mascot.layer.set_margin(max(-height + 1, y), 0, 0, x);
+
                         mascot.image_width = width as u32;
                     },
                     Event::UpdateImage(rgb) => {
