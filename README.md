@@ -54,7 +54,7 @@ When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click the 
 >
 > `java -jar shimelinux.jar --settings`
 >
-> `java -jar shimelinux.jar --shimeji-chooser`
+> `java -jar shimelinux.jar --chooser`
 
 ShimeLinux has been tested on the following distributions/desktop environments:
 
