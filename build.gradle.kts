@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "io.github.bujjuisabee"
-version = "1.1.0-nixospatch"
+version = "1.1.1"
 
 repositories {
     mavenCentral()
@@ -30,13 +30,13 @@ tasks.register("buildWaylandLib", Exec::class) {
     isIgnoreExitValue = true
 
     workingDir = File("$projectDir/shimelinux_wayland")
-    commandLine("cargo", "build")
+    commandLine("cargo", "build", "--release")
 }
 
 tasks.register("copyWaylandLib", Copy::class) {
     description = "Copies the Wayland library to resources"
 
-    from("$projectDir/shimelinux_wayland/target/debug/libshimelinux_wayland.so")
+    from("$projectDir/shimelinux_wayland/target/release/libshimelinux_wayland.so")
     into(layout.buildDirectory.dir("wayland-lib"))
 }
 
