@@ -91,6 +91,7 @@ struct Mascot {
     logical_x: i32,
     logical_y: i32,
     rgb: Vec<i32>,
+    mask: Vec<(i32, i32, i32, i32)>,
 }
 
 struct MouseState {
@@ -377,8 +378,8 @@ impl Mascot {
 
             // Set the mask shape
             let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
-            for (x, y, width, height) in get_mask(&self.rgb, self.image_width, self.height) {
-                shape.add(x, y, width, height);
+            for (x, y, width, height) in &self.mask {
+                shape.add(*x, *y, *width, *height);
             }
             self.layer.set_input_region(Some(&shape));
         }
@@ -440,6 +441,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         logical_x: 0,
         logical_y: 0,
         rgb: Vec::new(),
+        mask: Vec::new(),
     };
 
     std::thread::spawn(move || {
@@ -457,6 +459,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                         mascot.image_width = width as u32;
                     },
                     Event::UpdateImage(rgb) => {
+                        mascot.mask = get_mask(&rgb, mascot.image_width, mascot.height);
                         mascot.rgb = rgb;
                     },
                     Event::Dispose() => {
@@ -557,10 +560,15 @@ fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)
     let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
 
     for y in 0..height {
+        let mut start: Option<i32> = None;
         for x in 0..width {
             let index = ((y * width) + x) as usize;
-            if (rgb[index] >> 24) & 0xFF > 0 {
-                rects.push((x as i32, y as i32, 1, 1));
+            let alpha = (rgb[index] >> 24) & 0xFF;
+            if alpha > 0 && start.is_none() {
+                start = Some(x as i32);
+            } else if alpha == 0 && start.is_some() {
+                rects.push((start.unwrap(), y as i32, x as i32 - start.unwrap(), 1));
+                start = None;
             }
         }
     }
