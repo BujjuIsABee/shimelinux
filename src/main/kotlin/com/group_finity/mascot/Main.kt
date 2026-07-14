@@ -419,8 +419,16 @@ class Main {
             allowedBehaviorsSubmenu.add(multiscreenMenu)
 
             val chooseShimejiMenu = MenuItem("ChooseShimeji".localize()) {
+                if (!manager.isPaused) {
+                    manager.togglePauseAll()
+                }
+
                 val chooser = ImageSetChooser(null, true)
                 setActiveImageSets(chooser.display())
+
+                if (manager.isPaused) {
+                    manager.togglePauseAll()
+                }
             }
 
             val settingsMenu = MenuItem("Settings".localize()) {
