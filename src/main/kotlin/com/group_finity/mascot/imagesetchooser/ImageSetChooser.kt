@@ -84,13 +84,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setIconImage(icon)
         title = "ShimejiImageSetChooser".localize()
         minimumSize = Dimension(670, 495)
-        layout = BorderLayout()
         defaultCloseOperation = DISPOSE_ON_CLOSE
-
-        if (NativeFactory.usingWaylandLayers) {
-            maximumSize = Dimension(670, 495)
-            isResizable = false
-        }
+        layout = BorderLayout()
 
         list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
         list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
@@ -290,7 +285,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun readConfigFile(): MutableList<String> {
         val activeImageSets = mutableListOf<String>()
-        activeImageSets.addAll(getProperty("ActiveShimeji", "").split('/'))
+        activeImageSets.addAll(getProperty("ActiveShimeji", "").split("/"))
         selectAllSets = activeImageSets[0].trim().isEmpty()
         return activeImageSets
     }

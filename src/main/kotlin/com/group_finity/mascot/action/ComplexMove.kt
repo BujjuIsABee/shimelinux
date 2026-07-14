@@ -69,7 +69,7 @@ class ComplexMove(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        for (characteristic in characteristics.split(',')) {
+        for (characteristic in characteristics.split(",")) {
             if (characteristic == schema.getString("Breed")) {
                 isBreedEnabled = true
             }
@@ -102,14 +102,12 @@ class ComplexMove(
         } else {
             val reachedX = targetX == Int.MIN_VALUE || mascot.anchor.x != targetX
             val reachedY = targetY == Int.MIN_VALUE || mascot.anchor.y != targetY
-            return super.hasNext() && ((reachedX && reachedY) || isTurning)
+            return super.hasNext() && (isTurning || reachedX && reachedY)
         }
     }
 
     override fun tick() {
         super.tick()
-
-        val target = target
 
         if (isScanEnabled) {
             // Cannot broadcast while scanning for an affordance
@@ -121,12 +119,20 @@ class ComplexMove(
             throw LostGroundException()
         }
 
-        val targetX = if (isScanEnabled && target != null) target.anchor.x else targetX
-        val targetY = if (isScanEnabled && target != null) target.anchor.y else targetY
+        val targetX: Int
+        val targetY: Int
 
         if (isScanEnabled) {
+            val target = checkNotNull(target)
+
+            targetX = target.anchor.x
+            targetY = target.anchor.y
+
             putVariable(schema.getString(VARIABLE_TARGETX), targetX)
             putVariable(schema.getString(VARIABLE_TARGETY), targetY)
+        } else {
+            targetX = this.targetX
+            targetY = this.targetY
         }
 
         if (mascot.anchor.x != targetX) {
@@ -142,38 +148,42 @@ class ComplexMove(
 
         animation?.next(mascot, time)
 
-        if (targetX != DEFAULT_TARGETX || isScanEnabled) {
-            if ((mascot.isLookRight && (mascot.anchor.x >= targetX)) || (!mascot.isLookRight && (mascot.anchor.x <= targetX))) {
-                mascot.anchor = Point(targetX, mascot.anchor.y)
-            }
+        if ((targetX != DEFAULT_TARGETX || isScanEnabled) &&
+            mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX
+        ) {
+            mascot.anchor = Point(targetX, mascot.anchor.y)
         }
 
-        if (targetY != DEFAULT_TARGETY || isScanEnabled) {
-            if ((down && (mascot.anchor.y >= targetY)) || (!down && (mascot.anchor.y <= targetY))) {
-                mascot.anchor = Point(mascot.anchor.x, targetY)
-            }
+        if ((targetY != DEFAULT_TARGETY || isScanEnabled) &&
+            down && mascot.anchor.y >= targetY || !down && mascot.anchor.y <= targetY
+        ) {
+            mascot.anchor = Point(mascot.anchor.x, targetY)
         }
 
         if (isBreedEnabled && delegate.isIntervalFrame && delegate.isEnabled) {
             delegate.breed()
         }
 
-        if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY && target != null) {
+        if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
+                val target = checkNotNull(target)
+
                 mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
                 target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
-            } catch (e: IllegalStateException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: BehaviorInstantiationException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+            } catch (e: Exception) {
+                when (e) {
+                    is IllegalStateException,
+                    is BehaviorInstantiationException,
+                    is CantBeAliveException -> {
+                        log.log(Level.SEVERE, "Fatal Error", e)
+                        Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                    }
+
+                    else -> throw e
+                }
             }
         }
     }

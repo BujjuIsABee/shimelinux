@@ -47,20 +47,22 @@ class Interact(
     override fun tick() {
         super.tick()
 
-        val animation = animation ?: return
+        val animation = checkNotNull(animation)
 
         if ((time == animation.duration - 1 || animation.duration == 1) && behavior.isNotBlank()) {
             try {
                 mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
-            } catch (e: IllegalStateException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: BehaviorInstantiationException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+            } catch (e: Exception) {
+                when (e) {
+                    is IllegalStateException,
+                    is BehaviorInstantiationException,
+                    is CantBeAliveException -> {
+                        log.log(Level.SEVERE, "Fatal Error", e)
+                        Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                    }
+
+                    else -> throw e
+                }
             }
         }
     }

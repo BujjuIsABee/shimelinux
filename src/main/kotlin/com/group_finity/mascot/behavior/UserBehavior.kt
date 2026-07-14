@@ -31,9 +31,7 @@ import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.getConfiguration
-import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
-import java.awt.Point
 import java.awt.event.MouseEvent
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -57,14 +55,12 @@ class UserBehavior(
         try {
             action.init(mascot)
             if (!action.hasNext()) {
-                try {
-                    mascot.behavior = configuration.buildNextBehavior(name, mascot)
-                } catch (e: BehaviorInstantiationException) {
-                    throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
-                }
+                mascot.behavior = configuration.buildNextBehavior(name, mascot)
             }
         } catch (e: VariableException) {
             throw CantBeAliveException("VariableEvaluationErrorMessage".localize(), e)
+        } catch (e: BehaviorInstantiationException) {
+            throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
         }
     }
 
@@ -77,19 +73,19 @@ class UserBehavior(
 
             var hotspotResult = HotspotResult.INACTIVE
             if (mascot.isHotspotClicked) {
-                for (hotspot in mascot.hotspots) {
-                    if (hotspot.contains(mascot, checkNotNull(mascot.cursorPosition))) {
-                        hotspotResult = HotspotResult.ACTIVE_NULL
-                        if (hotspot.behavior != null) {
-                            hotspotResult = HotspotResult.ACTIVE
-                            try {
-                                mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
-                            } catch (e: BehaviorInstantiationException) {
-                                throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
-                            }
+                val cursorPosition = checkNotNull(mascot.cursorPosition)
+                for (hotspot in mascot.hotspots.filter { it.contains(mascot, cursorPosition) }) {
+                    hotspotResult = if (hotspot.behavior == null) HotspotResult.ACTIVE else HotspotResult.ACTIVE_NULL
+
+                    if (hotspot.behavior != null) {
+                        try {
+                            mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
+                        } catch (e: BehaviorInstantiationException) {
+                            throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
                         }
-                        break
                     }
+
+                    break
                 }
 
                 if (hotspotResult == HotspotResult.INACTIVE) {
@@ -105,17 +101,7 @@ class UserBehavior(
                     ) {
                         log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
 
-                        mascot.anchor = if (getProperty("Multiscreen", true)) {
-                            Point(
-                                (Math.random() * environment.screen.width).toInt() + environment.screen.left,
-                                environment.screen.top - 256
-                            )
-                        } else {
-                            Point(
-                                (Math.random() * environment.workArea.width).toInt() + environment.workArea.left,
-                                environment.workArea.top - 256
-                            )
-                        }
+                        mascot.resetPosition()
 
                         try {
                             mascot.behavior = configuration.buildBehavior(BEHAVIOR_FALL)
@@ -157,6 +143,7 @@ class UserBehavior(
                 if (hotspot.contains(mascot, e.point) && behaviorEnabled) {
                     handled = true
                     mascot.cursorPosition = e.point
+
                     if (hotspot.behavior != null) {
                         try {
                             mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
@@ -164,6 +151,7 @@ class UserBehavior(
                             throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
                         }
                     }
+
                     break
                 }
             }
@@ -195,6 +183,7 @@ class UserBehavior(
 
             if (mascot.isDragging) {
                 mascot.isDragging = false
+
                 try {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_THROWN))
                 } catch (e: BehaviorInstantiationException) {

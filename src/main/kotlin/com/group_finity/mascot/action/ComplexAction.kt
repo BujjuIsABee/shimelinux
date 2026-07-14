@@ -42,9 +42,7 @@ abstract class ComplexAction(
         get() = actions[currentAction]
 
     override val isDraggable: Boolean
-        get() = if (currentAction < actions.size) {
-            (actions[currentAction] as? ActionBase)?.isDraggable ?: true
-        } else true
+        get() = if (currentAction < actions.size && action is ActionBase) (action as ActionBase).isDraggable else true
 
     init {
         require(actions.isNotEmpty())

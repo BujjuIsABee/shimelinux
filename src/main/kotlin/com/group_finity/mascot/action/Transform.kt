@@ -49,7 +49,9 @@ class Transform(
     override fun tick() {
         super.tick()
 
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true && getProperty("Transformation", true)) {
+        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true &&
+            getProperty("Transformation", true)
+        ) {
             transform()
         }
     }
@@ -60,15 +62,17 @@ class Transform(
         try {
             mascot.imageSet = childType
             mascot.behavior = getConfiguration(childType).buildBehavior(transformBehavior, mascot)
-        } catch (e: IllegalStateException) {
-            log.log(Level.SEVERE, "Fatal Error", e)
-            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
-        } catch (e: BehaviorInstantiationException) {
-            log.log(Level.SEVERE, "Fatal Error", e)
-            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
-        } catch (e: CantBeAliveException) {
-            log.log(Level.SEVERE, "Fatal Error", e)
-            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
+        } catch (e: Exception) {
+            when (e) {
+                is IllegalStateException,
+                is BehaviorInstantiationException,
+                is CantBeAliveException -> {
+                    log.log(Level.SEVERE, "Fatal Error", e)
+                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                }
+
+                else -> throw e
+            }
         }
     }
 

@@ -86,9 +86,10 @@ class ScanInteract(
         putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
         putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
 
-        val target = target
-        val animation = animation
-        if (target?.affordances?.contains(affordance) == true && animation != null) {
+        if (target?.affordances?.contains(affordance) == true) {
+            val target = checkNotNull(target)
+            val animation = checkNotNull(animation)
+
             if (mascot.anchor.x != target.anchor.x) {
                 isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
                 mascot.isLookRight = mascot.anchor.x < target.anchor.x
@@ -110,15 +111,17 @@ class ScanInteract(
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
-                } catch (e: IllegalStateException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                } catch (e: Exception) {
+                    when (e) {
+                        is IllegalStateException,
+                        is BehaviorInstantiationException,
+                        is CantBeAliveException -> {
+                            log.log(Level.SEVERE, "Fatal Error", e)
+                            Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                        }
+
+                        else -> throw e
+                    }
                 }
             }
         }

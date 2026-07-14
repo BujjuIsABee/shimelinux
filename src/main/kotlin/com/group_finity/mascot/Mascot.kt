@@ -245,7 +245,7 @@ class Mascot(var imageSet: String) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
                     val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
-                    if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
+                    if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains("/")) {
                         val item = JMenuItem(if (Main.instance.languageBundle.containsKey(behaviorName)) behaviorName.localize() else caption)
                         item.addActionListener {
                             try {
@@ -257,7 +257,7 @@ class Mascot(var imageSet: String) {
                         }
                         behaviorsSubmenu.add(item)
                     }
-                    if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains('/')) {
+                    if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains("/")) {
                         val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
                         toggleItem.addActionListener {
                             Main.instance.setMascotBehaviorEnabled(
@@ -363,6 +363,20 @@ class Mascot(var imageSet: String) {
                     }
                 }
             }
+        }
+    }
+
+    fun resetPosition() {
+        anchor = if (getProperty("Multiscreen", true)) {
+            Point(
+                (Math.random() * environment.screen.width).toInt() + environment.screen.left,
+                environment.screen.top - 256
+            )
+        } else {
+            Point(
+                (Math.random() * environment.workArea.width).toInt() + environment.workArea.left,
+                environment.workArea.top - 256
+            )
         }
     }
 

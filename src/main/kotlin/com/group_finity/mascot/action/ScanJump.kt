@@ -73,10 +73,11 @@ class ScanJump(
     }
 
     override fun tick() {
+        val target = checkNotNull(target)
+
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        val target = target ?: return
         val targetX = target.anchor.x
         val targetY = target.anchor.y
 
@@ -115,15 +116,17 @@ class ScanJump(
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
-            } catch (e: IllegalStateException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: BehaviorInstantiationException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+            } catch (e: Exception) {
+                when (e) {
+                    is IllegalStateException,
+                    is BehaviorInstantiationException,
+                    is CantBeAliveException -> {
+                        log.log(Level.SEVERE, "Fatal Error", e)
+                        Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                    }
+
+                    else -> throw e
+                }
             }
         }
     }

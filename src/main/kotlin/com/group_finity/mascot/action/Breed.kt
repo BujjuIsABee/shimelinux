@@ -109,18 +109,18 @@ class Breed(
                 try {
                     mascot.behavior = getConfiguration(childType).buildBehavior(bornBehavior, action.mascot)
                     checkNotNull(action.mascot.manager).add(mascot)
-                } catch (e: IllegalStateException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
-                    mascot.dispose()
-                } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
-                    mascot.dispose()
-                } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
-                    mascot.dispose()
+                } catch (e: Exception) {
+                    when (e) {
+                        is IllegalStateException,
+                        is BehaviorInstantiationException,
+                        is CantBeAliveException -> {
+                            log.log(Level.SEVERE, "Fatal Error", e)
+                            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
+                            mascot.dispose()
+                        }
+
+                        else -> throw e
+                    }
                 }
             }
         }

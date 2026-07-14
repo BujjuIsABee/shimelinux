@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
@@ -31,7 +32,6 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.MouseInfo
 import java.awt.Point
-import java.awt.Rectangle
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import javax.imageio.ImageIO
@@ -49,7 +49,10 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
+        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
+        display.iconImage = icon
         display.title = "ShimeLinux"
+        display.isResizable = !NativeFactory.waylandLayersSupported
         display.isAutoRequestFocus = false
         display.addWindowListener(object : WindowListener {
             override fun windowOpened(e: WindowEvent) {}
@@ -69,24 +72,15 @@ class VirtualEnvironment : Environment() {
             override fun windowDeactivated(e: WindowEvent) {}
         })
 
-        val windowArray = getProperty("WindowSize", "600x500").split('x')
-
+        val windowArray = getProperty("WindowSize", "600x500").split("x")
         display.contentPane = VirtualContentPanel(
             Dimension(windowArray[0].toInt(), windowArray[1].toInt()),
             Color.decode(getProperty("Background", "#00FF00")),
         )
 
-        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
-        display.iconImage = icon
-
-        SwingUtilities.invokeLater {
-            display.pack()
-            display.isVisible = true
-            display.toFront()
-        }
-
-        activeIE.set(Rectangle(-500, -500, 0, 0))
-        screenRect.bounds = display.contentPane.bounds
+        display.pack()
+        display.isVisible = true
+        display.toFront()
         tick()
     }
 

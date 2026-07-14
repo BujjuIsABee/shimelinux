@@ -52,9 +52,8 @@ class Regist(
     }
 
     override fun hasNext(): Boolean {
-        val image = mascot.image
-        val offsetX = if (offsetType == schema.getString("Origin") && image != null) {
-            0 - offsetX + image.center.x
+        val offsetX = if (offsetType == schema.getString("Origin")) {
+            0 - offsetX + checkNotNull(mascot.image).center.x
         } else {
             (offsetX * scaling).roundToInt()
         }

@@ -66,7 +66,7 @@ class ComplexJump(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        for (characteristic in characteristics.split(',')) {
+        for (characteristic in characteristics.split(",")) {
             if (characteristic == schema.getString("Breed")) {
                 isBreedEnabled = true
             }
@@ -106,11 +106,12 @@ class ComplexJump(
     }
 
     override fun tick() {
-        val target = target
-        var targetX: Int
-        var targetY: Int
+        val targetX: Int
+        val targetY: Int
 
-        if (isScanEnabled && target != null) {
+        if (isScanEnabled) {
+            val target = checkNotNull(target)
+
             // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
@@ -152,22 +153,26 @@ class ComplexJump(
         if (distance <= velocity) {
             mascot.anchor = Point(targetX, targetY)
 
-            if (isScanEnabled && target != null) {
+            if (isScanEnabled) {
                 try {
+                    val target = checkNotNull(target)
+
                     mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
                     target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
                     }
-                } catch (e: IllegalStateException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                } catch (e: Exception) {
+                    when (e) {
+                        is IllegalStateException,
+                        is BehaviorInstantiationException,
+                        is CantBeAliveException -> {
+                            log.log(Level.SEVERE, "Fatal Error", e)
+                            Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                        }
+
+                        else -> throw e
+                    }
                 }
             }
         }

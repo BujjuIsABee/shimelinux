@@ -40,10 +40,7 @@ class ThrowIE(
     private val gravity: Double
         get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 
-    override fun hasNext(): Boolean {
-        val canThrow = getProperty("Throwing", true)
-        return super.hasNext() && environment.activeIE.isVisible && canThrow
-    }
+    override fun hasNext() = super.hasNext() && environment.activeIE.isVisible && getProperty("Throwing", true)
 
     override fun tick() {
         super.tick()

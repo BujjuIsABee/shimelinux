@@ -23,33 +23,21 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
-import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 import javax.swing.UIManager
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    val waylandLibExists = this::class.java.getResource("/lib/libshimelinux_wayland.so") != null
-    val isTilingWM = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-        "Hyprland", "niri" -> true
-        else -> false
-    }
-    override val environment: Environment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-        "KDE" -> KdeEnvironment()
-        else -> GenericLinuxEnvironment()
-    }
+    override val environment = if (kdeEnvironmentSupported) KdeEnvironment() else GenericLinuxEnvironment()
 
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
-    override fun newTransparentWindow(): TranslucentWindow {
-        if (usingWaylandLayers) {
-            return WaylandTranslucentWindow()
-        } else {
-            // Create the window with a LaF that supports transparency
-            val previousLaf = UIManager.getLookAndFeel()
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-            return LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
-        }
+    override fun newTransparentWindow() = if (waylandLayersSupported && WaylandLib.instance != null) {
+        WaylandTranslucentLayer()
+    } else {
+        // Create the window with a LaF that supports transparency
+        val previousLaf = UIManager.getLookAndFeel()
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
     }
 }

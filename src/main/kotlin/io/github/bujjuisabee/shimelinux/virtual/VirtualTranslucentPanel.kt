@@ -30,6 +30,12 @@ import javax.swing.JPanel
 class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     private var image: VirtualNativeImage? = null
 
+    override fun contains(x: Int, y: Int) = if (super.contains(x, y)) {
+        image?.let { (it.rgb[y * width + x] shr 24) and 0xFF > 0 } ?: false
+    } else {
+        false
+    }
+
     override fun asComponent() = this
 
     override fun setAlwaysOnTop(onTop: Boolean) {}
@@ -50,10 +56,7 @@ class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     }
 
     override fun dispose() {
-        val parent = this.parent
-        if (parent != null) {
-            parent.remove(this)
-            parent.repaint()
-        }
+        parent?.remove(this)
+        parent?.repaint()
     }
 }

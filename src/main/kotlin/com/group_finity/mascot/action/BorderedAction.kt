@@ -51,9 +51,7 @@ abstract class BorderedAction(
     }
 
     override fun tick() {
-        border?.let {
-            mascot.anchor = it.move(mascot.anchor)
-        }
+        border?.let { mascot.anchor = it.move(mascot.anchor) }
     }
 
     companion object {

@@ -41,7 +41,7 @@ class Pose(
         get() = ImagePairs.getImagePair(imageName)
 
     fun next(mascot: Mascot) {
-        mascot.anchor = Point(mascot.anchor.x + (if (mascot.isLookRight) -dx else dx), mascot.anchor.y + dy)
+        mascot.anchor = Point(mascot.anchor.x + if (mascot.isLookRight) -dx else dx, mascot.anchor.y + dy)
         mascot.image = ImagePairs.getImage(imageName, mascot.isLookRight)
         mascot.sound = soundName
     }

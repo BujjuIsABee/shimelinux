@@ -57,7 +57,7 @@ class Area {
         bottom = value.y + value.height
     }
 
-    fun contains(x: Int, y: Int) = (left <= x) && (x <= right) && (top <= y) && (y <= bottom)
+    fun contains(x: Int, y: Int) = x in left..right && y in top..bottom
 
     fun toRectangle() = Rectangle(left, top, width, height)
 

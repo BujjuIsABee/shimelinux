@@ -155,7 +155,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = "Settings".localize()
-        isResizable = !NativeFactory.waylandLayersSupported
         layout = BorderLayout()
 
         try {
@@ -272,14 +271,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         generalTab.add(hqxRadioButton)
 
         whitelistModel = DefaultListModel<String>()
-        for (title in getProperty("InteractiveWindows", "").split('/')) {
+        for (title in getProperty("InteractiveWindows", "").split("/")) {
             if (title.isNotBlank()) {
                 whitelistModel.add(whitelistModel.size, title)
             }
         }
 
         blacklistModel = DefaultListModel<String>()
-        for (title in getProperty("InteractiveWindowsBlacklist", "").split('/')) {
+        for (title in getProperty("InteractiveWindowsBlacklist", "").split("/")) {
             if (title.isNotBlank()) {
                 blacklistModel.add(blacklistModel.size, title)
             }
@@ -449,20 +448,16 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.add(menuScalingPanel, BorderLayout.NORTH)
         menuTab.add(themePanel, BorderLayout.CENTER)
 
-        val windowArray = windowSize.split('x')
+        val windowArray = windowSize.split("x")
 
         widthSpinner = JSpinner()
         widthSpinner.value = windowArray[0].toInt()
         widthSpinner.addChangeListener {
-            val windowArray = windowSize.split('x')
+            val windowArray = windowSize.split("x")
             val oldWidth = windowArray[0].toInt()
 
             if (widthSpinner.value != oldWidth) {
-                windowSize = buildString {
-                    append(widthSpinner.value)
-                    append('x')
-                    append(windowArray[1])
-                }
+                windowSize = "${widthSpinner.value}x${windowArray[1]}"
                 isEnvironmentReloadRequired = true
             }
         }
@@ -470,15 +465,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         heightSpinner = JSpinner()
         heightSpinner.value = windowArray[1].toInt()
         heightSpinner.addChangeListener {
-            val windowArray = windowSize.split('x')
+            val windowArray = windowSize.split("x")
             val oldHeight = windowArray[1].toInt()
 
             if (heightSpinner.value != oldHeight) {
-                windowSize = buildString {
-                    append(windowArray[0])
-                    append('x')
-                    append(heightSpinner.value)
-                }
+                windowSize = "${windowArray[0]}x${heightSpinner.value}"
                 isEnvironmentReloadRequired = true
             }
         }
@@ -577,15 +568,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         mainTabs = JTabbedPane()
         mainTabs.addTab("General".localize(), generalTab)
-        mainTabs.addTab("InteractiveWindows".localize(), interactiveWindowsTab)
+        if (NativeFactory.kdeEnvironmentSupported) {
+            mainTabs.addTab("InteractiveWindows".localize(), interactiveWindowsTab)
+        }
         mainTabs.addTab("Menu".localize(), menuTab)
         mainTabs.addTab("WindowMode".localize(), windowModeTab)
         mainTabs.addTab("About".localize(), aboutTab)
-
-        // Don't show interactive windows tab unless the KDE environment is used
-        if (System.getenv("XDG_CURRENT_DESKTOP") != "KDE") {
-            interactiveWindowsTab.isVisible = false
-        }
 
         doneButton = JButton("Done".localize())
         doneButton.addActionListener { handleDone() }
@@ -615,7 +603,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             JOptionPane.QUESTION_MESSAGE
         )
 
-        if (!input.isNullOrBlank() && !input.contains('/')) {
+        if (!input.isNullOrBlank() && !input.contains("/")) {
             if (interactiveWindowsTabs.selectedIndex == 0) {
                 whitelistModel.add(whitelistModel.size, input.trim())
             } else {

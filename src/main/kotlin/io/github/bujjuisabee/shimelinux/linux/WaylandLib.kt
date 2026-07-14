@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.linux
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.loadResource
 import kotlin.io.path.absolute
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.outputStream
 
 class WaylandLib {
@@ -41,16 +42,18 @@ class WaylandLib {
     external fun dispose(senderIndex: Int)
 
     companion object {
-        val INSTANCE = WaylandLib()
+        var instance: WaylandLib? = null
+            private set
 
         init {
-            // Load the Wayland library
-            getPath("lib", "libshimelinux_wayland.so").outputStream().use { output ->
-                loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
-                    input.copyTo(output)
-                }
+            loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
+                // Load the Wayland library
+                val destination = getPath("lib", "libshimelinux_wayland.so")
+                destination.outputStream().use { output -> input.copyTo(output) }
+                System.load(destination.absolutePathString())
+
+                instance = WaylandLib()
             }
-            System.load(getPath("lib", "libshimelinux_wayland.so").absolute().toString())
         }
     }
 }

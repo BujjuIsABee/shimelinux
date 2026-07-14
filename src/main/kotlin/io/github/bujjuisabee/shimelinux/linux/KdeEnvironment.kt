@@ -139,7 +139,7 @@ class KdeEnvironment : Environment() {
 
     private fun isIE(window: Window) = windowCache.getOrPut(window.title) {
         var blacklistInUse = false
-        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split('/')
+        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split("/")
         for (title in blacklist) {
             if (title.isNotBlank()) {
                 blacklistInUse = true
@@ -151,7 +151,7 @@ class KdeEnvironment : Environment() {
         }
 
         var whitelistInUse = false
-        val whitelist = getProperty("InteractiveWindows", "").split('/')
+        val whitelist = getProperty("InteractiveWindows", "").split("/")
         for (title in whitelist) {
             if (title.isNotBlank()) {
                 whitelistInUse = true

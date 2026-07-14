@@ -49,7 +49,7 @@ open class Move(
     override fun hasNext(): Boolean {
         val reachedX = targetX == Int.MIN_VALUE || mascot.anchor.x != targetX
         val reachedY = targetY == Int.MIN_VALUE || mascot.anchor.y != targetY
-        return super.hasNext() && ((reachedX && reachedY) || isTurning)
+        return super.hasNext() && (isTurning || reachedX && reachedY)
     }
 
     override fun tick() {
@@ -66,6 +66,7 @@ open class Move(
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
             mascot.isLookRight = mascot.anchor.x < targetX
         }
+
         if (targetY != DEFAULT_TARGETY) {
             isDown = mascot.anchor.y < targetY
         }
@@ -76,15 +77,16 @@ open class Move(
 
         animation?.next(mascot, time)
 
-        if (targetX != DEFAULT_TARGETX) {
-            if ((mascot.isLookRight && (mascot.anchor.x >= targetX)) || (!mascot.isLookRight && (mascot.anchor.x <= targetX))) {
-                mascot.anchor = Point(targetX, mascot.anchor.y)
-            }
+        if (targetX != DEFAULT_TARGETX &&
+            (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX)
+        ) {
+            mascot.anchor = Point(targetX, mascot.anchor.y)
         }
-        if (targetY != DEFAULT_TARGETY) {
-            if ((isDown && (mascot.anchor.y >= targetY)) || (!isDown && (mascot.anchor.y <= targetY))) {
-                mascot.anchor = Point(mascot.anchor.x, targetY)
-            }
+
+        if (targetY != DEFAULT_TARGETY &&
+            (isDown && mascot.anchor.y >= targetY || !isDown && mascot.anchor.y <= targetY)
+        ) {
+            mascot.anchor = Point(mascot.anchor.x, targetY)
         }
     }
 

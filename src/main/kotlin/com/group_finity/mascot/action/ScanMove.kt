@@ -77,6 +77,8 @@ class ScanMove(
     override fun tick() {
         super.tick()
 
+        val target = checkNotNull(target)
+
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
@@ -85,7 +87,6 @@ class ScanMove(
             throw LostGroundException()
         }
 
-        val target = target ?: return
         val targetX = target.anchor.x
         val targetY = target.anchor.y
 
@@ -105,10 +106,11 @@ class ScanMove(
 
         animation?.next(mascot, time)
 
-        if ((mascot.isLookRight && mascot.anchor.x >= targetX) || (!mascot.isLookRight && mascot.anchor.x <= targetX)) {
+        if (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX) {
             mascot.anchor = Point(targetX, mascot.anchor.y)
         }
-        if ((down && mascot.anchor.y >= targetY) || (!down && mascot.anchor.y <= targetY)) {
+
+        if (down && mascot.anchor.y >= targetY || !down && mascot.anchor.y <= targetY) {
             mascot.anchor = Point(mascot.anchor.x, targetY)
         }
 
@@ -119,15 +121,17 @@ class ScanMove(
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
-            } catch (e: IllegalStateException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: BehaviorInstantiationException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-            } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+            } catch (e: Exception) {
+                when (e) {
+                    is IllegalStateException,
+                    is BehaviorInstantiationException,
+                    is CantBeAliveException -> {
+                        log.log(Level.SEVERE, "Fatal Error", e)
+                        Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                    }
+
+                    else -> throw e
+                }
             }
         }
     }

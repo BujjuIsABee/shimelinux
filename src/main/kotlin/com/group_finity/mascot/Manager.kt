@@ -58,7 +58,7 @@ class Manager {
     fun start() {
         if (timer != null) return
 
-        timer = timer("UpdateMascot", false, period = TICK_INTERVAL) { tick() }
+        timer = timer(daemon = false, period = 40) { tick() }
     }
 
     fun stop() {
@@ -256,6 +256,5 @@ class Manager {
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
-        const val TICK_INTERVAL: Long = 40
     }
 }

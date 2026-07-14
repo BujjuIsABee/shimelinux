@@ -149,7 +149,7 @@ impl OutputHandler for Mascot {
         output: WlOutput
     ) {
         if let Some(info) = self.output_state.info(&output) {
-            let (logical_x, logical_y) = info.logical_position.expect("Failed to get logical position");
+            let (logical_x, logical_y) = info.logical_position.unwrap_or_default();
             self.logical_x = logical_x;
             self.logical_y = logical_y;
         }
@@ -162,7 +162,7 @@ impl OutputHandler for Mascot {
         output: WlOutput
     ) {
         if let Some(info) = self.output_state.info(&output) {
-            let (logical_x, logical_y) = info.logical_position.expect("Failed to get logical position");
+            let (logical_x, logical_y) = info.logical_position.unwrap_or_default();
             self.logical_x = logical_x;
             self.logical_y = logical_y;
         }
@@ -251,22 +251,23 @@ impl PointerHandler for Mascot {
             if &event.surface != self.layer.wl_surface() {
                 continue;
             }
+
             match event.kind {
                 Press { button, .. } => {
-                    MouseState::get_mouse_state(self.sender_index, |mouse_state| {
+                    MouseState::get(self.sender_index, |mouse_state| {
                         mouse_state.left_pressed = button == BTN_LEFT;
                         mouse_state.right_pressed = button == BTN_RIGHT;
                     });
                 },
                 Release { button, .. } => {
-                    MouseState::get_mouse_state(self.sender_index, |mouse_state| {
+                    MouseState::get(self.sender_index, |mouse_state| {
                         mouse_state.left_released = button == BTN_LEFT;
                         mouse_state.right_released = button == BTN_RIGHT;
                     });
                 },
 
                 Motion { .. } => {
-                    MouseState::get_mouse_state(self.sender_index, |mouse_state| {
+                    MouseState::get(self.sender_index, |mouse_state| {
                         let (position_x, position_y) = event.position;
                         mouse_state.position_x = (position_x as i32) + self.logical_x;
                         mouse_state.position_y = (position_y as i32) + self.logical_y;
@@ -320,7 +321,7 @@ impl Mascot {
             rgb: Vec::new(),
             mask: Vec::new(),
             first_configure: true,
-            sender_index
+            sender_index,
         }
     }
 
@@ -338,9 +339,16 @@ impl Mascot {
             // Draw the image to the canvas
             for y in 0..height {
                 for x in 0..width {
-                    let color = self.rgb[cmp::min((y * self.image_width as i32 + x) as usize, self.rgb.len() - 1)];
-                    let index = ((y * width + x) * 4) as usize;
-                    canvas[index..index + 4].copy_from_slice(&color.to_le_bytes());
+                    let canvas_index = cmp::min(
+                        ((y * width + x) * 4) as usize,
+                        canvas.len() - 1,
+                    );
+                    let color_index = cmp::min(
+                        (y * self.image_width as i32 + x) as usize,
+                        self.rgb.len() - 1,
+                    );
+
+                    canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.rgb[color_index].to_le_bytes());
                 }
             }
 
@@ -360,7 +368,7 @@ impl Mascot {
 }
 
 impl MouseState {
-    pub fn get_mouse_state<T: FnMut(&mut MouseState)>(sender_index: i32, mut action: T) {
+    pub fn get<T: FnMut(&mut MouseState)>(sender_index: i32, mut action: T) {
         let mut mouse_states = MOUSE_STATES.lock().unwrap();
         let mouse_state = mouse_states.entry(sender_index).or_default();
         action(mouse_state);

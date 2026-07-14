@@ -53,13 +53,9 @@ class BehaviorBuilder(
         conditions = conditions.toMutableList()
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
-        isToggleable = if (name == UserBehavior.BEHAVIOR_FALL ||
-            name == UserBehavior.BEHAVIOR_THROWN ||
-            name == UserBehavior.BEHAVIOR_DRAGGED
-        ) {
-            false
-        } else {
-            behaviorNode.getAttribute(configuration.schema.getString("Toggleable")).toBoolean()
+        isToggleable = when (name) {
+            UserBehavior.BEHAVIOR_FALL, UserBehavior.BEHAVIOR_DRAGGED, UserBehavior.BEHAVIOR_THROWN -> false
+            else -> behaviorNode.getAttribute(configuration.schema.getString("Toggleable")).toBoolean()
         }
 
         params.putAll(behaviorNode.attributes)
@@ -102,7 +98,7 @@ class BehaviorBuilder(
     }
 
     fun validate() {
-        if (!configuration.actionBuilders.containsKey(actionName)) {
+        if (!configuration.hasAction(actionName)) {
             log.log(Level.SEVERE, "There is no corresponding action ($this)")
             throw ConfigurationException("NoActionFoundErrorMessage".localize() + " ($this)")
         }
@@ -119,8 +115,8 @@ class BehaviorBuilder(
 
     fun isEffective(context: VariableMap): Boolean {
         if (frequency == 0) return false
-        return conditions.none { condition ->
-            condition?.let { Variable.parse(it)?.get(context) } as? Boolean == false
+        return conditions.none {
+            Variable.parse(it)?.get(context) as? Boolean == false
         }
     }
 

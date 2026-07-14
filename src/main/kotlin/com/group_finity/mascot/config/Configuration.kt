@@ -33,20 +33,19 @@ import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.Locale
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
 class Configuration {
+    lateinit var schema: ResourceBundle
     private val constants = linkedMapOf<String, String>()
-    val actionBuilders = linkedMapOf<String?, ActionBuilder>()
+    private val actionBuilders = linkedMapOf<String?, ActionBuilder>()
     private val behaviorBuilders = linkedMapOf<String, BehaviorBuilder>()
     private val information = linkedMapOf<String, String>()
-    lateinit var schema: ResourceBundle
-
-    val behaviorNames get() = behaviorBuilders.keys
+    val behaviorNames
+        get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {
         log.log(Level.INFO, "Reading configuration file")
@@ -92,7 +91,8 @@ class Configuration {
     private fun loadActions(list: Entry, imageSet: String) {
         for (node in list.selectChildren(schema.getString("Action"))) {
             val action = ActionBuilder(this, node, imageSet)
-            actionBuilders.putIfAbsent(action.name, action) ?: ConfigurationException("DuplicateActionErrorMessage".localize() + ": ${action.name}")
+            actionBuilders.putIfAbsent(action.name, action)
+                ?: ConfigurationException("DuplicateActionErrorMessage".localize() + ": ${action.name}")
         }
     }
 
@@ -135,8 +135,12 @@ class Configuration {
     }
 
     fun validate() {
-        actionBuilders.values.forEach { it.validate() }
-        behaviorBuilders.values.forEach { it.validate() }
+        for (builder in actionBuilders.values) {
+            builder.validate()
+        }
+        for (builder in behaviorBuilders.values) {
+            builder.validate()
+        }
     }
 
     fun buildAction(name: String, params: Map<String, String>): Action {
@@ -153,18 +157,7 @@ class Configuration {
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
         } else {
-            mascot.anchor = if (getProperty("Multiscreen", true)) {
-                Point(
-                    (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
-                    mascot.environment.screen.top - 256
-                )
-            } else {
-                Point(
-                    (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
-                    mascot.environment.workArea.top - 256
-                )
-            }
-
+            mascot.resetPosition()
             buildBehavior(schema.getString(BEHAVIOR_FALL))
         }
     }
@@ -210,18 +203,7 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            mascot.anchor = if (getProperty("Multiscreen", true)) {
-                Point(
-                    (Math.random() * mascot.environment.screen.width).toInt() + mascot.environment.screen.left,
-                    mascot.environment.screen.top - 256
-                )
-            } else {
-                Point(
-                    (Math.random() * mascot.environment.workArea.width).toInt() + mascot.environment.workArea.left,
-                    mascot.environment.workArea.top - 256
-                )
-            }
-
+            mascot.resetPosition()
             return buildBehavior(schema.getString(BEHAVIOR_FALL))
         }
 
@@ -234,16 +216,14 @@ class Configuration {
         return null
     }
 
-    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean {
-        if (builder.isToggleable) {
-            for (behavior in getProperty("DisabledBehaviours." + mascot.imageSet, "").split('/')) {
-                if (behavior == builder.name) return false
-            }
-        }
-        return true
-    }
+    fun hasAction(name: String) = actionBuilders.containsKey(name)
 
-    fun isBehaviorEnabled(name: String?, mascot: Mascot) = behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
+    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot) =
+        !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/")
+            .none { it == builder.name }
+
+    fun isBehaviorEnabled(name: String?, mascot: Mascot) =
+        behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
 
     fun isBehaviorHidden(name: String?) = behaviorBuilders[name]?.isHidden == true
 

@@ -28,6 +28,15 @@ import javax.script.Bindings
 class VariableMap : Bindings {
     val rawMap = linkedMapOf<String, Variable>()
 
+    override val keys
+        get() = rawMap.keys
+    override val values
+        get() = rawMap.keys.mapTo(mutableSetOf()) { get(it) }
+    override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
+        get() = rawMap.entries.mapTo(mutableSetOf()) { AbstractMap.SimpleEntry(it.key, get(it.key)) }
+    override val size
+        get() = rawMap.size
+
     fun init() {
         for (variable in rawMap.values) {
             variable.init()
@@ -39,16 +48,6 @@ class VariableMap : Bindings {
             variable.initFrame()
         }
     }
-
-    //region Bindings Impl
-    override val keys
-        get() = rawMap.keys
-    override val values
-        get() = rawMap.keys.mapTo(mutableSetOf()) { get(it) }
-    override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
-        get() = rawMap.entries.mapTo(mutableSetOf()) { AbstractMap.SimpleEntry(it.key, get(it.key)) }
-    override val size
-        get() = rawMap.size
 
     override fun isEmpty() = rawMap.isEmpty()
 
@@ -79,5 +78,4 @@ class VariableMap : Bindings {
     operator fun set(key: String, value: Any?) {
         put(key, value)
     }
-    //endregion
 }

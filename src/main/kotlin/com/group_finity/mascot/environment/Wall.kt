@@ -45,17 +45,17 @@ class Wall(val area: Area, val isRight: Boolean) : Border {
         get() = area.height
 
     override fun isOn(location: Point) =
-        area.isVisible && (x == location.x) && (top <= location.y) && (location.y <= bottom)
+        area.isVisible && x == location.x && top <= location.y && location.y <= bottom
 
     override fun move(location: Point): Point {
-        if (!area.isVisible) return location
-
-        val d = (bottom - dbottom - (top - dtop)).takeUnless { it == 0 } ?: return location
-        val newLocation = Point(location.x + dx, (location.y - (top - dtop)) * (bottom - top) / d + top)
-        return if (abs(newLocation.x - location.x) >= 80 || abs(newLocation.y - location.y) >= 80) {
+        val d = bottom - dbottom - (top - dtop)
+        return if (!area.isVisible || d == 0) {
             location
         } else {
-            newLocation
+            Point(
+                location.x + dx,
+                (location.y - (top - dtop)) * (bottom - top) / d + top
+            ).takeUnless { abs(it.x - location.x) >= 80 || abs(it.y - location.y) >= 80 } ?: location
         }
     }
 }

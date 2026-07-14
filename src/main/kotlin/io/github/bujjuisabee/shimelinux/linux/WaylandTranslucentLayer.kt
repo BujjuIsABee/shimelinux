@@ -28,8 +28,9 @@ import java.awt.Component
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
+import kotlin.concurrent.timer
 
-class WaylandTranslucentWindow : TranslucentWindow {
+class WaylandTranslucentLayer : TranslucentWindow {
     private val component = object : Component() {
         private var bounds = super.bounds
 
@@ -41,7 +42,7 @@ class WaylandTranslucentWindow : TranslucentWindow {
 
         override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
             bounds = Rectangle(x, y, width, height)
-            WaylandLib.INSTANCE.setBounds(senderIndex, x, y, width, height)
+            lib.setBounds(senderIndex, x, y, width, height)
         }
 
         override fun isShowing() = true
@@ -49,11 +50,16 @@ class WaylandTranslucentWindow : TranslucentWindow {
         override fun getLocationOnScreen() = Point(bounds.x, bounds.y)
     }
 
-    private val senderIndex: Int = WaylandLib.INSTANCE.createMascot()
+    private val lib = requireNotNull(WaylandLib.instance)
+    private val senderIndex: Int = lib.createMascot()
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var previousMousePosition = Point(0, 0)
     private var grabStart = Point(0, 0)
+
+    init {
+        timer(daemon = true, period = 40) { updateMouse() }
+    }
 
     override fun asComponent() = component
 
@@ -62,27 +68,25 @@ class WaylandTranslucentWindow : TranslucentWindow {
             this.image = image
             imageChanged = true
         }
-
-        updateMouse()
     }
 
     override fun updateImage() {
         if (image != null) {
             imageChanged = false
-            WaylandLib.INSTANCE.updateImage(senderIndex, image!!.rgb)
+            lib.updateImage(senderIndex, image!!.rgb)
         }
     }
 
     override fun setAlwaysOnTop(onTop: Boolean) {}
 
     override fun dispose() {
-        WaylandLib.INSTANCE.dispose(senderIndex)
+        lib.dispose(senderIndex)
     }
 
     @Suppress("KotlinConstantConditions")
     fun updateMouse() {
-        val (leftPressed, rightPressed, leftReleased, rightReleased) = WaylandLib.INSTANCE.getMouseState(senderIndex)
-        val (positionX, positionY) = WaylandLib.INSTANCE.getMousePosition(senderIndex)
+        val (leftPressed, rightPressed, leftReleased, rightReleased) = lib.getMouseState(senderIndex)
+        val (positionX, positionY) = lib.getMousePosition(senderIndex)
 
         if (leftPressed) {
             grabStart = component.bounds.location

@@ -55,9 +55,12 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(Main.frame) {
         System.setProperty("sun.awt.noerasebackground", "true") // Reduces flickering
     }
 
-    override fun getGraphicsConfiguration() = gc
-
-    override fun asComponent() = this
+    override fun paint(g: Graphics) {
+        val g2d = g as Graphics2D
+        g2d.composite = AlphaComposite.Src
+        g2d.drawImage(image?.managedImage, offset.x, offset.y, null)
+        g2d.dispose()
+    }
 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
         val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
@@ -74,6 +77,10 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(Main.frame) {
         )
     }
 
+    override fun getGraphicsConfiguration() = gc
+
+    override fun asComponent() = this
+
     override fun setImage(image: NativeImage) {
         if (image is LinuxNativeImage && this.image != image) {
             imageChanged = true
@@ -88,13 +95,6 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(Main.frame) {
             imageChanged = false
             repaint()
         }
-    }
-
-    override fun paint(g: Graphics) {
-        val g2d = g as Graphics2D
-        g2d.composite = AlphaComposite.Src
-        g2d.drawImage(image?.managedImage, offset.x, offset.y, null)
-        g2d.dispose()
     }
 
     private fun setWindowMask() {

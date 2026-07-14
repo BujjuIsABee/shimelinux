@@ -25,4 +25,8 @@ package io.github.bujjuisabee.shimelinux.virtual
 import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
-class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage
+class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage {
+    val width = managedImage.width
+    val height = managedImage.height
+    val rgb: IntArray = managedImage.getRGB(0, 0,width, height, null, 0, width)
+}

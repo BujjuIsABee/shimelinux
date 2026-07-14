@@ -51,10 +51,9 @@ class FallWithIE(
             throw LostGroundException()
         }
 
-        if (mascot.isLookRight && (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom)) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
-            throw LostGroundException()
-        } else if (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom) {
+        if (mascot.isLookRight && (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom) ||
+            !mascot.isLookRight && (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom)
+        ) {
             log.log(Level.INFO, "Lost ground ($mascot, $this)")
             throw LostGroundException()
         }

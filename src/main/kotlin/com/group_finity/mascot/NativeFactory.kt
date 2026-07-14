@@ -38,10 +38,10 @@ abstract class NativeFactory {
         @JvmStatic
         lateinit var instance: NativeFactory
 
-        val usingWaylandLayers: Boolean by lazy {
-            val linuxImpl = (instance as? io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl) ?: return@lazy false
-            return@lazy linuxImpl.isTilingWM && linuxImpl.waylandLibExists
-        }
+        private val desktopType = System.getenv("XDG_CURRENT_DESKTOP").lowercase()
+        private val sessionType = System.getenv("XDG_SESSION_TYPE").lowercase()
+        val kdeEnvironmentSupported = desktopType == "kde"
+        val waylandLayersSupported = sessionType == "wayland" && (desktopType == "hyprland" || desktopType == "niri")
 
         init {
             resetInstance()

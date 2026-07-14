@@ -57,7 +57,10 @@ open class Fall(
         velocityY = initialVy.toDouble()
     }
 
-    override fun hasNext() = super.hasNext() && !environment.floor.isOn(mascot.anchor) && !environment.wall.isOn(mascot.anchor)
+    override fun hasNext(): Boolean {
+        val onBorder = environment.floor.isOn(mascot.anchor) || environment.wall.isOn(mascot.anchor)
+        return super.hasNext() && !onBorder
+    }
 
     override fun tick() {
         if (velocityX != 0.0) {
@@ -70,8 +73,8 @@ open class Fall(
         putVariable(schema.getString(VARIABLE_VELOCITYX), velocityX)
         putVariable(schema.getString(VARIABLE_VELOCITYY), velocityY)
 
-        modX += (velocityX % 1.0)
-        modY += (velocityY % 1.0)
+        modX += velocityX % 1.0
+        modY += velocityY % 1.0
 
         val dx = velocityX.toInt() + modX.toInt()
         val dy = velocityY.toInt() + modY.toInt()
@@ -91,10 +94,14 @@ open class Fall(
             if (dy > 0) {
                 for (j in -80 until 0) {
                     mascot.anchor = Point(x, y + j)
-                    if (environment.getFloor(true).isOn(mascot.anchor)) break@outer
+                    if (environment.getFloor(true).isOn(mascot.anchor)) {
+                        break@outer
+                    }
                 }
             }
-            if (environment.getWall(true).isOn(mascot.anchor)) break
+            if (environment.getWall(true).isOn(mascot.anchor)) {
+                break
+            }
         }
 
         animation?.next(mascot, time)

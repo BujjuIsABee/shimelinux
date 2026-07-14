@@ -66,14 +66,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 }
             }
         } catch (e: ConfigurationException) {
-            val message = buildString {
-                append("FailedLoadActionErrorMessage".localize())
-                append(" \"$name\" ")
-                append("ForShimeji".localize())
-                append(" \"$imageSet.\"")
-            }
-
-            throw ConfigurationException(message, e)
+            throw ConfigurationException("${"FailedLoadActionErrorMessage".localize()} \"$name\" ${"ForShimeji".localize()} \"$imageSet.\"", e)
         }
 
         log.log(Level.INFO, "Finished loading action")

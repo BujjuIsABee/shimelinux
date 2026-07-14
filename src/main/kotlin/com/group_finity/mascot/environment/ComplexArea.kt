@@ -47,66 +47,22 @@ class ComplexArea {
     }
 
     @Suppress("unused")
-    fun getBottomBorder(location: Point): FloorCeiling? {
-        var result: FloorCeiling? = null
-        for (area in areaMap.values) {
-            if (area.bottomBorder.isOn(location)) {
-                result = area.bottomBorder
-            }
-        }
-        for (area in areaMap.values) {
-            if (area.topBorder.isOn(location)) {
-                result = null
-            }
-        }
-        return result
-    }
+    fun getBottomBorder(location: Point) = areaMap.values.lastOrNull { it.bottomBorder.isOn(location) }
+        ?.takeUnless { areaMap.values.any { it.topBorder.isOn(location) } }
+        ?.bottomBorder
 
     @Suppress("unused")
-    fun getTopBorder(location: Point): FloorCeiling? {
-        var result: FloorCeiling? = null
-        for (area in areaMap.values) {
-            if (area.topBorder.isOn(location)) {
-                result = area.topBorder
-            }
-        }
-        for (area in areaMap.values) {
-            if (area.bottomBorder.isOn(location)) {
-                result = null
-            }
-        }
-        return result
-    }
+    fun getTopBorder(location: Point) = areaMap.values.lastOrNull { it.topBorder.isOn(location) }
+        ?.takeUnless { areaMap.values.any { it.bottomBorder.isOn(location) } }
+        ?.topBorder
 
     @Suppress("unused")
-    fun getLeftBorder(location: Point): Wall? {
-        var result: Wall? = null
-        for (area in areaMap.values) {
-            if (area.leftBorder.isOn(location)) {
-                result = area.leftBorder
-            }
-        }
-        for (area in areaMap.values) {
-            if (area.rightBorder.isOn(location)) {
-                result = null
-            }
-        }
-        return result
-    }
+    fun getLeftBorder(location: Point) = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
+        ?.takeUnless { areaMap.values.any { it.rightBorder.isOn(location) } }
+        ?.leftBorder
 
     @Suppress("unused")
-    fun getRightBorder(location: Point): Wall? {
-        var result: Wall? = null
-        for (area in areaMap.values) {
-            if (area.rightBorder.isOn(location)) {
-                result = area.rightBorder
-            }
-        }
-        for (area in areaMap.values) {
-            if (area.leftBorder.isOn(location)) {
-                result = null
-            }
-        }
-        return result
-    }
+    fun getRightBorder(location: Point) = areaMap.values.lastOrNull { it.rightBorder.isOn(location) }
+        ?.takeUnless { areaMap.values.any { it.leftBorder.isOn(location) } }
+        ?.rightBorder
 }

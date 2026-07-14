@@ -23,10 +23,12 @@
 mod mascot;
 
 use std::{
-    cmp, mem, sync::{
+    cmp, mem,
+    sync::{
         Mutex,
         mpsc::{Sender, channel},
-    }, thread,
+    },
+    thread,
 };
 
 use jni::{
@@ -44,6 +46,7 @@ use smithay_client_toolkit::{
 };
 use wayland_client::{Connection, globals::registry_queue_init};
 
+use crate::mascot::Mascot;
 use crate::mascot::MouseState;
 
 enum Event {
@@ -68,18 +71,27 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
     let qh = event_queue.handle();
 
-    let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
-    let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to create layer shell");
+    let compositor_state = CompositorState::bind(&globals, &qh)
+        .expect("Failed to get compositor state");
+    let layer_shell = LayerShell::bind(&globals, &qh)
+        .expect("Failed to create layer shell");
 
     let surface = compositor_state.create_surface(&qh);
-    let layer = layer_shell.create_layer_surface(&qh, surface, Layer::Top, Some("shimelinux"), None);
+    let layer = layer_shell.create_layer_surface(
+        &qh,
+        surface,
+        Layer::Top,
+        Some("shimelinux"),
+        None,
+    );
+
     layer.set_exclusive_zone(-1);
     layer.set_anchor(Anchor::TOP | Anchor::LEFT);
     layer.set_size(1, 1);
     layer.set_keyboard_interactivity(KeyboardInteractivity::None);
     layer.commit();
 
-    let mut mascot = mascot::Mascot::new(compositor_state, layer, sender_index, &globals, &qh);
+    let mut mascot = Mascot::new(&globals, &qh, compositor_state, layer, sender_index);
 
     thread::spawn(move || {
         loop {
@@ -89,13 +101,22 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
             while let Ok(event) = receiver.try_recv() {
                 match event {
                     Event::SetBounds(x, y, width, height) => {
-                        mascot.layer.set_size(cmp::max(1, width as u32), cmp::max(1, height as u32));
-                        mascot.layer.set_margin(cmp::max(-height + 1, y), 0, 0, x);
+                        mascot.layer.set_size(
+                            cmp::max(1, width as u32),
+                            cmp::max(1, height as u32),
+                        );
+                        mascot.layer.set_margin(
+                            cmp::max(-height + 1, y),
+                            0,
+                            0,
+                            cmp::max(-width + 1, x),
+                        );
 
-                        mascot.image_width = width;
+                        mascot.image_width = width as u32;
+                        mascot.image_height = height as u32;
                     },
                     Event::UpdateImage(rgb) => {
-                        mascot.mask = get_mask(&rgb, mascot.image_width, mascot.height as i32);
+                        mascot.mask = get_mask(&rgb, mascot.image_width, mascot.image_height);
                         mascot.rgb = rgb;
                     },
                     Event::Dispose() => {
@@ -121,7 +142,12 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 ) {
     let senders = SENDERS.lock().unwrap();
     if let Some(sender) = senders.get(sender_index as usize) {
-        let _ = sender.send(Event::SetBounds(x, y, cmp::max(1, width), cmp::max(1, height)));
+        let _ = sender.send(Event::SetBounds(
+            x,
+            y,
+            cmp::max(1, width),
+            cmp::max(1, height),
+        ));
     }
 }
 
@@ -155,7 +181,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
 ) -> JBooleanArray<'caller> {
     let result = unowned_env.with_env(|env| -> Result<JBooleanArray, Error> {
         let array = JBooleanArray::new(env, 4).expect("Failed to get array");
-        MouseState::get_mouse_state(sender_index, |mouse_state| {
+        MouseState::get(sender_index, |mouse_state| {
             array.set_region(env, 0, &[
                 mem::replace(&mut mouse_state.left_pressed, false),
                 mem::replace(&mut mouse_state.right_pressed, false),
@@ -178,7 +204,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
 ) -> JIntArray<'caller> {
     let result = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
         let array = JIntArray::new(env, 2).expect("Failed to get array");
-        MouseState::get_mouse_state(sender_index, |mouse_state| {
+        MouseState::get(sender_index, |mouse_state| {
             array.set_region(env, 0, &[
                 mouse_state.position_x,
                 mouse_state.position_y
@@ -203,18 +229,18 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_di
     }
 }
 
-fn get_mask(rgb: &Vec<i32>, width: i32, height: i32) -> Vec<(i32, i32, i32, i32)> {
+fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
     let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
 
     for y in 0..height {
-        let mut start: Option<i32> = None;
+        let mut start: Option<u32> = None;
         for x in 0..width {
             let index = cmp::min(((y * width) + x) as usize, rgb.len() - 1);
             let alpha = (rgb[index] >> 24) & 0xFF;
             if alpha > 0 && start.is_none() {
                 start = Some(x);
             } else if alpha == 0 && start.is_some() {
-                rects.push((start.unwrap(), y, x - start.unwrap(), 1));
+                rects.push((start.unwrap() as i32, y as i32, (x - start.unwrap()) as i32, 1));
                 start = None;
             }
         }

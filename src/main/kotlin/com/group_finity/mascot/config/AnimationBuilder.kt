@@ -102,7 +102,7 @@ class AnimationBuilder(
         }
 
         if (leftImagePath != null) {
-            val anchorCoordinates = anchorText.split(',')
+            val anchorCoordinates = anchorText.split(",")
             val anchor = Point(anchorCoordinates[0].toInt(), anchorCoordinates[1].toInt())
 
             try {
@@ -113,7 +113,7 @@ class AnimationBuilder(
             }
         }
 
-        val moveCoordinates = moveText.split(',')
+        val moveCoordinates = moveText.split(",")
         var moveX = moveCoordinates[0].toInt()
         var moveY = moveCoordinates[1].toInt()
 

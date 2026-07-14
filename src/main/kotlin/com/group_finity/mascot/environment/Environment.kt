@@ -22,7 +22,7 @@
 
 package com.group_finity.mascot.environment
 
-import io.github.bujjuisabee.shimelinux.linux.WaylandTranslucentWindow
+import io.github.bujjuisabee.shimelinux.linux.WaylandTranslucentLayer
 import java.awt.GraphicsEnvironment
 import java.awt.MouseInfo
 import java.awt.Point
@@ -42,7 +42,7 @@ abstract class Environment {
         get() = complexScreen.areas
 
     fun init() {
-        timer("UpdateScreenRect", true, period = 5000L) { updateScreenRect() }
+        timer(daemon = true, period = 5000) { updateScreenRect() }
         tick()
     }
 
@@ -54,12 +54,12 @@ abstract class Environment {
 
     fun isScreenTopBottom(location: Point): Boolean {
         val count = screens.count { it.topBorder.isOn(location) } + screens.count { it.bottomBorder.isOn(location) }
-        return (count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))) || count == 1
+        return count == 1 || count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))
     }
 
     fun isScreenLeftRight(location: Point): Boolean {
         val count = screens.count { it.leftBorder.isOn(location) } + screens.count { it.rightBorder.isOn(location) }
-        return (count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))) || count == 1
+        return count == 1 || count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))
     }
 
     abstract fun moveActiveIE(point: Point)
@@ -74,7 +74,7 @@ abstract class Environment {
         internal var screenRect = Rectangle(Point(0, 0), Toolkit.getDefaultToolkit().screenSize)
         internal var screenRects = hashMapOf<String, Rectangle>()
         private val cursorPos: Point
-            get() = WaylandTranslucentWindow.mousePosition ?: MouseInfo.getPointerInfo()?.location ?: Point(0, 0)
+            get() = WaylandTranslucentLayer.mousePosition ?: MouseInfo.getPointerInfo()?.location ?: Point(0, 0)
 
         fun updateScreenRect() {
             var virtualBounds = Rectangle()

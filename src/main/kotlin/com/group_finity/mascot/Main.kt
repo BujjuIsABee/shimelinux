@@ -75,10 +75,12 @@ fun main(args: Array<String>) {
         Main.instance.run(openChooser, openSettings)
     } catch (_: OutOfMemoryError) {
         Main.showError(
-            "Out of Memory. There are probably too many\n" +
-            "Shimeji mascots for your computer to handle.\n" +
-            "Select fewer image sets or move some to the\n" +
-            "img/unused folder and try again."
+            """
+            Out of memory. There are probably too many
+            Shimeji mascots for your computer to handle.
+            Select fewer image sets or move some to the
+            img/unused folder and try again.
+            """.trimIndent()
         )
         exitProcess(0)
     }
@@ -115,7 +117,7 @@ class Main {
             for (resource in resources) {
                 val destination = getPath().resolve(resource.removePrefix("/"))
 
-                if (resource.endsWith('/')) {
+                if (resource.endsWith("/")) {
                     destination.createDirectories()
                 } else if (!destination.exists()) {
                     destination.createParentDirectories()
@@ -189,7 +191,7 @@ class Main {
 
         // Get the image sets to use
         if (!getProperty("AlwaysShowShimejiChooser", false)) {
-            for (set in getProperty("ActiveShimeji", "").split('/')) {
+            for (set in getProperty("ActiveShimeji", "").split("/")) {
                 if (set.trim().isNotEmpty()) {
                     imageSets.add(set.trim())
                 }
@@ -731,7 +733,7 @@ class Main {
 
     fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
         val list = mutableListOf<String>()
-        val data = getProperty("DisabledBehaviours.${mascot.imageSet}", "").split('/')
+        val data = getProperty("DisabledBehaviors.${mascot.imageSet}", "").split("/")
 
         if (data.isNotEmpty() && data[0] != "") {
             list.addAll(data)
@@ -745,14 +747,14 @@ class Main {
 
         if (list.isNotEmpty()) {
             setProperty(
-                "DisabledBehaviours.${mascot.imageSet}",
+                "DisabledBehaviors.${mascot.imageSet}",
                 list.toString()
                     .replace("[", "")
                     .replace("]", "")
                     .replace(", ", "/")
             )
         } else {
-            properties.remove("DisabledBehaviours.${mascot.imageSet}")
+            properties.remove("DisabledBehaviors.${mascot.imageSet}")
         }
 
         updateConfigFile()
@@ -769,7 +771,7 @@ class Main {
 
     private fun setMascotInformationDismissed(imageSet: String) {
         val list = mutableListOf<String>()
-        val data = getProperty("InformationDismissed", "").split('/')
+        val data = getProperty("InformationDismissed", "").split("/")
 
         if (data.isNotEmpty() && data[0].isNotEmpty()) {
             list.addAll(data.toList())

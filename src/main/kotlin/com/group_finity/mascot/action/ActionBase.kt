@@ -41,11 +41,11 @@ abstract class ActionBase(
     internal open val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) }
 
-    private var _startTime = 0
+    private var startTime = 0
     var time: Int
-        get() = mascot.time - _startTime
+        get() = mascot.time - startTime
         set(value) {
-            _startTime = mascot.time - value
+            startTime = mascot.time - value
         }
 
     open val isDraggable: Boolean
@@ -67,7 +67,9 @@ abstract class ActionBase(
         variables["action"] = this
         variables.init()
 
-        animations.forEach { it.init() }
+        for (animation in animations) {
+            animation.init()
+        }
     }
 
     override fun hasNext() = isEffective && time < duration
@@ -89,11 +91,15 @@ abstract class ActionBase(
 
     private fun initFrame() {
         variables.initFrame()
-        animations.forEach { it.initFrame() }
+
+        for (animation in animations) {
+            animation.initFrame()
+        }
     }
 
     internal open fun refreshHotspots() {
         mascot.hotspots.clear()
+
         try {
             mascot.hotspots.addAll(animation?.hotspots.orEmpty())
         } catch (_: VariableException) {

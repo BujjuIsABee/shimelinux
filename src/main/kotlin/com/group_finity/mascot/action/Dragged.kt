@@ -93,7 +93,9 @@ class Dragged(
             cursor.y + offsetY
         )
 
-        if (time == timeToRegist - 1 && Math.random() >= 0.1) timeToRegist++
+        if (time == timeToRegist - 1 && Math.random() >= 0.1) {
+            timeToRegist++
+        }
     }
 
     override fun refreshHotspots() {
