@@ -21,7 +21,7 @@
  */
 
 use std::{
-    cmp::max,
+    cmp,
     collections::HashMap,
     sync::{LazyLock, Mutex},
 };
@@ -69,7 +69,8 @@ pub struct Mascot {
     pub logical_y: i32,
     pub width: u32,
     pub height: u32,
-    pub image_width: i32,
+    pub image_width: u32,
+    pub image_height: u32,
     pub rgb: Vec<i32>,
     pub mask: Vec<(i32, i32, i32, i32)>,
     pub first_configure: bool,
@@ -189,8 +190,8 @@ impl LayerShellHandler for Mascot {
         _serial: u32,
     ) {
         let (width, height) = configure.new_size;
-        self.width = max(1, width);
-        self.height = max(1, height);
+        self.width = cmp::max(1, width);
+        self.height = cmp::max(1, height);
 
         // Draw the mascot for the first time if this is the first configure
         if self.first_configure {
@@ -298,7 +299,7 @@ impl ProvidesRegistryState for Mascot {
 
 delegate_noop!(Mascot: ignore WlRegion);
 impl Mascot {
-    pub fn new(compositor_state: CompositorState, layer: LayerSurface, sender_index: i32, globals: &GlobalList, qh: &QueueHandle<Mascot>) -> Self {
+    pub fn new(globals: &GlobalList, qh: &QueueHandle<Mascot>, compositor_state: CompositorState, layer: LayerSurface, sender_index: i32) -> Self {
         let shm = Shm::bind(globals, qh).expect("Failed to get shm");
         let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to get pool");
         Mascot {
@@ -315,6 +316,7 @@ impl Mascot {
             width: 0,
             height: 0,
             image_width: 0,
+            image_height: 0,
             rgb: Vec::new(),
             mask: Vec::new(),
             first_configure: true,
@@ -336,7 +338,7 @@ impl Mascot {
             // Draw the image to the canvas
             for y in 0..height {
                 for x in 0..width {
-                    let color = self.rgb[(y * self.image_width + x) as usize];
+                    let color = self.rgb[cmp::min((y * self.image_width as i32 + x) as usize, self.rgb.len() - 1)];
                     let index = ((y * width + x) * 4) as usize;
                     canvas[index..index + 4].copy_from_slice(&color.to_le_bytes());
                 }

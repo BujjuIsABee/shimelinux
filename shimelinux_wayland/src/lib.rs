@@ -209,7 +209,7 @@ fn get_mask(rgb: &Vec<i32>, width: i32, height: i32) -> Vec<(i32, i32, i32, i32)
     for y in 0..height {
         let mut start: Option<i32> = None;
         for x in 0..width {
-            let index = ((y * width) + x) as usize;
+            let index = cmp::min(((y * width) + x) as usize, rgb.len() - 1);
             let alpha = (rgb[index] >> 24) & 0xFF;
             if alpha > 0 && start.is_none() {
                 start = Some(x);
