@@ -22,10 +22,10 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.getPath
 import com.group_finity.mascot.loadResource
-import kotlin.io.path.absolute
+import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.createParentDirectories
 import kotlin.io.path.outputStream
 
 class WaylandLib {
@@ -48,7 +48,8 @@ class WaylandLib {
         init {
             loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
                 // Load the Wayland library
-                val destination = getPath("lib", "libshimelinux_wayland.so")
+                val destination = Path(System.getProperty("user.home"), ".local", "share", "shimelinux", "libshimelinux_wayland.so")
+                destination.createParentDirectories()
                 destination.outputStream().use { output -> input.copyTo(output) }
                 System.load(destination.absolutePathString())
 
