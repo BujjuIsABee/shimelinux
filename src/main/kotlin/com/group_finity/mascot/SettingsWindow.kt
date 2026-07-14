@@ -155,11 +155,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = "Settings".localize()
+        isResizable = !NativeFactory.waylandLayersSupported
         layout = BorderLayout()
-
-        if (NativeFactory.usingWaylandLayers) {
-            isResizable = false
-        }
 
         try {
             getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { darkTheme.load(it) }
