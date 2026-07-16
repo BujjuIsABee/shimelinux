@@ -23,10 +23,8 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.loadResource
-import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.outputStream
+import java.io.File
+import kotlin.io.outputStream
 
 class WaylandLib {
     external fun createMascot(): Int
@@ -45,16 +43,16 @@ class WaylandLib {
 
     companion object {
         var instance: WaylandLib? = null
-            private set
 
         init {
             loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
-                // Load the Wayland library
-                val destination = Path(System.getProperty("user.home"), ".local", "share", "shimelinux", "libshimelinux_wayland.so")
-                destination.createParentDirectories()
-                destination.outputStream().use { output -> input.copyTo(output) }
-                System.load(destination.absolutePathString())
+                val libFile = File.createTempFile("libshimelinux_wayland", ".so")
+                libFile.deleteOnExit()
+                libFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
 
+                System.load(libFile.absolutePath)
                 instance = WaylandLib()
             }
         }
