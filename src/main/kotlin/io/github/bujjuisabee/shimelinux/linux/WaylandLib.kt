@@ -39,6 +39,8 @@ class WaylandLib {
 
     external fun getMousePosition(senderIndex: Int): IntArray
 
+    external fun setCursor(senderIndex: Int, useHand: Boolean)
+
     external fun dispose(senderIndex: Int)
 
     companion object {

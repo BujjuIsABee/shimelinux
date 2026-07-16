@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.linux
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.Component
+import java.awt.Cursor
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
@@ -48,6 +49,10 @@ class WaylandTranslucentLayer : TranslucentWindow {
         override fun isShowing() = true
 
         override fun getLocationOnScreen() = Point(bounds.x, bounds.y)
+
+        override fun setCursor(cursor: Cursor) {
+            lib.setCursor(senderIndex, cursor.type == Cursor.HAND_CURSOR)
+        }
     }
 
     private val lib = requireNotNull(WaylandLib.instance)

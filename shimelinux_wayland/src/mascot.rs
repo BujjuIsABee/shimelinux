@@ -65,6 +65,8 @@ pub struct Mascot {
     pub pool: SlotPool,
     pub layer: LayerSurface,
     pub pointer: Option<WlPointer>,
+    pub cursor_surface: Option<WlSurface>,
+    pub serial: Option<u32>,
     pub logical_x: i32,
     pub logical_y: i32,
     pub width: u32,
@@ -248,6 +250,7 @@ impl PointerHandler for Mascot {
     ) {
         use PointerEventKind::*;
         for event in events {
+            // Skip events for different mascots
             if &event.surface != self.layer.wl_surface() {
                 continue;
             }
@@ -258,25 +261,36 @@ impl PointerHandler for Mascot {
                         mouse_state.left_pressed = button == BTN_LEFT;
                         mouse_state.right_pressed = button == BTN_RIGHT;
                     });
-                },
+                }
                 Release { button, .. } => {
                     MouseState::get(self.sender_index, |mouse_state| {
                         mouse_state.left_released = button == BTN_LEFT;
                         mouse_state.right_released = button == BTN_RIGHT;
                     });
-                },
-
+                }
                 Motion { .. } => {
                     MouseState::get(self.sender_index, |mouse_state| {
                         let (position_x, position_y) = event.position;
                         mouse_state.position_x = (position_x as i32) + self.logical_x;
                         mouse_state.position_y = (position_y as i32) + self.logical_y;
                     });
-                },
 
-                Enter { .. } => {},
-                Leave { .. } => {},
-                Axis { .. } => {},
+                    // Set the cursor
+                    if let Some(cursor_surface) = &self.cursor_surface
+                        && let Some(serial) = self.serial
+                        && let Some(pointer) = &self.pointer
+                    {
+                        pointer.set_cursor(serial, Some(&cursor_surface), 0, 0);
+                    }
+                }
+                Enter { serial } => {
+                    self.serial = Some(serial);
+                }
+                Leave { serial } => {
+                    self.serial = Some(serial);
+                }
+
+                Axis { .. } => {}
             }
         }
     }
@@ -312,6 +326,8 @@ impl Mascot {
             pool,
             layer,
             pointer: None,
+            cursor_surface: None,
+            serial: None,
             logical_x: 0,
             logical_y: 0,
             width: 0,

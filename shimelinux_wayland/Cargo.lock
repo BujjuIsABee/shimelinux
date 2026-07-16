@@ -313,6 +313,7 @@ dependencies = [
  "jni",
  "smithay-client-toolkit",
  "wayland-client",
+ "wayland-cursor",
 ]
 
 [[package]]
