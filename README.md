@@ -43,16 +43,6 @@ When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click the 
 
 ## Compatibility/Troubleshooting
 
-ShimeLinux has been tested on the following Linux distributions and desktop environments:
-
-| Distro          | Desktop Environment(s)                                                    |
-|-----------------|---------------------------------------------------------------------------|
-| Arch Linux      | KDE Plasma 6.6/6.7, GNOME 50, Cinnamon 6.6, Hyprland v0.55.4, niri v26.04 |
-| Fedora 44       | KDE Plasma 6.7                                                            |
-| Linux Mint 22.3 | Cinnamon 6.6                                                              |
-| Ubuntu 26.04    | GNOME 50                                                                  |
-| NixOS 26.05     | KDE Plasma 6.7                                                            |
-
 > [!IMPORTANT]
 > #### NixOS
 > 
@@ -62,9 +52,7 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 > 
 > `java -jar shimelinux.jar --chooser`
 > 
-> #### Tiling Window Managers
-> 
-> With the exceptions of Hyprland and niri, tiling window managers are not supported. ShimeLinux may not work properly on unsupported tiling window managers.
+> #### Niri
 > 
 > In niri, the settings menu, Shimeji chooser, and right-click popup menus are displayed as full windows by default. To fix this, add the following lines to your `config.kdl` file:
 > 
@@ -80,7 +68,19 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 > Because this project is heavily based on Shimeji-ee, which uses a lot of memory, ShimeLinux will use a lot of your computer's memory as well. To avoid issues related to memory usage, make sure not to select too many Shimeji at once.
 > 
 > #### Older Graphics Cards
->
+> 
 > You might experience some graphical issues when using this program on older graphics cards. This is because ShimeLinux uses the same outdated UI library as Shimeji-ee.
 > 
 > **If you encounter an issue that is not listed above, please report it [here](https://github.com/BujjuIsABee/shimelinux/issues).**
+
+
+ShimeLinux has been tested on the following Linux distributions and desktop environments:
+
+| Distro          | Desktop Environment(s)                                                    |
+|-----------------|---------------------------------------------------------------------------|
+| Arch Linux      | KDE Plasma 6.6/6.7, GNOME 50, Cinnamon 6.6, Hyprland v0.55.4, niri v26.04 |
+| Fedora 44       | KDE Plasma 6.7                                                            |
+| Linux Mint 22.3 | Cinnamon 6.6                                                              |
+| Ubuntu 26.04    | GNOME 50                                                                  |
+| NixOS 26.05     | KDE Plasma 6.7                                                            |
+
