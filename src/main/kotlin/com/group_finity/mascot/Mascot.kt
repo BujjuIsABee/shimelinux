@@ -170,7 +170,17 @@ class Mascot(var imageSet: String) {
     }
 
     private fun showPopup(x: Int, y: Int) {
-        val popup = JPopupMenu()
+        val popup = object : JPopupMenu() {
+            override fun setVisible(b: Boolean) {
+                if (!b && NativeFactory.waylandLayersSupported) {
+                    // Manually close the popup menu to prevent freezing
+                    SwingUtilities.getWindowAncestor(this).dispose()
+                    firePopupMenuWillBecomeInvisible()
+                } else {
+                    super.setVisible(b)
+                }
+            }
+        }
 
         popup.addPopupMenuListener(object : PopupMenuListener {
             override fun popupMenuCanceled(e: PopupMenuEvent) {}
