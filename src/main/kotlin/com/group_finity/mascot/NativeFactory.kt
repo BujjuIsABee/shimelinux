@@ -26,6 +26,7 @@ import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
+import javax.swing.JPopupMenu
 
 abstract class NativeFactory {
     abstract val environment: Environment
@@ -34,14 +35,11 @@ abstract class NativeFactory {
 
     abstract fun newTransparentWindow(): TranslucentWindow
 
+    abstract fun getPopupMenu(): JPopupMenu
+
     companion object {
         @JvmStatic
         lateinit var instance: NativeFactory
-
-        private val desktopType = System.getenv("XDG_CURRENT_DESKTOP").lowercase()
-        private val sessionType = System.getenv("XDG_SESSION_TYPE").lowercase()
-        val kdeEnvironmentSupported = desktopType == "kde"
-        val waylandLayersSupported = sessionType == "wayland" && (desktopType == "hyprland" || desktopType == "niri")
 
         init {
             resetInstance()

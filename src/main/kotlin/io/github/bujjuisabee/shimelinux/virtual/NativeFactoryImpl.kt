@@ -24,6 +24,7 @@ package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
+import javax.swing.JPopupMenu
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
@@ -32,4 +33,6 @@ class NativeFactoryImpl : NativeFactory() {
     override fun newNativeImage(src: BufferedImage) = VirtualNativeImage(src)
 
     override fun newTransparentWindow() = VirtualTranslucentPanel().also { environment.addShimeji(it) }
+
+    override fun getPopupMenu() = JPopupMenu()
 }

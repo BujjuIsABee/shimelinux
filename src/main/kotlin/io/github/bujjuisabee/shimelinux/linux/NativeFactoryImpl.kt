@@ -24,20 +24,46 @@ package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
+import javax.swing.JPopupMenu
+import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = if (kdeEnvironmentSupported) KdeEnvironment() else GenericLinuxEnvironment()
+    private val desktop = System.getenv("XDG_CURRENT_DESKTOP")
+    private val kdeEnvironmentSupported = desktop == "KDE"
+    private val waylandLayersSupported = desktop == "Hyprland" || desktop == "niri"
+
+    override val environment = if (kdeEnvironmentSupported) {
+        KdeEnvironment()
+    } else {
+        GenericLinuxEnvironment()
+    }
 
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
-    override fun newTransparentWindow() = if (waylandLayersSupported && WaylandLib.instance != null) {
+    override fun newTransparentWindow() = if (waylandLayersSupported) {
         WaylandTranslucentLayer()
     } else {
         // Create the window with a LaF that supports transparency
         val previousLaf = UIManager.getLookAndFeel()
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
+    }
+
+    override fun getPopupMenu() = if (waylandLayersSupported) {
+        object : JPopupMenu() {
+            override fun setVisible(b: Boolean) {
+                if (!b) {
+                    // Manually close the popup menu to prevent freezing
+                    SwingUtilities.getWindowAncestor(this).dispose()
+                    firePopupMenuWillBecomeInvisible()
+                } else {
+                    super.setVisible(true)
+                }
+            }
+        }
+    } else {
+        JPopupMenu()
     }
 }

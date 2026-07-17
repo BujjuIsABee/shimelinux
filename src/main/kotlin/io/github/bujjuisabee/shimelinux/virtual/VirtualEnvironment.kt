@@ -23,7 +23,6 @@
 package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
@@ -52,7 +51,6 @@ class VirtualEnvironment : Environment() {
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         display.iconImage = icon
         display.title = "ShimeLinux"
-        display.isResizable = !NativeFactory.waylandLayersSupported
         display.isAutoRequestFocus = false
         display.addWindowListener(object : WindowListener {
             override fun windowOpened(e: WindowEvent) {}

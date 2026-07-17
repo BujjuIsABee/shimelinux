@@ -41,7 +41,6 @@ import java.util.logging.Logger
 import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenu
 import javax.swing.JMenuItem
-import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
@@ -170,17 +169,7 @@ class Mascot(var imageSet: String) {
     }
 
     private fun showPopup(x: Int, y: Int) {
-        val popup = object : JPopupMenu() {
-            override fun setVisible(b: Boolean) {
-                if (!b && NativeFactory.waylandLayersSupported) {
-                    // Manually close the popup menu to prevent freezing
-                    SwingUtilities.getWindowAncestor(this).dispose()
-                    firePopupMenuWillBecomeInvisible()
-                } else {
-                    super.setVisible(b)
-                }
-            }
-        }
+        val popup = NativeFactory.instance.getPopupMenu()
 
         popup.addPopupMenuListener(object : PopupMenuListener {
             override fun popupMenuCanceled(e: PopupMenuEvent) {}

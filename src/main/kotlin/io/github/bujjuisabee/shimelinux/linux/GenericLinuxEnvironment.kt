@@ -24,9 +24,7 @@ package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.getProperty
 import java.awt.Point
-import java.awt.Rectangle
 
 class GenericLinuxEnvironment : Environment() {
     override val workArea: Area
@@ -37,35 +35,6 @@ class GenericLinuxEnvironment : Environment() {
 
     init {
         activeIE.isVisible = false
-    }
-
-    override fun tick() {
-        super.tick()
-
-        // TODO: Remove this once a better fix is implemented
-        val envX = getProperty<Int?>("EnvironmentX", -1)
-        val envY = getProperty<Int?>("EnvironmentY", -1)
-        val envWidth = getProperty<Int?>("EnvironmentWidth", -1)
-        val envHeight = getProperty<Int?>("EnvironmentHeight", -1)
-
-        if (envX != -1 || envY != -1 || envWidth != -1 || envHeight != -1) {
-            screen.set(
-                Rectangle(
-                    envX ?: screen.left,
-                    envY ?: screen.top,
-                    envWidth ?: screen.width,
-                    envHeight ?: screen.height
-                )
-            )
-            workArea.set(
-                Rectangle(
-                    envX ?: workArea.left,
-                    envY ?: workArea.top,
-                    envWidth ?: workArea.width,
-                    envHeight ?: workArea.height
-                )
-            )
-        }
     }
 
     override fun moveActiveIE(point: Point) {}

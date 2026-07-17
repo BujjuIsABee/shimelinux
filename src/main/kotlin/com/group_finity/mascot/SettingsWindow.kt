@@ -25,6 +25,7 @@ package com.group_finity.mascot
 import com.formdev.flatlaf.FlatClientProperties
 import com.formdev.flatlaf.ui.FlatLineBorder
 import com.group_finity.mascot.image.TranslucentWindow
+import io.github.bujjuisabee.shimelinux.linux.KdeEnvironment
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -568,7 +569,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         mainTabs = JTabbedPane()
         mainTabs.addTab("General".localize(), generalTab)
-        if (NativeFactory.kdeEnvironmentSupported) {
+        if (NativeFactory.instance.environment is KdeEnvironment) {
             mainTabs.addTab("InteractiveWindows".localize(), interactiveWindowsTab)
         }
         mainTabs.addTab("Menu".localize(), menuTab)
