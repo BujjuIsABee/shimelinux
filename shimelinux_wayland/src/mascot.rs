@@ -64,6 +64,7 @@ pub struct Mascot {
     pub shm: Shm,
     pub pool: SlotPool,
     pub layer: LayerSurface,
+    pub output_id: Option<i32>,
     pub pointer: Option<WlPointer>,
     pub cursor_surface: Option<WlSurface>,
     pub serial: Option<u32>,
@@ -79,7 +80,6 @@ pub struct Mascot {
 
 #[derive(Default)]
 pub struct Screen {
-    pub id: i32,
     pub x: i32,
     pub y: i32,
     pub width: i32,
@@ -133,10 +133,8 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        if let Some(info) = self.output_state.info(output) {
-            Screen::get(|screen| {
-                screen.id = info.id as i32;
-            });
+        if let Some(info) = self.output_state.info(&output) {
+            self.output_id = Some(info.id as i32);
         }
     }
 
@@ -147,6 +145,7 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         _output: &WlOutput,
     ) {
+        self.output_id = None;
     }
 }
 
@@ -166,14 +165,7 @@ impl OutputHandler for Mascot {
             let id = info.id as i32;
             let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
-            Screen::get(|screen| {
-                if screen.id == id {
-                    screen.x = x;
-                    screen.y = y;
-                    screen.width = width;
-                    screen.height = height;
-                }
-            });
+            Screen::set(id, x, y, width, height);
         }
     }
 
@@ -187,14 +179,7 @@ impl OutputHandler for Mascot {
             let id = info.id as i32;
             let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
-            Screen::get(|screen| {
-                if screen.id == id {
-                    screen.x = x;
-                    screen.y = y;
-                    screen.width = width;
-                    screen.height = height;
-                }
-            });
+            Screen::set(id, x, y, width, height);
         }
     }
 
@@ -353,6 +338,7 @@ impl Mascot {
             shm,
             pool,
             layer,
+            output_id: None,
             pointer: None,
             cursor_surface: None,
             serial: None,
@@ -410,9 +396,24 @@ impl Mascot {
 }
 
 impl Screen {
-    pub fn get<T: FnMut(&mut Screen)>(mut action: T) {
-        let mut screen = SCREEN.lock().unwrap();
-        action(&mut screen);
+    pub fn get<T: FnMut(&mut Screen)>(id: i32, mut action: T) {
+        let mut screens = SCREENS.lock().unwrap();
+        let screen = screens.entry(id).or_default();
+        action(screen);
+    }
+
+    pub fn get_ids() -> Vec<i32> {
+        let screens = SCREENS.lock().unwrap();
+        screens.keys().cloned().collect()
+    }
+
+    fn set(id: i32, x: i32, y: i32, width: i32, height: i32) {
+        Screen::get(id, |screen| {
+            screen.x = x;
+            screen.y = y;
+            screen.width = width;
+            screen.height = height;
+        });
     }
 }
 
@@ -424,5 +425,5 @@ impl MouseState {
     }
 }
 
-static SCREEN: LazyLock<Mutex<Screen>> = LazyLock::new(|| { Mutex::new(Screen::default()) });
+static SCREENS: LazyLock<Mutex<HashMap<i32, Screen>>> = LazyLock::new(|| { Mutex::new(HashMap::new()) });
 static MOUSE_STATES: LazyLock<Mutex<HashMap<i32, MouseState>>> = LazyLock::new(|| { Mutex::new(HashMap::new()) });
