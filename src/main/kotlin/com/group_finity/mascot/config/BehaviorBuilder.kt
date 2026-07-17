@@ -38,9 +38,9 @@ class BehaviorBuilder(
     behaviorNode: Entry,
     private var conditions: MutableList<String?>
 ) {
-    val name = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name")))
+    val name = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name"))) { "Behavior requires Name attribute." }
     private val actionName = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
-    val frequency = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))).toInt()
+    val frequency = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))) { "Behavior requires Frequency attribute." }.toInt()
     val isHidden = behaviorNode.getAttribute(configuration.schema.getString("Hidden")).toBoolean()
     val isToggleable: Boolean
     val isNextAdditive: Boolean

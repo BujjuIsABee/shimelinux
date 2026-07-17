@@ -49,10 +49,11 @@ abstract class NativeFactory {
 
         @JvmStatic
         fun resetInstance() {
-            instance = when (getProperty("Environment", "linux")) {
+            val environment = getProperty("Environment", "linux")
+            instance = when (environment) {
                 "linux" -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
                 "virtual" -> io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl()
-                else -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
+                else -> error("Invalid environment: $environment")
             }
         }
     }

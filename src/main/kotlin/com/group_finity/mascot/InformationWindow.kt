@@ -57,7 +57,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
 
-        val splashImage = requireNotNull(config.getInformation("SplashImage"))
+        val splashImage = checkNotNull(config.getInformation("SplashImage"))
         splashImageLabel = JLabel()
         splashImageLabel.alignmentX = CENTER_ALIGNMENT
         splashImageLabel.icon = ImageIcon(getPath("img", imageSet, splashImage).toString())

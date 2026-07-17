@@ -673,18 +673,21 @@ class Main {
         try {
             mascot.behavior = checkNotNull(getConfiguration(imageSet)).buildNextBehavior(null, mascot)
             manager.add(mascot)
-        } catch (e: BehaviorInstantiationException) {
-            log.log(Level.SEVERE, "Failed to initialize the first action", e)
-            showError("FailedInitializeFirstActionErrorMessage".localize(), e)
-            mascot.dispose()
-        } catch (e: CantBeAliveException) {
-            log.log(Level.SEVERE, "Fatal Error", e)
-            showError("FailedInitializeFirstActionErrorMessage".localize(), e)
-            mascot.dispose()
         } catch (e: Exception) {
-            log.log(Level.SEVERE, "Could not be started ($imageSet)", e)
-            showError("CouldNotCreateShimejiErrorMessage".localize() + " ($imageSet)", e)
-            mascot.dispose()
+            when (e) {
+                is BehaviorInstantiationException,
+                is CantBeAliveException -> {
+                    log.log(Level.SEVERE, "Failed to initialize the first action", e)
+                    showError("FailedInitializeFirstActionErrorMessage".localize(), e)
+                    mascot.dispose()
+                }
+
+                else -> {
+                    log.log(Level.SEVERE, "Could not be started ($imageSet)", e)
+                    showError("CouldNotCreateShimejiErrorMessage".localize() + " ($imageSet)", e)
+                    mascot.dispose()
+                }
+            }
         }
     }
 

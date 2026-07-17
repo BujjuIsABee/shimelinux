@@ -41,6 +41,6 @@ class MoveWithTurn(
     override val hasTurningAnimation = true
 
     init {
-        require(animations.size > 2)
+        require(animations.size >= 2) { "MoveWithTurn requires at least two animations." }
     }
 }

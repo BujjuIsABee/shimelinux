@@ -36,7 +36,7 @@ class Animation(
     val duration = poses.sumOf { it.duration }
 
     init {
-        require(poses.isNotEmpty())
+        require(poses.isNotEmpty()) { "Animation requires at least one pose." }
     }
 
     fun isEffective(variables: VariableMap) = condition.get(variables) as? Boolean == true

@@ -45,7 +45,7 @@ abstract class ComplexAction(
         get() = if (currentAction < actions.size && action is ActionBase) (action as ActionBase).isDraggable else true
 
     init {
-        require(actions.isNotEmpty())
+        require(actions.isNotEmpty()) { "ComplexAction requires at least one Action or ActionReference node." }
     }
 
     override fun init(mascot: Mascot) {

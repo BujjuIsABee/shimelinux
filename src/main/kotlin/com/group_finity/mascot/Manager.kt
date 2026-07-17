@@ -122,14 +122,17 @@ class Manager {
                 try {
                     val configuration = getConfiguration(mascot.imageSet)
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
-                } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Failed to set behavior.", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                    mascot.dispose()
-                } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Fatal Error", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                    mascot.dispose()
+                } catch (e: Exception) {
+                    when (e) {
+                        is BehaviorInstantiationException,
+                        is CantBeAliveException -> {
+                            log.log(Level.SEVERE, "Failed to set behavior.", e)
+                            Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                            mascot.dispose()
+                        }
+
+                        else -> throw e
+                    }
                 }
             }
         }
@@ -142,14 +145,18 @@ class Manager {
                     if (mascot.imageSet == imageSet) {
                         mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
                     }
-                } catch (e: BehaviorInstantiationException) {
-                    log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                    mascot.dispose()
-                } catch (e: CantBeAliveException) {
-                    log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                    Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
-                    mascot.dispose()
+                } catch (e: Exception) {
+                    when (e) {
+                        is BehaviorInstantiationException,
+                        is CantBeAliveException -> {
+                            log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
+                            Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                            mascot.dispose()
+                        }
+
+                        else -> throw e
+                    }
+
                 }
             }
         }

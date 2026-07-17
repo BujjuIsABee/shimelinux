@@ -64,8 +64,8 @@ class Configuration {
         schema = ResourceBundle.getBundle("conf.schema", locale)
 
         for (constant in configurationNode.selectChildren(schema.getString("Constant"))) {
-            val key = checkNotNull(constant.getAttribute(schema.getString("Name")))
-            val value = checkNotNull(constant.getAttribute(schema.getString("Value")))
+            val key = requireNotNull(constant.getAttribute(schema.getString("Name"))) { "Constant requires Name attribute." }
+            val value = requireNotNull(constant.getAttribute(schema.getString("Value"))) { "Constant requires Value attribute." }
             constants[key] = value
         }
 

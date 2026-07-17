@@ -84,9 +84,9 @@ class AnimationBuilder(
         val leftImagePath = if (!leftImageText.isNullOrEmpty()) getPath("img", imageSet, leftImageText) else null
         val rightImageText = frameNode.getAttribute(schema.getString("ImageRight"))
         val rightImagePath = if (!rightImageText.isNullOrEmpty()) getPath("img", imageSet, rightImageText) else null
-        val anchorText = requireNotNull(frameNode.getAttribute(schema.getString("ImageAnchor")))
-        val moveText = requireNotNull(frameNode.getAttribute(schema.getString("Velocity")))
-        val durationText = requireNotNull(frameNode.getAttribute(schema.getString("Duration")))
+        val anchorText = requireNotNull(frameNode.getAttribute(schema.getString("ImageAnchor"))) { "Pose requires Anchor attribute." }
+        val moveText = requireNotNull(frameNode.getAttribute(schema.getString("Velocity"))) { "Pose requires Velocity attribute." }
+        val durationText = requireNotNull(frameNode.getAttribute(schema.getString("Duration"))) { "Pose requires Duration attribute." }
         var soundText = frameNode.getAttribute(schema.getString("Sound"))
         val volumeText = frameNode.getAttribute(schema.getString("Volume")) ?: "0"
 
@@ -142,9 +142,9 @@ class AnimationBuilder(
     }
 
     private fun loadHotspot(frameNode: Entry): Hotspot {
-        val shapeText = requireNotNull(frameNode.getAttribute(schema.getString("Shape")))
-        val originText = requireNotNull(frameNode.getAttribute(schema.getString("Origin")))
-        val sizeText = requireNotNull(frameNode.getAttribute(schema.getString("Size")))
+        val shapeText = requireNotNull(frameNode.getAttribute(schema.getString("Shape"))) { "Hotspot requires Shape attribute." }
+        val originText = requireNotNull(frameNode.getAttribute(schema.getString("Origin"))) { "Hotspot requires Origin attribute." }
+        val sizeText = requireNotNull(frameNode.getAttribute(schema.getString("Size"))) { "Hotspot requires Size attribute." }
         val behaviorText = frameNode.getAttribute(schema.getString("Behavior"))
 
         val scaling = getProperty("Scaling", 1.0)
