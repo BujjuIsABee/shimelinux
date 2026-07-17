@@ -48,7 +48,7 @@ use smithay_client_toolkit::{
 use wayland_client::{Connection, globals::registry_queue_init};
 use wayland_cursor::CursorTheme;
 
-use crate::mascot::{Mascot, SCREENS};
+use crate::mascot::{Mascot, Screen};
 use crate::mascot::MouseState;
 
 enum Event {
@@ -198,24 +198,20 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_up
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreens<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreen<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
 ) -> JIntArray<'caller> {
     let outcome = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
-        let array = JIntArray::new(env, 5).expect("Failed to get array");
-        let mut screens = SCREENS.lock().unwrap();
-        let mut start = 0;
-        for (id, screen) in screens.iter_mut() {
-            array.set_region(env, start, &[
-                *id,
+        let array = JIntArray::new(env, 4).expect("Failed to get array");
+        Screen::get(|screen| {
+            array.set_region(env, 0, &[
                 screen.x,
                 screen.y,
                 screen.width,
                 screen.height,
             ]).expect("Failed to set array");
-            start += 5;
-        }
+        });
 
         Ok(array)
     });
@@ -269,6 +265,18 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
 }
 
 #[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_dispose<'caller>(
+    mut _unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+    sender_index: i32,
+) {
+    let senders = SENDERS.lock().unwrap();
+    if let Some(sender) = senders.get(sender_index as usize) {
+        _ = sender.send(Event::Dispose());
+    }
+}
+
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setCursor<'caller>(
     mut _unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
@@ -278,18 +286,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
     let senders = SENDERS.lock().unwrap();
     if let Some(sender) = senders.get(sender_index as usize) {
         _ = sender.send(Event::SetCursor(use_hand));
-    }
-}
-
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_dispose<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    sender_index: i32,
-) {
-    let senders = SENDERS.lock().unwrap();
-    if let Some(sender) = senders.get(sender_index as usize) {
-        _ = sender.send(Event::Dispose());
     }
 }
 

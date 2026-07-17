@@ -33,7 +33,7 @@ class WaylandLib {
 
     external fun updateImage(senderIndex: Int, rgb: IntArray)
 
-    external fun getScreens(): IntArray
+    external fun getScreen(): IntArray
 
     external fun getMouseState(senderIndex: Int): BooleanArray
 
