@@ -110,45 +110,51 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
 
         if (leftPressed || rightPressed) {
-            component.dispatchEvent(MouseEvent(
-                component,
-                MouseEvent.MOUSE_PRESSED,
-                System.currentTimeMillis(),
-                modifiers,
-                positionX,
-                positionY,
-                1,
-                false,
-                button
-            ))
+            component.dispatchEvent(
+                MouseEvent(
+                    component,
+                    MouseEvent.MOUSE_PRESSED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    positionX,
+                    positionY,
+                    1,
+                    false,
+                    button
+                )
+            )
         }
         if (leftReleased || rightReleased) {
-            component.dispatchEvent(MouseEvent(
-                component,
-                MouseEvent.MOUSE_RELEASED,
-                System.currentTimeMillis(),
-                modifiers,
-                positionX,
-                positionY,
-                1,
-                rightReleased,
-                button
-            ))
+            component.dispatchEvent(
+                MouseEvent(
+                    component,
+                    MouseEvent.MOUSE_RELEASED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    positionX,
+                    positionY,
+                    1,
+                    rightReleased,
+                    button
+                )
+            )
         }
         if (previousMousePosition != newMousePosition) {
             previousMousePosition = newMousePosition
             mousePosition = newMousePosition
-            component.dispatchEvent(MouseEvent(
-                component,
-                if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
-                System.currentTimeMillis(),
-                modifiers,
-                positionX,
-                positionY,
-                1,
-                false,
-                button
-            ))
+            component.dispatchEvent(
+                MouseEvent(
+                    component,
+                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    positionX,
+                    positionY,
+                    1,
+                    false,
+                    button
+                )
+            )
         }
     }
 

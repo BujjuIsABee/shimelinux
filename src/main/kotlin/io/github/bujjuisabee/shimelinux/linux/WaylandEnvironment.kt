@@ -22,41 +22,52 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.loadResource
-import java.io.File
-import kotlin.io.outputStream
+import com.group_finity.mascot.environment.Area
+import com.group_finity.mascot.environment.Environment
+import java.awt.Point
+import java.awt.Rectangle
 
-class WaylandLib {
-    external fun createMascot(): Int
+class WaylandEnvironment : Environment() {
+    override val workArea: Area
+        get() = screen
 
-    external fun setBounds(senderIndex: Int, x: Int, y: Int, width: Int, height: Int)
+    override val activeIE = Area()
+    override val activeIETitle = ""
 
-    external fun updateImage(senderIndex: Int, rgb: IntArray)
+    private val lib = requireNotNull(WaylandLib.instance)
 
-    external fun getScreens(): IntArray
+    init {
+        activeIE.isVisible = false
+    }
 
-    external fun getMouseState(senderIndex: Int): BooleanArray
+    override fun moveActiveIE(point: Point) {}
 
-    external fun getMousePosition(senderIndex: Int): IntArray
+    override fun restoreIE() {}
 
-    external fun setCursor(senderIndex: Int, useHand: Boolean)
+    override fun refreshCache() {}
 
-    external fun dispose(id: Int)
+    override fun dispose() {}
 
-    companion object {
-        var instance: WaylandLib? = null
+    override fun updateScreenRect() {
+        var screenRect = Rectangle()
+        val screenRects = hashMapOf<String, Rectangle>()
 
-        init {
-            loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
-                val libFile = File.createTempFile("libshimelinux_wayland", ".so")
-                libFile.deleteOnExit()
-                libFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-
-                System.load(libFile.absolutePath)
-                instance = WaylandLib()
-            }
+        val screens = lib.getScreens()
+        if (screens.size < 5 || screens.size % 5 != 0) {
+            return
         }
+
+        for (screen in lib.getScreens().toList().chunked(5)) {
+            val id = screen[0].toString()
+            val bounds = Rectangle(screen[1], screen[2], screen[3], screen[4])
+
+            screenRects[id] = bounds
+            screenRect = screenRect.union(bounds)
+        }
+
+        Companion.screenRects = screenRects
+        Companion.screenRect = screenRect
+
+        println("ScreenRect: $screenRect")
     }
 }

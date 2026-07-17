@@ -78,6 +78,14 @@ pub struct Mascot {
 }
 
 #[derive(Default)]
+pub struct Screen {
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+}
+
+#[derive(Default)]
 pub struct MouseState {
     pub left_pressed: bool,
     pub right_pressed: bool,
@@ -133,6 +141,7 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         _output: &WlOutput,
     ) {
+
     }
 }
 
@@ -146,24 +155,40 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput
+        output: WlOutput
     ) {
+        if let Some(info) = self.output_state.info(&output) {
+            let id = info.id as i32;
+            let (x, y) = info.logical_position.unwrap_or_default();
+            let (width, height) = info.logical_size.unwrap_or_default();
+            Screen::set(id, x, y, width, height);
+        }
     }
 
     fn update_output(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput
+        output: WlOutput
     ) {
+        if let Some(info) = self.output_state.info(&output) {
+            let id = info.id as i32;
+            let (x, y) = info.logical_position.unwrap_or_default();
+            let (width, height) = info.logical_size.unwrap_or_default();
+            Screen::set(id, x, y, width, height);
+        }
     }
 
     fn output_destroyed(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput
+        output: WlOutput
     ) {
+        if let Some(info) = self.output_state.info(&output) {
+            let id = info.id as i32;
+            Screen::remove(id);
+        }
     }
 }
 
@@ -369,14 +394,39 @@ impl Mascot {
     }
 }
 
+impl Screen {
+    pub fn get<T: FnMut(&mut Screen)>(id: i32, mut action: T) {
+        let mut screens = SCREENS.lock().unwrap();
+        let screen = screens.entry(id).or_default();
+        action(screen);
+    }
+
+    fn set(id: i32, x: i32, y: i32, width: i32, height: i32) {
+        Screen::get(id, |screen| {
+            screen.x = x;
+            screen.y = y;
+            screen.width = width;
+            screen.height = height;
+        });
+    }
+
+    fn remove(id: i32) {
+        let mut screens = SCREENS.lock().unwrap();
+        screens.remove(&id);
+    }
+}
+
 impl MouseState {
-    pub fn get<T: FnMut(&mut MouseState)>(sender_index: i32, mut action: T) {
+    pub fn get<T: FnMut(&mut MouseState)>(id: i32, mut action: T) {
         let mut mouse_states = MOUSE_STATES.lock().unwrap();
-        let mouse_state = mouse_states.entry(sender_index).or_default();
+        let mouse_state = mouse_states.entry(id).or_default();
         action(mouse_state);
     }
 }
 
 static MOUSE_STATES: LazyLock<Mutex<HashMap<i32, MouseState>>> = LazyLock::new(|| {
+    Mutex::new(HashMap::new())
+});
+pub static SCREENS: LazyLock<Mutex<HashMap<i32, Screen>>> = LazyLock::new(|| {
     Mutex::new(HashMap::new())
 });

@@ -32,17 +32,17 @@ import javax.swing.UIManager
 class NativeFactoryImpl : NativeFactory() {
     private val desktop = System.getenv("XDG_CURRENT_DESKTOP")
     private val kdeEnvironmentSupported = desktop == "KDE"
-    private val waylandLayersSupported = desktop == "Hyprland" || desktop == "niri"
+    private val waylandEnvironmentSupported = desktop == "Hyprland" || desktop == "niri"
 
-    override val environment = if (kdeEnvironmentSupported) {
-        KdeEnvironment()
-    } else {
-        GenericLinuxEnvironment()
+    override val environment = when {
+        kdeEnvironmentSupported -> KdeEnvironment()
+        waylandEnvironmentSupported -> WaylandEnvironment()
+        else -> GenericLinuxEnvironment()
     }
 
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
-    override fun newTransparentWindow() = if (waylandLayersSupported) {
+    override fun newTransparentWindow() = if (waylandEnvironmentSupported) {
         WaylandTranslucentLayer()
     } else {
         // Create the window with a LaF that supports transparency
@@ -51,7 +51,7 @@ class NativeFactoryImpl : NativeFactory() {
         LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
     }
 
-    override fun getPopupMenu() = if (waylandLayersSupported) {
+    override fun getPopupMenu() = if (waylandEnvironmentSupported) {
         object : JPopupMenu() {
             override fun setVisible(b: Boolean) {
                 if (!b) {
