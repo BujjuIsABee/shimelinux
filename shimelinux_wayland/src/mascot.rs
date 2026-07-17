@@ -67,8 +67,6 @@ pub struct Mascot {
     pub pointer: Option<WlPointer>,
     pub cursor_surface: Option<WlSurface>,
     pub serial: Option<u32>,
-    pub logical_x: i32,
-    pub logical_y: i32,
     pub width: u32,
     pub height: u32,
     pub image_width: u32,
@@ -148,26 +146,16 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        output: WlOutput
+        _output: WlOutput
     ) {
-        if let Some(info) = self.output_state.info(&output) {
-            let (logical_x, logical_y) = info.logical_position.unwrap_or_default();
-            self.logical_x = logical_x;
-            self.logical_y = logical_y;
-        }
     }
 
     fn update_output(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        output: WlOutput
+        _output: WlOutput
     ) {
-        if let Some(info) = self.output_state.info(&output) {
-            let (logical_x, logical_y) = info.logical_position.unwrap_or_default();
-            self.logical_x = logical_x;
-            self.logical_y = logical_y;
-        }
     }
 
     fn output_destroyed(
@@ -271,8 +259,8 @@ impl PointerHandler for Mascot {
                 Motion { .. } => {
                     MouseState::get(self.sender_index, |mouse_state| {
                         let (position_x, position_y) = event.position;
-                        mouse_state.position_x = (position_x as i32) + self.logical_x;
-                        mouse_state.position_y = (position_y as i32) + self.logical_y;
+                        mouse_state.position_x = position_x as i32;
+                        mouse_state.position_y = position_y as i32;
                     });
 
                     // Set the cursor
@@ -328,8 +316,6 @@ impl Mascot {
             pointer: None,
             cursor_surface: None,
             serial: None,
-            logical_x: 0,
-            logical_y: 0,
             width: 0,
             height: 0,
             image_width: 0,
