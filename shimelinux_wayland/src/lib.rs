@@ -109,11 +109,11 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                         // Adjust the position
                         let mut x = x;
                         let mut y = cmp::max(-height + 1, y);
-                        if let Some(id) = mascot.output_id {
-                            Screen::get(id, |screen| {
-                                x -= screen.x;
-                                y -= screen.y;
-                            });
+                        if let Some(offset_x) = mascot.offset_x
+                            && let Some(offset_y) = mascot.offset_y
+                        {
+                            x -= offset_x;
+                            y -= offset_y;
                         }
 
                         // Set the position

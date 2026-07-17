@@ -64,7 +64,8 @@ pub struct Mascot {
     pub shm: Shm,
     pub pool: SlotPool,
     pub layer: LayerSurface,
-    pub output_id: Option<i32>,
+    pub offset_x: Option<i32>,
+    pub offset_y: Option<i32>,
     pub pointer: Option<WlPointer>,
     pub cursor_surface: Option<WlSurface>,
     pub serial: Option<u32>,
@@ -134,7 +135,11 @@ impl CompositorHandler for Mascot {
         output: &WlOutput,
     ) {
         if let Some(info) = self.output_state.info(&output) {
-            self.output_id = Some(info.id as i32);
+            let (x, y) = info.logical_position.unwrap_or_default();
+            if self.offset_x == None && self.offset_y == None {
+                self.offset_x = Some(x);
+                self.offset_y = Some(y);
+            }
         }
     }
 
@@ -145,7 +150,6 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         _output: &WlOutput,
     ) {
-        self.output_id = None;
     }
 }
 
@@ -338,7 +342,8 @@ impl Mascot {
             shm,
             pool,
             layer,
-            output_id: None,
+            offset_x: None,
+            offset_y: None,
             pointer: None,
             cursor_surface: None,
             serial: None,
