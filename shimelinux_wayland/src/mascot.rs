@@ -64,8 +64,6 @@ pub struct Mascot {
     pub shm: Shm,
     pub pool: SlotPool,
     pub layer: LayerSurface,
-    pub offset_x: Option<i32>,
-    pub offset_y: Option<i32>,
     pub pointer: Option<WlPointer>,
     pub cursor_surface: Option<WlSurface>,
     pub serial: Option<u32>,
@@ -332,8 +330,6 @@ impl Mascot {
             shm,
             pool,
             layer,
-            offset_x: None,
-            offset_y: None,
             pointer: None,
             cursor_surface: None,
             serial: None,
@@ -400,13 +396,14 @@ impl Mascot {
             let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
 
+            if x != 0 || y != 0 {
+                return;
+            }
+
             if Mascot::get_output_id() == None {
                 Mascot::set_output_id(id);
             }
             if Some(id) == Mascot::get_output_id() {
-                self.offset_x = Some(x);
-                self.offset_y = Some(y);
-
                 Mascot::get_screen(|screen| {
                     screen.x = x;
                     screen.y = y;
