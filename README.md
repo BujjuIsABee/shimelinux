@@ -43,37 +43,6 @@ When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click the 
 
 ## Compatibility/Troubleshooting
 
-> [!IMPORTANT]
-> #### NixOS
-> 
-> The system tray icon does not work properly on NixOS. To access the settings menu and Shimeji chooser, you will need to right-click on ShimeLinux in your application launcher and select "Settings" or "Choose Shimeji." If this does not work, you can use these commands:
-> 
-> `java -jar shimelinux.jar --settings`
-> 
-> `java -jar shimelinux.jar --chooser`
-> 
-> #### Niri
-> 
-> In niri, the settings menu, Shimeji chooser, and right-click popup menus are displayed as full windows by default. To fix this, add the following lines to your `config.kdl` file:
-> 
-> ```kdl
-> window-rule {
->   match app-id="com-group_finity-mascot-MainKt"
->   open-floating true
-> }
-> ```
-> 
-> #### Memory Usage
-> 
-> Because this project is heavily based on Shimeji-ee, which uses a lot of memory, ShimeLinux will use a lot of your computer's memory as well. To avoid issues related to memory usage, make sure not to select too many Shimeji at once.
-> 
-> #### Older Graphics Cards
-> 
-> You might experience some graphical issues when using this program on older graphics cards. This is because ShimeLinux uses the same outdated UI library as Shimeji-ee.
-> 
-> **If you encounter an issue that is not listed above, please report it [here](https://github.com/BujjuIsABee/shimelinux/issues).**
-
-
 ShimeLinux has been tested on the following Linux distributions and desktop environments:
 
 | Distro          | Desktop Environment(s)                                                    |
@@ -84,3 +53,39 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 | Ubuntu 26.04    | GNOME 50                                                                  |
 | NixOS 26.05     | KDE Plasma 6.7                                                            |
 
+### Known Issues
+
+> [!NOTE]
+> If you encounter an issue that is not listed below, please report it [here](https://github.com/BujjuIsABee/shimelinux/issues).
+
+#### NixOS
+
+The system tray icon does not work properly on NixOS. To access the settings menu and Shimeji chooser, you will need to right-click on ShimeLinux in your application launcher and select "Settings" or "Choose Shimeji." If this does not work, you can use these commands:
+
+`java -jar shimelinux.jar --settings`
+
+`java -jar shimelinux.jar --chooser`
+
+#### Niri
+
+In niri, the settings menu, Shimeji chooser, and right-click popup menus will display as full windows by default. To make them display as floating windows, add this to your niri config file:
+
+```kdl
+window-rule {
+  match app-id="com-group_finity-mascot-MainKt"
+  open-floating true
+}
+```
+
+If the menus are still buggy, it's probably an issue with the UI library (Java Swing), rather than ShimeLinux itself.
+
+#### Memory Usage
+
+Because this project is heavily based on Shimeji-ee, which uses a lot of memory, ShimeLinux will use a lot of your computer's memory as well.
+
+> [!WARNING]
+> To reduce the amount of memory used, make sure not to select too many Shimeji at once. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
+
+#### Older Graphics Cards
+
+You might experience some graphical issues when using ShimeLinux on older graphics cards.
