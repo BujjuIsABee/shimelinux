@@ -23,39 +23,39 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
+import java.awt.Point
 import java.awt.image.BufferedImage
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 @Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    private val desktop = System.getenv("XDG_CURRENT_DESKTOP")
-    private val kdeEnvironmentSupported = desktop == "KDE"
-    private val waylandEnvironmentSupported = desktop == "Hyprland" || desktop == "niri"
-
-    override val environment = when {
-        kdeEnvironmentSupported -> KdeEnvironment()
-        waylandEnvironmentSupported -> WaylandEnvironment()
+    override val environment = when (desktop) {
+        KDE -> KdeEnvironment()
+        HYPRLAND, NIRI -> WaylandEnvironment()
         else -> GenericLinuxEnvironment()
     }
 
     override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
 
-    override fun newTransparentWindow() = if (waylandEnvironmentSupported) {
-        WaylandTranslucentLayer()
-    } else {
-        // Create the window with a LaF that supports transparency
-        val previousLaf = UIManager.getLookAndFeel()
-        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
+    override fun newTransparentWindow() = when (desktop) {
+        HYPRLAND, NIRI -> WaylandTranslucentLayer()
+        else -> {
+            // Create the window with a LaF that supports transparency
+            val previousLaf = UIManager.getLookAndFeel()
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+            LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
+        }
     }
 
-    override fun getPopupMenu() = if (waylandEnvironmentSupported) {
-        object : JPopupMenu() {
+    override fun getPopupMenu() = when(desktop) {
+        HYPRLAND, NIRI -> object : JPopupMenu() {
             override fun setVisible(b: Boolean) {
                 if (!b) {
-                    // Manually close the popup menu to prevent freezing
+                    // Manually close the popup menu
                     SwingUtilities.getWindowAncestor(this).dispose()
                     firePopupMenuWillBecomeInvisible()
                 } else {
@@ -63,7 +63,26 @@ class NativeFactoryImpl : NativeFactory() {
                 }
             }
         }
-    } else {
-        JPopupMenu()
+
+        else -> JPopupMenu()
+    }
+
+    private fun getHyprlandCursorPos(): Point? = runCatching {
+        val process = ProcessBuilder("hyprctl", "cursorpos").start()
+        val result = process.inputStream.use {
+            val reader = BufferedReader(InputStreamReader(it))
+            reader.readLine()
+        }
+
+        val parts = result.split(", ")
+        return Point(parts[0].toInt(), parts[1].toInt())
+    }.getOrNull()
+
+    companion object {
+        const val KDE = "KDE"
+        const val HYPRLAND = "Hyprland"
+        const val NIRI = "niri"
+
+        val desktop: String? = System.getenv("XDG_CURRENT_DESKTOP")
     }
 }

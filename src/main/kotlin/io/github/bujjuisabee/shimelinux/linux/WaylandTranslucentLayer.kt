@@ -141,7 +141,6 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
         if (previousMousePosition != newMousePosition) {
             previousMousePosition = newMousePosition
-            mousePosition = newMousePosition
             component.dispatchEvent(
                 MouseEvent(
                     component,
@@ -155,6 +154,21 @@ class WaylandTranslucentLayer : TranslucentWindow {
                     button
                 )
             )
+
+            if (NativeFactoryImpl.desktop == NativeFactoryImpl.NIRI) {
+                mousePosition = newMousePosition
+            }
+        }
+
+        if (NativeFactoryImpl.desktop == NativeFactoryImpl.HYPRLAND) {
+            val command = ProcessBuilder("hyprctl", "cursorpos").start()
+            val result = command.inputStream.bufferedReader().use { it.readLine()?.split(", ") }
+
+            if (result != null && result.size == 2) {
+                val x = result[0].toIntOrNull() ?: 0
+                val y = result[1].toIntOrNull() ?: 0
+                mousePosition = Point(x, y)
+            }
         }
     }
 
