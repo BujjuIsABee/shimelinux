@@ -155,11 +155,13 @@ class WaylandTranslucentLayer : TranslucentWindow {
                 )
             )
 
+            // Update mouse position for niri
             if (NativeFactoryImpl.desktop == NativeFactoryImpl.NIRI) {
                 mousePosition = newMousePosition
             }
         }
 
+        // Update mouse position for Hyprland
         if (NativeFactoryImpl.desktop == NativeFactoryImpl.HYPRLAND) {
             val command = ProcessBuilder("hyprctl", "cursorpos").start()
             val result = command.inputStream.bufferedReader().use { it.readLine()?.split(", ") }

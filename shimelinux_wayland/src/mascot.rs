@@ -249,7 +249,7 @@ impl PointerHandler for Mascot {
     ) {
         use PointerEventKind::*;
         for event in events {
-            // Skip events for different mascots
+            // Skip events for other mascots
             if &event.surface != self.layer.wl_surface() {
                 continue;
             }
@@ -342,6 +342,31 @@ impl Mascot {
             first_configure: true,
             sender_index,
         }
+    }
+
+    pub fn update_mask(&mut self, rgb: &Vec<i32>) {
+        let mut rects = Vec::new();
+
+        for y in 0..self.image_height {
+            let mut start: Option<u32> = None; 
+            for x in 0..self.image_width {
+                let index = cmp::min(((y * self.image_width) + x) as usize, rgb.len() - 1);
+                let alpha = (rgb[index] >> 24) & 0xFF;
+                if alpha > 0 && start.is_none() {
+                    start = Some(x);
+                } else if alpha == 0 && start.is_some() {
+                    rects.push(Rectangle {
+                        x: start.unwrap() as i32,
+                        y: y as i32,
+                        width: (x - start.unwrap()) as i32,
+                        height: 1,
+                    });
+                    start = None;
+                }
+            }
+        }
+
+        self.mask = rects;
     }
 
     fn draw(&mut self, qh: &QueueHandle<Self>) {

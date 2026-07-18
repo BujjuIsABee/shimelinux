@@ -49,7 +49,7 @@ use wayland_client::{Connection, globals::registry_queue_init};
 use wayland_cursor::CursorTheme;
 
 use crate::mascot::MouseState;
-use crate::mascot::{Mascot, Rectangle};
+use crate::mascot::Mascot;
 
 enum Event {
     SetBounds(i32, i32, i32, i32),
@@ -71,7 +71,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     let sender_index = senders.len() as i32; // used as an identifier for the mascot
     senders.push(sender);
 
-    // Connect to the Wayland server
     let connection = Connection::connect_to_env().unwrap();
     let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
     let qh = event_queue.handle();
@@ -100,7 +99,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                 match event {
                     Event::SetBounds(x, y, width, height) => {
                         // Set the dimensions
-                        // cmp::max is used to avoid setting values below 1
                         mascot.layer.set_size(
                             cmp::max(1, width as u32),
                             cmp::max(1, height as u32),
@@ -119,7 +117,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                         mascot.image_height = height as u32;
                     }
                     Event::UpdateImage(rgb) => {
-                        mascot.mask = get_mask(&rgb, mascot.image_width, mascot.image_height);
+                        mascot.update_mask(&rgb);
                         mascot.rgb = rgb;
                     }
                     Event::SetCursor(use_hand) => {
@@ -163,10 +161,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 ) {
     let senders = SENDERS.lock().unwrap();
     if let Some(sender) = senders.get(sender_index as usize) {
-        // cmp::max is used on the position to prevent the mascot from going fully offscreen, which causes visual issues on niri
-        // it is used on the dimensions to prevent the width and height from going below 1, which is not allowed
         let _ = sender.send(Event::SetBounds(
-            cmp::max(-width + 1, x),
+            cmp::max(-width + 1, x), // prevents the mascot from going fully offscreen, which causes visual issues on niri
             cmp::max(-height + 1, y),
             cmp::max(1, width),
             cmp::max(1, height),
@@ -184,7 +180,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_up
     let senders = SENDERS.lock().unwrap();
     if let Some(sender) = senders.get(sender_index as usize) {
         let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
-            // Convert the JIntArray to a Vec<i32>
             let rgb = unsafe {
                 rgb.get_elements(env, ReleaseMode::NoCopyBack).unwrap().to_vec()
             };
@@ -228,9 +223,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
     let outcome = unowned_env.with_env(|env| -> Result<JBooleanArray, Error> {
         let array = JBooleanArray::new(env, 4).expect("Failed to get array");
         MouseState::get(sender_index, |mouse_state| {
-            // mem::replace is used to get the value of the bool, then set it to false so the press/release is only reported once
             array.set_region(env, 0, &[
-                mem::replace(&mut mouse_state.left_pressed, false),
+                mem::replace(&mut mouse_state.left_pressed, false), // get the value of the bool, then set it to false so the press/release is only reported once
                 mem::replace(&mut mouse_state.right_pressed, false),
                 mem::replace(&mut mouse_state.left_released, false),
                 mem::replace(&mut mouse_state.right_released, false),
@@ -287,31 +281,4 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
     if let Some(sender) = senders.get(sender_index as usize) {
         _ = sender.send(Event::SetCursor(use_hand));
     }
-}
-
-fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<Rectangle> {
-    let mut rects: Vec<Rectangle> = Vec::new();
-
-    for y in 0..height {
-        let mut start: Option<u32> = None; // the mask is divided into rows of non-transparent pixels to reduce memory usage for larger images
-        for x in 0..width {
-            let index = cmp::min(((y * width) + x) as usize, rgb.len() - 1); // cmp::min is used to prevent an index out of bounds error
-            let alpha = (rgb[index] >> 24) & 0xFF;
-            if alpha > 0 && start.is_none() {
-                // Start a new row
-                start = Some(x);
-            } else if alpha == 0 && start.is_some() {
-                // End the current row and add it to rects
-                rects.push(Rectangle {
-                    x: start.unwrap() as i32,
-                    y: y as i32,
-                    width: (x - start.unwrap()) as i32,
-                    height: 1,
-                });
-                start = None;
-            }
-        }
-    }
-
-    rects
 }
