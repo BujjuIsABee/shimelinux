@@ -108,10 +108,10 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 
                         // Set the position
                         mascot.layer.set_margin(
-                            y,
+                            y - mascot.offset_y.unwrap_or_default(),
                             0,
                             0,
-                            x,
+                            x - mascot.offset_x.unwrap_or_default(),
                         );
 
                         // Store the requested dimensions
