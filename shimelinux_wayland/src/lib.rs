@@ -39,8 +39,7 @@ use jni::{
     sys::jboolean,
 };
 use smithay_client_toolkit::{
-    compositor::CompositorState,
-    shell::{
+    compositor::CompositorState, shell::{
         WaylandSurface,
         wlr_layer::{Anchor, Layer, LayerShell},
     },
@@ -48,7 +47,7 @@ use smithay_client_toolkit::{
 use wayland_client::{Connection, globals::registry_queue_init};
 use wayland_cursor::CursorTheme;
 
-use crate::mascot::{Mascot, Screen};
+use crate::mascot::{Mascot, Rectangle};
 use crate::mascot::MouseState;
 
 enum Event {
@@ -105,16 +104,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                             cmp::max(1, width as u32),
                             cmp::max(1, height as u32),
                         );
-
-                        // Adjust the position
-                        let mut x = x;
-                        let mut y = cmp::max(-height + 1, y);
-                        if let Some(offset_x) = mascot.offset_x
-                            && let Some(offset_y) = mascot.offset_y
-                        {
-                            x -= offset_x;
-                            y -= offset_y;
-                        }
 
                         // Set the position
                         mascot.layer.set_margin(
@@ -176,8 +165,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
         // cmp::max is used on the position to prevent the mascot from going fully offscreen, which causes visual issues on niri
         // it is used on the dimensions to prevent the width and height from going below 1, which is not allowed
         let _ = sender.send(Event::SetBounds(
-            x,
-            y,
+            cmp::max(-width + 1, x),
+            cmp::max(-height + 1, y),
             cmp::max(1, width),
             cmp::max(1, height),
         ));
@@ -214,7 +203,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
 ) -> JIntArray<'caller> {
     let outcome = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
         let array = JIntArray::new(env, 4).expect("Failed to get array");
-        Screen::get(|screen| {
+        Mascot::get_screen(|screen| {
             array.set_region(env, 0, &[
                 screen.x,
                 screen.y,
@@ -299,8 +288,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
     }
 }
 
-fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)> {
-    let mut rects: Vec<(i32, i32, i32, i32)> = Vec::new();
+fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<Rectangle> {
+    let mut rects: Vec<Rectangle> = Vec::new();
 
     for y in 0..height {
         let mut start: Option<u32> = None; // the mask is divided into rows of non-transparent pixels to reduce memory usage for larger images
@@ -312,7 +301,12 @@ fn get_mask(rgb: &Vec<i32>, width: u32, height: u32) -> Vec<(i32, i32, i32, i32)
                 start = Some(x);
             } else if alpha == 0 && start.is_some() {
                 // End the current row and add it to rects
-                rects.push((start.unwrap() as i32, y as i32, (x - start.unwrap()) as i32, 1));
+                rects.push(Rectangle {
+                    x: start.unwrap() as i32,
+                    y: y as i32,
+                    width: (x - start.unwrap()) as i32,
+                    height: 1,
+                });
                 start = None;
             }
         }

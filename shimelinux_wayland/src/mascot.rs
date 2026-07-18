@@ -64,8 +64,6 @@ pub struct Mascot {
     pub shm: Shm,
     pub pool: SlotPool,
     pub layer: LayerSurface,
-    pub offset_x: Option<i32>,
-    pub offset_y: Option<i32>,
     pub pointer: Option<WlPointer>,
     pub cursor_surface: Option<WlSurface>,
     pub serial: Option<u32>,
@@ -74,13 +72,13 @@ pub struct Mascot {
     pub image_width: u32,
     pub image_height: u32,
     pub rgb: Vec<i32>,
-    pub mask: Vec<(i32, i32, i32, i32)>,
+    pub mask: Vec<Rectangle>,
     pub first_configure: bool,
     pub sender_index: i32,
 }
 
 #[derive(Default)]
-pub struct Screen {
+pub struct Rectangle {
     pub x: i32,
     pub y: i32,
     pub width: i32,
@@ -134,17 +132,7 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        if let Some(info) = self.output_state.info(&output) {
-            let id = info.id as i32;
-            let (x, y) = info.logical_position.unwrap_or_default();
-            let (width, height) = info.logical_size.unwrap_or_default();
-            if self.offset_x == None && self.offset_y == None && Screen::get_output_id() == None {
-                self.offset_x = Some(x);
-                self.offset_y = Some(y);
-                Screen::set_output_id(id);
-                Screen::set(x, y, width, height)
-            }
-        }
+        self.set_screen(&output);
     }
 
     fn surface_leave(
@@ -169,14 +157,7 @@ impl OutputHandler for Mascot {
         _qh: &QueueHandle<Self>,
         output: WlOutput
     ) {
-        if let Some(info) = self.output_state.info(&output) {
-            let id = info.id as i32;
-            let (x, y) = info.logical_position.unwrap_or_default();
-            let (width, height) = info.logical_size.unwrap_or_default();
-            if Some(id) == Screen::get_output_id() {
-                Screen::set(x, y, width, height);
-            }
-        }
+        self.set_screen(&output);
     }
 
     fn update_output(
@@ -185,14 +166,7 @@ impl OutputHandler for Mascot {
         _qh: &QueueHandle<Self>,
         output: WlOutput
     ) {
-        if let Some(info) = self.output_state.info(&output) {
-            let id = info.id as i32;
-            let (x, y) = info.logical_position.unwrap_or_default();
-            let (width, height) = info.logical_size.unwrap_or_default();
-            if Some(id) == Screen::get_output_id() {
-                Screen::set(x, y, width, height);
-            }
-        }
+        self.set_screen(&output);
     }
 
     fn output_destroyed(
@@ -350,8 +324,6 @@ impl Mascot {
             shm,
             pool,
             layer,
-            offset_x: None,
-            offset_y: None,
             pointer: None,
             cursor_surface: None,
             serial: None,
@@ -395,8 +367,8 @@ impl Mascot {
 
             // Set the mask shape
             let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
-            for (x, y, width, height) in &self.mask {
-                shape.add(*x, *y, *width, *height);
+            for rect in &self.mask {
+                shape.add(rect.x, rect.y, rect.width, rect.height);
             }
             self.layer.set_input_region(Some(&shape));
         }
@@ -406,21 +378,28 @@ impl Mascot {
         buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
         self.layer.commit();
     }
-}
-
-impl Screen {
-    pub fn get<T: FnMut(&mut Screen)>(mut action: T) {
+    
+    pub fn get_screen<T: FnMut(&mut Rectangle)>(mut action: T) {
         let mut screen = SCREEN.lock().unwrap();
         action(screen.get_or_insert_default());
     }
 
-    fn set(x: i32, y: i32, width: i32, height: i32) {
-        Screen::get(|screen| {
-            screen.x = x;
-            screen.y = y;
-            screen.width = width;
-            screen.height = height;
-        });
+    fn set_screen(&mut self, output: &WlOutput) {
+        if let Some(info) = self.output_state.info(output) {
+            let id = info.id as i32;
+            let (width, height) = info.logical_size.unwrap_or_default();
+            if Mascot::get_output_id() == None {
+                Mascot::set_output_id(id);
+            }
+            if Some(id) == Mascot::get_output_id() {
+                Mascot::get_screen(|screen| {
+                    screen.x = 0;
+                    screen.y = 0;
+                    screen.width = width;
+                    screen.height = height;
+                });
+            }
+        }
     }
 
     fn get_output_id() -> Option<i32> {
@@ -443,5 +422,5 @@ impl MouseState {
 }
 
 static OUTPUT_ID: LazyLock<Mutex<Option<i32>>> = LazyLock::new(|| { Mutex::new(None) });
-static SCREEN: LazyLock<Mutex<Option<Screen>>> = LazyLock::new(|| { Mutex::new(None) });
+static SCREEN: LazyLock<Mutex<Option<Rectangle>>> = LazyLock::new(|| { Mutex::new(None) });
 static MOUSE_STATES: LazyLock<Mutex<HashMap<i32, MouseState>>> = LazyLock::new(|| { Mutex::new(HashMap::new()) });
