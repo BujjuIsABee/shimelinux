@@ -396,17 +396,13 @@ impl Mascot {
             let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
 
-            if x != 0 || y != 0 {
-                return;
-            }
-
             if Mascot::get_output_id() == None {
                 Mascot::set_output_id(id);
             }
             if Some(id) == Mascot::get_output_id() {
                 Mascot::get_screen(|screen| {
-                    screen.x = x;
-                    screen.y = y;
+                    screen.x = 0;
+                    screen.y = 0;
                     screen.width = width;
                     screen.height = height;
                 });
