@@ -136,9 +136,10 @@ impl CompositorHandler for Mascot {
     ) {
         if let Some(info) = self.output_state.info(&output) {
             let (x, y) = info.logical_position.unwrap_or_default();
-            if self.offset_x == None && self.offset_y == None {
+            if self.offset_x == None && self.offset_y == None && Screen::get_output_id() == None {
                 self.offset_x = Some(x);
                 self.offset_y = Some(y);
+                Screen::set_output_id(info.id as i32);
             }
         }
     }
@@ -169,7 +170,9 @@ impl OutputHandler for Mascot {
             let id = info.id as i32;
             let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
-            Screen::set(id, x, y, width, height);
+            if Some(id) == Screen::get_output_id() {
+                Screen::set(x, y, width, height);
+            }
         }
     }
 
@@ -183,7 +186,9 @@ impl OutputHandler for Mascot {
             let id = info.id as i32;
             let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
-            Screen::set(id, x, y, width, height);
+            if Some(id) == Screen::get_output_id() {
+                Screen::set(x, y, width, height);
+            }
         }
     }
 
@@ -401,24 +406,28 @@ impl Mascot {
 }
 
 impl Screen {
-    pub fn get<T: FnMut(&mut Screen)>(id: i32, mut action: T) {
-        let mut screens = SCREENS.lock().unwrap();
-        let screen = screens.entry(id).or_default();
-        action(screen);
+    pub fn get<T: FnMut(&mut Screen)>(mut action: T) {
+        let mut screen = SCREEN.lock().unwrap();
+        action(screen.get_or_insert_default());
     }
 
-    pub fn get_ids() -> Vec<i32> {
-        let screens = SCREENS.lock().unwrap();
-        screens.keys().cloned().collect()
-    }
-
-    fn set(id: i32, x: i32, y: i32, width: i32, height: i32) {
-        Screen::get(id, |screen| {
+    fn set(x: i32, y: i32, width: i32, height: i32) {
+        Screen::get(|screen| {
             screen.x = x;
             screen.y = y;
             screen.width = width;
             screen.height = height;
         });
+    }
+
+    fn get_output_id() -> Option<i32> {
+        let output_id = OUTPUT_ID.lock().unwrap();
+        *output_id
+    }
+
+    fn set_output_id(id: i32) {
+        let mut output_id = OUTPUT_ID.lock().unwrap();
+        *output_id = Some(id);
     }
 }
 
@@ -430,5 +439,6 @@ impl MouseState {
     }
 }
 
-static SCREENS: LazyLock<Mutex<HashMap<i32, Screen>>> = LazyLock::new(|| { Mutex::new(HashMap::new()) });
+static OUTPUT_ID: LazyLock<Mutex<Option<i32>>> = LazyLock::new(|| { Mutex::new(None) });
+static SCREEN: LazyLock<Mutex<Option<Screen>>> = LazyLock::new(|| { Mutex::new(None) });
 static MOUSE_STATES: LazyLock<Mutex<HashMap<i32, MouseState>>> = LazyLock::new(|| { Mutex::new(HashMap::new()) });

@@ -49,18 +49,9 @@ class WaylandEnvironment : Environment() {
     override fun dispose() {}
 
     override fun updateScreenRect() {
-        var screenRect = Rectangle()
-        val screenRects = hashMapOf<String, Rectangle>()
-
-        val screenIds = lib.getScreenIds()
-        for (screenId in screenIds) {
-            val screen = lib.getScreen(screenId)
-            val bounds = Rectangle(screen[0], screen[1], screen[2], screen[3])
-            screenRects[screenId.toString()] = bounds
-            screenRect = screenRect.union(bounds)
-        }
-
-        Companion.screenRects = screenRects
-        Companion.screenRect = screenRect
+        val screen = lib.getScreen()
+        val bounds = Rectangle(screen[0], screen[1], screen[2], screen[3])
+        screenRects = hashMapOf("screen" to bounds)
+        screenRect = bounds
     }
 }

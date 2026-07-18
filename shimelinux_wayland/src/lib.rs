@@ -211,11 +211,10 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_up
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreen<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    id: i32,
 ) -> JIntArray<'caller> {
     let outcome = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
         let array = JIntArray::new(env, 4).expect("Failed to get array");
-        Screen::get(id, |screen| {
+        Screen::get(|screen| {
             array.set_region(env, 0, &[
                 screen.x,
                 screen.y,
@@ -223,22 +222,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
                 screen.height,
             ]).expect("Failed to set array");
         });
-
-        Ok(array)
-    });
-
-    outcome.resolve::<ThrowRuntimeExAndDefault>()
-}
-
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreenIds<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-) -> JIntArray<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
-        let ids = Screen::get_ids();
-        let array = JIntArray::new(env, ids.len()).expect("Failed to get array");
-        array.set_region(env, 0, &ids).expect("Failed to set array");
 
         Ok(array)
     });
