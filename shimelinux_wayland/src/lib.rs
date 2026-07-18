@@ -39,7 +39,8 @@ use jni::{
     sys::jboolean,
 };
 use smithay_client_toolkit::{
-    compositor::CompositorState, shell::{
+    compositor::CompositorState,
+    shell::{
         WaylandSurface,
         wlr_layer::{Anchor, Layer, LayerShell},
     },
@@ -47,8 +48,8 @@ use smithay_client_toolkit::{
 use wayland_client::{Connection, globals::registry_queue_init};
 use wayland_cursor::CursorTheme;
 
-use crate::mascot::{Mascot, Rectangle};
 use crate::mascot::MouseState;
+use crate::mascot::{Mascot, Rectangle};
 
 enum Event {
     SetBounds(i32, i32, i32, i32),
