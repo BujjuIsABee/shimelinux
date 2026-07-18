@@ -393,7 +393,6 @@ impl Mascot {
     fn set_screen(&mut self, output: &WlOutput) {
         if let Some(info) = self.output_state.info(output) {
             let id = info.id as i32;
-            let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
 
             if Mascot::get_output_id() == None {
