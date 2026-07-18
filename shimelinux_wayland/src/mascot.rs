@@ -135,11 +135,14 @@ impl CompositorHandler for Mascot {
         output: &WlOutput,
     ) {
         if let Some(info) = self.output_state.info(&output) {
+            let id = info.id as i32;
             let (x, y) = info.logical_position.unwrap_or_default();
+            let (width, height) = info.logical_size.unwrap_or_default();
             if self.offset_x == None && self.offset_y == None && Screen::get_output_id() == None {
                 self.offset_x = Some(x);
                 self.offset_y = Some(y);
-                Screen::set_output_id(info.id as i32);
+                Screen::set_output_id(id);
+                Screen::set(x, y, width, height)
             }
         }
     }
