@@ -83,7 +83,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 
     // Create the layer
     let surface = compositor_state.create_surface(&qh);
-    let layer = layer_shell.create_layer_surface(&qh, surface, Layer::Top, Some("shimelinux"), None);
+    let layer = layer_shell.create_layer_surface(&qh, surface, Layer::Overlay, Some("shimelinux"), None);
     layer.set_exclusive_zone(-1);
     layer.set_anchor(Anchor::TOP | Anchor::LEFT);
     layer.set_size(1, 1);
