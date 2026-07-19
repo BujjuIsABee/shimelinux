@@ -39,9 +39,15 @@ If none of these options work for you, you can download the `.jar` file [here](h
 
 ## How to use
 
-When you open ShimeLinux, a Shimeji will appear. To add more Shimeji, click the system tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to appear when you run the program. Shimeji in the `img/unused` folder will be ignored.
+When you open ShimeLinux, a Shimeji will appear. You can right-click on a Shimeji to open a menu with options for that Shimeji, or click on the system tray icon for general options.
+
+To add more Shimeji, click the system tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to appear when you run the program. Shimeji in the `img/unused` folder will be ignored.
+
+To close the program, right-click on a Shimeji or the system tray icon and select "Dismiss All."
 
 ## Compatibility/Troubleshooting
+
+Any Shimeji that works on the latest version of Shimeji-ee should work for ShimeLinux as well.
 
 ShimeLinux has been tested on the following Linux distributions and desktop environments:
 
@@ -51,7 +57,7 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 | Fedora 44       | KDE Plasma 6.7                                                            |
 | Linux Mint 22.3 | Cinnamon 6.6                                                              |
 | Ubuntu 26.04    | GNOME 50                                                                  |
-| NixOS 26.05     | KDE Plasma 6.7                                                            |
+| NixOS 26.05     | KDE Plasma 6.7, niri v26.04                                               |
 
 ### Known Issues
 
@@ -84,7 +90,7 @@ If the menus are still buggy, it's probably an issue with the UI library (Java S
 Because this project is heavily based on Shimeji-ee, which uses a lot of memory, ShimeLinux will use a lot of your computer's memory as well.
 
 > [!WARNING]
-> To reduce the amount of memory used, make sure not to select too many Shimeji at once. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
+> Make sure not to select too many Shimeji at once. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
 
 #### Older Graphics Cards
 
