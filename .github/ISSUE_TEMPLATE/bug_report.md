@@ -8,25 +8,20 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+Provide a description of the bug.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Steps to reproduce**
+Provide steps to reproduce the bug.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+1. 
+2. 
+3. 
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**System information**
+Answer the following questions:
 
-**Desktop (please complete the following information):**
-- Distro: [e.g. Arch Linux]
-- Desktop Environment: [e.g. KDE Plasma]
-- Window Manager: [e.g. X11, Wayland]
+- Which Linux distribution are you using?
+- Which desktop environment are you using?
 
-**Additional context**
-Add any other context about the problem here.
+**Screenshots/Logs**
+If possible, provide screenshots and logs showing the issue. Logs are located at the config directory (~/.config/shimelinux).
