@@ -1,12 +1,10 @@
 # ShimeLinux
 
-**Shimeji desktop pet for Linux**
-
 <img width="1280" height="720" alt="Screenshot" src="https://github.com/user-attachments/assets/eb7c5939-7cd2-4fab-8891-eab648211d64" />
 
-ShimeLinux is an unofficial Linux port/Kotlin rewrite of [Shimeji-ee by Kilkakon](https://kilkakon.com/shimeji). This project also incorporates work from [SystemTray by dorkbox](https://github.com/dorkbox/SystemTray), [FlatLaf by FormDev](https://github.com/JFormDesigner/FlatLaf), [hqx-java by Arcnor](https://github.com/Arcnor/hqx-java), [dbus-java by hypfvieh](https://github.com/hypfvieh/dbus-java), and [Smithay's Client Toolkit](https://github.com/smithay/client-toolkit). You can view the licenses for these projects [here](https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE-ORIGINAL).
+An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the latest version of Shimeji-ee should work. Some tiling window managers are also supported (see [Compatibility](https://github.com/BujjuIsABee/shimelinux#compatibility)).
 
-## How to install
+## Installation
 
 ### Debian-based distributions
 
@@ -39,15 +37,14 @@ If none of these options work for you, you can download the `.jar` file [here](h
 
 ## How to use
 
-When you open ShimeLinux, a Shimeji will appear. You can right-click on a Shimeji to open a menu with options for that Shimeji, or click on the system tray icon for general options.
+When you open ShimeLinux, a Shimeji will appear. You can right-click on a Shimeji to open a menu with options for that Shimeji, or right-click on the system tray icon for general options. To close the program, open one of these menus and select "Dismiss All."
 
-To add more Shimeji, click the system tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to appear when you run the program. Shimeji in the `img/unused` folder will be ignored.
+To add more Shimeji, click the system tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to use.
 
-To close the program, right-click on a Shimeji or the system tray icon and select "Dismiss All."
+> [!WARNING]
+> ShimeLinux can use a lot of your computer's memory, so you should make sure not to select too many Shimeji at once. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
 
-## Compatibility/Troubleshooting
-
-Any Shimeji that works on the latest version of Shimeji-ee should work for ShimeLinux as well.
+## Compatibility
 
 ShimeLinux has been tested on the following Linux distributions and desktop environments:
 
@@ -59,39 +56,24 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 | Ubuntu 26.04    | GNOME 50                                                                  |
 | NixOS 26.05     | KDE Plasma 6.7, niri v26.04                                               |
 
-### Known Issues
+### NixOS
 
-> [!NOTE]
-> If you encounter an issue that is not listed below, please report it [here](https://github.com/BujjuIsABee/shimelinux/issues).
+The system tray icon does not work on NixOS. To access the settings menu and Shimeji chooser, you will need to right-click on ShimeLinux in your application launcher and select "Settings" or "Choose Shimeji," or launch the application from the terminal with the `--settings` or `--chooser` flags.
 
-#### NixOS
+### Tiling Window Managers
 
-The system tray icon does not work properly on NixOS. To access the settings menu and Shimeji chooser, you will need to right-click on ShimeLinux in your application launcher and select "Settings" or "Choose Shimeji." If this does not work, you can use these commands:
+ShimeLinux supports **Hyprland** and **niri**. On these compositors, Shimeji are displayed using Wayland layers instead of windows. Some menus may be buggy, as ShimeLinux uses an outdated UI library with limited Wayland support.
 
-`java -jar shimelinux.jar --settings`
+> [!TIP]
+> On niri, the settings menu, Shimeji chooser, and right-click popup menus will be displayed as full windows by default. To make them display as floating windows, add this to your niri config file:
+> 
+> ```kdl
+> window-rule {
+>   match app-id="com-group_finity-mascot-MainKt"
+>   open-floating true
+> }
+> ```
 
-`java -jar shimelinux.jar --chooser`
+## Licenses
 
-#### Niri
-
-In niri, the settings menu, Shimeji chooser, and right-click popup menus will display as full windows by default. To make them display as floating windows, add this to your niri config file:
-
-```kdl
-window-rule {
-  match app-id="com-group_finity-mascot-MainKt"
-  open-floating true
-}
-```
-
-If the menus are still buggy, it's probably an issue with the UI library (Java Swing), rather than ShimeLinux itself.
-
-#### Memory Usage
-
-Because this project is heavily based on Shimeji-ee, which uses a lot of memory, ShimeLinux will use a lot of your computer's memory as well.
-
-> [!WARNING]
-> Make sure not to select too many Shimeji at once. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
-
-#### Older Graphics Cards
-
-You might experience some graphical issues when using ShimeLinux on older graphics cards.
+This project incorporates work from [Shimeji-ee by Kilkakon](https://kilkakon.com/shimeji), [SystemTray by dorkbox](https://github.com/dorkbox/SystemTray), [FlatLaf by FormDev](https://github.com/JFormDesigner/FlatLaf), [hqx-java by Arcnor](https://github.com/Arcnor/hqx-java), [dbus-java by hypfvieh](https://github.com/hypfvieh/dbus-java), and [Smithay's Client Toolkit](https://github.com/smithay/client-toolkit). You can view the licenses for these projects [here](https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE-ORIGINAL).
