@@ -26,16 +26,16 @@ import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
-import javax.swing.JPopupMenu
+
+import io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl as LinuxNativeFactory
+import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
 abstract class NativeFactory {
     abstract val environment: Environment
 
+    abstract fun newTranslucentWindow(): TranslucentWindow
+
     abstract fun newNativeImage(src: BufferedImage): NativeImage
-
-    abstract fun newTransparentWindow(): TranslucentWindow
-
-    abstract fun getPopupMenu(): JPopupMenu
 
     companion object {
         @JvmStatic
@@ -49,8 +49,8 @@ abstract class NativeFactory {
         fun resetInstance() {
             val environment = getProperty("Environment", "linux")
             instance = when (environment) {
-                "linux" -> io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl()
-                "virtual" -> io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl()
+                "linux" -> LinuxNativeFactory()
+                "virtual" -> VirtualNativeFactory()
                 else -> error("Invalid environment: $environment")
             }
         }

@@ -26,16 +26,12 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import java.awt.Point
 
-class GenericLinuxEnvironment : Environment() {
+class LinuxEnvironment : Environment() {
     override val workArea: Area
         get() = screen
 
-    override val activeIE = Area()
+    override val activeIE = Area().apply { isVisible = false }
     override val activeIETitle = ""
-
-    init {
-        activeIE.isVisible = false
-    }
 
     override fun moveActiveIE(point: Point) {}
 

@@ -23,66 +23,34 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.NativeFactory
-import java.awt.Point
 import java.awt.image.BufferedImage
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import javax.swing.JPopupMenu
-import javax.swing.SwingUtilities
-import javax.swing.UIManager
 
-@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = when (desktop) {
-        KDE -> KdeEnvironment()
-        HYPRLAND, NIRI -> WaylandEnvironment()
-        else -> GenericLinuxEnvironment()
+    override val environment = when (type) {
+        Type.GENERIC -> LinuxEnvironment()
+        Type.KDE -> KdeEnvironment()
+        Type.WAYLAND -> WaylandEnvironment()
     }
 
-    override fun newNativeImage(src: BufferedImage) = LinuxNativeImage(src)
-
-    override fun newTransparentWindow() = when (desktop) {
-        HYPRLAND, NIRI -> WaylandTranslucentLayer()
-        else -> {
-            // Create the window with a LaF that supports transparency
-            val previousLaf = UIManager.getLookAndFeel()
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-            LinuxTranslucentWindow().also { UIManager.setLookAndFeel(previousLaf) }
-        }
+    override fun newNativeImage(src: BufferedImage) = when (type) {
+        Type.GENERIC,
+        Type.KDE,
+        Type.WAYLAND -> LinuxNativeImage(src)
     }
 
-    override fun getPopupMenu() = when(desktop) {
-        HYPRLAND, NIRI -> object : JPopupMenu() {
-            override fun setVisible(b: Boolean) {
-                if (!b) {
-                    // Manually close the popup menu
-                    SwingUtilities.getWindowAncestor(this).dispose()
-                    firePopupMenuWillBecomeInvisible()
-                } else {
-                    super.setVisible(true)
-                }
-            }
-        }
-
-        else -> JPopupMenu()
+    override fun newTranslucentWindow() = when (type) {
+        Type.GENERIC,
+        Type.KDE -> LinuxTranslucentWindow()
+        Type.WAYLAND -> WaylandTranslucentLayer()
     }
 
-    private fun getHyprlandCursorPos(): Point? = runCatching {
-        val process = ProcessBuilder("hyprctl", "cursorpos").start()
-        val result = process.inputStream.use {
-            val reader = BufferedReader(InputStreamReader(it))
-            reader.readLine()
-        }
-
-        val parts = result.split(", ")
-        return Point(parts[0].toInt(), parts[1].toInt())
-    }.getOrNull()
+    enum class Type { GENERIC, KDE, WAYLAND }
 
     companion object {
-        const val KDE = "KDE"
-        const val HYPRLAND = "Hyprland"
-        const val NIRI = "niri"
-
-        val desktop: String? = System.getenv("XDG_CURRENT_DESKTOP")
+        private val type = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+            "KDE" -> Type.KDE
+            "Hyprland", "niri" -> Type.WAYLAND
+            else -> Type.GENERIC
+        }
     }
 }

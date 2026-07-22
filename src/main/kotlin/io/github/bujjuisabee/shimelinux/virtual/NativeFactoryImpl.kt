@@ -26,13 +26,10 @@ import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
 import javax.swing.JPopupMenu
 
-@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
     override val environment = VirtualEnvironment()
 
     override fun newNativeImage(src: BufferedImage) = VirtualNativeImage(src)
 
-    override fun newTransparentWindow() = VirtualTranslucentPanel().also { environment.addShimeji(it) }
-
-    override fun getPopupMenu() = JPopupMenu()
+    override fun newTranslucentWindow() = VirtualTranslucentPanel().also { environment.addShimeji(it) }
 }

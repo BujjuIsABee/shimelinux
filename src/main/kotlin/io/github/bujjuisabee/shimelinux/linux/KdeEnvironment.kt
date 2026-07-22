@@ -30,6 +30,7 @@ import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.types.Variant
 import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
@@ -50,8 +51,11 @@ class KdeEnvironment : Environment() {
     private var restoreWindows: Boolean = false
     private val windowCache = mutableMapOf<String, Boolean>()
 
-    private val shutdownThread = Thread { handleShutdown() }
     private var isShuttingDown = false
+    private val shutdownThread = Thread {
+        isShuttingDown = true
+        dispose()
+    }
 
     init {
         try {
@@ -83,8 +87,8 @@ class KdeEnvironment : Environment() {
             }
 
             script?.run()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
+            error("Failed to start KWin script")
         } finally {
             // Ensure the DBus connection is closed when the program shuts down
             Runtime.getRuntime().addShutdownHook(shutdownThread)
@@ -130,11 +134,6 @@ class KdeEnvironment : Environment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    fun handleShutdown() {
-        isShuttingDown = true
-        dispose()
     }
 
     private fun isIE(window: Window) = windowCache.getOrPut(window.title) {
@@ -191,7 +190,7 @@ class KdeEnvironment : Environment() {
 
         fun resetActiveWindow()
 
-        fun getWindowPosition(): Map<String, Int>
+        fun getWindowPosition(): Map<String, Variant<*>>
 
         fun getRestoreWindows(): Boolean
     }
@@ -214,22 +213,22 @@ class KdeEnvironment : Environment() {
             activeWindow = null
         }
 
-        override fun getWindowPosition(): Map<String, Int> {
+        override fun getWindowPosition(): Map<String, Variant<*>> {
             val windowPosition = windowPosition.also {
                 this@KdeEnvironment.windowPosition = null
             }
 
             return if (windowPosition == null) {
                 mapOf(
-                    "hasValue" to 0,
-                    "x" to -1,
-                    "y" to -1
+                    "hasValue" to Variant(false),
+                    "x" to Variant(-1),
+                    "y" to Variant(-1)
                 )
             } else {
                 mapOf(
-                    "hasValue" to 1,
-                    "x" to windowPosition.x,
-                    "y" to windowPosition.y
+                    "hasValue" to Variant(true),
+                    "x" to Variant(windowPosition.x),
+                    "y" to Variant(windowPosition.y)
                 )
             }
         }

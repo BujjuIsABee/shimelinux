@@ -31,8 +31,10 @@ function setActiveWindow(window) {
         busName, clientPath, interfaceName,
         "setActiveWindow",
         window.caption,
-        window.x, window.y,
-        window.width, window.height,
+        window.x,
+        window.y,
+        window.width,
+        window.height,
         () => {}
     );
 }
@@ -45,13 +47,13 @@ function resetActiveWindow() {
     );
 }
 
-function update() {
+function tick() {
     // Move windows
     callDBus(
         busName, clientPath, interfaceName,
         "getWindowPosition",
         (windowPosition) => {
-            if (windowPosition.hasValue == 0 || !activeWindow) return;
+            if (!windowPosition.hasValue || !activeWindow) return;
 
             activeWindow.frameGeometry = {
                 x: windowPosition.x,
@@ -120,8 +122,8 @@ function isWindowOnscreen(window) {
 
 workspace.windowActivated.connect(onWindowActivated);
 
-// Start a timer to call update() every 40 milliseconds
+// Start a timer to call tick every 40 milliseconds
 const timer = new QTimer();
 timer.interval = 40;
-timer.timeout.connect(update);
+timer.timeout.connect(tick);
 timer.start();
