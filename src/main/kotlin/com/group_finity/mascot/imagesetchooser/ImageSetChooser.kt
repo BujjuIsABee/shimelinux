@@ -23,7 +23,6 @@
 package com.group_finity.mascot.imagesetchooser
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
@@ -31,15 +30,16 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.setProperty
+import dorkbox.desktop.Desktop
 import java.awt.BorderLayout
 import java.awt.Cursor
-import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Frame
 import java.awt.GridLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.io.IOException
 import javax.imageio.ImageIO
 import javax.swing.BoxLayout
 import javax.swing.DefaultListModel
@@ -305,12 +305,11 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun handleMore() {
-        val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
         try {
-            checkNotNull(desktop).open(getPath("img").toFile())
+            Desktop.browseDirectory(getPath("img").toString())
             cancelled = true
             dispose()
-        } catch (_: Exception) {
+        } catch (_: IOException) {
             JOptionPane.showMessageDialog(
                 this@ImageSetChooser,
                 "FailedOpenFileBrowserErrorMessage".localize() + "\n${getPath("img")}",

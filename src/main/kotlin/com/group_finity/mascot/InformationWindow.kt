@@ -23,10 +23,11 @@
 package com.group_finity.mascot
 
 import com.group_finity.mascot.config.Configuration
-import java.awt.Desktop
+import dorkbox.desktop.Desktop
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
+import java.io.IOException
 import java.net.URI
 import java.util.StringTokenizer
 import javax.imageio.ImageIO
@@ -243,10 +244,9 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 )
 
                 if (response == JOptionPane.YES_OPTION) {
-                    val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
                     try {
-                        checkNotNull(desktop).browse(URI(url))
-                    } catch (_: Exception) {
+                        Desktop.browseURL(URI(url))
+                    } catch (_: IOException) {
                         JOptionPane.showMessageDialog(
                             this@InformationWindow,
                             "FailedOpenWebBrowserErrorMessage".localize() + "\n$url",
