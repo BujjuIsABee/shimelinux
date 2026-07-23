@@ -24,14 +24,22 @@ package io.github.bujjuisabee.shimelinux.linux
 
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 
 class LinuxEnvironment : Environment() {
-    override val workArea: Area
-        get() = screen
+    override val workArea = Area()
 
     override val activeIE = Area().apply { isVisible = false }
     override val activeIETitle = ""
+
+    override fun tick() {
+        super.tick()
+
+        val device = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+        val workAreaRect = device.defaultConfiguration.bounds
+        workArea.set(workAreaRect)
+    }
 
     override fun moveActiveIE(point: Point) {}
 

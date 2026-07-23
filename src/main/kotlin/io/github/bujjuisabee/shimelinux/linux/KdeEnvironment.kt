@@ -31,6 +31,7 @@ import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.types.Variant
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
@@ -97,6 +98,10 @@ class KdeEnvironment : Environment() {
 
     override fun tick() {
         super.tick()
+
+        val device = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+        val workAreaRect = device.defaultConfiguration.bounds
+        workArea.set(workAreaRect)
 
         val activeWindow = activeWindow
         if (activeWindow != null && isIE(activeWindow)) {
