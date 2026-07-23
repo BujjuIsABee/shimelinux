@@ -20,75 +20,103 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+use std::{cmp, sync::{Mutex, mpsc}, thread};
+
+use jni::{EnvUnowned, Outcome, elements::ReleaseMode, errors::{Error, ThrowRuntimeExAndDefault}, objects::{JClass, JIntArray, JObject}, sys::jboolean};
+use smithay_client_toolkit::{compositor::CompositorState, output::OutputState, registry::RegistryState, seat::SeatState, shell::{WaylandSurface, wlr_layer::{Anchor, Layer, LayerShell}}, shm::{Shm, slot::SlotPool}};
+use wayland_client::{Connection, globals::registry_queue_init};
+
+use crate::mascot::{CursorState, Mascot, get_cursor_position, get_screen_rect};
+
 mod mascot;
 
-use std::{
-    cmp, mem,
-    sync::{
-        Mutex,
-        mpsc::{Sender, channel},
-    },
-    thread,
-};
+#[derive(Default, Clone)]
+pub struct Point {
+    pub x: i32,
+    pub y: i32,
+}
 
-use jni::{
-    EnvUnowned,
-    elements::ReleaseMode,
-    errors::{Error, ThrowRuntimeExAndDefault},
-    objects::{JBooleanArray, JClass, JIntArray},
-    sys::jboolean,
-};
-use smithay_client_toolkit::{
-    compositor::CompositorState,
-    shell::{
-        WaylandSurface,
-        wlr_layer::{Anchor, Layer, LayerShell},
-    },
-};
-use wayland_client::{Connection, globals::registry_queue_init};
-use wayland_cursor::CursorTheme;
-
-use crate::mascot::MouseState;
-use crate::mascot::Mascot;
+#[derive(Default, Clone)]
+pub struct Rect {
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+}
 
 enum Event {
-    SetBounds(i32, i32, i32, i32),
-    UpdateImage(Vec<i32>),
+    SetBounds(Rect),
+    SetImage(Vec<i32>),
     SetCursor(bool),
     Dispose(),
 }
 
-static SENDERS: Mutex<Vec<Sender<Event>>> = Mutex::new(Vec::new());
+static SENDERS: Mutex<Vec<mpsc::Sender<Event>>> = Mutex::new(Vec::new());
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createMascot<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
+    mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
+    object: JObject,
 ) -> i32 {
-    // Get the sender and receiver
     let mut senders = SENDERS.lock().unwrap();
-    let (sender, receiver) = channel::<Event>();
-    let sender_index = senders.len() as i32; // used as an identifier for the mascot
+    let (sender, receiver) = mpsc::channel::<Event>();
     senders.push(sender);
 
-    let connection = Connection::connect_to_env().unwrap();
-    let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
+    let conn = Connection::connect_to_env().unwrap();
+    let (globals, mut event_queue) = registry_queue_init(&conn).unwrap();
     let qh = event_queue.handle();
 
-    let compositor_state = CompositorState::bind(&globals, &qh)
-        .expect("Failed to get compositor state");
-    let layer_shell = LayerShell::bind(&globals, &qh)
-        .expect("Failed to create layer shell");
+    let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
+    let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
+    let shm = Shm::bind(&globals, &qh).expect("Failed to get shm");
+    let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to get pool");
 
-    // Create the layer
     let surface = compositor_state.create_surface(&qh);
-    let layer = layer_shell.create_layer_surface(&qh, surface, Layer::Overlay, Some("shimelinux"), None);
+    let layer = layer_shell.create_layer_surface(
+        &qh,
+        surface,
+        Layer::Overlay,
+        Some("shimelinux"),
+        None
+    );
+
     layer.set_exclusive_zone(-1);
     layer.set_anchor(Anchor::TOP | Anchor::LEFT);
     layer.set_size(1, 1);
     layer.commit();
 
-    let mut mascot = Mascot::new(&globals, &qh, compositor_state, layer, sender_index);
+    let (jvm, object) = match unowned_env
+        .with_env(|env| -> Result<_, Error> {
+            Ok((
+                env.get_java_vm().unwrap(),
+                env.new_global_ref(object).unwrap(),
+            ))
+        })
+        .into_outcome()
+    {
+        Outcome::Ok((jvm, object)) => (jvm, object),
+        _ => panic!("Failed to get JVM"),
+    };
+
+    let mut mascot = Mascot {
+        jvm,
+        object,
+        compositor_state,
+        registry_state: RegistryState::new(&globals),
+        output_state: OutputState::new(&globals, &qh),
+        seat_state: SeatState::new(&globals, &qh),
+        cursor_state: CursorState::default(),
+        shm,
+        pool,
+        layer,
+        layer_width: 0,
+        layer_height: 0,
+        layer_mask: Vec::new(),
+        configured: false,
+        image_rgb: Vec::new(),
+        image_bounds: Rect::default(),
+    };
 
     thread::spawn(move || {
         loop {
@@ -97,56 +125,24 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
             // Handle events
             while let Ok(event) = receiver.try_recv() {
                 match event {
-                    Event::SetBounds(x, y, width, height) => {
-                        // Set the dimensions
-                        mascot.layer.set_size(
-                            cmp::max(1, width as u32),
-                            cmp::max(1, height as u32),
-                        );
-
-                        // Set the position
-                        mascot.layer.set_margin(
-                            y,
-                            0,
-                            0,
-                            x,
-                        );
-
-                        // Store the requested dimensions
-                        mascot.image_width = width as u32;
-                        mascot.image_height = height as u32;
+                    Event::SetBounds(bounds) => {
+                        mascot.set_bounds(bounds);
                     }
-                    Event::UpdateImage(rgb) => {
-                        mascot.update_mask(&rgb);
-                        mascot.rgb = rgb;
+                    Event::SetImage(rgb) => {
+                        mascot.set_image(rgb);
                     }
                     Event::SetCursor(use_hand) => {
-                        let mut cursor_theme = CursorTheme::load(&connection, mascot.shm.wl_shm().clone(), 24)
-                            .expect("Failed to get cursor theme");
-
-                        if let Some(cursor) = cursor_theme.get_cursor(if use_hand { "pointer" } else { "left_ptr" }) {
-                            let cursor_surface = mascot.cursor_surface.get_or_insert(mascot.compositor_state.create_surface(&qh));
-
-                            // Attach None to remove the previous cursor image buffer
-                            cursor_surface.attach(None, 0, 0);
-                            cursor_surface.commit();
-
-                            // Attach the new cursor image buffer
-                            cursor_surface.attach(Some(&cursor[0]), 0, 0);
-                            cursor_surface.commit();
-
-                            mascot.cursor_surface = Some(cursor_surface.clone());
-                        }
+                        mascot.set_cursor(&conn, &qh, use_hand);
                     }
                     Event::Dispose() => {
-                        mascot.layer.wl_surface().destroy();
+                        mascot.dispose();
                     }
                 }
             }
         }
     });
 
-    sender_index // return the sender index/identifier to kotlin
+    senders.len() as i32 - 1 // return the sender index; it is used as an identifier for the mascot
 }
 
 #[unsafe(no_mangle)]
@@ -161,17 +157,17 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 ) {
     let senders = SENDERS.lock().unwrap();
     if let Some(sender) = senders.get(sender_index as usize) {
-        let _ = sender.send(Event::SetBounds(
-            cmp::max(-width + 1, x), // prevents the mascot from going fully offscreen, which causes visual issues on niri
-            cmp::max(-height + 1, y),
-            cmp::max(1, width),
-            cmp::max(1, height),
-        ));
+        let _ = sender.send(Event::SetBounds(Rect {
+            x: cmp::max(-width + 1, x),
+            y: cmp::max(-height + 1, y),
+            width: cmp::max(1, width),
+            height: cmp::max(1, height),
+        }));
     }
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_updateImage<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setImage<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     sender_index: i32,
@@ -184,78 +180,24 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_up
                 rgb.get_elements(env, ReleaseMode::NoCopyBack).unwrap().to_vec()
             };
 
-            _ = sender.send(Event::UpdateImage(rgb));
-            Ok(())
+            Ok(rgb)
         });
 
-        outcome.resolve::<ThrowRuntimeExAndDefault>();
+        _ = sender.send(Event::SetImage(outcome.resolve::<ThrowRuntimeExAndDefault>()));
     }
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreen<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-) -> JIntArray<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
-        let array = JIntArray::new(env, 4).expect("Failed to get array");
-        Mascot::get_screen(|screen| {
-            array.set_region(env, 0, &[
-                screen.x,
-                screen.y,
-                screen.width,
-                screen.height,
-            ]).expect("Failed to set array");
-        });
-
-        Ok(array)
-    });
-
-    outcome.resolve::<ThrowRuntimeExAndDefault>()
-}
-
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getMouseState<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setCursor<'caller>(
+    mut _unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     sender_index: i32,
-) -> JBooleanArray<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<JBooleanArray, Error> {
-        let array = JBooleanArray::new(env, 4).expect("Failed to get array");
-        MouseState::get(sender_index, |mouse_state| {
-            array.set_region(env, 0, &[
-                mem::replace(&mut mouse_state.left_pressed, false), // get the value of the bool, then set it to false so the press/release is only reported once
-                mem::replace(&mut mouse_state.right_pressed, false),
-                mem::replace(&mut mouse_state.left_released, false),
-                mem::replace(&mut mouse_state.right_released, false),
-            ]).expect("Failed to set array");
-        });
-
-        Ok(array)
-    });
-
-    outcome.resolve::<ThrowRuntimeExAndDefault>()
-}
-
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getMousePosition<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    sender_index: i32,
-) -> JIntArray<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<JIntArray, Error> {
-        let array = JIntArray::new(env, 2).expect("Failed to get array");
-        MouseState::get(sender_index, |mouse_state| {
-            array.set_region(env, 0, &[
-                mouse_state.position_x,
-                mouse_state.position_y
-            ]).expect("Failed to set array");
-        });
-
-        Ok(array)
-    });
-
-    outcome.resolve::<ThrowRuntimeExAndDefault>()
+    use_hand: jboolean,
+) {
+    let senders = SENDERS.lock().unwrap();
+    if let Some(sender) = senders.get(sender_index as usize) {
+        _ = sender.send(Event::SetCursor(use_hand));
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -271,14 +213,41 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_di
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setCursor<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreenRect<'caller>(
+    mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    sender_index: i32,
-    use_hand: jboolean,
-) {
-    let senders = SENDERS.lock().unwrap();
-    if let Some(sender) = senders.get(sender_index as usize) {
-        _ = sender.send(Event::SetCursor(use_hand));
-    }
+) -> JIntArray<'caller> {
+    let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
+        let array = JIntArray::new(env, 4).unwrap();
+        let screen_rect = get_screen_rect();
+        array.set_region(env, 0, &[
+            screen_rect.x,
+            screen_rect.y,
+            screen_rect.width,
+            screen_rect.height,
+        ]).expect("Failed to set array");
+
+        Ok(array)
+    });
+
+    outcome.resolve::<ThrowRuntimeExAndDefault>()
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getCursorPosition<'caller>(
+    mut unowned_env: EnvUnowned<'caller>,
+    _class: JClass<'caller>,
+) -> JIntArray<'caller> {
+    let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
+        let array = JIntArray::new(env, 2).unwrap();
+        let cursor_position = get_cursor_position();
+        array.set_region(env, 0, &[
+            cursor_position.x,
+            cursor_position.y,
+        ]).expect("Failed to set array");
+
+        Ok(array)
+    });
+
+    outcome.resolve::<ThrowRuntimeExAndDefault>()
 }

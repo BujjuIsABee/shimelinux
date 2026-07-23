@@ -20,79 +20,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{
-    cmp,
-    collections::HashMap,
-    sync::{LazyLock, Mutex},
-};
+use std::{cmp, mem, process::Command, sync::{LazyLock, Mutex, OnceLock}};
 
-use smithay_client_toolkit::{
-    compositor::{CompositorHandler, CompositorState},
-    delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
-    delegate_seat, delegate_shm,
-    output::{OutputHandler, OutputState},
-    registry::{ProvidesRegistryState, RegistryState},
-    registry_handlers,
-    seat::{
-        Capability, SeatHandler, SeatState,
-        pointer::{BTN_LEFT, BTN_RIGHT, PointerEvent, PointerEventKind, PointerHandler},
-    },
-    shell::{
-        WaylandSurface,
-        wlr_layer::{LayerShellHandler, LayerSurface, LayerSurfaceConfigure},
-    },
-    shm::{Shm, ShmHandler, slot::SlotPool},
-};
-use wayland_client::{
-    Connection, QueueHandle, delegate_noop,
-    globals::GlobalList,
-    protocol::{
-        wl_output::{self, WlOutput},
-        wl_pointer::WlPointer,
-        wl_region::WlRegion,
-        wl_seat::WlSeat,
-        wl_shm::Format,
-        wl_surface::WlSurface,
-    },
-};
+use jni::{JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
+use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{Capability, SeatHandler, SeatState, pointer::{BTN_LEFT, BTN_RIGHT, PointerEvent, PointerEventKind, PointerHandler}}, shell::{WaylandSurface, wlr_layer::{LayerShellHandler, LayerSurface, LayerSurfaceConfigure}}, shm::{Shm, ShmHandler, slot::SlotPool}};
+use wayland_client::{Connection, QueueHandle, delegate_noop, protocol::{wl_output::{Transform, WlOutput}, wl_pointer::WlPointer, wl_region::WlRegion, wl_seat::WlSeat, wl_shm::Format, wl_surface::WlSurface}};
+use wayland_cursor::CursorTheme;
 
-pub struct Mascot {
-    pub compositor_state: CompositorState,
-    pub registry_state: RegistryState,
-    pub output_state: OutputState,
-    pub seat_state: SeatState,
-    pub shm: Shm,
-    pub pool: SlotPool,
-    pub layer: LayerSurface,
+use crate::{Point, Rect};
+
+#[derive(Default)]
+pub struct CursorState {
     pub pointer: Option<WlPointer>,
-    pub cursor_surface: Option<WlSurface>,
+    pub surface: Option<WlSurface>,
     pub serial: Option<u32>,
-    pub width: u32,
-    pub height: u32,
-    pub image_width: u32,
-    pub image_height: u32,
-    pub rgb: Vec<i32>,
-    pub mask: Vec<Rectangle>,
-    pub first_configure: bool,
-    pub sender_index: i32,
-}
 
-#[derive(Default)]
-pub struct Rectangle {
-    pub x: i32,
-    pub y: i32,
-    pub width: i32,
-    pub height: i32,
-}
-
-#[derive(Default)]
-pub struct MouseState {
     pub left_pressed: bool,
     pub right_pressed: bool,
     pub left_released: bool,
     pub right_released: bool,
-    pub position_x: i32,
-    pub position_y: i32,
+    pub position: Point,
+    pub grab_start: Point,
+}
+
+pub struct Mascot {
+    pub jvm: JavaVM,
+    pub object: Global<JObject<'static>>,
+
+    pub compositor_state: CompositorState,
+    pub registry_state: RegistryState,
+    pub output_state: OutputState,
+    pub seat_state: SeatState,
+    pub cursor_state: CursorState,
+    pub shm: Shm,
+    pub pool: SlotPool,
+
+    pub layer: LayerSurface,
+    pub layer_width: u32,
+    pub layer_height: u32,
+    pub layer_mask: Vec<Rect>,
+    pub configured: bool,
+
+    pub image_rgb: Vec<i32>,
+    pub image_bounds: Rect,
 }
 
 delegate_compositor!(Mascot);
@@ -111,7 +81,7 @@ impl CompositorHandler for Mascot {
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
         _surface: &WlSurface,
-        _new_transform: wl_output::Transform,
+        _new_transform: Transform,
     ) {
     }
 
@@ -132,7 +102,7 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        self.set_screen(&output);
+        self.set_screen_rect(output);
     }
 
     fn surface_leave(
@@ -155,32 +125,38 @@ impl OutputHandler for Mascot {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        output: WlOutput
+        output: WlOutput,
     ) {
-        self.set_screen(&output);
+        self.set_screen_rect(&output);
     }
 
     fn update_output(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        output: WlOutput
+        output: WlOutput,
     ) {
-        self.set_screen(&output);
+        self.set_screen_rect(&output);
     }
 
     fn output_destroyed(
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        _output: WlOutput
+        _output: WlOutput,
     ) {
     }
 }
 
 delegate_layer!(Mascot);
 impl LayerShellHandler for Mascot {
-    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {}
+    fn closed(
+        &mut self,
+        _conn: &Connection,
+        _qh: &QueueHandle<Self>,
+        _layer: &LayerSurface
+    ) {
+    }
 
     fn configure(
         &mut self,
@@ -191,12 +167,11 @@ impl LayerShellHandler for Mascot {
         _serial: u32,
     ) {
         let (width, height) = configure.new_size;
-        self.width = cmp::max(1, width);
-        self.height = cmp::max(1, height);
+        self.layer_width = width;
+        self.layer_height = height;
 
-        // Draw the mascot for the first time if this is the first configure
-        if self.first_configure {
-            self.first_configure = false;
+        if !self.configured {
+            self.configured = true;
             self.draw(qh);
         }
     }
@@ -208,7 +183,13 @@ impl SeatHandler for Mascot {
         &mut self.seat_state
     }
 
-    fn new_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
+    fn new_seat(
+        &mut self,
+        _conn: &Connection,
+        _qh: &QueueHandle<Self>,
+        _seat: WlSeat
+    ) {
+    }
 
     fn new_capability(
         &mut self,
@@ -217,9 +198,9 @@ impl SeatHandler for Mascot {
         seat: WlSeat,
         capability: Capability,
     ) {
-        if capability == Capability::Pointer && self.pointer.is_none() {
-            let pointer = self.seat_state.get_pointer(qh, &seat).expect("Failed to get pointer");
-            self.pointer = Some(pointer);
+        if capability == Capability::Pointer && self.cursor_state.pointer.is_none() {
+            let pointer = self.seat_state.get_pointer(qh, &seat).unwrap();
+            self.cursor_state.pointer = Some(pointer);
         }
     }
 
@@ -230,12 +211,18 @@ impl SeatHandler for Mascot {
         _seat: WlSeat,
         capability: Capability,
     ) {
-        if capability == Capability::Pointer && self.pointer.is_none() {
-            self.pointer.take().unwrap().release();
+        if capability == Capability::Pointer && self.cursor_state.pointer.is_some() {
+            self.cursor_state.pointer.take().unwrap().release();
         }
     }
 
-    fn remove_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
+    fn remove_seat(
+        &mut self,
+        _conn: &Connection,
+        _qh: &QueueHandle<Self>,
+        _seat: WlSeat
+    ) {
+    }
 }
 
 delegate_pointer!(Mascot);
@@ -255,43 +242,60 @@ impl PointerHandler for Mascot {
             }
 
             match event.kind {
-                Press { button, .. } => {
-                    MouseState::get(self.sender_index, |mouse_state| {
-                        mouse_state.left_pressed = button == BTN_LEFT;
-                        mouse_state.right_pressed = button == BTN_RIGHT;
-                    });
-                }
-                Release { button, .. } => {
-                    MouseState::get(self.sender_index, |mouse_state| {
-                        mouse_state.left_released = button == BTN_LEFT;
-                        mouse_state.right_released = button == BTN_RIGHT;
-                    });
-                }
-                Motion { .. } => {
-                    MouseState::get(self.sender_index, |mouse_state| {
-                        let (position_x, position_y) = event.position;
-                        mouse_state.position_x = position_x as i32;
-                        mouse_state.position_y = position_y as i32;
-                    });
-
-                    // Set the cursor
-                    if let Some(cursor_surface) = &self.cursor_surface
-                        && let Some(serial) = self.serial
-                        && let Some(pointer) = &self.pointer
-                    {
-                        pointer.set_cursor(serial, Some(&cursor_surface), 0, 0);
-                    }
-                }
                 Enter { serial } => {
-                    self.serial = Some(serial);
+                    self.cursor_state.serial = Some(serial);
                 }
                 Leave { serial } => {
-                    self.serial = Some(serial);
+                    self.cursor_state.serial = Some(serial);
                 }
+                Motion { .. } => {
+                    if let Some(pointer) = &self.cursor_state.pointer
+                        && let Some(serial) = self.cursor_state.serial
+                        && let Some(surface)  = &self.cursor_state.surface
+                    {
+                        pointer.set_cursor(serial, Some(surface), 0, 0);
+                    }
 
-                _ => {}
+                    self.cursor_state.position.x = event.position.0 as i32;
+                    self.cursor_state.position.y = event.position.1 as i32;
+                }
+                Press { button, .. } => {
+                    if button == BTN_LEFT {
+                        self.cursor_state.left_pressed = true;
+                    } else if button == BTN_RIGHT {
+                        self.cursor_state.right_pressed = true;
+                    }
+                }
+                Release { button, .. } => {
+                    if button == BTN_LEFT {
+                        self.cursor_state.left_released = true;
+                    } else if button == BTN_RIGHT {
+                        self.cursor_state.right_released = true;
+                    }
+                }
+                Axis { .. } => {}
             }
         }
+
+        self.set_cursor_position();
+
+        self.jvm.attach_current_thread(|env| -> Result<_, Error> {
+            env.call_method(
+                self.object.as_ref(),
+                jni_str!("updateCursor"),
+                jni_sig!((bool, bool, bool, bool, i32, i32)),
+                &[
+                    JValue::from(mem::replace(&mut self.cursor_state.left_pressed, false)),
+                    JValue::from(mem::replace(&mut self.cursor_state.right_pressed, false)),
+                    JValue::from(mem::replace(&mut self.cursor_state.left_released, false)),
+                    JValue::from(mem::replace(&mut self.cursor_state.right_released, false)),
+                    JValue::from(self.cursor_state.position.x),
+                    JValue::from(self.cursor_state.position.y),
+                ]
+            ).expect("Failed to call method");
+
+            Ok(())
+        }).expect("Failed to attach JVM");
     }
 }
 
@@ -313,65 +317,51 @@ impl ProvidesRegistryState for Mascot {
 
 delegate_noop!(Mascot: ignore WlRegion);
 impl Mascot {
-    pub fn new(
-        globals: &GlobalList,
-        qh: &QueueHandle<Mascot>,
-        compositor_state: CompositorState,
-        layer: LayerSurface,
-        sender_index: i32,
-    ) -> Self {
-        let shm = Shm::bind(globals, qh).expect("Failed to get shm");
-        let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to get pool");
-        Mascot {
-            compositor_state: compositor_state,
-            registry_state: RegistryState::new(&globals),
-            output_state: OutputState::new(&globals, &qh),
-            seat_state: SeatState::new(&globals, &qh),
-            shm,
-            pool,
-            layer,
-            pointer: None,
-            cursor_surface: None,
-            serial: None,
-            width: 0,
-            height: 0,
-            image_width: 0,
-            image_height: 0,
-            rgb: Vec::new(),
-            mask: Vec::new(),
-            first_configure: true,
-            sender_index,
+    pub fn set_bounds(&mut self, bounds: Rect) {
+        self.image_bounds = bounds.clone();
+        self.layer.set_size(
+            cmp::max(1, bounds.width as u32),
+            cmp::max(1, bounds.height as u32),
+        );
+
+        self.layer.set_margin(
+            bounds.y,
+            0,
+            0,
+            bounds.x,
+        );
+
+        self.layer.commit();
+    }
+
+    pub fn set_image(&mut self, rgb: Vec<i32>) {
+        self.image_rgb = rgb;
+        self.update_layer_mask();
+    }
+
+    pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
+        let mut theme = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24).expect("Failed to get cursor theme");
+        let name = if use_hand { "pointer" } else { "left_ptr" };
+        if let Some(cursor) = theme.get_cursor(name) {
+            let surface = self.cursor_state.surface.get_or_insert(self.compositor_state.create_surface(qh));
+
+            // Attach None to clear the previous buffer
+            surface.attach(None, 0, 0);
+            surface.commit();
+
+            // Attach the new buffer
+            surface.attach(Some(&cursor[0]), 0, 0);
+            surface.commit();
         }
     }
 
-    pub fn update_mask(&mut self, rgb: &Vec<i32>) {
-        let mut rects = Vec::new();
-
-        for y in 0..self.image_height {
-            let mut start: Option<u32> = None; 
-            for x in 0..self.image_width {
-                let index = cmp::min(((y * self.image_width) + x) as usize, rgb.len() - 1);
-                let alpha = (rgb[index] >> 24) & 0xFF;
-                if alpha > 0 && start.is_none() {
-                    start = Some(x);
-                } else if alpha == 0 && start.is_some() {
-                    rects.push(Rectangle {
-                        x: start.unwrap() as i32,
-                        y: y as i32,
-                        width: (x - start.unwrap()) as i32,
-                        height: 1,
-                    });
-                    start = None;
-                }
-            }
-        }
-
-        self.mask = rects;
+    pub fn dispose(&mut self) {
+        self.layer.wl_surface().destroy();
     }
 
     fn draw(&mut self, qh: &QueueHandle<Self>) {
-        let width = self.width as i32;
-        let height = self.height as i32;
+        let width = self.layer_width as i32;
+        let height = self.layer_height as i32;
         let stride = width * 4;
 
         let (buffer, canvas) = self
@@ -379,80 +369,115 @@ impl Mascot {
             .create_buffer(width, height, stride, Format::Argb8888)
             .expect("Failed to create buffer");
 
-        if self.rgb.len() > 0 {
+        if !self.image_rgb.is_empty() {
             // Draw the image to the canvas
-            for y in 0..height {
-                for x in 0..width {
-                    let canvas_index = cmp::min(
-                        ((y * width + x) * 4) as usize,
-                        canvas.len() - 1,
-                    );
-                    let color_index = cmp::min(
-                        (y * self.image_width as i32 + x) as usize,
-                        self.rgb.len() - 1,
-                    );
+            for i in 0..width * height {
+                let (x, y) = (i % width, i / width);
+                let canvas_index = ((y * width + x) * 4) as usize;
+                let image_index = (y * self.image_bounds.width as i32 + x) as usize;
 
-                    canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.rgb[color_index].to_le_bytes());
-                }
+                canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
             }
 
             // Set the mask shape
-            let shape = self.compositor_state.wl_compositor().create_region(&qh, ());
-            for rect in &self.mask {
-                shape.add(rect.x, rect.y, rect.width, rect.height);
+            let region = self.compositor_state.wl_compositor().create_region(&qh, ());
+            for rect in &self.layer_mask {
+                region.add(rect.x, rect.y, rect.width, rect.height);
             }
-            self.layer.set_input_region(Some(&shape));
+            self.layer.set_input_region(Some(&region));
         }
 
+        // Update the layer
         self.layer.wl_surface().damage_buffer(0, 0, width, height);
         self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
         buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
         self.layer.commit();
     }
-    
-    pub fn get_screen<T: FnMut(&mut Rectangle)>(mut action: T) {
-        let mut screen = SCREEN.lock().unwrap();
-        action(screen.get_or_insert_default());
+
+    fn update_layer_mask(&mut self) {
+        let mut rects: Vec<Rect> = Vec::new();
+        for y in 0..self.image_bounds.height as u32 {
+            let mut section_start: Option<u32> = None;
+            for x in 0..self.image_bounds.width as u32 {
+                let index: usize = (y * self.image_bounds.width as u32 + x) as usize;
+                let alpha = (self.image_rgb[index] >> 24) & 0xFF;
+                if alpha > 0 && section_start.is_none() {
+                    section_start = Some(x);
+                } else if alpha == 0 && let Some(start) = section_start {
+                    section_start = None;
+                    rects.push(Rect {
+                        x: start as i32,
+                        y: y as i32,
+                        width: (x - start) as i32,
+                        height: 1,
+                    });
+                }
+            }
+        }
+        self.layer_mask = rects;
     }
 
-    fn set_screen(&mut self, output: &WlOutput) {
+    fn set_screen_rect(&mut self, output: &WlOutput) {
         if let Some(info) = self.output_state.info(output) {
-            let id = info.id as i32;
-            let (width, height) = info.logical_size.unwrap_or_default();
-
-            if Mascot::get_output_id() == None {
-                Mascot::set_output_id(id);
-            }
-            if Some(id) == Mascot::get_output_id() {
-                Mascot::get_screen(|screen| {
-                    screen.x = 0;
-                    screen.y = 0;
-                    screen.width = width;
-                    screen.height = height;
-                });
+            if *OUTPUT_ID.get_or_init(|| info.id) == info.id {
+                let (width, height) = info.logical_size.unwrap_or_default();
+                let mut screen_rect = SCREEN_RECT.lock().unwrap();
+                *screen_rect = Rect {
+                    x: 0,
+                    y: 0,
+                    width,
+                    height,
+                };
             }
         }
     }
 
-    fn get_output_id() -> Option<i32> {
-        let output_id = OUTPUT_ID.lock().unwrap();
-        *output_id
-    }
+    fn set_cursor_position(&mut self) {
+        let desktop = DESKTOP_TYPE.unwrap_or_else(|| "other");
+        let mut cursor_position = CURSOR_POSITION.lock().unwrap();
 
-    fn set_output_id(id: i32) {
-        let mut output_id = OUTPUT_ID.lock().unwrap();
-        *output_id = Some(id);
+        if desktop == NIRI {
+            if self.cursor_state.left_pressed {
+                self.cursor_state.grab_start = Point {
+                    x: self.image_bounds.x,
+                    y: self.image_bounds.y,
+                };
+            }
+
+            *cursor_position = Point {
+                x: self.cursor_state.position.x + self.cursor_state.grab_start.x,
+                y: self.cursor_state.position.y + self.cursor_state.grab_start.y,
+            };
+        } else if desktop == HYPRLAND {
+            let output = Command::new("hyprctl")
+                .arg("cursorpos")
+                .output()
+                .expect("Failed to get cursor position");
+
+            if let Some(parts) = String::from_utf8(output.stdout).unwrap().split_once(", ") {
+                *cursor_position = Point {
+                    x: parts.0.parse().unwrap(),
+                    y: parts.1.parse().unwrap(),
+                }
+            }
+        }
     }
 }
 
-impl MouseState {
-    pub fn get<T: FnMut(&mut MouseState)>(sender_index: i32, mut action: T) {
-        let mut mouse_states = MOUSE_STATES.lock().unwrap();
-        let mouse_state = mouse_states.entry(sender_index).or_default();
-        action(mouse_state);
-    }
+pub fn get_screen_rect() -> Rect {
+    let screen_rect = SCREEN_RECT.lock().unwrap();
+    screen_rect.clone()
 }
 
-static OUTPUT_ID: LazyLock<Mutex<Option<i32>>> = LazyLock::new(|| { Mutex::new(None) });
-static SCREEN: LazyLock<Mutex<Option<Rectangle>>> = LazyLock::new(|| { Mutex::new(None) });
-static MOUSE_STATES: LazyLock<Mutex<HashMap<i32, MouseState>>> = LazyLock::new(|| { Mutex::new(HashMap::new()) });
+pub fn get_cursor_position() -> Point {
+    let cursor_position = CURSOR_POSITION.lock().unwrap();
+    cursor_position.clone()
+}
+
+static DESKTOP_TYPE: Option<&str> = option_env!("XDG_CURRENT_DESKTOP");
+static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
+static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
+static CURSOR_POSITION: LazyLock<Mutex<Point>> = LazyLock::new(|| Mutex::new(Point::default()));
+
+const NIRI: &str = "niri";
+const HYPRLAND: &str = "Hyprland";

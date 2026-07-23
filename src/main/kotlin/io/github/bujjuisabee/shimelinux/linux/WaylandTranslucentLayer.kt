@@ -29,7 +29,6 @@ import java.awt.Cursor
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
-import kotlin.concurrent.timer
 
 class WaylandTranslucentLayer : TranslucentWindow {
     private val component = object : Component() {
@@ -56,15 +55,10 @@ class WaylandTranslucentLayer : TranslucentWindow {
     }
 
     private val lib = requireNotNull(WaylandLib.instance)
-    private val senderIndex: Int = lib.createMascot()
+    private val senderIndex: Int = lib.createMascot(this)
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
-    private var previousMousePosition = Point(0, 0)
-    private var grabStart = Point(0, 0)
-
-    init {
-        timer(daemon = true, period = 40) { updateMouse() }
-    }
+    private var previousCursorPosition = Point(0, 0)
 
     override fun asComponent() = component
 
@@ -78,7 +72,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
     override fun updateImage() {
         if (image != null) {
             imageChanged = false
-            lib.updateImage(senderIndex, image!!.rgb)
+            lib.setImage(senderIndex, image!!.rgb)
         }
     }
 
@@ -88,25 +82,22 @@ class WaylandTranslucentLayer : TranslucentWindow {
         lib.dispose(senderIndex)
     }
 
-    @Suppress("KotlinConstantConditions")
-    fun updateMouse() {
-        val (leftPressed, rightPressed, leftReleased, rightReleased) = lib.getMouseState(senderIndex)
-        val (positionX, positionY) = lib.getMousePosition(senderIndex)
-
-        if (leftPressed) {
-            grabStart = component.bounds.location
-        }
-        val newMousePosition = Point(positionX + grabStart.x, positionY + grabStart.y)
-
-        var modifiers = MouseEvent.NOBUTTON
-        var button = MouseEvent.NOBUTTON
-        if (leftPressed || leftReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
-            button = button or MouseEvent.BUTTON1
-        }
-        if (rightPressed || rightReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
-            button = button or MouseEvent.BUTTON3
+    @Suppress("unused")
+    fun updateCursor(
+        leftPressed: Boolean,
+        rightPressed: Boolean,
+        leftReleased: Boolean,
+        rightReleased: Boolean,
+        positionX: Int,
+        positionY: Int,
+    ) {
+        val newCursorPosition = Point(positionX, positionY)
+        val (modifiers, button) = if (leftPressed || leftReleased) {
+            Pair(MouseEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1)
+        } else if (rightPressed || rightReleased) {
+            Pair(MouseEvent.BUTTON3_DOWN_MASK, MouseEvent.BUTTON3)
+        } else {
+            Pair(MouseEvent.NOBUTTON, MouseEvent.NOBUTTON)
         }
 
         if (leftPressed || rightPressed) {
@@ -124,6 +115,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
                 )
             )
         }
+
         if (leftReleased || rightReleased) {
             component.dispatchEvent(
                 MouseEvent(
@@ -139,8 +131,9 @@ class WaylandTranslucentLayer : TranslucentWindow {
                 )
             )
         }
-        if (previousMousePosition != newMousePosition) {
-            previousMousePosition = newMousePosition
+
+        if (previousCursorPosition != newCursorPosition) {
+            previousCursorPosition = newCursorPosition
             component.dispatchEvent(
                 MouseEvent(
                     component,
@@ -150,32 +143,10 @@ class WaylandTranslucentLayer : TranslucentWindow {
                     positionX,
                     positionY,
                     1,
-                    false,
+                    rightReleased,
                     button
                 )
             )
-
-            // Update mouse position for niri
-            if (NativeFactoryImpl.desktop == NativeFactoryImpl.NIRI) {
-                mousePosition = newMousePosition
-            }
         }
-
-        // Update mouse position for Hyprland
-        if (NativeFactoryImpl.desktop == NativeFactoryImpl.HYPRLAND) {
-            val command = ProcessBuilder("hyprctl", "cursorpos").start()
-            val result = command.inputStream.bufferedReader().use { it.readLine()?.split(", ") }
-
-            if (result != null && result.size == 2) {
-                val x = result[0].toIntOrNull() ?: 0
-                val y = result[1].toIntOrNull() ?: 0
-                mousePosition = Point(x, y)
-            }
-        }
-    }
-
-    companion object {
-        var mousePosition: Point? = null
-            private set
     }
 }

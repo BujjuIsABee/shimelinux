@@ -31,13 +31,18 @@ class WaylandEnvironment : Environment() {
     override val workArea: Area
         get() = screen
 
-    override val activeIE = Area()
+    override val activeIE = Area().apply { isVisible = false }
     override val activeIETitle = ""
 
     private val lib = requireNotNull(WaylandLib.instance)
 
-    init {
-        activeIE.isVisible = false
+    override fun tick() {
+        val (x, y, width, height) = lib.getScreenRect()
+        screenRect.bounds = Rectangle(x, y, width, height)
+        screen.set(screenRect)
+
+        val (cursorX, cursorY) = lib.getCursorPosition()
+        cursor.set(Point(cursorX, cursorY))
     }
 
     override fun moveActiveIE(point: Point) {}
@@ -47,11 +52,4 @@ class WaylandEnvironment : Environment() {
     override fun refreshCache() {}
 
     override fun dispose() {}
-
-    override fun updateScreenRect() {
-        val screen = lib.getScreen()
-        val bounds = Rectangle(screen[0], screen[1], screen[2], screen[3])
-        screenRects = hashMapOf("screen" to bounds)
-        screenRect = bounds
-    }
 }

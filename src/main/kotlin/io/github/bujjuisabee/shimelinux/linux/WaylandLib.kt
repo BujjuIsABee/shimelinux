@@ -27,21 +27,19 @@ import java.io.File
 import kotlin.io.outputStream
 
 class WaylandLib {
-    external fun createMascot(): Int
+    external fun createMascot(obj: Any?): Int
 
     external fun setBounds(senderIndex: Int, x: Int, y: Int, width: Int, height: Int)
 
-    external fun updateImage(senderIndex: Int, rgb: IntArray)
-
-    external fun getScreen(): IntArray
-
-    external fun getMouseState(senderIndex: Int): BooleanArray
-
-    external fun getMousePosition(senderIndex: Int): IntArray
+    external fun setImage(senderIndex: Int, rgb: IntArray)
 
     external fun setCursor(senderIndex: Int, useHand: Boolean)
 
     external fun dispose(id: Int)
+
+    external fun getScreenRect(): IntArray
+
+    external fun getCursorPosition(): IntArray
 
     companion object {
         var instance: WaylandLib? = null
