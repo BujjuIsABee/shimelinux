@@ -20,10 +20,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{cmp, sync::{Mutex, mpsc}, thread};
+use std::{
+    cmp,
+    sync::{Mutex, mpsc},
+    thread,
+};
 
-use jni::{EnvUnowned, Outcome, elements::ReleaseMode, errors::{Error, ThrowRuntimeExAndDefault}, objects::{JClass, JIntArray, JObject}, sys::jboolean};
-use smithay_client_toolkit::{compositor::CompositorState, output::OutputState, registry::RegistryState, seat::SeatState, shell::{WaylandSurface, wlr_layer::{Anchor, Layer, LayerShell}}, shm::{Shm, slot::SlotPool}};
+use jni::{
+    EnvUnowned, Outcome,
+    elements::ReleaseMode,
+    errors::{Error, ThrowRuntimeExAndDefault},
+    objects::{JClass, JIntArray, JObject},
+    sys::jboolean,
+};
+use smithay_client_toolkit::{
+    compositor::CompositorState,
+    output::OutputState,
+    registry::RegistryState,
+    seat::SeatState,
+    shell::{
+        WaylandSurface,
+        wlr_layer::{Anchor, Layer, LayerShell},
+    },
+    shm::{Shm, slot::SlotPool},
+};
 use wayland_client::{Connection, globals::registry_queue_init};
 
 use crate::mascot::{CursorState, Mascot, get_cursor_position, get_screen_rect};

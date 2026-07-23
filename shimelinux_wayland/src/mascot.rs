@@ -20,11 +20,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{cmp, mem, process::Command, sync::{LazyLock, Mutex, OnceLock}};
+use std::{
+    cmp, mem,
+    process::Command,
+    sync::{LazyLock, Mutex, OnceLock},
+};
 
 use jni::{JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
-use smithay_client_toolkit::{compositor::{CompositorHandler, CompositorState}, delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry, delegate_seat, delegate_shm, output::{OutputHandler, OutputState}, registry::{ProvidesRegistryState, RegistryState}, registry_handlers, seat::{Capability, SeatHandler, SeatState, pointer::{BTN_LEFT, BTN_RIGHT, PointerEvent, PointerEventKind, PointerHandler}}, shell::{WaylandSurface, wlr_layer::{LayerShellHandler, LayerSurface, LayerSurfaceConfigure}}, shm::{Shm, ShmHandler, slot::SlotPool}};
-use wayland_client::{Connection, QueueHandle, delegate_noop, protocol::{wl_output::{Transform, WlOutput}, wl_pointer::WlPointer, wl_region::WlRegion, wl_seat::WlSeat, wl_shm::Format, wl_surface::WlSurface}};
+use smithay_client_toolkit::{
+    compositor::{CompositorHandler, CompositorState},
+    delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
+    delegate_seat, delegate_shm,
+    output::{OutputHandler, OutputState},
+    registry::{ProvidesRegistryState, RegistryState},
+    registry_handlers,
+    seat::{
+        Capability, SeatHandler, SeatState,
+        pointer::{BTN_LEFT, BTN_RIGHT, PointerEvent, PointerEventKind, PointerHandler},
+    },
+    shell::{
+        WaylandSurface,
+        wlr_layer::{LayerShellHandler, LayerSurface, LayerSurfaceConfigure},
+    },
+    shm::{Shm, ShmHandler, slot::SlotPool},
+};
+use wayland_client::{
+    Connection, QueueHandle, delegate_noop,
+    protocol::{
+        wl_output::{Transform, WlOutput},
+        wl_pointer::WlPointer,
+        wl_region::WlRegion,
+        wl_seat::WlSeat,
+        wl_shm::Format,
+        wl_surface::WlSurface,
+    },
+};
 use wayland_cursor::CursorTheme;
 
 use crate::{Point, Rect};
@@ -251,7 +281,7 @@ impl PointerHandler for Mascot {
                 Motion { .. } => {
                     if let Some(pointer) = &self.cursor_state.pointer
                         && let Some(serial) = self.cursor_state.serial
-                        && let Some(surface)  = &self.cursor_state.surface
+                        && let Some(surface) = &self.cursor_state.surface
                     {
                         pointer.set_cursor(serial, Some(surface), 0, 0);
                     }
@@ -279,8 +309,8 @@ impl PointerHandler for Mascot {
 
         self.set_cursor_position();
 
-        self.jvm.attach_current_thread(|env| -> Result<_, Error> {
-            env.call_method(
+        let _ = self.jvm.attach_current_thread(|env| -> Result<_, Error> {
+            let _ = env.call_method(
                 self.object.as_ref(),
                 jni_str!("updateCursor"),
                 jni_sig!((bool, bool, bool, bool, i32, i32)),
@@ -292,10 +322,10 @@ impl PointerHandler for Mascot {
                     JValue::from(self.cursor_state.position.x),
                     JValue::from(self.cursor_state.position.y),
                 ]
-            ).expect("Failed to call method");
+            );
 
             Ok(())
-        }).expect("Failed to attach JVM");
+        });
     }
 }
 
@@ -454,10 +484,12 @@ impl Mascot {
                 .output()
                 .expect("Failed to get cursor position");
 
-            if let Some(parts) = String::from_utf8(output.stdout).unwrap().split_once(", ") {
+            if let Ok(output_text) = String::from_utf8(output.stdout) 
+                && let Some((x, y)) = output_text.split_once(", ")
+            {
                 *cursor_position = Point {
-                    x: parts.0.parse().unwrap(),
-                    y: parts.1.parse().unwrap(),
+                    x: x.trim().parse().unwrap_or_default(),
+                    y: y.trim().parse().unwrap_or_default(),
                 }
             }
         }
