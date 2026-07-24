@@ -502,6 +502,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundColorChooserRightPanel.add(getWindowBackgroundColorPreview(windowBackgroundColorChooserButton))
         windowBackgroundColorChooserRightPanel.add(Box.createHorizontalStrut(3))
         windowBackgroundColorChooserRightPanel.add(windowBackgroundColorChooserButton)
+        windowBackgroundColorChooserRightPanel.add(Box.createHorizontalStrut(5))
 
         windowBackgroundColorChooserPanel = JPanel(BorderLayout())
         windowBackgroundColorChooserPanel.alignmentX = LEFT_ALIGNMENT
