@@ -59,8 +59,6 @@ import kotlin.system.exitProcess
 fun main(args: Array<String>) {
     try {
         val debug = args.contains("--debug") || args.contains("-d")
-        val openChooser = args.contains("--chooser") || args.contains("-c")
-        val openSettings = args.contains("--settings") || args.contains("-s")
 
         if (!debug) {
             try {
@@ -72,7 +70,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        Main.instance.run(openChooser, openSettings)
+        Main.instance.run()
     } catch (_: OutOfMemoryError) {
         Main.showError(
             """
@@ -97,7 +95,7 @@ class Main {
     lateinit var languageBundle: ResourceBundle
         private set
 
-    fun run(openChooser: Boolean, openSettings: Boolean) {
+    fun run() {
         // Set up config directory
         try {
             val resources = mutableListOf(
@@ -176,19 +174,6 @@ class Main {
             exit()
         }
 
-        if (openChooser) {
-            ImageSetChooser(null, true).display()
-        }
-
-        if (openSettings) {
-            val settings = SettingsWindow(null, true)
-            settings.isVisible = true
-        }
-
-        if (openChooser || openSettings) {
-            exit()
-        }
-
         // Get the image sets to use
         if (!getProperty("AlwaysShowShimejiChooser", false)) {
             for (set in getProperty("ActiveShimeji", "").split("/")) {
@@ -222,9 +207,7 @@ class Main {
         } while (imageSets.isEmpty())
 
         // Create the tray icon
-        if (!getProperty("TrayIconDisabled", false)) {
-            createTrayIcon()
-        }
+        createTrayIcon()
 
         // Create the first mascot
         for (imageSet in imageSets) {
@@ -636,9 +619,6 @@ class Main {
         } catch (_: Exception) {
             log.log(Level.SEVERE, "Failed to create tray icon")
             showError("FailedDisplaySystemTrayErrorMessage".localize())
-
-            setProperty("TrayIconDisabled", "true")
-            updateConfigFile()
         }
     }
 
@@ -721,13 +701,11 @@ class Main {
             manager.isExitOnLastRemoved = isExitOnLastRemoved
 
             // Refresh the tray icon
-            if (!getProperty("TrayIconDisabled", false)) {
-                val icon = SystemTray.get()
-                for (entry in icon.menu.entries) {
-                    icon.menu.remove(entry)
-                }
-                createTrayIcon()
+            val icon = SystemTray.get()
+            for (entry in icon.menu.entries) {
+                icon.menu.remove(entry)
             }
+            createTrayIcon()
         } catch (_: Exception) {
             showError("Failed to set the new language.")
             exit()

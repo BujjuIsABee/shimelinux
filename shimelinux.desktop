@@ -6,12 +6,3 @@ Icon=shimelinux
 Type=Application
 Categories=Graphics;
 Exec=/usr/bin/shimelinux
-Actions=ChooseShimeji;Settings
-
-[Desktop Action ChooseShimeji]
-Name=Choose Shimeji
-Exec=/usr/bin/shimelinux --chooser
-
-[Desktop Action Settings]
-Name=Settings
-Exec=/usr/bin/shimelinux --settings
