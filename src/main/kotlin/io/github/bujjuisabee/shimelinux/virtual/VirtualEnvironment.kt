@@ -29,12 +29,14 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
+import javax.swing.SwingUtilities
 
 class VirtualEnvironment : Environment() {
     override val workArea: Area
@@ -86,7 +88,11 @@ class VirtualEnvironment : Environment() {
             screen.set(screenRect)
         }
 
-        cursor.set(display.mousePosition ?: Point(0, 0))
+        val point = MouseInfo.getPointerInfo()?.location
+        if (point != null && display.isVisible) {
+            SwingUtilities.convertPointFromScreen(point, display.contentPane)
+        }
+        cursor.set(point ?: Point(0, 0))
 
         activeIE.isVisible = false
     }
@@ -103,6 +109,6 @@ class VirtualEnvironment : Environment() {
 
     fun addShimeji(shimeji: JPanel) {
         shimeji.isOpaque = false
-        display.add(shimeji)
+        display.contentPane.add(shimeji)
     }
 }
