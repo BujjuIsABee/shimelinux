@@ -358,7 +358,7 @@ class Main {
         try {
             val icon = SystemTray.get()
             loadResource("/img/icon.png").use { icon.setImage(it) }
-            icon.setStatus("ShimeLinux")
+            icon.status = "ShimeLinux"
 
             val callShimejiMenu = MenuItem("CallShimeji".localize()) {
                 createMascot()

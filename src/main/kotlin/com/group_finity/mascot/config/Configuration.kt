@@ -157,7 +157,7 @@ class Configuration {
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
         } else {
-            mascot.resetPosition()
+            mascot.resetAnchor()
             buildBehavior(schema.getString(BEHAVIOR_FALL))
         }
     }
@@ -203,7 +203,7 @@ class Configuration {
         }
 
         if (totalFrequency == 0L) {
-            mascot.resetPosition()
+            mascot.resetAnchor()
             return buildBehavior(schema.getString(BEHAVIOR_FALL))
         }
 

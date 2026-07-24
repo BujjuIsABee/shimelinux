@@ -21,12 +21,12 @@
  */
 
 use std::{
-    cmp, mem,
+    cmp,
     process::Command,
     sync::{LazyLock, Mutex, OnceLock},
 };
 
-use jni::{JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
+use jni::{JNIVersion, JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::{InitArgsBuilder, JavaVM}};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
     delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
@@ -74,7 +74,6 @@ pub struct CursorState {
 }
 
 pub struct Mascot {
-    pub jvm: JavaVM,
     pub object: Global<JObject<'static>>,
 
     pub compositor_state: CompositorState,
@@ -309,23 +308,38 @@ impl PointerHandler for Mascot {
 
         self.set_cursor_position();
 
-        let _ = self.jvm.attach_current_thread(|env| -> Result<_, Error> {
+        let jvm = JVM.get_or_init(|| {
+            let jvm_args = InitArgsBuilder::new()
+                .version(JNIVersion::V1_8)
+                .option("-Xcheck:jni")
+                .build()
+                .unwrap();
+
+            JavaVM::new(jvm_args).unwrap()
+        });
+
+        let _ = jvm.attach_current_thread(|env| -> Result<_, Error> {
             let _ = env.call_method(
-                self.object.as_ref(),
+                &self.object,
                 jni_str!("updateCursor"),
                 jni_sig!((bool, bool, bool, bool, i32, i32)),
                 &[
-                    JValue::from(mem::replace(&mut self.cursor_state.left_pressed, false)),
-                    JValue::from(mem::replace(&mut self.cursor_state.right_pressed, false)),
-                    JValue::from(mem::replace(&mut self.cursor_state.left_released, false)),
-                    JValue::from(mem::replace(&mut self.cursor_state.right_released, false)),
+                    JValue::from(self.cursor_state.left_pressed),
+                    JValue::from(self.cursor_state.right_pressed),
+                    JValue::from(self.cursor_state.left_released),
+                    JValue::from(self.cursor_state.right_released),
                     JValue::from(self.cursor_state.position.x),
                     JValue::from(self.cursor_state.position.y),
-                ]
+                ],
             );
 
             Ok(())
         });
+
+        self.cursor_state.left_pressed = false;
+        self.cursor_state.right_pressed = false;
+        self.cursor_state.left_released = false;
+        self.cursor_state.right_released = false;
     }
 }
 
@@ -506,6 +520,7 @@ pub fn get_cursor_position() -> Point {
     cursor_position.clone()
 }
 
+static JVM: OnceLock<JavaVM> = OnceLock::new();
 static DESKTOP_TYPE: Option<&str> = option_env!("XDG_CURRENT_DESKTOP");
 static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
 static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));

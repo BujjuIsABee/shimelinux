@@ -4,7 +4,7 @@ version = "0.2.1"
 edition = "2024"
 
 [dependencies]
-jni = "0.22"
+jni = { version = "0.22", features = ["invocation"] }
 smithay-client-toolkit = "0.20.0"
 wayland-client = "0.31.14"
 wayland-cursor = "0.31.14"

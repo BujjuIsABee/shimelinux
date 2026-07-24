@@ -31,7 +31,7 @@ class WaylandEnvironment : Environment() {
     override val workArea: Area
         get() = screen
 
-    override val activeIE = Area().apply { isVisible = false }
+    override val activeIE = Area()
     override val activeIETitle = ""
 
     private val lib = requireNotNull(WaylandLib.instance)
@@ -43,6 +43,8 @@ class WaylandEnvironment : Environment() {
 
         val (cursorX, cursorY) = lib.getCursorPosition()
         cursor.set(Point(cursorX, cursorY))
+
+        activeIE.isVisible = false
     }
 
     override fun moveActiveIE(point: Point) {}

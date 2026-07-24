@@ -27,11 +27,7 @@ use std::{
 };
 
 use jni::{
-    EnvUnowned, Outcome,
-    elements::ReleaseMode,
-    errors::{Error, ThrowRuntimeExAndDefault},
-    objects::{JClass, JIntArray, JObject},
-    sys::jboolean,
+    EnvUnowned, elements::ReleaseMode, errors::{Error, ThrowRuntimeExAndDefault}, objects::{JClass, JIntArray, JObject}, refs::Global, sys::jboolean,
 };
 use smithay_client_toolkit::{
     compositor::CompositorState,
@@ -77,7 +73,7 @@ static SENDERS: Mutex<Vec<mpsc::Sender<Event>>> = Mutex::new(Vec::new());
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createMascot<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    object: JObject,
+    object: JObject<'caller>,
 ) -> i32 {
     let mut senders = SENDERS.lock().unwrap();
     let (sender, receiver) = mpsc::channel::<Event>();
@@ -106,22 +102,14 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     layer.set_size(1, 1);
     layer.commit();
 
-    let (jvm, object) = match unowned_env
-        .with_env(|env| -> Result<_, Error> {
-            Ok((
-                env.get_java_vm().unwrap(),
-                env.new_global_ref(object).unwrap(),
-            ))
-        })
-        .into_outcome()
-    {
-        Outcome::Ok((jvm, object)) => (jvm, object),
-        _ => panic!("Failed to get JVM"),
-    };
+    let mut object_global: Option<Global<JObject>> = None;
+    let _ = unowned_env.with_env(|env| -> Result<_, Error> {
+        object_global = Some(env.new_global_ref(object).unwrap());
+        Ok(())
+    });
 
     let mut mascot = Mascot {
-        jvm,
-        object,
+        object: object_global.unwrap_or_default(),
         compositor_state,
         registry_state: RegistryState::new(&globals),
         output_state: OutputState::new(&globals, &qh),

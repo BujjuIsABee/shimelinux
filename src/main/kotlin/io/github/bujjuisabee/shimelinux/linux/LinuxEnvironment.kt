@@ -26,19 +26,26 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import java.awt.GraphicsEnvironment
 import java.awt.Point
+import java.awt.Rectangle
 
 class LinuxEnvironment : Environment() {
     override val workArea = Area()
-
-    override val activeIE = Area().apply { isVisible = false }
+    override val activeIE = Area()
     override val activeIETitle = ""
+
+    private val workAreaRect: Rectangle
+
+    init {
+        val device = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+        workAreaRect = device.defaultConfiguration.bounds
+    }
 
     override fun tick() {
         super.tick()
 
-        val device = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
-        val workAreaRect = device.defaultConfiguration.bounds
         workArea.set(workAreaRect)
+
+        activeIE.isVisible = false
     }
 
     override fun moveActiveIE(point: Point) {}

@@ -29,14 +29,12 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
-import javax.swing.SwingUtilities
 
 class VirtualEnvironment : Environment() {
     override val workArea: Area
@@ -77,9 +75,9 @@ class VirtualEnvironment : Environment() {
         )
 
         display.pack()
+        display.setLocationRelativeTo(null)
         display.isVisible = true
         display.toFront()
-        tick()
     }
 
     override fun tick() {
@@ -88,13 +86,9 @@ class VirtualEnvironment : Environment() {
             screen.set(screenRect)
         }
 
-        val info = MouseInfo.getPointerInfo()
-        var point = Point(0, 0)
-        if (info != null && display.isVisible) {
-            point = info.location
-            SwingUtilities.convertPointFromScreen(point, display.contentPane)
-        }
-        cursor.set(point)
+        cursor.set(display.mousePosition ?: Point(0, 0))
+
+        activeIE.isVisible = false
     }
 
     override fun moveActiveIE(point: Point) {}
@@ -108,14 +102,7 @@ class VirtualEnvironment : Environment() {
     }
 
     fun addShimeji(shimeji: JPanel) {
-        SwingUtilities.invokeLater {
-            if (display.contentPane.size.width > 0 && display.contentPane.size.height > 0) {
-                display.preferredSize = display.size
-                display.rootPane.preferredSize = display.rootPane.size
-                display.contentPane.preferredSize = display.contentPane.size
-            }
-            shimeji.isOpaque = false
-            display.contentPane.add(shimeji)
-        }
+        shimeji.isOpaque = false
+        display.add(shimeji)
     }
 }

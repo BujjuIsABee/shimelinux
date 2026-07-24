@@ -173,7 +173,14 @@ class Mascot(var imageSet: String) {
         val popup = JPopupMenu()
 
         popup.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuCanceled(e: PopupMenuEvent) {}
+            override fun popupMenuCanceled(e: PopupMenuEvent) {
+                // Prevent freezing on Wayland environment when closing the menu
+                if (System.getenv("XDG_CURRENT_DESKTOP") == "Hyprland" ||
+                    System.getenv("XDG_CURRENT_DESKTOP") == "niri"
+                ) {
+                    SwingUtilities.getWindowAncestor(popup).dispose()
+                }
+            }
 
             override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
                 isAnimating = true
@@ -366,7 +373,7 @@ class Mascot(var imageSet: String) {
         }
     }
 
-    fun resetPosition() {
+    fun resetAnchor() {
         anchor = if (getProperty("Multiscreen", true)) {
             Point(
                 (Math.random() * environment.screen.width).toInt() + environment.screen.left,

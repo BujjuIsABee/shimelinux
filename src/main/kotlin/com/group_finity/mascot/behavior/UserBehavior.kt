@@ -101,7 +101,7 @@ class UserBehavior(
                     ) {
                         log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
 
-                        mascot.resetPosition()
+                        mascot.resetAnchor()
 
                         try {
                             mascot.behavior = configuration.buildBehavior(BEHAVIOR_FALL)
