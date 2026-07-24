@@ -56,20 +56,8 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
+fun main() {
     try {
-        val debug = args.contains("--debug") || args.contains("-d")
-
-        if (!debug) {
-            try {
-                Main.loadResource("/conf/logging.properties").use {
-                    LogManager.getLogManager().readConfiguration(it)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
         Main.instance.run()
     } catch (_: OutOfMemoryError) {
         Main.showError(
@@ -889,6 +877,16 @@ class Main {
         val frame: JFrame by lazy {
             JFrame().apply {
                 iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            }
+        }
+
+        init {
+            try {
+                loadResource("/conf/logging.properties").use {
+                    LogManager.getLogManager().readConfiguration(it)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
