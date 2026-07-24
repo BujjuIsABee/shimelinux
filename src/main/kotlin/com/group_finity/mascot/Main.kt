@@ -35,7 +35,6 @@ import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
 import java.awt.Point
-import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
 import java.util.Locale
@@ -45,7 +44,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
 import java.util.logging.LogManager
 import java.util.logging.Logger
-import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.UIManager
@@ -66,12 +64,6 @@ object Main {
     private val configurations = ConcurrentHashMap<String, Configuration>()
     private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
 
-    val frame: JFrame by lazy {
-        JFrame().apply {
-            iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
-        }
-    }
-
     lateinit var properties: Properties
         private set
     lateinit var languageBundle: ResourceBundle
@@ -86,6 +78,7 @@ object Main {
             e.printStackTrace()
         }
     }
+
     fun run() {
         // Set up config directory
         try {
@@ -902,7 +895,7 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     }
 
 fun showError(message: String) {
-    JOptionPane.showMessageDialog(Main.frame, message, "Error", JOptionPane.ERROR_MESSAGE)
+    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
 }
 
 fun showError(message: String, exception: Throwable) {

@@ -108,7 +108,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     } else if (workArea.topBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
         workArea.topBorder
     } else {
-        NotOnBorder.INSTANCE
+        NotOnBorder.instance
     }
 
     fun getFloor(ignoreSeparator: Boolean) = if (activeIE.topBorder.isOn(mascot.anchor)) {
@@ -116,7 +116,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     } else if (workArea.bottomBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
         workArea.bottomBorder
     } else {
-        NotOnBorder.INSTANCE
+        NotOnBorder.instance
     }
 
     fun getWall(ignoreSeparator: Boolean): Border {
@@ -127,7 +127,7 @@ class MascotEnvironment(private val mascot: Mascot) {
             if (activeIE.rightBorder.isOn(mascot.anchor)) return activeIE.rightBorder
             if (workArea.leftBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenLeftRight)) return workArea.leftBorder
         }
-        return NotOnBorder.INSTANCE
+        return NotOnBorder.instance
     }
 
     fun moveActiveIE(point: Point) {

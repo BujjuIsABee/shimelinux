@@ -35,7 +35,6 @@ import kotlin.io.path.inputStream
 import kotlin.math.roundToInt
 
 object ImagePairLoader {
-    @JvmStatic
     fun load(leftPath: Path, rightPath: Path?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
         if (ImagePairs.contains(leftPath.toString() + (rightPath?.toString() ?: ""))) return
 

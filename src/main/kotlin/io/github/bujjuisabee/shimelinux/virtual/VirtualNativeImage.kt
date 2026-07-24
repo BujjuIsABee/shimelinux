@@ -28,5 +28,5 @@ import java.awt.image.BufferedImage
 class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage {
     val width = managedImage.width
     val height = managedImage.height
-    val rgb: IntArray = managedImage.getRGB(0, 0,width, height, null, 0, width)
+    val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 }

@@ -30,11 +30,7 @@ import javax.swing.JPanel
 class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     private var image: VirtualNativeImage? = null
 
-    override fun contains(x: Int, y: Int) = if (super.contains(x, y)) {
-        image?.let { (it.rgb[y * width + x] shr 24) and 0xFF > 0 } ?: false
-    } else {
-        false
-    }
+    override fun contains(x: Int, y: Int) = super.contains(x, y) && image?.let { (it.rgb[y * width + x] shr 24) and 0xFF > 0 } ?: false
 
     override fun asComponent() = this
 

@@ -237,8 +237,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 val url = st.nextToken()
                 val response = JOptionPane.showConfirmDialog(
                     this@InformationWindow,
-                    localize("ConfirmVisitWebsiteMessage") + "\n" +
-                    localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
+                    localize("ConfirmVisitWebsiteMessage") + "\n" + localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
                     localize("VisitWebsite"),
                     JOptionPane.YES_NO_OPTION
                 )

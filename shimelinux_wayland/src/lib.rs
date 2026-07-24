@@ -102,14 +102,14 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     layer.set_size(1, 1);
     layer.commit();
 
-    let mut object_global: Option<Global<JObject>> = None;
+    let mut object_ref: Option<Global<JObject>> = None;
     let _ = unowned_env.with_env(|env| -> Result<_, Error> {
-        object_global = Some(env.new_global_ref(object).unwrap());
+        object_ref = Some(env.new_global_ref(object).unwrap());
         Ok(())
     });
 
     let mut mascot = Mascot {
-        object: object_global.unwrap_or_default(),
+        object: object_ref.unwrap(),
         compositor_state,
         registry_state: RegistryState::new(&globals),
         output_state: OutputState::new(&globals, &qh),

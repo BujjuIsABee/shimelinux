@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
-import javax.swing.JPopupMenu
 
 class NativeFactoryImpl : NativeFactory() {
     override val environment = VirtualEnvironment()

@@ -64,8 +64,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val selectAllLabel: JLabel
     private val listScrollPane: JScrollPane
     private val listPanel: JPanel
-    private val list1: ShimejiList
-    private val list2: ShimejiList
+    private val leftList: ShimejiList
+    private val rightList: ShimejiList
     private val footerPanel: JPanel
     private val moreButton: JButton
     private val useSelectedButton: JButton
@@ -86,12 +86,12 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BorderLayout()
 
-        list1 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
-        list2 = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        leftList = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        rightList = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
 
         listPanel = JPanel(GridLayout(1, 2, 0, 0))
-        listPanel.add(list1)
-        listPanel.add(list2)
+        listPanel.add(leftList)
+        listPanel.add(rightList)
 
         listScrollPane = JScrollPane(listPanel)
         listScrollPane.preferredSize = Dimension(518, 100)
@@ -102,8 +102,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
         clearAllLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
-                list1.clearSelection()
-                list2.clearSelection()
+                leftList.clearSelection()
+                rightList.clearSelection()
             }
         })
 
@@ -112,8 +112,8 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
         selectAllLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
-                list1.setSelectionInterval(0, list1.model.size - 1)
-                list2.setSelectionInterval(0, list2.model.size - 1)
+                leftList.setSelectionInterval(0, leftList.model.size - 1)
+                rightList.setSelectionInterval(0, rightList.model.size - 1)
             }
         })
 
@@ -235,7 +235,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             if (onList1) {
                 onList1 = false
-                list1.addShimeji(
+                leftList.addShimeji(
                     imageSet,
                     actionsFile,
                     behaviorsFile,
@@ -248,7 +248,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 }
             } else {
                 onList1 = true
-                list2.addShimeji(
+                rightList.addShimeji(
                     imageSet,
                     actionsFile,
                     behaviorsFile,
@@ -264,11 +264,11 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             imageSets.add(imageSet)
         }
 
-        setUpList(list1)
-        list1.selectedIndices = si1.toIntArray()
+        setUpList(leftList)
+        leftList.selectedIndices = si1.toIntArray()
 
-        setUpList(list2)
-        list2.selectedIndices = si2.toIntArray()
+        setUpList(rightList)
+        rightList.selectedIndices = si2.toIntArray()
 
         add(headerPanel, BorderLayout.NORTH)
         add(listScrollPane, BorderLayout.CENTER)
@@ -321,13 +321,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private fun handleUseSelected() {
         imageSets.clear()
 
-        for (selection in list1.selectedValuesList) {
+        for (selection in leftList.selectedValuesList) {
             if (selection is ImageSetChooserPanel) {
                 imageSets.add(checkNotNull(selection.imageSet))
             }
         }
 
-        for (selection in list2.selectedValuesList) {
+        for (selection in rightList.selectedValuesList) {
             if (selection is ImageSetChooserPanel) {
                 imageSets.add(checkNotNull(selection.imageSet))
             }

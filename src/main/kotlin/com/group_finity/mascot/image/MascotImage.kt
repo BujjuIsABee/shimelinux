@@ -28,6 +28,9 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 
 class MascotImage(val image: NativeImage, val center: Point, val size: Dimension) {
-    constructor(image: BufferedImage, center: Point) :
-        this(NativeFactory.instance.newNativeImage(image), center, Dimension(image.width, image.height))
+    constructor(image: BufferedImage, center: Point) : this(
+        NativeFactory.instance.newNativeImage(image),
+        center,
+        Dimension(image.width, image.height)
+    )
 }

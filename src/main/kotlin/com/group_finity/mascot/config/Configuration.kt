@@ -44,7 +44,7 @@ class Configuration {
     private val actionBuilders = linkedMapOf<String?, ActionBuilder>()
     private val behaviorBuilders = linkedMapOf<String, BehaviorBuilder>()
     private val information = linkedMapOf<String, String>()
-    val behaviorNames
+    val behaviorNames: MutableSet<String>
         get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {

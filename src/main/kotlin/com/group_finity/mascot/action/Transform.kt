@@ -22,6 +22,7 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
@@ -30,7 +31,6 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.showError
-import com.group_finity.mascot.tryGetConfiguration
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -57,7 +57,7 @@ class Transform(
     }
 
     private fun transform() {
-        val childType = transformMascot.takeUnless { tryGetConfiguration(it) == null } ?: mascot.imageSet
+        val childType = transformMascot.takeUnless { Main.getConfiguration(it) == null } ?: mascot.imageSet
 
         try {
             mascot.imageSet = childType

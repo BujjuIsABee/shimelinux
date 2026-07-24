@@ -317,32 +317,20 @@ class Mascot(var imageSet: String) {
             time++
         }
 
-        debugWindow?.let { debugWindow ->
-            behavior?.let { behavior ->
-                debugWindow.setBehavior(
-                    behavior.toString()
-                        .substring(10, behavior.toString().length - 1)
-                        .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
-                        .replace("  ", " ")
-                )
-            }
-
-            debugWindow.setShimejiX(anchor.x)
-            debugWindow.setShimejiY(anchor.y)
-
-            val activeWindow = environment.activeIE
-            debugWindow.setWindowTitle(environment.activeIETitle)
-            debugWindow.setWindowX(activeWindow.left)
-            debugWindow.setWindowY(activeWindow.top)
-            debugWindow.setWindowWidth(activeWindow.width)
-            debugWindow.setWindowHeight(activeWindow.height)
-
-            val workArea = environment.workArea
-            debugWindow.setEnvironmentX(workArea.left)
-            debugWindow.setEnvironmentY(workArea.top)
-            debugWindow.setEnvironmentWidth(workArea.width)
-            debugWindow.setEnvironmentHeight(workArea.height)
-        }
+        debugWindow?.set(
+            behavior,
+            anchor.x,
+            anchor.y,
+            environment.activeIETitle,
+            environment.activeIE.left,
+            environment.activeIE.top,
+            environment.activeIE.width,
+            environment.activeIE.height,
+            environment.workArea.left,
+            environment.workArea.top,
+            environment.workArea.width,
+            environment.workArea.height
+        )
     }
 
     fun apply() {

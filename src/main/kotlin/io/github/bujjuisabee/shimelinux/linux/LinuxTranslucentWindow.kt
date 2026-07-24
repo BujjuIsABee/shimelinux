@@ -22,7 +22,6 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
@@ -51,7 +50,7 @@ class LinuxTranslucentWindow : TranslucentWindow {
         // Initialize window with a LaF that supports transparency
         UIManager.getLookAndFeel().let { previous ->
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-            window = object : JWindow(Main.frame) {
+            window = object : JWindow() {
                 init {
                     background = Color(0, 0, 0, 0)
                     name = ""

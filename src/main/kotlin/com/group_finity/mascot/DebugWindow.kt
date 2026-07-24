@@ -22,6 +22,7 @@
 
 package com.group_finity.mascot
 
+import com.group_finity.mascot.behavior.Behavior
 import java.awt.Font
 import java.awt.GridLayout
 import javax.imageio.ImageIO
@@ -156,51 +157,37 @@ class DebugWindow(imageSet: String) : JFrame() {
         setLocationRelativeTo(null)
     }
 
-    fun setShimejiX(x: Int) {
-        shimejiXValue.text = x.toString()
-    }
+    fun set(
+        behavior: Behavior?,
+        shimejiX: Int,
+        shimejiY: Int,
+        activeIE: String,
+        windowX: Int,
+        windowY: Int,
+        windowWidth: Int,
+        windowHeight: Int,
+        environmentX: Int,
+        environmentY: Int,
+        environmentWidth: Int,
+        environmentHeight: Int
+    ) {
+        behavior?.let {
+            behaviorValue.text = behavior.toString()
+                .substring(10, behavior.toString().length - 1)
+                .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+                .replace("  ", " ")
+        }
 
-    fun setShimejiY(y: Int) {
-        shimejiYValue.text = y.toString()
-    }
-
-    fun setWindowX(x: Int) {
-        windowXValue.text = x.toString()
-    }
-
-    fun setWindowY(y: Int) {
-        windowYValue.text = y.toString()
-    }
-
-    fun setWindowWidth(width: Int) {
-        windowWidthValue.text = width.toString()
-    }
-
-    fun setWindowHeight(height: Int) {
-        windowHeightValue.text = height.toString()
-    }
-
-    fun setBehavior(behavior: String) {
-        behaviorValue.text = behavior
-    }
-
-    fun setEnvironmentX(x: Int) {
-        environmentXValue.text = x.toString()
-    }
-
-    fun setEnvironmentY(y: Int) {
-        environmentYValue.text = y.toString()
-    }
-
-    fun setEnvironmentWidth(width: Int) {
-        environmentWidthValue.text = width.toString()
-    }
-
-    fun setEnvironmentHeight(height: Int) {
-        environmentHeightValue.text = height.toString()
-    }
-
-    fun setWindowTitle(title: String) {
-        activeIEValue.text = title
+        shimejiXValue.text = shimejiX.toString()
+        shimejiYValue.text = shimejiY.toString()
+        activeIEValue.text = activeIE
+        windowXValue.text = windowX.toString()
+        windowYValue.text = windowY.toString()
+        windowWidthValue.text = windowWidth.toString()
+        windowHeightValue.text = windowHeight.toString()
+        environmentXValue.text = environmentX.toString()
+        environmentYValue.text = environmentY.toString()
+        environmentWidthValue.text = environmentWidth.toString()
+        environmentHeightValue.text = environmentHeight.toString()
     }
 }

@@ -38,14 +38,12 @@ abstract class NativeFactory {
     abstract fun newNativeImage(src: BufferedImage): NativeImage
 
     companion object {
-        @JvmStatic
         lateinit var instance: NativeFactory
 
         init {
             resetInstance()
         }
 
-        @JvmStatic
         fun resetInstance() {
             val environment = getProperty("Environment", "linux")
             instance = when (environment) {
