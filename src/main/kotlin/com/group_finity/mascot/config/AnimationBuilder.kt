@@ -63,7 +63,7 @@ class AnimationBuilder(
                 poses.add(loadPose(frameNode))
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load pose: ${frameNode.attributes}", e)
-                throw ConfigurationException("FailedLoadPoseErrorMessage".localize() + ": ${frameNode.attributes}", e)
+                throw ConfigurationException(localize("FailedLoadPoseErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
@@ -72,7 +72,7 @@ class AnimationBuilder(
                 hotspots.add(loadHotspot(frameNode))
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load hotspot: ${frameNode.attributes}", e)
-                throw ConfigurationException("FailedLoadHotspotErrorMessage".localize() + ": ${frameNode.attributes}", e)
+                throw ConfigurationException(localize("FailedLoadHotspotErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
@@ -109,7 +109,7 @@ class AnimationBuilder(
                 ImagePairLoader.load(leftImagePath, rightImagePath, anchor, scaling, filter, opacity)
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}", e)
-                throw ConfigurationException("FailedLoadImageErrorMessage".localize() + ": $leftImagePath, ${rightImagePath ?: ""}", e)
+                throw ConfigurationException(localize("FailedLoadImageErrorMessage") + ": $leftImagePath, ${rightImagePath ?: ""}", e)
             }
         }
 
@@ -132,7 +132,7 @@ class AnimationBuilder(
                 soundText += volumeText.toFloat()
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load sound: $soundText", e)
-                throw ConfigurationException("FailedLoadSoundErrorMessage".localize() + ": $soundText", e)
+                throw ConfigurationException(localize("FailedLoadSoundErrorMessage") + ": $soundText", e)
             }
         }
 
@@ -172,7 +172,7 @@ class AnimationBuilder(
 
             else -> {
                 log.log(Level.SEVERE, "Failed to load hotspot shape: $shapeText")
-                throw ConfigurationException("HotspotShapeNotSupportedErrorMessage".localize() + ": $shapeText")
+                throw ConfigurationException(localize("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
             }
         }
 
@@ -190,7 +190,7 @@ class AnimationBuilder(
                 turn.toBoolean()
             )
         } catch (e: VariableException) {
-            throw AnimationInstantiationException("FailedConditionEvaluationErrorMessage".localize(), e)
+            throw AnimationInstantiationException(localize("FailedConditionEvaluationErrorMessage"), e)
         }
     }
 

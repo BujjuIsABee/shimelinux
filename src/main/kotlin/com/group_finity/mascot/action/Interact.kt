@@ -22,13 +22,13 @@
 
 package com.group_finity.mascot.action
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
+import com.group_finity.mascot.showError
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -58,7 +58,7 @@ class Interact(
                     is BehaviorInstantiationException,
                     is CantBeAliveException -> {
                         log.log(Level.SEVERE, "Fatal Error", e)
-                        Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                        showError(localize("FailedSetBehaviorErrorMessage"), e)
                     }
 
                     else -> throw e

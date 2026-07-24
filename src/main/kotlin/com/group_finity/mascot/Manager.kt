@@ -96,7 +96,7 @@ class Manager {
         }
 
         if (isExitOnLastRemoved && mascots.isEmpty()) {
-            Main.instance.exit()
+            Main.exit()
         }
     }
 
@@ -127,7 +127,7 @@ class Manager {
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
                             log.log(Level.SEVERE, "Failed to set behavior.", e)
-                            Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                            showError(localize("FailedSetBehaviorErrorMessage"), e)
                             mascot.dispose()
                         }
 
@@ -150,7 +150,7 @@ class Manager {
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
                             log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
-                            Main.showError("FailedSetBehaviorErrorMessage".localize(), e)
+                            showError(localize("FailedSetBehaviorErrorMessage"), e)
                             mascot.dispose()
                         }
 

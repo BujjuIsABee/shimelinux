@@ -116,7 +116,7 @@ class Mascot(var imageSet: String) {
                             behavior.mousePressed(e)
                         } catch (e: CantBeAliveException) {
                             log.log(Level.SEVERE, "Fatal Error", e)
-                            Main.showError("SevereShimejiErrorErrorMessage".localize(), e)
+                            showError(localize("SevereShimejiErrorErrorMessage"), e)
                             dispose()
                         }
                     }
@@ -135,7 +135,7 @@ class Mascot(var imageSet: String) {
                             behavior.mouseReleased(e)
                         } catch (e: CantBeAliveException) {
                             log.log(Level.SEVERE, "Fatal Error", e)
-                            Main.showError("SevereShimejiErrorErrorMessage".localize(), e)
+                            showError(localize("SevereShimejiErrorErrorMessage"), e)
                             dispose()
                         }
                     }
@@ -191,22 +191,22 @@ class Mascot(var imageSet: String) {
             }
         })
 
-        val callAnotherMenu = JMenuItem("CallAnother".localize())
+        val callAnotherMenu = JMenuItem(localize("CallAnother"))
         callAnotherMenu.addActionListener {
-            Main.instance.createMascot(imageSet)
+            Main.createMascot(imageSet)
         }
 
-        val followCursorMenu = JMenuItem("FollowCursor".localize())
+        val followCursorMenu = JMenuItem(localize("FollowCursor"))
         followCursorMenu.addActionListener {
             manager?.setBehaviorAll(getConfiguration(imageSet), "ChaseMouse", imageSet)
         }
 
-        val restoreWindowsMenu = JMenuItem("RestoreWindows".localize())
+        val restoreWindowsMenu = JMenuItem(localize("RestoreWindows"))
         restoreWindowsMenu.addActionListener {
             NativeFactory.instance.environment.restoreIE()
         }
 
-        val debugMenu = JMenuItem("RevealStatistics".localize())
+        val debugMenu = JMenuItem(localize("RevealStatistics"))
         debugMenu.addActionListener {
             if (debugWindow == null) {
                 debugWindow = DebugWindow(imageSet)
@@ -214,52 +214,52 @@ class Mascot(var imageSet: String) {
             debugWindow?.isVisible = true
         }
 
-        val dismissMenu = JMenuItem("Dismiss".localize())
+        val dismissMenu = JMenuItem(localize("Dismiss"))
         dismissMenu.addActionListener {
             dispose()
         }
 
-        val dismissOthersMenu = JMenuItem("DismissOthers".localize())
+        val dismissOthersMenu = JMenuItem(localize("DismissOthers"))
         dismissOthersMenu.addActionListener {
             manager?.remainOne(imageSet)
         }
 
-        val dismissAllOthersMenu = JMenuItem("DismissAllOthers".localize())
+        val dismissAllOthersMenu = JMenuItem(localize("DismissAllOthers"))
         dismissAllOthersMenu.addActionListener {
             manager?.remainOne(this)
         }
 
-        val dismissAllMenu = JMenuItem("DismissAll".localize())
+        val dismissAllMenu = JMenuItem(localize("DismissAll"))
         dismissAllMenu.addActionListener {
-            Main.instance.exit()
+            Main.exit()
         }
 
         val pauseMenu = JMenuItem(
             if (isAnimating) {
-                "PauseAnimations".localize()
+                localize("PauseAnimations")
             } else {
-                "ResumeAnimations".localize()
+                localize("ResumeAnimations")
             }
         )
         pauseMenu.addActionListener {
             isPaused = !isPaused
         }
 
-        val behaviorsSubmenu = JMenu("SetBehavior".localize())
-        val allowedSubmenu = JMenu("AllowedBehaviors".localize())
+        val behaviorsSubmenu = JMenu(localize("SetBehavior"))
+        val allowedSubmenu = JMenu(localize("AllowedBehaviors"))
         val config = getConfiguration(imageSet)
         for (behaviorName in config.behaviorNames) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
                     val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
                     if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains("/")) {
-                        val item = JMenuItem(if (Main.instance.languageBundle.containsKey(behaviorName)) behaviorName.localize() else caption)
+                        val item = JMenuItem(if (Main.languageBundle.containsKey(behaviorName)) localize(behaviorName) else caption)
                         item.addActionListener {
                             try {
                                 behavior = config.buildBehavior(behaviorName)
                             } catch (e: Exception) {
                                 log.log(Level.SEVERE, "Failed to set behavior ($this)")
-                                Main.showError("CouldNotSetBehaviorErrorMessage".localize(), e)
+                                showError(localize("CouldNotSetBehaviorErrorMessage"), e)
                             }
                         }
                         behaviorsSubmenu.add(item)
@@ -267,7 +267,7 @@ class Mascot(var imageSet: String) {
                     if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains("/")) {
                         val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
                         toggleItem.addActionListener {
-                            Main.instance.setMascotBehaviorEnabled(
+                            Main.setMascotBehaviorEnabled(
                                 behaviorName,
                                 this,
                                 !config.isBehaviorEnabled(behaviorName, this)
@@ -311,7 +311,7 @@ class Mascot(var imageSet: String) {
                 behavior?.next()
             } catch (e: CantBeAliveException) {
                 log.log(Level.SEVERE, "Fatal Error", e)
-                Main.showError("CouldNotGetNextBehaviorErrorMessage".localize(), e)
+                showError(localize("CouldNotGetNextBehaviorErrorMessage"), e)
                 dispose()
             }
             time++

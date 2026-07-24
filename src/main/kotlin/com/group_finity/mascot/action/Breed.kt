@@ -28,11 +28,11 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.VariableException
-import com.group_finity.mascot.tryGetConfiguration
 import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
+import com.group_finity.mascot.showError
 import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Level
@@ -85,7 +85,7 @@ class Breed(
 
         fun breed() {
             val scaling = getProperty("Scaling", 1.0)
-            val childType = bornMascot.takeUnless { tryGetConfiguration(it) == null } ?: action.mascot.imageSet
+            val childType = bornMascot.takeUnless { Main.getConfiguration(it) == null } ?: action.mascot.imageSet
 
             repeat(bornCount) {
                 val mascot = Mascot(childType)
@@ -115,7 +115,7 @@ class Breed(
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
                             log.log(Level.SEVERE, "Fatal Error", e)
-                            Main.showError("FailedCreateNewShimejiErrorMessage".localize(), e)
+                            showError(localize("FailedCreateNewShimejiErrorMessage"), e)
                             mascot.dispose()
                         }
 

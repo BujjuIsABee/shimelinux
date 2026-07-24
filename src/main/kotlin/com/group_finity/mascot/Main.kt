@@ -37,6 +37,7 @@ import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.InputStream
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -49,6 +50,7 @@ import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -56,33 +58,34 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-fun main() {
-    try {
-        Main.instance.run()
-    } catch (_: OutOfMemoryError) {
-        Main.showError(
-            """
-            Out of memory. There are probably too many
-            Shimeji mascots for your computer to handle.
-            Select fewer image sets or move some to the
-            img/unused folder and try again.
-            """.trimIndent()
-        )
-        exitProcess(0)
-    }
-}
+object Main {
+    private val log = Logger.getLogger(this::class.java.name)
 
-class Main {
     private val manager = Manager()
     private var imageSets = mutableListOf<String>()
     private val configurations = ConcurrentHashMap<String, Configuration>()
     private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
+
+    val frame: JFrame by lazy {
+        JFrame().apply {
+            iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+        }
+    }
 
     lateinit var properties: Properties
         private set
     lateinit var languageBundle: ResourceBundle
         private set
 
+    init {
+        try {
+            loadResource("/conf/logging.properties").use {
+                LogManager.getLogManager().readConfiguration(it)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     fun run() {
         // Set up config directory
         try {
@@ -317,7 +320,7 @@ class Main {
             return true
         } catch (e: Exception) {
             log.log(Level.SEVERE, "Failed to load configuration files", e)
-            showError("FailedLoadConfigErrorMessage".localize(), e)
+            showError(localize("FailedLoadConfigErrorMessage"), e)
         }
 
         return false
@@ -331,59 +334,59 @@ class Main {
             loadResource("/img/icon.png").use { icon.setImage(it) }
             icon.status = "ShimeLinux"
 
-            val callShimejiMenu = MenuItem("CallShimeji".localize()) {
+            val callShimejiMenu = MenuItem(localize("CallShimeji")) {
                 createMascot()
             }
 
-            val followCursorMenu = MenuItem("FollowCursor".localize()) {
+            val followCursorMenu = MenuItem(localize("FollowCursor")) {
                 manager.setBehaviorAll("ChaseMouse")
             }
 
-            val reduceToOneMenu = MenuItem("ReduceToOne".localize()) {
+            val reduceToOneMenu = MenuItem(localize("ReduceToOne")) {
                 manager.remainOne()
             }
 
-            val restoreWindowsMenu = MenuItem("RestoreWindows".localize()) {
+            val restoreWindowsMenu = MenuItem(localize("RestoreWindows")) {
                 NativeFactory.instance.environment.restoreIE()
             }
 
-            val breedingMenu = Checkbox("BreedingCloning".localize()) {
+            val breedingMenu = Checkbox(localize("BreedingCloning")) {
                 toggleBooleanSetting("Breeding", true)
                 updateConfigFile()
             }
             breedingMenu.checked = getProperty("Breeding", true)
 
-            val transientMenu = Checkbox("BreedingTransient".localize()) {
+            val transientMenu = Checkbox(localize("BreedingTransient")) {
                 toggleBooleanSetting("Transients", true)
                 updateConfigFile()
             }
             transientMenu.checked = getProperty("Transients", true)
 
-            val transformationMenu = Checkbox("Transformation".localize()) {
+            val transformationMenu = Checkbox(localize("Transformation")) {
                 toggleBooleanSetting("Transformation", true)
                 updateConfigFile()
             }
             transformationMenu.checked = getProperty("Transformation", true)
 
-            val throwingMenu = Checkbox("ThrowingWindows".localize()) {
+            val throwingMenu = Checkbox(localize("ThrowingWindows")) {
                 toggleBooleanSetting("Throwing", true)
                 updateConfigFile()
             }
             throwingMenu.checked = getProperty("Throwing", true)
 
-            val soundsMenu = Checkbox("SoundEffects".localize()) {
+            val soundsMenu = Checkbox(localize("SoundEffects")) {
                 toggleBooleanSetting("Sounds", true)
                 updateConfigFile()
             }
             soundsMenu.checked = getProperty("Sounds", true)
 
-            val multiscreenMenu = Checkbox("Multiscreen".localize()) {
+            val multiscreenMenu = Checkbox(localize("Multiscreen")) {
                 toggleBooleanSetting("Multiscreen", true)
                 updateConfigFile()
             }
             multiscreenMenu.checked = getProperty("Multiscreen", true)
 
-            val allowedBehaviorsSubmenu = Menu("AllowedBehaviors".localize())
+            val allowedBehaviorsSubmenu = Menu(localize("AllowedBehaviors"))
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
@@ -391,7 +394,7 @@ class Main {
             allowedBehaviorsSubmenu.add(soundsMenu)
             allowedBehaviorsSubmenu.add(multiscreenMenu)
 
-            val chooseShimejiMenu = MenuItem("ChooseShimeji".localize()) {
+            val chooseShimejiMenu = MenuItem(localize("ChooseShimeji")) {
                 if (!manager.isPaused) {
                     manager.togglePauseAll()
                 }
@@ -404,7 +407,7 @@ class Main {
                 }
             }
 
-            val settingsMenu = MenuItem("Settings".localize()) {
+            val settingsMenu = MenuItem(localize("Settings")) {
                 if (!manager.isPaused) {
                     manager.togglePauseAll()
                 }
@@ -559,7 +562,7 @@ class Main {
                 updateConfigFile()
             }
 
-            val languageSubmenu = Menu("Language".localize())
+            val languageSubmenu = Menu(localize("Language"))
             languageSubmenu.add(americanEnglishMenu)
             languageSubmenu.add(britishEnglishMenu)
             languageSubmenu.add(arabicMenu)
@@ -583,12 +586,19 @@ class Main {
             languageSubmenu.add(koreanMenu)
             languageSubmenu.add(japaneseMenu)
 
-            var pauseAllMenu: MenuItem? = null
-            pauseAllMenu = MenuItem("PauseAnimations".localize()) {
-                pauseAllMenu?.let { pauseMenuClicked(it) }
+            val pauseAllMenu = MenuItem(localize("PauseAnimations"))
+            pauseAllMenu.callback = {
+                manager.togglePauseAll()
+
+                // Update pause menu item text
+                pauseAllMenu.text = if (manager.isPaused) {
+                    localize("ResumeAnimations")
+                } else {
+                    localize("PauseAnimations")
+                }
             }
 
-            val dismissAllMenu = MenuItem("DismissAll".localize()) {
+            val dismissAllMenu = MenuItem(localize("DismissAll")) {
                 exit()
             }
 
@@ -606,18 +616,7 @@ class Main {
             icon.menu.add(dismissAllMenu)
         } catch (_: Exception) {
             log.log(Level.SEVERE, "Failed to create tray icon")
-            showError("FailedDisplaySystemTrayErrorMessage".localize())
-        }
-    }
-
-    private fun pauseMenuClicked(pauseMenuItem: MenuItem) {
-        manager.togglePauseAll()
-
-        // Update pause menu item text
-        pauseMenuItem.text = if (manager.isPaused) {
-            "ResumeAnimations".localize()
-        } else {
-            "PauseAnimations".localize()
+            showError(localize("FailedDisplaySystemTrayErrorMessage"))
         }
     }
 
@@ -646,13 +645,13 @@ class Main {
                 is BehaviorInstantiationException,
                 is CantBeAliveException -> {
                     log.log(Level.SEVERE, "Failed to initialize the first action", e)
-                    showError("FailedInitializeFirstActionErrorMessage".localize(), e)
+                    showError(localize("FailedInitializeFirstActionErrorMessage"), e)
                     mascot.dispose()
                 }
 
                 else -> {
                     log.log(Level.SEVERE, "Could not be started ($imageSet)", e)
-                    showError("CouldNotCreateShimejiErrorMessage".localize() + " ($imageSet)", e)
+                    showError(localize("CouldNotCreateShimejiErrorMessage") + " ($imageSet)", e)
                     mascot.dispose()
                 }
             }
@@ -661,7 +660,7 @@ class Main {
 
     private fun updateLanguage(language: String) {
         if (getProperty("Language", "en-US") != language) {
-            setProperty("Language", language)
+            properties.setProperty("Language", language)
             refreshLanguage()
         }
     }
@@ -715,7 +714,7 @@ class Main {
         }
 
         if (list.isNotEmpty()) {
-            setProperty(
+            properties.setProperty(
                 "DisabledBehaviors.${mascot.imageSet}",
                 list.toString()
                     .replace("[", "")
@@ -732,9 +731,9 @@ class Main {
     @Suppress("SameParameterValue")
     private fun toggleBooleanSetting(propertyName: String, defaultValue: Boolean) {
         if (getProperty(propertyName, defaultValue)) {
-            setProperty(propertyName, "false")
+            properties.setProperty(propertyName, "false")
         } else {
-            setProperty(propertyName, "true")
+            properties.setProperty(propertyName, "true")
         }
     }
 
@@ -749,7 +748,7 @@ class Main {
             list.add(imageSet)
         }
 
-        setProperty(
+        properties.setProperty(
             "InformationDismissed",
             list.toString()
                 .replace("[", "")
@@ -866,44 +865,52 @@ class Main {
         manager.stop()
         exitProcess(0)
     }
+}
 
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
-        @JvmStatic
-        val instance = Main()
-
-        @JvmStatic
-        val frame: JFrame by lazy {
-            JFrame().apply {
-                iconImage = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
-            }
-        }
-
-        init {
-            try {
-                loadResource("/conf/logging.properties").use {
-                    LogManager.getLogManager().readConfiguration(it)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        @JvmStatic
-        fun showError(message: String) {
-            JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE)
-        }
-
-        @JvmStatic
-        fun showError(message: String, exception: Throwable) {
-            val message = message + if (exception is SAXParseException) {
-                "\nLine ${exception.lineNumber}: ${exception.message}"
-            } else {
-                "\n${exception.message}"
-            }
-
-            showError(message + "\n${"SeeLogForDetails".localize()}")
-        }
+fun main() {
+    try {
+        Main.run()
+    } catch (_: OutOfMemoryError) {
+        showError(
+            """
+            Out of memory. There are probably too many
+            Shimeji mascots for your computer to handle.
+            Select fewer image sets or move some to the
+            img/unused folder and try again.
+            """.trimIndent()
+        )
+        exitProcess(0)
     }
+}
+
+fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
+
+fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
+
+fun localize(key: String): String = Main.languageBundle.getString(key)
+
+fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
+
+inline fun <reified T> getProperty(key: String, defaultValue: T): T =
+    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
+        when (T::class) {
+            Int::class -> value.toInt()
+            Double::class -> value.toDouble()
+            Boolean::class -> value.toBoolean()
+            else -> value
+        } as? T ?: defaultValue
+    }
+
+fun showError(message: String) {
+    JOptionPane.showMessageDialog(Main.frame, message, "Error", JOptionPane.ERROR_MESSAGE)
+}
+
+fun showError(message: String, exception: Throwable) {
+    val message = message + if (exception is SAXParseException) {
+        "\nLine ${exception.lineNumber}: ${exception.message}"
+    } else {
+        "\n${exception.message}"
+    }
+
+    showError("$message\n${localize("SeeLogForDetails")}")
 }

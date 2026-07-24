@@ -58,9 +58,9 @@ class UserBehavior(
                 mascot.behavior = configuration.buildNextBehavior(name, mascot)
             }
         } catch (e: VariableException) {
-            throw CantBeAliveException("VariableEvaluationErrorMessage".localize(), e)
+            throw CantBeAliveException(localize("VariableEvaluationErrorMessage"), e)
         } catch (e: BehaviorInstantiationException) {
-            throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
+            throw CantBeAliveException(localize("FailedInitializeFollowingBehaviorErrorMessage"), e)
         }
     }
 
@@ -81,7 +81,7 @@ class UserBehavior(
                         try {
                             mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
                         } catch (e: BehaviorInstantiationException) {
-                            throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
+                            throw CantBeAliveException(localize("FailedInitializeFollowingBehaviorErrorMessage"), e)
                         }
                     }
 
@@ -106,7 +106,7 @@ class UserBehavior(
                         try {
                             mascot.behavior = configuration.buildBehavior(BEHAVIOR_FALL)
                         } catch (e: BehaviorInstantiationException) {
-                            throw CantBeAliveException("FailedFallingActionInitializeErrorMessage".localize(), e)
+                            throw CantBeAliveException(localize("FailedFallingActionInitializeErrorMessage"), e)
                         }
                     }
                 } else {
@@ -115,7 +115,7 @@ class UserBehavior(
                     try {
                         mascot.behavior = configuration.buildNextBehavior(name, mascot)
                     } catch (e: BehaviorInstantiationException) {
-                        throw CantBeAliveException("FailedInitializeFollowingActionsErrorMessage".localize(), e)
+                        throw CantBeAliveException(localize("FailedInitializeFollowingActionsErrorMessage"), e)
                     }
                 }
             }
@@ -126,10 +126,10 @@ class UserBehavior(
             try {
                 mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
             } catch (e: BehaviorInstantiationException) {
-                throw CantBeAliveException("FailedFallingActionInitializeErrorMessage".localize(), e)
+                throw CantBeAliveException(localize("FailedFallingActionInitializeErrorMessage"), e)
             }
         } catch (e: VariableException) {
-            throw CantBeAliveException("VariableEvaluationErrorMessage".localize(), e)
+            throw CantBeAliveException(localize("VariableEvaluationErrorMessage"), e)
         }
     }
 
@@ -148,7 +148,7 @@ class UserBehavior(
                         try {
                             mascot.behavior = configuration.buildBehavior(hotspot.behavior, mascot)
                         } catch (e: BehaviorInstantiationException) {
-                            throw CantBeAliveException("FailedInitializeFollowingBehaviorErrorMessage".localize(), e)
+                            throw CantBeAliveException(localize("FailedInitializeFollowingBehaviorErrorMessage"), e)
                         }
                     }
 
@@ -160,7 +160,7 @@ class UserBehavior(
                 try {
                     handled = !action.isDraggable
                 } catch (e: VariableException) {
-                    throw CantBeAliveException("FailedDragActionInitializeErrorMessage".localize(), e)
+                    throw CantBeAliveException(localize("FailedDragActionInitializeErrorMessage"), e)
                 }
             }
 
@@ -168,7 +168,7 @@ class UserBehavior(
                 try {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {
-                    throw CantBeAliveException("FailedDragActionInitializeErrorMessage".localize(), e)
+                    throw CantBeAliveException(localize("FailedDragActionInitializeErrorMessage"), e)
                 }
             }
         }
@@ -187,7 +187,7 @@ class UserBehavior(
                 try {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_THROWN))
                 } catch (e: BehaviorInstantiationException) {
-                    throw CantBeAliveException("FailedDropActionInitializeErrorMessage".localize(), e)
+                    throw CantBeAliveException(localize("FailedDropActionInitializeErrorMessage"), e)
                 }
             }
         }

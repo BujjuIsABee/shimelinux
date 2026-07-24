@@ -64,62 +64,62 @@ class DebugWindow(imageSet: String) : JFrame() {
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
-        behaviorLabel = JLabel("Behavior".localize())
+        behaviorLabel = JLabel(localize("Behavior"))
         behaviorLabel.font = behaviorLabel.font.deriveFont(Font.BOLD)
         behaviorValue = JLabel("N/A")
         behaviorValue.alignmentX = LEFT_ALIGNMENT
 
-        shimejiXLabel = JLabel("ShimejiX".localize())
+        shimejiXLabel = JLabel(localize("ShimejiX"))
         shimejiXLabel.font = shimejiXLabel.font.deriveFont(Font.BOLD)
         shimejiXValue = JLabel("N/A")
         shimejiXValue.alignmentX = LEFT_ALIGNMENT
 
-        shimejiYLabel = JLabel("ShimejiY".localize())
+        shimejiYLabel = JLabel(localize("ShimejiY"))
         shimejiYLabel.font = shimejiYLabel.font.deriveFont(Font.BOLD)
         shimejiYValue = JLabel("N/A")
         shimejiYValue.alignmentX = LEFT_ALIGNMENT
 
-        activeIELabel = JLabel("WindowTitle".localize())
+        activeIELabel = JLabel(localize("WindowTitle"))
         activeIELabel.font = activeIELabel.font.deriveFont(Font.BOLD)
         activeIEValue = JLabel("N/A")
         activeIEValue.alignmentX = LEFT_ALIGNMENT
 
-        windowXLabel = JLabel("WindowX".localize())
+        windowXLabel = JLabel(localize("WindowX"))
         windowXLabel.font = windowXLabel.font.deriveFont(Font.BOLD)
         windowXValue = JLabel("N/A")
         windowXValue.alignmentX = LEFT_ALIGNMENT
 
-        windowYLabel = JLabel("WindowY".localize())
+        windowYLabel = JLabel(localize("WindowY"))
         windowYLabel.font = windowYLabel.font.deriveFont(Font.BOLD)
         windowYValue = JLabel("N/A")
         windowYValue.alignmentX = LEFT_ALIGNMENT
 
-        windowWidthLabel = JLabel("WindowWidth".localize())
+        windowWidthLabel = JLabel(localize("WindowWidth"))
         windowWidthLabel.font = windowWidthLabel.font.deriveFont(Font.BOLD)
         windowWidthValue = JLabel("N/A")
         windowWidthValue.alignmentX = LEFT_ALIGNMENT
 
-        windowHeightLabel = JLabel("WindowHeight".localize())
+        windowHeightLabel = JLabel(localize("WindowHeight"))
         windowHeightLabel.font = windowHeightLabel.font.deriveFont(Font.BOLD)
         windowHeightValue = JLabel("N/A")
         windowHeightValue.alignmentX = LEFT_ALIGNMENT
 
-        environmentXLabel = JLabel("EnvironmentX".localize())
+        environmentXLabel = JLabel(localize("EnvironmentX"))
         environmentXLabel.font = environmentXLabel.font.deriveFont(Font.BOLD)
         environmentXValue = JLabel("N/A")
         environmentXValue.alignmentX = LEFT_ALIGNMENT
 
-        environmentYLabel = JLabel("EnvironmentY".localize())
+        environmentYLabel = JLabel(localize("EnvironmentY"))
         environmentYLabel.font = environmentYLabel.font.deriveFont(Font.BOLD)
         environmentYValue = JLabel("N/A")
         environmentYValue.alignmentX = LEFT_ALIGNMENT
 
-        environmentWidthLabel = JLabel("EnvironmentWidth".localize())
+        environmentWidthLabel = JLabel(localize("EnvironmentWidth"))
         environmentWidthLabel.font = environmentWidthLabel.font.deriveFont(Font.BOLD)
         environmentWidthValue = JLabel("N/A")
         environmentWidthValue.alignmentX = LEFT_ALIGNMENT
 
-        environmentHeightLabel = JLabel("EnvironmentHeight".localize())
+        environmentHeightLabel = JLabel(localize("EnvironmentHeight"))
         environmentHeightLabel.font = environmentHeightLabel.font.deriveFont(Font.BOLD)
         environmentHeightValue = JLabel("N/A")
         environmentHeightValue.alignmentX = LEFT_ALIGNMENT

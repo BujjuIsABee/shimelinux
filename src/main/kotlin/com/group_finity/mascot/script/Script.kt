@@ -37,7 +37,7 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
         try {
             compiled = (engine as Compilable).compile(source)
         } catch (e: ScriptException) {
-            throw VariableException("ScriptCompilationErrorMessage".localize() + ": $source", e)
+            throw VariableException(localize("ScriptCompilationErrorMessage") + ": $source", e)
         }
     }
 
@@ -55,7 +55,7 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
         return value ?: try {
             compiled.eval(variables).also { value = it }
         } catch (e: ScriptException) {
-            throw VariableException("ScriptEvaluationErrorMessage".localize() + ": $source", e)
+            throw VariableException(localize("ScriptEvaluationErrorMessage") + ": $source", e)
         }
     }
 

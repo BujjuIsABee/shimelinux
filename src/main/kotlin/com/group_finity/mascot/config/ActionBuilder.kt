@@ -66,7 +66,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 }
             }
         } catch (e: ConfigurationException) {
-            throw ConfigurationException("${"FailedLoadActionErrorMessage".localize()} \"$name\" ${"ForShimeji".localize()} \"$imageSet.\"", e)
+            throw ConfigurationException("${localize("FailedLoadActionErrorMessage")} \"$name\" ${localize("ForShimeji")} \"$imageSet.\"", e)
         }
 
         log.log(Level.INFO, "Finished loading action")
@@ -94,11 +94,11 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                             cls.getConstructor().newInstance()
                         }
                     } catch (e: InstantiationException) {
-                        throw ActionInstantiationException("FailedClassActionInitializeErrorMessage".localize() + " ($this)", e)
+                        throw ActionInstantiationException(localize("FailedClassActionInitializeErrorMessage") + " ($this)", e)
                     } catch (e: IllegalAccessException) {
-                        throw ActionInstantiationException("CannotAccessClassActionErrorMessage".localize() + " ($this)", e)
+                        throw ActionInstantiationException(localize("CannotAccessClassActionErrorMessage") + " ($this)", e)
                     } catch (e: ClassNotFoundException) {
-                        throw ActionInstantiationException("ClassNotFoundErrorMessage".localize() + " ($this)", e)
+                        throw ActionInstantiationException(localize("ClassNotFoundErrorMessage") + " ($this)", e)
                     }
                 }
 
@@ -107,12 +107,12 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
                 "Animate" -> Animate(schema, animations, variables)
                 "Sequence" -> Sequence(schema, variables, *actions.toTypedArray())
                 "Select" -> Select(schema, variables, *actions.toTypedArray())
-                else -> throw ActionInstantiationException("UnknownActionTypeErrorMessage".localize() + " ($this)")
+                else -> throw ActionInstantiationException(localize("UnknownActionTypeErrorMessage") + " ($this)")
             }
         } catch (e: AnimationInstantiationException) {
-            throw ActionInstantiationException("FailedCreateAnimationErrorMessage".localize() + ": $this", e)
+            throw ActionInstantiationException(localize("FailedCreateAnimationErrorMessage") + ": $this", e)
         } catch (e: VariableException) {
-            throw ActionInstantiationException("FailedParameterEvaluationErrorMessage".localize() + ": $this", e)
+            throw ActionInstantiationException(localize("FailedParameterEvaluationErrorMessage") + ": $this", e)
         }
     }
 

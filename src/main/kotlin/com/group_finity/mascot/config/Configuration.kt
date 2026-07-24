@@ -92,7 +92,7 @@ class Configuration {
         for (node in list.selectChildren(schema.getString("Action"))) {
             val action = ActionBuilder(this, node, imageSet)
             actionBuilders.putIfAbsent(action.name, action)
-                ?: ConfigurationException("DuplicateActionErrorMessage".localize() + ": ${action.name}")
+                ?: ConfigurationException(localize("DuplicateActionErrorMessage") + ": ${action.name}")
         }
     }
 
@@ -145,14 +145,14 @@ class Configuration {
 
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name]
-            ?: throw ActionInstantiationException("NoCorrespondingActionFoundErrorMessage".localize() + ": $name")
+            ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
 
         return factory.buildAction(params)
     }
 
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name]
-            ?: throw BehaviorInstantiationException("NoBehaviorFoundErrorMessage".localize() + " ($name)")
+            ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
@@ -163,7 +163,7 @@ class Configuration {
     }
 
     fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior()
-        ?: throw BehaviorInstantiationException("NoBehaviorFoundErrorMessage".localize() + " ($name)")
+        ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()

@@ -100,7 +100,7 @@ class BehaviorBuilder(
     fun validate() {
         if (!configuration.hasAction(actionName)) {
             log.log(Level.SEVERE, "There is no corresponding action ($this)")
-            throw ConfigurationException("NoActionFoundErrorMessage".localize() + " ($this)")
+            throw ConfigurationException(localize("NoActionFoundErrorMessage") + " ($this)")
         }
     }
 
@@ -109,7 +109,7 @@ class BehaviorBuilder(
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
         } catch (e: ActionInstantiationException) {
             log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)", e)
-            throw BehaviorInstantiationException("FailedInitializeCorrespondingActionErrorMessage".localize() + " ($this)", e)
+            throw BehaviorInstantiationException(localize("FailedInitializeCorrespondingActionErrorMessage") + " ($this)", e)
         }
     }
 

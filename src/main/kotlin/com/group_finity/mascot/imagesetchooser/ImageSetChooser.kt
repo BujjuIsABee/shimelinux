@@ -29,7 +29,6 @@ import com.group_finity.mascot.getPath
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
-import com.group_finity.mascot.setProperty
 import dorkbox.desktop.Desktop
 import java.awt.BorderLayout
 import java.awt.Cursor
@@ -82,7 +81,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     init {
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
-        title = "ShimejiImageSetChooser".localize()
+        title = localize("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BorderLayout()
@@ -98,7 +97,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         listScrollPane.preferredSize = Dimension(518, 100)
         listScrollPane.verticalScrollBar.unitIncrement = 10
 
-        clearAllLabel = JLabel("<html><u>" + "ClearAll".localize() + "</u></html>")
+        clearAllLabel = JLabel("<html><u>" + localize("ClearAll") + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
         clearAllLabel.addMouseListener(object : MouseAdapter() {
@@ -108,7 +107,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         })
 
-        selectAllLabel = JLabel("<html><u>" + "SelectAll".localize() + "</u></html>")
+        selectAllLabel = JLabel("<html><u>" + localize("SelectAll") + "</u></html>")
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
         selectAllLabel.addMouseListener(object : MouseAdapter() {
@@ -125,22 +124,22 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         labelsPanel.add(selectAllLabel)
 
         headerPanel = JPanel(BorderLayout())
-        headerPanel.add(JLabel("SelectImageSetsToUse".localize()), BorderLayout.WEST)
+        headerPanel.add(JLabel(localize("SelectImageSetsToUse")), BorderLayout.WEST)
         headerPanel.add(labelsPanel, BorderLayout.EAST)
 
-        moreButton = JButton("More".localize())
+        moreButton = JButton(localize("More"))
         moreButton.addActionListener { handleMore() }
 
-        useSelectedButton = JButton("UseSelected".localize())
+        useSelectedButton = JButton(localize("UseSelected"))
         useSelectedButton.addActionListener { handleUseSelected() }
 
-        useAllButton = JButton("UseAll".localize())
+        useAllButton = JButton(localize("UseAll"))
         useAllButton.addActionListener {
             cancelled = false
             dispose()
         }
 
-        cancelButton = JButton("Cancel".localize())
+        cancelButton = JButton(localize("Cancel"))
         cancelButton.addActionListener { dispose() }
 
         footerPanel = JPanel(FlowLayout(FlowLayout.CENTER))
@@ -292,7 +291,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun updateConfigFile() {
         runCatching {
-            setProperty(
+            Main.properties.setProperty(
                 "ActiveShimeji",
                 imageSets
                     .toString()
@@ -300,7 +299,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                     .replace("]", "")
                     .replace(", ", "/")
             )
-            confPath.outputStream().use { Main.instance.properties.store(it, "Configuration Options") }
+            confPath.outputStream().use { Main.properties.store(it, "Configuration Options") }
         }
     }
 
@@ -312,7 +311,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         } catch (_: IOException) {
             JOptionPane.showMessageDialog(
                 this@ImageSetChooser,
-                "FailedOpenFileBrowserErrorMessage".localize() + "\n${getPath("img")}",
+                localize("FailedOpenFileBrowserErrorMessage") + "\n${getPath("img")}",
                 "Error",
                 JOptionPane.PLAIN_MESSAGE
             )

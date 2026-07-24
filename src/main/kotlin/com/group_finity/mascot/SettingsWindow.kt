@@ -154,7 +154,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     init {
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
-        title = "Settings".localize()
+        title = localize("Settings")
         layout = BorderLayout()
 
         try {
@@ -171,13 +171,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         initialLightTextColor = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
         initialLightAccentColor = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
 
-        alwaysShowShimejiChooserCheckBox = JCheckBox("AlwaysShowShimejiChooser".localize())
+        alwaysShowShimejiChooserCheckBox = JCheckBox(localize("AlwaysShowShimejiChooser"))
         alwaysShowShimejiChooserCheckBox.isSelected = alwaysShowShimejiChooser
         alwaysShowShimejiChooserCheckBox.addChangeListener {
             alwaysShowShimejiChooser = alwaysShowShimejiChooserCheckBox.isSelected
         }
 
-        alwaysShowInformationScreenCheckBox = JCheckBox("AlwaysShowInformationScreen".localize())
+        alwaysShowInformationScreenCheckBox = JCheckBox(localize("AlwaysShowInformationScreen"))
         alwaysShowInformationScreenCheckBox.isSelected = alwaysShowInformationScreen
         alwaysShowInformationScreenCheckBox.addChangeListener {
             alwaysShowInformationScreen = alwaysShowInformationScreenCheckBox.isSelected
@@ -222,7 +222,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        nearestNeighborRadioButton = JRadioButton("NearestNeighbor".localize())
+        nearestNeighborRadioButton = JRadioButton(localize("NearestNeighbor"))
         nearestNeighborRadioButton.isSelected = filter == "Nearest"
         nearestNeighborRadioButton.addChangeListener {
             if (nearestNeighborRadioButton.isSelected && filter != "Nearest") {
@@ -231,7 +231,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        bicubicRadioButton = JRadioButton("BicubicFilter".localize())
+        bicubicRadioButton = JRadioButton(localize("BicubicFilter"))
         bicubicRadioButton.isSelected = filter == "Bicubic"
         bicubicRadioButton.addChangeListener {
             if (bicubicRadioButton.isSelected && filter != "Bicubic") {
@@ -240,7 +240,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        hqxRadioButton = JRadioButton("HqxFilter".localize())
+        hqxRadioButton = JRadioButton(localize("HqxFilter"))
         hqxRadioButton.isSelected = filter == "Hqx"
         hqxRadioButton.addChangeListener {
             if (hqxRadioButton.isSelected && filter != "Hqx") {
@@ -259,13 +259,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         generalTab.add(alwaysShowShimejiChooserCheckBox)
         generalTab.add(alwaysShowInformationScreenCheckBox)
         generalTab.add(Box.createVerticalStrut(10))
-        generalTab.add(JLabel("Scaling".localize()))
+        generalTab.add(JLabel(localize("Scaling")))
         generalTab.add(scalingSlider)
         generalTab.add(Box.createVerticalStrut(10))
-        generalTab.add(JLabel("Opacity".localize()))
+        generalTab.add(JLabel(localize("Opacity")))
         generalTab.add(opacitySlider)
         generalTab.add(Box.createVerticalStrut(10))
-        generalTab.add(JLabel("Filter".localize()))
+        generalTab.add(JLabel(localize("Filter")))
         generalTab.add(nearestNeighborRadioButton)
         generalTab.add(bicubicRadioButton)
         generalTab.add(hqxRadioButton)
@@ -288,14 +288,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         blacklist = JList(blacklistModel)
 
         interactiveWindowsTabs = JTabbedPane()
-        interactiveWindowsTabs.addTab("Whitelist".localize(), JScrollPane(whitelist))
-        interactiveWindowsTabs.addTab("Blacklist".localize(), JScrollPane(blacklist))
+        interactiveWindowsTabs.addTab(localize("Whitelist"), JScrollPane(whitelist))
+        interactiveWindowsTabs.addTab(localize("Blacklist"), JScrollPane(blacklist))
 
-        addInteractiveWindowButton = JButton("Add".localize())
+        addInteractiveWindowButton = JButton(localize("Add"))
         addInteractiveWindowButton.preferredSize = Dimension(130, 26)
         addInteractiveWindowButton.addActionListener { handleAddInteractiveWindowButtonAction() }
 
-        removeInteractiveWindowButton = JButton("Remove".localize())
+        removeInteractiveWindowButton = JButton(localize("Remove"))
         removeInteractiveWindowButton.preferredSize = Dimension(130, 26)
         removeInteractiveWindowButton.addActionListener { handleRemoveInteractiveWindowButtonAction() }
 
@@ -331,15 +331,15 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         menuScalingPanel = JPanel()
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
-        menuScalingPanel.border = BorderFactory.createTitledBorder("MenuScaling".localize())
+        menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
         menuScalingPanel.add(menuScalingSlider)
 
         themeComboBox = JComboBox<String>()
-        themeComboBox.addItem("FlatDark".localize())
-        themeComboBox.addItem("FlatLight".localize())
-        themeComboBox.addItem("Gtk".localize())
+        themeComboBox.addItem(localize("FlatDark"))
+        themeComboBox.addItem(localize("FlatLight"))
+        themeComboBox.addItem(localize("Gtk"))
 
-        backgroundColorButton = JButton("Change".localize())
+        backgroundColorButton = JButton(localize("Change"))
         backgroundColorButton.addActionListener { handleChangeBackgroundColorButtonAction() }
 
         backgroundColorRightPanel = JPanel()
@@ -356,10 +356,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         backgroundColorRightPanel.add(backgroundColorButton)
 
         backgroundColorPanel = JPanel(BorderLayout())
-        backgroundColorPanel.add(JLabel("BackgroundColor".localize()), BorderLayout.WEST)
+        backgroundColorPanel.add(JLabel(localize("BackgroundColor")), BorderLayout.WEST)
         backgroundColorPanel.add(backgroundColorRightPanel, BorderLayout.EAST)
 
-        textColorButton = JButton("Change".localize())
+        textColorButton = JButton(localize("Change"))
         textColorButton.addActionListener { handleChangeTextColorButtonAction() }
 
         textColorRightPanel = JPanel()
@@ -376,10 +376,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         textColorRightPanel.add(textColorButton)
 
         textColorPanel = JPanel(BorderLayout())
-        textColorPanel.add(JLabel("TextColor".localize()), BorderLayout.WEST)
+        textColorPanel.add(JLabel(localize("TextColor")), BorderLayout.WEST)
         textColorPanel.add(textColorRightPanel, BorderLayout.EAST)
 
-        accentColorButton = JButton("Change".localize())
+        accentColorButton = JButton(localize("Change"))
         accentColorButton.addActionListener { handleChangeAccentColorButtonAction() }
 
         accentColorRightPanel = JPanel()
@@ -396,7 +396,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         accentColorRightPanel.add(accentColorButton)
 
         accentColorPanel = JPanel(BorderLayout())
-        accentColorPanel.add(JLabel("AccentColor".localize()), BorderLayout.WEST)
+        accentColorPanel.add(JLabel(localize("AccentColor")), BorderLayout.WEST)
         accentColorPanel.add(accentColorRightPanel, BorderLayout.EAST)
 
         flatThemeColorsPanel = JPanel()
@@ -408,7 +408,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeColorsPanel.add(Box.createVerticalStrut(6))
         flatThemeColorsPanel.add(accentColorPanel)
 
-        resetButton = JButton("Reset".localize())
+        resetButton = JButton(localize("Reset"))
         resetButton.addActionListener { handleResetButtonAction() }
 
         resetButtonPanel = JPanel()
@@ -420,7 +420,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemePanel.add(resetButtonPanel, BorderLayout.SOUTH)
 
         gtkThemePanel = JPanel(GridBagLayout())
-        gtkThemePanel.add(JLabel("GtkThemeMessage".localize()))
+        gtkThemePanel.add(JLabel(localize("GtkThemeMessage")))
 
         val themeMap = mapOf(0 to "FlatDark", 1 to "FlatLight", 2 to "GTK")
         val indexMap = themeMap.entries.associate { it.value to it.key }
@@ -438,7 +438,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         themePanel = JPanel()
         themePanel.layout = BoxLayout(themePanel, BoxLayout.Y_AXIS)
-        themePanel.border = BorderFactory.createTitledBorder("Theme".localize())
+        themePanel.border = BorderFactory.createTitledBorder(localize("Theme"))
         themePanel.add(themeComboBox)
         themePanel.add(flatThemePanel)
         themePanel.add(gtkThemePanel)
@@ -482,7 +482,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowDimensionsSpinnersPanel = JPanel(BorderLayout())
         windowDimensionsSpinnersPanel.alignmentX = LEFT_ALIGNMENT
-        windowDimensionsSpinnersPanel.add(JLabel("Dimensions".localize()), BorderLayout.WEST)
+        windowDimensionsSpinnersPanel.add(JLabel(localize("Dimensions")), BorderLayout.WEST)
         windowDimensionsSpinnersPanel.add(windowDimensionsCustomizerRightPanel, BorderLayout.EAST)
 
         windowDimensionsCustomizerPanel = JPanel()
@@ -494,7 +494,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         dimensionsPanel.alignmentX = LEFT_ALIGNMENT
         dimensionsPanel.add(windowDimensionsCustomizerPanel, BorderLayout.NORTH)
 
-        windowBackgroundColorChooserButton = JButton("Change".localize())
+        windowBackgroundColorChooserButton = JButton(localize("Change"))
         windowBackgroundColorChooserButton.addActionListener { handleChangeWindowBackgroundColorButton() }
 
         windowBackgroundColorChooserRightPanel = JPanel()
@@ -506,7 +506,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowBackgroundColorChooserPanel = JPanel(BorderLayout())
         windowBackgroundColorChooserPanel.alignmentX = LEFT_ALIGNMENT
-        windowBackgroundColorChooserPanel.add(JLabel("Background".localize()), BorderLayout.WEST)
+        windowBackgroundColorChooserPanel.add(JLabel(localize("Background")), BorderLayout.WEST)
         windowBackgroundColorChooserPanel.add(windowBackgroundColorChooserRightPanel, BorderLayout.EAST)
 
         windowBackgroundCustomizerPanel = JPanel()
@@ -528,7 +528,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowModeSettingsPanel.alignmentX = LEFT_ALIGNMENT
         windowModeSettingsPanel.add(dimensionsAndBackgroundPanel, BorderLayout.NORTH)
 
-        windowModeCheckBox = JCheckBox("WindowedModeEnabled".localize())
+        windowModeCheckBox = JCheckBox(localize("WindowedModeEnabled"))
         windowModeCheckBox.isSelected = environment == "virtual"
         windowModeCheckBox.addActionListener {
             val newEnvironment = if (windowModeCheckBox.isSelected) "virtual" else "linux"
@@ -568,18 +568,18 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab.add(infoPanel)
 
         mainTabs = JTabbedPane()
-        mainTabs.addTab("General".localize(), generalTab)
+        mainTabs.addTab(localize("General"), generalTab)
         if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") {
-            mainTabs.addTab("InteractiveWindows".localize(), interactiveWindowsTab)
+            mainTabs.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
-        mainTabs.addTab("Menu".localize(), menuTab)
-        mainTabs.addTab("WindowMode".localize(), windowModeTab)
-        mainTabs.addTab("About".localize(), aboutTab)
+        mainTabs.addTab(localize("Menu"), menuTab)
+        mainTabs.addTab(localize("WindowMode"), windowModeTab)
+        mainTabs.addTab(localize("About"), aboutTab)
 
-        doneButton = JButton("Done".localize())
+        doneButton = JButton(localize("Done"))
         doneButton.addActionListener { handleDone() }
 
-        cancelButton = JButton("Cancel".localize())
+        cancelButton = JButton(localize("Cancel"))
         cancelButton.addActionListener { handleCancel() }
 
         footerPanel = JPanel(FlowLayout())
@@ -595,11 +595,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private fun handleAddInteractiveWindowButtonAction() {
         val input = JOptionPane.showInputDialog(
             rootPane,
-            "InteractiveWindowHintMessage".localize(),
+            localize("InteractiveWindowHintMessage"),
             if (interactiveWindowsTabs.selectedIndex == 0) {
-                "AddInteractiveWindow".localize()
+                localize("AddInteractiveWindow")
             } else {
-                "BlacklistInteractiveWindow".localize()
+                localize("BlacklistInteractiveWindow")
             },
             JOptionPane.QUESTION_MESSAGE
         )
@@ -635,7 +635,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val color = JColorChooser.showDialog(
             this,
-            "ChooseBackgroundColor".localize(),
+            localize("ChooseBackgroundColor"),
             Color.decode(selectedTheme.getProperty("@background", defaultColor)),
             false
         )
@@ -652,7 +652,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val color = JColorChooser.showDialog(
             this,
-            "ChooseTextColor".localize(),
+            localize("ChooseTextColor"),
             Color.decode(selectedTheme.getProperty("@foreground", defaultColor)),
             false
         )
@@ -670,7 +670,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val color = JColorChooser.showDialog(
             this,
-            "ChooseAccentColor".localize(),
+            localize("ChooseAccentColor"),
             Color.decode(selectedTheme.getProperty("@accentColor", defaultColor)),
             false
         )
@@ -699,7 +699,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private fun handleChangeWindowBackgroundColorButton() {
         val color = JColorChooser.showDialog(
             this,
-            "ChooseBackgroundColor".localize(),
+            localize("ChooseBackgroundColor"),
             Color.decode(background),
             false
         )
@@ -714,24 +714,24 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         if (isRestartRequired) {
             val response = JOptionPane.showConfirmDialog(
                 this,
-                "RestartRequiredMessage".localize(),
-                "RestartRequired".localize(),
+                localize("RestartRequiredMessage"),
+                localize("RestartRequired"),
                 JOptionPane.YES_NO_OPTION
             )
 
             isRestartRequired = response == JOptionPane.YES_OPTION
         }
 
-        setProperty("AlwaysShowShimejiChooser", alwaysShowShimejiChooser.toString())
-        setProperty("AlwaysShowInformationScreen", alwaysShowInformationScreen.toString())
-        setProperty("Scaling", scaling.toString())
-        setProperty("Opacity", opacity.toString())
-        setProperty("Filter", filter)
-        setProperty("MenuScaling", menuScaling.toString())
-        setProperty("Theme", theme)
-        setProperty("Environment", environment)
-        setProperty("WindowSize", windowSize)
-        setProperty("Background", background)
+        Main.properties.setProperty("AlwaysShowShimejiChooser", alwaysShowShimejiChooser.toString())
+        Main.properties.setProperty("AlwaysShowInformationScreen", alwaysShowInformationScreen.toString())
+        Main.properties.setProperty("Scaling", scaling.toString())
+        Main.properties.setProperty("Opacity", opacity.toString())
+        Main.properties.setProperty("Filter", filter)
+        Main.properties.setProperty("MenuScaling", menuScaling.toString())
+        Main.properties.setProperty("Theme", theme)
+        Main.properties.setProperty("Environment", environment)
+        Main.properties.setProperty("WindowSize", windowSize)
+        Main.properties.setProperty("Background", background)
 
         val whitelist = whitelistModel.elements().toList().toString()
             .replace("[", "")
@@ -743,11 +743,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             .replace("]", "")
             .replace(", ", "/")
 
-        setProperty("InteractiveWindows", whitelist)
-        setProperty("InteractiveWindowsBlacklist", blacklist)
+        Main.properties.setProperty("InteractiveWindows", whitelist)
+        Main.properties.setProperty("InteractiveWindowsBlacklist", blacklist)
 
         getPath("conf", "settings.properties").outputStream().use {
-            Main.instance.properties.store(it, "Configuration Options")
+            Main.properties.store(it, "Configuration Options")
         }
 
         dispose()

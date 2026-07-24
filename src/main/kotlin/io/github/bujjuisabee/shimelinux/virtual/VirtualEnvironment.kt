@@ -54,7 +54,7 @@ class VirtualEnvironment : Environment() {
             override fun windowOpened(e: WindowEvent) {}
 
             override fun windowClosing(e: WindowEvent) {
-                Main.instance.exit()
+                Main.exit()
             }
 
             override fun windowClosed(e: WindowEvent) {}

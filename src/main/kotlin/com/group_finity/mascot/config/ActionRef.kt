@@ -39,7 +39,7 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
     override fun validate() {
         if (!configuration.hasAction(name)) {
             log.log(Level.SEVERE, "There is no corresponding behavior: $this")
-            throw ConfigurationException("NoBehaviorFoundErrorMessage".localize() + ": $this")
+            throw ConfigurationException(localize("NoBehaviorFoundErrorMessage") + ": $this")
         }
     }
 

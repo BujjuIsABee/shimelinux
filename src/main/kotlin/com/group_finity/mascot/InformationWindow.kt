@@ -53,7 +53,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     init {
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
-        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else "Information".localize()
+        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else localize("Information")
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
@@ -67,7 +67,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
         imagePanel.add(splashImageLabel)
 
-        closeButton = JButton("Close".localize())
+        closeButton = JButton(localize("Close"))
         closeButton.minimumSize = Dimension(95, 23)
         closeButton.maximumSize = Dimension(130, 26)
         closeButton.preferredSize = Dimension(130, 26)
@@ -108,7 +108,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
             append("\">")
 
             if (config.containsInformationKey("ArtistName")) {
-                append("ArtBy".localize()).append(" ")
+                append(localize("ArtBy")).append(" ")
                 if (config.containsInformationKey("ArtistURL")) {
                     append("<a href=\"").append(config.getInformation("ArtistURL")).append("\" ")
 
@@ -136,7 +136,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     append(" - ")
                 }
 
-                append("ScriptedBy".localize()).append(" ")
+                append(localize("ScriptedBy")).append(" ")
                 if (config.containsInformationKey("ScripterURL")) {
                     append("<a href=\"").append(config.getInformation("ScripterURL")).append("\" ")
 
@@ -166,7 +166,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     append(" - ")
                 }
 
-                append("CommissionedBy".localize()).append(" ")
+                append(localize("CommissionedBy")).append(" ")
                 if (config.containsInformationKey("CommissionerURL")) {
                     append("<a href=\"").append(config.getInformation("CommissionerURL")).append("\" ")
 
@@ -197,7 +197,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     append(" - ")
                 }
 
-                append("SupportAt".localize()).append(" ")
+                append(localize("SupportAt")).append(" ")
                 if (config.containsInformationKey("SupportURL")) {
                     append("<a href=\"").append(config.getInformation("SupportURL")).append("\" ")
 
@@ -237,9 +237,9 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 val url = st.nextToken()
                 val response = JOptionPane.showConfirmDialog(
                     this@InformationWindow,
-                    "ConfirmVisitWebsiteMessage".localize() + "\n" +
-                    "ExerciseCautionAndBewareSusLinksMessage".localize() + "\n$url",
-                    "VisitWebsite".localize(),
+                    localize("ConfirmVisitWebsiteMessage") + "\n" +
+                    localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
+                    localize("VisitWebsite"),
                     JOptionPane.YES_NO_OPTION
                 )
 
@@ -249,7 +249,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     } catch (_: IOException) {
                         JOptionPane.showMessageDialog(
                             this@InformationWindow,
-                            "FailedOpenWebBrowserErrorMessage".localize() + "\n$url",
+                            localize("FailedOpenWebBrowserErrorMessage") + "\n$url",
                             "Error",
                             JOptionPane.PLAIN_MESSAGE
                         )
