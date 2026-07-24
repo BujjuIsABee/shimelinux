@@ -350,13 +350,7 @@ class Mascot(var imageSet: String) {
 
             val sound = sound
             if (!Sounds.isMuted && sound != null && Sounds.contains(sound)) {
-                Sounds.getSound(sound)?.let { clip ->
-                    if (!clip.isRunning) {
-                        clip.stop()
-                        clip.microsecondPosition = 0
-                        clip.start()
-                    }
-                }
+                Sounds.playSound(sound)
             }
         }
     }

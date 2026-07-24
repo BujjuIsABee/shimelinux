@@ -33,7 +33,7 @@ import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.ImagePairLoader
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.Variable
-import com.group_finity.mascot.sound.SoundLoader
+import com.group_finity.mascot.sound.Sounds
 import java.awt.Dimension
 import java.awt.Point
 import java.awt.Rectangle
@@ -128,7 +128,7 @@ class AnimationBuilder(
                     getPath("sound", imageSet, soundText).takeIf { it.exists() }?.toString() ?:
                     getPath("img", imageSet, "sound", soundText).toString()
 
-                SoundLoader.load(soundText, volumeText.toFloat())
+                Sounds.load(soundText, volumeText.toFloat())
                 soundText += volumeText.toFloat()
             } catch (e: Exception) {
                 log.log(Level.SEVERE, "Failed to load sound: $soundText", e)

@@ -23,27 +23,61 @@
 package com.group_finity.mascot.sound
 
 import com.group_finity.mascot.getProperty
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
+import javax.sound.sampled.FloatControl
+import javax.sound.sampled.LineEvent
 
 object Sounds {
-    private val sounds = ConcurrentHashMap<String, Clip>()
+    private val sounds = ConcurrentHashMap<String, Pair<String, Float>>()
+    private val clips = ConcurrentHashMap<String, Clip>()
 
-    var isMuted
+    var isMuted: Boolean
         get() = !getProperty("Sounds", true)
         set(value) {
             if (value) {
-                sounds.values.forEach { it.stop() }
+                for (clip in clips.values) {
+                    clip.stop()
+                }
             }
         }
 
-    fun load(fileName: String, clip: Clip) {
-        sounds.putIfAbsent(fileName, clip)
+    fun load(name: String, volume: Float) {
+        sounds.putIfAbsent(name + volume, Pair(name, volume))
+    }
+
+    fun playSound(fileName: String) {
+        val (name, volume) = sounds[fileName] ?: return
+
+        val clip = clips.getOrPut(fileName) {
+            val clip = AudioSystem.getClip()
+            AudioSystem.getAudioInputStream(File(name)).use { clip.open(it) }
+
+            // Set volume
+            (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = volume
+
+            // Handle stop event
+            clip.addLineListener {
+                if (it.type == LineEvent.Type.STOP) {
+                    clip.stop()
+                    clip.close()
+                    clips.remove(fileName, clip)
+                }
+            }
+
+            return@getOrPut clip
+        }
+
+        if (!clip.isRunning) {
+            clip.stop()
+            clip.microsecondPosition = 0
+            clip.start()
+        }
     }
 
     fun contains(fileName: String) = sounds.containsKey(fileName)
 
-    fun getSound(fileName: String) = sounds[fileName]
-
-    fun getSoundsIgnoringVolume(fileName: String) = sounds.filter { it.key.startsWith(fileName) }.values.toMutableList()
+    fun getSoundsIgnoringVolume(fileName: String) = clips.filter { it.key.startsWith(fileName) }.values.toMutableList()
 }
