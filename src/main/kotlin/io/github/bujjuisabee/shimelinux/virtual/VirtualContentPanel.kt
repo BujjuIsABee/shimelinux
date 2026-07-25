@@ -22,14 +22,102 @@
 
 package io.github.bujjuisabee.shimelinux.virtual
 
+import com.group_finity.mascot.getProperty
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.Graphics
+import java.awt.Image
+import java.awt.event.ComponentEvent
+import java.awt.event.ComponentListener
 import javax.swing.JPanel
 
-class VirtualContentPanel(preferredSize: Dimension, background: Color) : JPanel() {
+class VirtualContentPanel(
+    preferredSize: Dimension,
+    background: Color,
+    private val image: Image?
+) : JPanel() {
+    private var resizedImage: Image? = null
+    private val mode = when (getProperty("BackgroundMode", "Fit")) {
+        "Center" -> Mode.CENTER
+        "Fit" -> Mode.FIT
+        "Stretch" -> Mode.STRETCH
+        "Fill" -> Mode.FILL
+        else -> Mode.CENTER
+    }
+
     init {
         layout = null
         this.preferredSize = preferredSize
         this.background = background
+        resizedImage = image
+
+        addComponentListener(object : ComponentListener {
+            override fun componentResized(e: ComponentEvent) {
+                if (image != null) {
+                    if (mode == Mode.STRETCH) {
+                        resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
+                    } else if (mode != Mode.CENTER) {
+                        val factor = when (mode) {
+                            Mode.FIT -> (width / image.getWidth(null)).coerceAtMost(height / image.getHeight(null))
+                            else -> (width / image.getWidth(null)).coerceAtLeast(height / image.getHeight(null))
+                        }
+
+                        resizedImage = image.getScaledInstance(
+                            factor * image.getWidth(null),
+                            factor * image.getHeight(null),
+                            Image.SCALE_SMOOTH
+                        )
+                    }
+                }
+
+                repaint()
+            }
+
+            override fun componentMoved(e: ComponentEvent) {}
+
+            override fun componentShown(e: ComponentEvent) {}
+
+            override fun componentHidden(e: ComponentEvent?) {}
+        })
     }
+
+    override fun paintComponent(g: Graphics) {
+        super.paintComponent(g)
+
+        val resizedImage = resizedImage ?: return
+
+        when (mode) {
+            Mode.STRETCH -> {
+                g.drawImage(resizedImage, 0, 0, null)
+            }
+
+            Mode.CENTER -> {
+                g.drawImage(
+                    resizedImage,
+                    if (resizedImage.getWidth(null) > width) {
+                        (resizedImage.getWidth(null) - width) / -2
+                    } else {
+                        (width - resizedImage.getWidth(null)) / 2
+                    },
+                    if (resizedImage.getHeight(null) > height) {
+                        (resizedImage.getHeight(null) - height) / -2
+                    } else {
+                        (height - resizedImage.getHeight(null)) / 2
+                    },
+                    null
+                )
+            }
+
+            else -> {
+                g.drawImage(
+                    resizedImage,
+                    (width - resizedImage.getWidth(null)) / 2,
+                    (height - resizedImage.getHeight(null)) / 2,
+                    null
+                )
+            }
+        }
+    }
+
+    enum class Mode { CENTER, FIT, STRETCH, FILL }
 }

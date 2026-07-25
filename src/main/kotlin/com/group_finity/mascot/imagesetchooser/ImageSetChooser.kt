@@ -128,10 +128,41 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         headerPanel.add(labelsPanel, BorderLayout.EAST)
 
         moreButton = JButton(localize("More"))
-        moreButton.addActionListener { handleMore() }
+        moreButton.addActionListener {
+            try {
+                Desktop.browseDirectory(getPath("img").toString())
+                cancelled = true
+                dispose()
+            } catch (_: IOException) {
+                JOptionPane.showMessageDialog(
+                    this@ImageSetChooser,
+                    localize("FailedOpenFileBrowserErrorMessage") + "\n${getPath("img")}",
+                    "Error",
+                    JOptionPane.PLAIN_MESSAGE
+                )
+            }
+        }
 
         useSelectedButton = JButton(localize("UseSelected"))
-        useSelectedButton.addActionListener { handleUseSelected() }
+        useSelectedButton.addActionListener {
+            imageSets.clear()
+
+            for (selection in leftList.selectedValuesList) {
+                if (selection is ImageSetChooserPanel) {
+                    imageSets.add(checkNotNull(selection.imageSet))
+                }
+            }
+
+            for (selection in rightList.selectedValuesList) {
+                if (selection is ImageSetChooserPanel) {
+                    imageSets.add(checkNotNull(selection.imageSet))
+                }
+            }
+
+            updateConfigFile()
+            cancelled = false
+            dispose()
+        }
 
         useAllButton = JButton(localize("UseAll"))
         useAllButton.addActionListener {
@@ -301,41 +332,6 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
             confPath.outputStream().use { Main.properties.store(it, "Configuration Options") }
         }
-    }
-
-    private fun handleMore() {
-        try {
-            Desktop.browseDirectory(getPath("img").toString())
-            cancelled = true
-            dispose()
-        } catch (_: IOException) {
-            JOptionPane.showMessageDialog(
-                this@ImageSetChooser,
-                localize("FailedOpenFileBrowserErrorMessage") + "\n${getPath("img")}",
-                "Error",
-                JOptionPane.PLAIN_MESSAGE
-            )
-        }
-    }
-
-    private fun handleUseSelected() {
-        imageSets.clear()
-
-        for (selection in leftList.selectedValuesList) {
-            if (selection is ImageSetChooserPanel) {
-                imageSets.add(checkNotNull(selection.imageSet))
-            }
-        }
-
-        for (selection in rightList.selectedValuesList) {
-            if (selection is ImageSetChooserPanel) {
-                imageSets.add(checkNotNull(selection.imageSet))
-            }
-        }
-
-        updateConfigFile()
-        cancelled = false
-        dispose()
     }
 
     private fun setUpList(list: JList<ImageSetChooserPanel>) {

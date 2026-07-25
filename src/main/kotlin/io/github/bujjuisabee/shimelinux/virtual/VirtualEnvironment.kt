@@ -33,6 +33,7 @@ import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
+import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
@@ -71,9 +72,15 @@ class VirtualEnvironment : Environment() {
         })
 
         val windowArray = getProperty("WindowSize", "600x500").split("x")
+
+        val image = File(getProperty("BackgroundImage", ""))
+            .takeIf { it.exists() }
+            ?.let { ImageIO.read(it) }
+
         display.contentPane = VirtualContentPanel(
             Dimension(windowArray[0].toInt(), windowArray[1].toInt()),
             Color.decode(getProperty("Background", "#00FF00")),
+            image
         )
 
         display.pack()

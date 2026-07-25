@@ -53,7 +53,6 @@ class LinuxTranslucentWindow : TranslucentWindow {
             window = object : JWindow() {
                 init {
                     background = Color(0, 0, 0, 0)
-                    name = ""
                 }
 
                 override fun paint(g: Graphics) {

@@ -221,40 +221,38 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
             }
             append("</center>")
         }
-        editorPane.addHyperlinkListener { event -> handleHyperlink(event) }
+        editorPane.addHyperlinkListener { event ->
+            if (event.eventType == HyperlinkEvent.EventType.ACTIVATED) {
+                val st = StringTokenizer(event.description, " ")
+                if (st.hasMoreTokens()) {
+                    val url = st.nextToken()
+                    val response = JOptionPane.showConfirmDialog(
+                        this@InformationWindow,
+                        localize("ConfirmVisitWebsiteMessage") + "\n" + localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
+                        localize("VisitWebsite"),
+                        JOptionPane.YES_NO_OPTION
+                    )
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        try {
+                            Desktop.browseURL(URI(url))
+                        } catch (_: IOException) {
+                            JOptionPane.showMessageDialog(
+                                this@InformationWindow,
+                                localize("FailedOpenWebBrowserErrorMessage") + "\n$url",
+                                "Error",
+                                JOptionPane.PLAIN_MESSAGE
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         add(imagePanel)
         add(JScrollPane(editorPane))
         add(footerPanel)
         pack()
         setLocationRelativeTo(null)
-    }
-
-    private fun handleHyperlink(event: HyperlinkEvent) {
-        if (event.eventType == HyperlinkEvent.EventType.ACTIVATED) {
-            val st = StringTokenizer(event.description, " ")
-            if (st.hasMoreTokens()) {
-                val url = st.nextToken()
-                val response = JOptionPane.showConfirmDialog(
-                    this@InformationWindow,
-                    localize("ConfirmVisitWebsiteMessage") + "\n" + localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
-                    localize("VisitWebsite"),
-                    JOptionPane.YES_NO_OPTION
-                )
-
-                if (response == JOptionPane.YES_OPTION) {
-                    try {
-                        Desktop.browseURL(URI(url))
-                    } catch (_: IOException) {
-                        JOptionPane.showMessageDialog(
-                            this@InformationWindow,
-                            localize("FailedOpenWebBrowserErrorMessage") + "\n$url",
-                            "Error",
-                            JOptionPane.PLAIN_MESSAGE
-                        )
-                    }
-                }
-            }
-        }
     }
 }
