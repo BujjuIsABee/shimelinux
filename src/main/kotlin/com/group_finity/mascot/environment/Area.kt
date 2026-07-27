@@ -40,9 +40,9 @@ class Area {
     val rightBorder = Wall(this, true)
     val bottomBorder = FloorCeiling(this, true)
 
-    val width
+    val width: Int
         get() = right - left
-    val height
+    val height: Int
         get() = bottom - top
 
     fun set(value: Rectangle) {
@@ -61,5 +61,5 @@ class Area {
 
     fun toRectangle() = Rectangle(left, top, width, height)
 
-    override fun toString() = "Area ($left, $top, $right, $bottom)"
+    override fun toString() = "Area[left=$left, top=$top, right=$right, bottom=$bottom]"
 }

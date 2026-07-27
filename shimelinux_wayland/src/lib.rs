@@ -27,7 +27,11 @@ use std::{
 };
 
 use jni::{
-    EnvUnowned, elements::ReleaseMode, errors::{Error, ThrowRuntimeExAndDefault}, objects::{JClass, JIntArray, JObject}, refs::Global, sys::jboolean,
+    EnvUnowned,
+    elements::ReleaseMode,
+    errors::{Error, ThrowRuntimeExAndDefault},
+    objects::{JClass, JIntArray, JObject},
+    sys::jboolean,
 };
 use smithay_client_toolkit::{
     compositor::CompositorState,
@@ -79,15 +83,14 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     let (sender, receiver) = mpsc::channel::<Event>();
     senders.push(sender);
 
-    let conn = Connection::connect_to_env().unwrap();
-    let (globals, mut event_queue) = registry_queue_init(&conn).unwrap();
+    let connection = Connection::connect_to_env().expect("Failed to get connection.");
+    let (globals, mut event_queue) = registry_queue_init(&connection).expect("Failed to initialize event queue");
     let qh = event_queue.handle();
 
     let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
     let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
     let shm = Shm::bind(&globals, &qh).expect("Failed to get shm");
     let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to get pool");
-
     let surface = compositor_state.create_surface(&qh);
     let layer = layer_shell.create_layer_surface(
         &qh,
@@ -102,14 +105,12 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
     layer.set_size(1, 1);
     layer.commit();
 
-    let mut object_ref: Option<Global<JObject>> = None;
-    let _ = unowned_env.with_env(|env| -> Result<_, Error> {
-        object_ref = Some(env.new_global_ref(object).unwrap());
-        Ok(())
-    });
+    let object_ref = unowned_env.with_env(|env| -> Result<_, Error> {
+        Ok(env.new_global_ref(object).expect("Failed to get object ref"))
+    }).resolve::<ThrowRuntimeExAndDefault>();
 
     let mut mascot = Mascot {
-        object: object_ref.unwrap(),
+        object: object_ref,
         compositor_state,
         registry_state: RegistryState::new(&globals),
         output_state: OutputState::new(&globals, &qh),
@@ -140,7 +141,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                         mascot.set_image(rgb);
                     }
                     Event::SetCursor(use_hand) => {
-                        mascot.set_cursor(&conn, &qh, use_hand);
+                        mascot.set_cursor(&connection, &qh, use_hand);
                     }
                     Event::Dispose() => {
                         mascot.dispose();

@@ -81,7 +81,7 @@ class BehaviorBuilder(
 
         this.isNextAdditive = isNextAdditive
 
-        log.log(Level.INFO, "Finished loading behavior: $this")
+        log.log(Level.INFO, "Finished loading behavior")
     }
 
     private fun loadBehaviors(list: Entry, conditions: MutableList<String?>) {
@@ -120,7 +120,7 @@ class BehaviorBuilder(
         }
     }
 
-    override fun toString() = "Behavior ($name, $frequency, $actionName)"
+    override fun toString() = "BehaviorBuilder[name=$name, frequency=$frequency, actionName=$actionName]"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

@@ -57,7 +57,7 @@ class Interact(
                     is IllegalStateException,
                     is BehaviorInstantiationException,
                     is CantBeAliveException -> {
-                        log.log(Level.SEVERE, "Fatal Error", e)
+                        log.log(Level.SEVERE, "Failed to set behavior", e)
                         showError(localize("FailedSetBehaviorErrorMessage"), e)
                     }
 

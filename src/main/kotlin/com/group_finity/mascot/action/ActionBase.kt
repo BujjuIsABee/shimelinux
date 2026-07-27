@@ -122,9 +122,9 @@ abstract class ActionBase(
     }
 
     override fun toString() = try {
-        "Action (${this::class.java.simpleName}, $name)"
+        "Action[className=${this::class.java.simpleName}, name=$name]"
     } catch (_: VariableException) {
-        "Action (${this::class.java.simpleName}, null)"
+        "Action[className=${this::class.java.simpleName}, name=null]"
     }
 
     companion object {

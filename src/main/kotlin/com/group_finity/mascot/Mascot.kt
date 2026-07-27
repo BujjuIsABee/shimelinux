@@ -350,7 +350,13 @@ class Mascot(var imageSet: String) {
 
             val sound = sound
             if (!Sounds.isMuted && sound != null && Sounds.contains(sound)) {
-                Sounds.playSound(sound)
+                Sounds.getSound(sound)?.let { clip ->
+                    if (!clip.isRunning) {
+                        clip.stop()
+                        clip.microsecondPosition = 0
+                        clip.start()
+                    }
+                }
             }
         }
     }
@@ -399,7 +405,7 @@ class Mascot(var imageSet: String) {
         window.asComponent().cursor = Cursor.getPredefinedCursor(if (useHand) Cursor.HAND_CURSOR else Cursor.DEFAULT_CURSOR)
     }
 
-    override fun toString() = "Mascot ($id, $imageSet)"
+    override fun toString() = "Mascot[id=$id, imageSet=$imageSet]"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

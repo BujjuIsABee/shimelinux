@@ -31,9 +31,9 @@ class MascotEnvironment(private val mascot: Mascot) {
     private val impl = NativeFactory.instance.environment
     private var currentWorkArea: Area? = null
 
-    val workArea
+    val workArea: Area
         get() = getWorkArea(false)
-    val activeIE
+    val activeIE: Area
         get() = if (!getProperty("Multiscreen", true) &&
             currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false
         ) {
@@ -41,27 +41,27 @@ class MascotEnvironment(private val mascot: Mascot) {
         } else {
             impl.activeIE
         }
-    val activeIETitle
+    val activeIETitle: String
         get() = impl.activeIETitle
-    val screen
+    val screen: Area
         get() = impl.screen
 
     @Suppress("unused")
-    val complexScreen
+    val complexScreen: ComplexArea
         get() = impl.complexScreen
-    val cursor
+    val cursor: Location
         get() = impl.cursor
 
-    val ceiling
+    val ceiling: Border
         get() = getCeiling(false)
-    val floor
+    val floor: Border
         get() = getFloor(false)
-    val wall
+    val wall: Border
         get() = getWall(false)
 
-    val isScreenTopBottom
+    val isScreenTopBottom: Boolean
         get() = impl.isScreenTopBottom(mascot.anchor)
-    val isScreenLeftRight
+    val isScreenLeftRight: Boolean
         get() = impl.isScreenLeftRight(mascot.anchor)
 
     init {

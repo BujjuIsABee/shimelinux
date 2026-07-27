@@ -26,7 +26,14 @@ use std::{
     sync::{LazyLock, Mutex, OnceLock},
 };
 
-use jni::{JNIVersion, JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::{InitArgsBuilder, JavaVM}};
+use jni::{
+    JNIVersion, JValue,
+    errors::Error,
+    jni_sig, jni_str,
+    objects::JObject,
+    refs::Global,
+    vm::{InitArgsBuilder, JavaVM},
+};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
     delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
@@ -228,7 +235,7 @@ impl SeatHandler for Mascot {
         capability: Capability,
     ) {
         if capability == Capability::Pointer && self.cursor_state.pointer.is_none() {
-            let pointer = self.seat_state.get_pointer(qh, &seat).unwrap();
+            let pointer = self.seat_state.get_pointer(qh, &seat).expect("Failed to get pointer");
             self.cursor_state.pointer = Some(pointer);
         }
     }
@@ -315,7 +322,7 @@ impl PointerHandler for Mascot {
                 .build()
                 .unwrap();
 
-            JavaVM::new(jvm_args).unwrap()
+            JavaVM::new(jvm_args).expect("Failed to get JVM")
         });
 
         let _ = jvm.attach_current_thread(|env| -> Result<_, Error> {
@@ -384,7 +391,9 @@ impl Mascot {
     }
 
     pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
-        let mut theme = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24).expect("Failed to get cursor theme");
+        let mut theme = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24)
+            .expect("Failed to get cursor theme");
+
         let name = if use_hand { "pointer" } else { "left_ptr" };
         if let Some(cursor) = theme.get_cursor(name) {
             let surface = self.cursor_state.surface.get_or_insert(self.compositor_state.create_surface(qh));
@@ -477,7 +486,7 @@ impl Mascot {
     }
 
     fn set_cursor_position(&mut self) {
-        let desktop = DESKTOP_TYPE.unwrap_or_else(|| "other");
+        let desktop = DESKTOP_TYPE.unwrap_or_default();
         let mut cursor_position = CURSOR_POSITION.lock().unwrap();
 
         if desktop == NIRI {
@@ -521,10 +530,10 @@ pub fn get_cursor_position() -> Point {
 }
 
 static JVM: OnceLock<JavaVM> = OnceLock::new();
-static DESKTOP_TYPE: Option<&str> = option_env!("XDG_CURRENT_DESKTOP");
 static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
 static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
 static CURSOR_POSITION: LazyLock<Mutex<Point>> = LazyLock::new(|| Mutex::new(Point::default()));
+static DESKTOP_TYPE: Option<&str> = option_env!("XDG_CURRENT_DESKTOP");
 
 const NIRI: &str = "niri";
 const HYPRLAND: &str = "Hyprland";

@@ -26,6 +26,7 @@ import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.action.ActionBase
 import com.group_finity.mascot.config.Configuration
+import com.group_finity.mascot.environment.MascotEnvironment
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
@@ -43,7 +44,7 @@ class UserBehavior(
     private val configuration: Configuration
 ) : Behavior {
     private lateinit var mascot: Mascot
-    internal val environment
+    internal val environment: MascotEnvironment
         get() = mascot.environment
 
     @Synchronized
@@ -193,7 +194,7 @@ class UserBehavior(
         }
     }
 
-    override fun toString() = "Behavior ($name)"
+    override fun toString() = "Behavior[name=$name]"
 
     enum class HotspotResult { INACTIVE, ACTIVE_NULL, ACTIVE }
 

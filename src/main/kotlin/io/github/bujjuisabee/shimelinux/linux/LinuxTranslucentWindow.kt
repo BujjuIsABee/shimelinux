@@ -56,10 +56,12 @@ class LinuxTranslucentWindow : TranslucentWindow {
                 }
 
                 override fun paint(g: Graphics) {
-                    val g2d = g as Graphics2D
-                    g2d.composite = AlphaComposite.Src
-                    g2d.drawImage(image?.managedImage, offset.x, offset.y, null)
-                    g2d.dispose()
+                    image?.let {
+                        val g2d = g as Graphics2D
+                        g2d.composite = AlphaComposite.Src
+                        g2d.drawImage(it.managedImage, offset.x, offset.y, null)
+                        g2d.dispose()
+                    }
                 }
 
                 override fun setBounds(x: Int, y: Int, width: Int, height: Int) {

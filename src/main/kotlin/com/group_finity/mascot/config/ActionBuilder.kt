@@ -131,7 +131,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
         putAll(params.mapValues { Variable.parse(it.value) })
     }
 
-    override fun toString() = "Action ($name, $type, $className)"
+    override fun toString() = "ActionBuilder[name=$name, type=$type, className=$className]"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

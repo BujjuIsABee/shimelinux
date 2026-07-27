@@ -24,60 +24,52 @@ package com.group_finity.mascot.sound
 
 import com.group_finity.mascot.getProperty
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
 
 object Sounds {
-    private val sounds = ConcurrentHashMap<String, Pair<String, Float>>()
-    private val clips = ConcurrentHashMap<String, Clip>()
+    private val sounds = mutableListOf<Sound>()
 
     var isMuted: Boolean
         get() = !getProperty("Sounds", true)
         set(value) {
             if (value) {
-                for (clip in clips.values) {
+                for (clip in sounds.mapNotNull { it.clip }) {
                     clip.stop()
                 }
             }
         }
 
     fun load(name: String, volume: Float) {
-        sounds.putIfAbsent(name + volume, Pair(name, volume))
+        sounds.add(Sound(name, volume, null))
     }
 
-    fun playSound(fileName: String) {
-        val (name, volume) = sounds[fileName] ?: return
+    fun contains(name: String) = sounds.any { name == it.name + it.volume }
 
-        val clip = clips.getOrPut(fileName) {
-            val clip = AudioSystem.getClip()
-            AudioSystem.getAudioInputStream(File(name)).use { clip.open(it) }
+    fun getSound(name: String) = sounds.find { name == it.name + it.volume }?.let { getClip(it) }
 
-            // Set volume
-            (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = volume
+    fun getSoundsIgnoringVolume(name: String) = sounds.filter { it.name == name }.mapNotNull { it.clip }
 
-            // Handle stop event
-            clip.addLineListener {
-                if (it.type == LineEvent.Type.STOP) {
-                    clip.stop()
-                    clip.close()
-                    clips.remove(fileName, clip)
-                }
+    private fun getClip(sound: Sound): Clip {
+        sound.clip?.let { return it }
+
+        val clip = AudioSystem.getClip()
+        AudioSystem.getAudioInputStream(File(sound.name)).use { clip.open(it) }
+
+        (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = sound.volume
+
+        clip.addLineListener {
+            if (it.type == LineEvent.Type.STOP) {
+                clip.stop()
+                clip.close()
+                sounds.remove(sound)
             }
-
-            return@getOrPut clip
         }
 
-        if (!clip.isRunning) {
-            clip.stop()
-            clip.microsecondPosition = 0
-            clip.start()
-        }
+        return clip.also { sound.clip = it }
     }
 
-    fun contains(fileName: String) = sounds.containsKey(fileName)
-
-    fun getSoundsIgnoringVolume(fileName: String) = clips.filter { it.key.startsWith(fileName) }.values.toMutableList()
+    data class Sound(val name: String, val volume: Float, var clip: Clip?)
 }

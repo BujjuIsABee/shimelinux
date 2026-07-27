@@ -52,7 +52,7 @@ class Manager {
             }
             return isPaused
         }
-    val count
+    val count: Int
         get() = getCount(null)
 
     fun start() {

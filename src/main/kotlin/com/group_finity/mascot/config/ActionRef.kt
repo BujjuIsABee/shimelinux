@@ -49,7 +49,7 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
         return configuration.buildAction(name, newParams)
     }
 
-    override fun toString() = "Action ($name)"
+    override fun toString() = "ActionRef[name=$name]"
 
     companion object {
         private val log = Logger.getLogger(this::class.java.name)

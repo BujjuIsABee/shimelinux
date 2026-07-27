@@ -85,8 +85,8 @@ abstract class Environment {
                 screenRect = screenRect.union(device.defaultConfiguration.bounds)
             }
 
-            Companion.screenRects = screenRects
-            Companion.screenRect = screenRect
+            this.screenRects = screenRects
+            this.screenRect = screenRect
         }
     }
 }

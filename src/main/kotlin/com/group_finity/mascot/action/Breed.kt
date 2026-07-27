@@ -114,7 +114,7 @@ class Breed(
                         is IllegalStateException,
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, "Fatal Error", e)
+                            log.log(Level.SEVERE, "Failed to create new Shimeji", e)
                             showError(localize("FailedCreateNewShimejiErrorMessage"), e)
                             mascot.dispose()
                         }

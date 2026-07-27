@@ -37,7 +37,9 @@ import java.awt.Rectangle
 import java.io.File
 
 class KdeEnvironment : Environment() {
-    override val workArea = Area()
+    override val workArea: Area
+        get() = screen
+
     override val activeIE = Area()
     override var activeIETitle = ""
 
@@ -50,8 +52,6 @@ class KdeEnvironment : Environment() {
     private var restoreWindows: Boolean = false
     private val windowCache = mutableMapOf<String, Boolean>()
 
-    private val workAreaRect: Rectangle
-
     private var isShuttingDown = false
     private val shutdownThread = Thread {
         isShuttingDown = true
@@ -59,9 +59,6 @@ class KdeEnvironment : Environment() {
     }
 
     init {
-        val device = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
-        workAreaRect = device.defaultConfiguration.bounds
-
         try {
             dbus = DBusConnectionBuilder.forSessionBus().build().also {
                 it.requestBusName("io.github.bujjuisabee.shimelinux")
@@ -101,8 +98,6 @@ class KdeEnvironment : Environment() {
 
     override fun tick() {
         super.tick()
-
-        workArea.set(workAreaRect)
 
         val activeWindow = activeWindow
         if (activeWindow != null && isIE(activeWindow)) {

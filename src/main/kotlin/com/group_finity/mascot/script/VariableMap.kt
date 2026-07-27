@@ -28,13 +28,13 @@ import javax.script.Bindings
 class VariableMap : Bindings {
     val rawMap = linkedMapOf<String, Variable>()
 
-    override val keys
+    override val keys: MutableSet<String>
         get() = rawMap.keys
-    override val values
+    override val values: MutableSet<Any?>
         get() = rawMap.keys.mapTo(mutableSetOf()) { get(it) }
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
         get() = rawMap.entries.mapTo(mutableSetOf()) { AbstractMap.SimpleEntry(it.key, get(it.key)) }
-    override val size
+    override val size: Int
         get() = rawMap.size
 
     fun init() {

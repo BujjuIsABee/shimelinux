@@ -29,7 +29,6 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.event.WindowEvent
 import java.awt.event.WindowListener
@@ -37,7 +36,6 @@ import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
-import javax.swing.SwingUtilities
 
 class VirtualEnvironment : Environment() {
     override val workArea: Area
@@ -73,9 +71,9 @@ class VirtualEnvironment : Environment() {
 
         val windowArray = getProperty("WindowSize", "600x500").split("x")
 
-        val image = File(getProperty("BackgroundImage", ""))
-            .takeIf { it.exists() }
-            ?.let { ImageIO.read(it) }
+        val image = runCatching {
+            ImageIO.read(File(getProperty("BackgroundImage", "")))
+        }.getOrNull()
 
         display.contentPane = VirtualContentPanel(
             Dimension(windowArray[0].toInt(), windowArray[1].toInt()),
@@ -84,7 +82,6 @@ class VirtualEnvironment : Environment() {
         )
 
         display.pack()
-        display.setLocationRelativeTo(null)
         display.isVisible = true
         display.toFront()
     }
@@ -93,13 +90,8 @@ class VirtualEnvironment : Environment() {
         if (display.isVisible) {
             screenRect.bounds = display.contentPane.bounds
             screen.set(screenRect)
+            cursor.set(display.mousePosition ?: Point(0, 0))
         }
-
-        val point = MouseInfo.getPointerInfo()?.location
-        if (point != null && display.isVisible) {
-            SwingUtilities.convertPointFromScreen(point, display.contentPane)
-        }
-        cursor.set(point ?: Point(0, 0))
 
         activeIE.isVisible = false
     }
