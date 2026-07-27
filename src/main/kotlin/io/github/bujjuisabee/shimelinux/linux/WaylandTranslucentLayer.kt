@@ -59,6 +59,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var previousCursorPosition = Point(0, 0)
+    private var grabStart = Point(0, 0)
 
     override fun asComponent() = component
 
@@ -91,13 +92,38 @@ class WaylandTranslucentLayer : TranslucentWindow {
         positionX: Int,
         positionY: Int,
     ) {
-        val newCursorPosition = Point(positionX, positionY)
         val (modifiers, button) = if (leftPressed || leftReleased) {
             Pair(MouseEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1)
         } else if (rightPressed || rightReleased) {
             Pair(MouseEvent.BUTTON3_DOWN_MASK, MouseEvent.BUTTON3)
         } else {
             Pair(MouseEvent.NOBUTTON, MouseEvent.NOBUTTON)
+        }
+
+        if (leftPressed) {
+            grabStart = component.bounds.location
+        }
+
+        val newCursorPosition = Point(positionX + grabStart.x, positionY + grabStart.y)
+        if (previousCursorPosition != newCursorPosition) {
+            previousCursorPosition = newCursorPosition
+
+            when (System.getenv("XDG_CURRENT_DESKTOP")) {
+                "niri" -> {
+                    WaylandEnvironment.cursorPosition = newCursorPosition
+                }
+
+                "Hyprland" -> {
+                    val command = ProcessBuilder("hyprctl", "cursorpos").start()
+                    val result = command.inputStream.bufferedReader().use { it.readLine()?.split(", ") }
+
+                    if (result != null && result.size == 2) {
+                        val x = result[0].toIntOrNull() ?: 0
+                        val y = result[1].toIntOrNull() ?: 0
+                        WaylandEnvironment.cursorPosition = Point(x, y)
+                    }
+                }
+            }
         }
 
         if (leftPressed || rightPressed) {
@@ -133,7 +159,6 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
 
         if (previousCursorPosition != newCursorPosition) {
-            previousCursorPosition = newCursorPosition
             component.dispatchEvent(
                 MouseEvent(
                     component,

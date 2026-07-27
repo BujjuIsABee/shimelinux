@@ -38,11 +38,10 @@ class WaylandEnvironment : Environment() {
 
     override fun tick() {
         val (x, y, width, height) = lib.getScreenRect()
-        val (cursorX, cursorY) = lib.getCursorPosition()
 
         screenRect.bounds = Rectangle(x, y, width, height)
         screen.set(screenRect)
-        cursor.set(Point(cursorX, cursorY))
+        cursor.set(Point(cursorPosition.x, cursorPosition.y))
 
         activeIE.isVisible = false
     }
@@ -54,4 +53,8 @@ class WaylandEnvironment : Environment() {
     override fun refreshCache() {}
 
     override fun dispose() {}
+
+    companion object {
+        var cursorPosition = Point(0, 0)
+    }
 }

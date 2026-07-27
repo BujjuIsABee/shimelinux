@@ -22,7 +22,6 @@
 
 use std::{
     cmp,
-    process::Command,
     sync::{LazyLock, Mutex, OnceLock},
 };
 
@@ -77,7 +76,6 @@ pub struct CursorState {
     pub left_released: bool,
     pub right_released: bool,
     pub position: Point,
-    pub grab_start: Point,
 }
 
 pub struct Mascot {
@@ -313,8 +311,6 @@ impl PointerHandler for Mascot {
             }
         }
 
-        self.set_cursor_position();
-
         let jvm = JVM.get_or_init(|| {
             let jvm_args = InitArgsBuilder::new()
                 .version(JNIVersion::V1_8)
@@ -484,39 +480,6 @@ impl Mascot {
             }
         }
     }
-
-    fn set_cursor_position(&mut self) {
-        let desktop = DESKTOP_TYPE.unwrap_or_default();
-        let mut cursor_position = CURSOR_POSITION.lock().unwrap();
-
-        if desktop == NIRI {
-            if self.cursor_state.left_pressed {
-                self.cursor_state.grab_start = Point {
-                    x: self.image_bounds.x,
-                    y: self.image_bounds.y,
-                };
-            }
-
-            *cursor_position = Point {
-                x: self.cursor_state.position.x + self.cursor_state.grab_start.x,
-                y: self.cursor_state.position.y + self.cursor_state.grab_start.y,
-            };
-        } else if desktop == HYPRLAND {
-            let output = Command::new("hyprctl")
-                .arg("cursorpos")
-                .output()
-                .expect("Failed to get cursor position");
-
-            if let Ok(output_text) = String::from_utf8(output.stdout) 
-                && let Some((x, y)) = output_text.split_once(", ")
-            {
-                *cursor_position = Point {
-                    x: x.trim().parse().unwrap_or_default(),
-                    y: y.trim().parse().unwrap_or_default(),
-                }
-            }
-        }
-    }
 }
 
 pub fn get_screen_rect() -> Rect {
@@ -524,16 +487,7 @@ pub fn get_screen_rect() -> Rect {
     screen_rect.clone()
 }
 
-pub fn get_cursor_position() -> Point {
-    let cursor_position = CURSOR_POSITION.lock().unwrap();
-    cursor_position.clone()
-}
 
 static JVM: OnceLock<JavaVM> = OnceLock::new();
 static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
 static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
-static CURSOR_POSITION: LazyLock<Mutex<Point>> = LazyLock::new(|| Mutex::new(Point::default()));
-static DESKTOP_TYPE: Option<&str> = option_env!("XDG_CURRENT_DESKTOP");
-
-const NIRI: &str = "niri";
-const HYPRLAND: &str = "Hyprland";

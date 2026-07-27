@@ -46,7 +46,7 @@ use smithay_client_toolkit::{
 };
 use wayland_client::{Connection, globals::registry_queue_init};
 
-use crate::mascot::{CursorState, Mascot, get_cursor_position, get_screen_rect};
+use crate::mascot::{CursorState, Mascot, get_screen_rect};
 
 mod mascot;
 
@@ -234,25 +234,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
             screen_rect.y,
             screen_rect.width,
             screen_rect.height,
-        ]).expect("Failed to set array");
-
-        Ok(array)
-    });
-
-    outcome.resolve::<ThrowRuntimeExAndDefault>()
-}
-
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getCursorPosition<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-) -> JIntArray<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
-        let array = JIntArray::new(env, 2).unwrap();
-        let cursor_position = get_cursor_position();
-        array.set_region(env, 0, &[
-            cursor_position.x,
-            cursor_position.y,
         ]).expect("Failed to set array");
 
         Ok(array)

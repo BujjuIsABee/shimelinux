@@ -39,8 +39,6 @@ class WaylandLib {
 
     external fun getScreenRect(): IntArray
 
-    external fun getCursorPosition(): IntArray
-
     companion object {
         var instance: WaylandLib? = null
 
