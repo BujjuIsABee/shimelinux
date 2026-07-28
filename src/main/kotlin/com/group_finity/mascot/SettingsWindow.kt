@@ -58,6 +58,7 @@ import javax.swing.JScrollPane
 import javax.swing.JSlider
 import javax.swing.JSpinner
 import javax.swing.JTabbedPane
+import javax.swing.JTextField
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
@@ -334,6 +335,26 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val flatThemeBackgroundColorRightPanel = JPanel()
         flatThemeBackgroundColorRightPanel.layout = BoxLayout(flatThemeBackgroundColorRightPanel, BoxLayout.X_AXIS)
 
+        val flatThemeBackgroundColorTextField = JTextField(if (themeComboBox.selectedIndex == 0) {
+            darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
+        } else {
+            lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
+        })
+        flatThemeBackgroundColorTextField.addActionListener {
+            val color = runCatching {
+                Color.decode(flatThemeBackgroundColorTextField.text)
+            }.getOrNull()
+
+            if (color != null) {
+                if (themeComboBox.selectedIndex == 0) {
+                    darkTheme.setProperty("@background", getHex(color))
+                } else {
+                    lightTheme.setProperty("@background", getHex(color))
+                }
+                refreshTheme()
+            }
+        }
+
         val flatThemeBackgroundColorButton = JButton(localize("Change"))
         flatThemeBackgroundColorButton.addActionListener {
             val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
@@ -347,7 +368,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
-                selectedTheme.setProperty("@background", getHex(color))
+                val hex = getHex(color)
+                selectedTheme.setProperty("@background", hex)
+                flatThemeBackgroundColorTextField.text = hex
                 refreshTheme()
             }
         }
@@ -371,6 +394,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
         }
 
+        flatThemeBackgroundColorRightPanel.add(flatThemeBackgroundColorTextField)
+        flatThemeBackgroundColorRightPanel.add(Box.createHorizontalStrut(3))
         flatThemeBackgroundColorRightPanel.add(flatThemeBackgroundColorPreview)
         flatThemeBackgroundColorRightPanel.add(Box.createHorizontalStrut(3))
         flatThemeBackgroundColorRightPanel.add(flatThemeBackgroundColorButton)
@@ -382,6 +407,26 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val flatThemeTextColorRightPanel = JPanel()
         flatThemeTextColorRightPanel.layout = BoxLayout(flatThemeTextColorRightPanel, BoxLayout.X_AXIS)
+
+        val flatThemeTextColorTextField = JTextField(if (themeComboBox.selectedIndex == 0) {
+            darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
+        } else {
+            lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
+        })
+        flatThemeTextColorTextField.addActionListener {
+            val color = runCatching {
+                Color.decode(flatThemeTextColorTextField.text)
+            }.getOrNull()
+
+            if (color != null) {
+                if (themeComboBox.selectedIndex == 0) {
+                    darkTheme.setProperty("@foreground", getHex(color))
+                } else {
+                    lightTheme.setProperty("@foreground", getHex(color))
+                }
+                refreshTheme()
+            }
+        }
 
         val flatThemeTextColorButton = JButton(localize("Change"))
         flatThemeTextColorButton.addActionListener {
@@ -396,7 +441,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
-                selectedTheme.setProperty("@foreground", getHex(color))
+                val hex = getHex(color)
+                selectedTheme.setProperty("@foreground", hex)
+                flatThemeTextColorTextField.text = hex
                 refreshTheme()
             }
         }
@@ -420,6 +467,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
         }
 
+        flatThemeTextColorRightPanel.add(flatThemeTextColorTextField)
+        flatThemeTextColorRightPanel.add(Box.createHorizontalStrut(3))
         flatThemeTextColorRightPanel.add(flatThemeTextColorPreview)
         flatThemeTextColorRightPanel.add(Box.createHorizontalStrut(3))
         flatThemeTextColorRightPanel.add(flatThemeTextColorButton)
@@ -431,6 +480,26 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         val flatThemeAccentColorRightPanel = JPanel()
         flatThemeAccentColorRightPanel.layout = BoxLayout(flatThemeAccentColorRightPanel, BoxLayout.X_AXIS)
+
+        val flatThemeAccentColorTextField = JTextField(if (themeComboBox.selectedIndex == 0) {
+            darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+        } else {
+            lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+        })
+        flatThemeAccentColorTextField.addActionListener {
+            val color = runCatching {
+                Color.decode(flatThemeAccentColorTextField.text)
+            }.getOrNull()
+
+            if (color != null) {
+                if (themeComboBox.selectedIndex == 0) {
+                    darkTheme.setProperty("@accentColor", getHex(color))
+                } else {
+                    lightTheme.setProperty("@accentColor", getHex(color))
+                }
+                refreshTheme()
+            }
+        }
 
         val flatThemeAccentColorButton = JButton(localize("Change"))
         flatThemeAccentColorButton.addActionListener {
@@ -444,7 +513,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
-                selectedTheme.setProperty("@accentColor", getHex(color))
+                val hex = getHex(color)
+                selectedTheme.setProperty("@accentColor", hex)
+                flatThemeAccentColorTextField.text = hex
                 refreshTheme()
             }
         }
@@ -468,6 +539,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
         }
 
+        flatThemeAccentColorRightPanel.add(flatThemeAccentColorTextField)
+        flatThemeAccentColorRightPanel.add(Box.createHorizontalStrut(3))
         flatThemeAccentColorRightPanel.add(flatThemeAccentColorPreview)
         flatThemeAccentColorRightPanel.add(Box.createHorizontalStrut(3))
         flatThemeAccentColorRightPanel.add(flatThemeAccentColorButton)
@@ -580,6 +653,18 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val windowBackgroundColorRightPanel = JPanel()
         windowBackgroundColorRightPanel.layout = BoxLayout(windowBackgroundColorRightPanel, BoxLayout.X_AXIS)
 
+        val windowBackgroundColorTextField = JTextField(windowBackgroundColor)
+        windowBackgroundColorTextField.addActionListener {
+            val color = runCatching {
+                Color.decode(windowBackgroundColorTextField.text)
+            }.getOrNull()
+
+            if (color != null) {
+                windowBackgroundColor = getHex(color)
+                repaint()
+            }
+        }
+
         val windowBackgroundColorButton = JButton(localize("Change"))
         windowBackgroundColorButton.addActionListener {
             val color = JColorChooser.showDialog(
@@ -590,8 +675,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
-                windowBackgroundColor = getHex(color)
-                refreshTheme()
+                val hex = getHex(color)
+                windowBackgroundColor = hex
+                windowBackgroundColorTextField.text = hex
+                repaint()
             }
         }
 
@@ -608,6 +695,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             override fun getBackground() = Color.decode(windowBackgroundColor)
         }
 
+        windowBackgroundColorRightPanel.add(windowBackgroundColorTextField)
+        windowBackgroundColorRightPanel.add(Box.createHorizontalStrut(3))
         windowBackgroundColorRightPanel.add(windowBackgroundColorPreview)
         windowBackgroundColorRightPanel.add(Box.createHorizontalStrut(3))
         windowBackgroundColorRightPanel.add(windowBackgroundColorButton)
@@ -716,7 +805,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         titleLabel.font = titleLabel.font.deriveFont(Font.BOLD, titleLabel.font.size + 10.0f)
         titleLabel.alignmentX = CENTER_ALIGNMENT
 
-        val versionLabel = JLabel("v1.1.3")
+        val versionLabel = JLabel(VERSION)
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
         aboutTab.add(Box.createVerticalGlue())
@@ -897,6 +986,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     companion object {
+        private const val VERSION = "1.1.3"
+
         private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
         private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
         private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
