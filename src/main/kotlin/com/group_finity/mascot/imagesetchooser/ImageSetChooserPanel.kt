@@ -43,9 +43,6 @@ class ImageSetChooserPanel(
     imageLocation: String,
     captionText: String
 ) : JPanel() {
-    private val textPanel: JPanel
-    private val imageLabel: JLabel
-    private val captionLabel: JLabel
     private val checkbox: JCheckBox = JCheckBox()
 
     init {
@@ -54,17 +51,17 @@ class ImageSetChooserPanel(
         layout = BoxLayout(this, BoxLayout.X_AXIS)
         border = BorderFactory.createLineBorder(UIManager.getColor("Table.gridColor"))
 
-        imageLabel = JLabel()
+        val imageLabel = JLabel()
         imageLabel.icon = runCatching {
             ImageIO.read(File(imageLocation))
         }.getOrNull()?.let {
             ImageIcon(it.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
         }
 
-        captionLabel = JLabel(captionText)
+        val captionLabel = JLabel(captionText)
         captionLabel.font = captionLabel.font.deriveFont(Font.BOLD)
 
-        textPanel = JPanel()
+        val textPanel = JPanel()
         textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
         textPanel.add(captionLabel)
         textPanel.add(JLabel(actions))

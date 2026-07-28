@@ -24,13 +24,16 @@ package com.group_finity.mascot
 
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.BorderLayout
+import java.awt.CardLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.Frame
+import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Image
+import java.awt.Insets
 import java.util.Hashtable
 import java.util.Properties
 import javax.imageio.ImageIO
@@ -55,7 +58,7 @@ import javax.swing.JScrollPane
 import javax.swing.JSlider
 import javax.swing.JSpinner
 import javax.swing.JTabbedPane
-import javax.swing.JTextField
+import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.border.BevelBorder
@@ -64,141 +67,73 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
-    private val tabs: JTabbedPane
-    private val generalTab: JPanel
-    private val alwaysShowShimejiChooserCheckBox: JCheckBox
-    private val alwaysShowInformationScreenCheckBox: JCheckBox
-    private val scalingSlider: JSlider
-    private val opacitySlider: JSlider
-    private val nearestNeighborRadioButton: JRadioButton
-    private val bicubicRadioButton: JRadioButton
-    private val hqxRadioButton: JRadioButton
-    private val filterButtonGroup: ButtonGroup
-    private val interactiveWindowsTab: JPanel
-    private val interactiveWindowsTabs: JTabbedPane
-    private val whitelistModel: DefaultListModel<String>
-    private val whitelist: JList<String>
-    private val blacklistModel: DefaultListModel<String>
-    private val blacklist: JList<String>
-    private val interactiveWindowsButtonsPanel: JPanel
-    private val addInteractiveWindowButton: JButton
-    private val removeInteractiveWindowButton: JButton
-    private val menuTab: JPanel
-    private val menuScalingPanel: JPanel
-    private val menuScalingSlider: JSlider
-    private val themeComboBox: JComboBox<String>
-    private val flatThemePanel: JPanel
-    private val flatThemeColorsPanel: JPanel
-    private val backgroundColorPanel: JPanel
-    private val backgroundColorRightPanel: JPanel
-    private val backgroundColorButton: JButton
-    private val textColorPanel: JPanel
-    private val textColorRightPanel: JPanel
-    private val textColorButton: JButton
-    private val accentColorPanel: JPanel
-    private val accentColorRightPanel: JPanel
-    private val accentColorButton: JButton
-    private val gtkThemePanel: JPanel
-    private val themePanel: JPanel
-    private val resetButtonPanel: JPanel
-    private val resetButton: JButton
-    private val windowModeTab: JPanel
-    private val windowModeCheckBox: JCheckBox
-    private val windowModeSettingsContainerPanel: JPanel
-    private val windowModeSettingsPanel: JPanel
-    private val dimensionsPanel: JPanel
-    private val dimensionsContainerPanel: JPanel
-    private val dimensionsSpinnersPanel: JPanel
-    private val widthSpinner: JSpinner
-    private val heightSpinner: JSpinner
-    private val windowBackgroundPanel: JPanel
-    private val backgroundContainerPanel: JPanel
-    private val windowBackgroundColorPanel: JPanel
-    private val windowBackgroundColorRightPanel: JPanel
-    private val windowBackgroundColorButton: JButton
-    private val backgroundImagePanel: JPanel
-    private val backgroundImageRightPanel: JPanel
-    private val backgroundModeComboBox: JComboBox<String>
-    private val changeBackgroundImageButton: JButton
-    private val backgroundImagePathContainerPanel: JPanel
-    private val backgroundImagePathPanel: JPanel
-    private val backgroundImageTextField: JTextField
-    private val removeBackgroundImageButton: JButton
-    private val aboutTab: JPanel
-    private val infoPanel: JPanel
-    private val aboutImageLabel: JLabel
-    private val shimelinuxLabel: JLabel
-    private val versionLabel: JLabel
-    private val footerPanel: JPanel
-    private val doneButton: JButton
-    private val cancelButton: JButton
-
     private var alwaysShowShimejiChooser = getProperty("AlwaysShowShimejiChooser", false)
     private var alwaysShowInformationScreen = getProperty("AlwaysShowInformationScreen", false)
     private var scaling = getProperty("Scaling", 1.0)
     private var opacity = getProperty("Opacity", 1.0)
     private var filter = getProperty("Filter", "Nearest")
-    private var menuScaling = getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1)
+    private val whitelistModel = DefaultListModel<String>()
+    private val blacklistModel = DefaultListModel<String>()
+    private var menuScaling = getProperty("MenuScaling", 1)
     private var theme = getProperty("Theme", "FlatDark")
     private var environment = getProperty("Environment", "linux")
     private var windowSize = getProperty("WindowSize", "600x500")
     private var windowBackgroundColor = getProperty("Background", "#00FF00")
     private var windowBackgroundImage = getProperty("BackgroundImage", "")
     private var windowBackgroundMode = getProperty("BackgroundMode", "Center")
-    private val initialTheme = theme
+
     private val darkTheme = Properties()
     private val lightTheme = Properties()
-    private val initialDarkBackgroundColor: String
-    private val initialDarkTextColor: String
-    private val initialDarkAccentColor: String
-    private val initialLightBackgroundColor: String
-    private val initialLightTextColor: String
-    private val initialLightAccentColor: String
+    private val initialDarkTheme = Properties()
+    private val initialLightTheme = Properties()
+    private val initialTheme = theme
 
-    var isEnvironmentReloadRequired = false
     var isRestartRequired = false
+    var isEnvironmentReloadRequired = false
     var isImageReloadRequired = false
     var isInteractiveWindowReloadRequired = false
 
     init {
+        try {
+            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
+                darkTheme.load(it)
+                initialDarkTheme.putAll(darkTheme)
+            }
+
+            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
+                lightTheme.load(it)
+                initialLightTheme.putAll(lightTheme)
+            }
+        } catch (_: Exception) {
+        }
+
         val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("Settings")
         layout = BorderLayout()
 
-        try {
-            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use {
-                darkTheme.load(it)
+        val tabs = object : JTabbedPane() {
+            override fun getPreferredSize() = super.getPreferredSize().apply {
+                width = 450
             }
-            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use {
-                lightTheme.load(it)
-            }
-        } catch (_: Exception) {
         }
 
-        // Store initial theme colors
-        initialDarkBackgroundColor = darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
-        initialDarkTextColor = darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
-        initialDarkAccentColor = darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-        initialLightBackgroundColor = lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
-        initialLightTextColor = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
-        initialLightAccentColor = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+        val generalTab = JPanel()
+        generalTab.layout = BoxLayout(generalTab, BoxLayout.Y_AXIS)
 
-        alwaysShowShimejiChooserCheckBox = JCheckBox(localize("AlwaysShowShimejiChooser"))
+        val alwaysShowShimejiChooserCheckBox = JCheckBox(localize("AlwaysShowShimejiChooser"))
         alwaysShowShimejiChooserCheckBox.isSelected = alwaysShowShimejiChooser
         alwaysShowShimejiChooserCheckBox.addChangeListener {
             alwaysShowShimejiChooser = alwaysShowShimejiChooserCheckBox.isSelected
         }
 
-        alwaysShowInformationScreenCheckBox = JCheckBox(localize("AlwaysShowInformationScreen"))
+        val alwaysShowInformationScreenCheckBox = JCheckBox(localize("AlwaysShowInformationScreen"))
         alwaysShowInformationScreenCheckBox.isSelected = alwaysShowInformationScreen
         alwaysShowInformationScreenCheckBox.addChangeListener {
             alwaysShowInformationScreen = alwaysShowInformationScreenCheckBox.isSelected
         }
 
-        scalingSlider = object : JSlider() {
-            override fun getPreferredSize() = Dimension(450, super.preferredSize.height)
-        }
+        val scalingSlider = JSlider()
         scalingSlider.alignmentX = LEFT_ALIGNMENT
         scalingSlider.maximum = 80
         scalingSlider.majorTickSpacing = 10
@@ -212,15 +147,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 scalingSlider.value = 5
             }
 
-            if (scalingSlider.value / 10.0 != scaling) {
-                scaling = scalingSlider.value / 10.0
-                isImageReloadRequired = true
-            }
+            scaling = scalingSlider.value / 10.0
         }
 
-        opacitySlider = object : JSlider() {
-            override fun getPreferredSize() = Dimension(450, super.preferredSize.height)
-        }
+        val opacitySlider = JSlider()
         opacitySlider.alignmentX = LEFT_ALIGNMENT
         opacitySlider.majorTickSpacing = 10
         opacitySlider.minorTickSpacing = 5
@@ -229,46 +159,39 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         opacitySlider.snapToTicks = true
         opacitySlider.value = (opacity * 100.0).toInt()
         opacitySlider.addChangeListener {
-            if (opacitySlider.value / 100.0 != opacity) {
-                opacity = opacitySlider.value / 100.0
-                isImageReloadRequired = true
-            }
+            opacity = opacitySlider.value / 100.0
         }
 
-        nearestNeighborRadioButton = JRadioButton(localize("NearestNeighbor"))
+        val filterButtonGroup = ButtonGroup()
+
+        val nearestNeighborRadioButton = JRadioButton(localize("NearestNeighbor"))
         nearestNeighborRadioButton.isSelected = filter == "Nearest"
         nearestNeighborRadioButton.addChangeListener {
-            if (nearestNeighborRadioButton.isSelected && filter != "Nearest") {
+            if (nearestNeighborRadioButton.isSelected) {
                 filter = "Nearest"
-                isImageReloadRequired = true
             }
         }
 
-        bicubicRadioButton = JRadioButton(localize("BicubicFilter"))
+        val bicubicRadioButton = JRadioButton(localize("BicubicFilter"))
         bicubicRadioButton.isSelected = filter == "Bicubic"
         bicubicRadioButton.addChangeListener {
-            if (bicubicRadioButton.isSelected && filter != "Bicubic") {
+            if (bicubicRadioButton.isSelected) {
                 filter = "Bicubic"
-                isImageReloadRequired = true
             }
         }
 
-        hqxRadioButton = JRadioButton(localize("HqxFilter"))
+        val hqxRadioButton = JRadioButton(localize("HqxFilter"))
         hqxRadioButton.isSelected = filter == "Hqx"
         hqxRadioButton.addChangeListener {
-            if (hqxRadioButton.isSelected && filter != "Hqx") {
+            if (hqxRadioButton.isSelected) {
                 filter = "Hqx"
-                isImageReloadRequired = true
             }
         }
 
-        filterButtonGroup = ButtonGroup()
         filterButtonGroup.add(nearestNeighborRadioButton)
         filterButtonGroup.add(bicubicRadioButton)
         filterButtonGroup.add(hqxRadioButton)
 
-        generalTab = JPanel()
-        generalTab.layout = BoxLayout(generalTab, BoxLayout.Y_AXIS)
         generalTab.add(alwaysShowShimejiChooserCheckBox)
         generalTab.add(alwaysShowInformationScreenCheckBox)
         generalTab.add(Box.createVerticalStrut(10))
@@ -283,28 +206,26 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         generalTab.add(bicubicRadioButton)
         generalTab.add(hqxRadioButton)
 
-        whitelistModel = DefaultListModel<String>()
-        for (title in getProperty("InteractiveWindows", "").split("/")) {
-            if (title.isNotBlank()) {
-                whitelistModel.add(whitelistModel.size, title)
-            }
+        val interactiveWindowsTab = JPanel(BorderLayout())
+
+        val interactiveWindowsTabs = JTabbedPane()
+
+        val whitelist = JList(whitelistModel)
+        for (caption in getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }) {
+            whitelistModel.add(whitelistModel.size, caption)
         }
 
-        blacklistModel = DefaultListModel<String>()
-        for (title in getProperty("InteractiveWindowsBlacklist", "").split("/")) {
-            if (title.isNotBlank()) {
-                blacklistModel.add(blacklistModel.size, title)
-            }
+        val blacklist = JList(blacklistModel)
+        for (caption in getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }) {
+            blacklistModel.add(blacklistModel.size, caption)
         }
 
-        whitelist = JList(whitelistModel)
-        blacklist = JList(blacklistModel)
-
-        interactiveWindowsTabs = JTabbedPane()
         interactiveWindowsTabs.addTab(localize("Whitelist"), JScrollPane(whitelist))
         interactiveWindowsTabs.addTab(localize("Blacklist"), JScrollPane(blacklist))
 
-        addInteractiveWindowButton = JButton(localize("Add"))
+        val interactiveWindowsButtonsPanel = JPanel(FlowLayout())
+
+        val addInteractiveWindowButton = JButton(localize("Add"))
         addInteractiveWindowButton.preferredSize = Dimension(130, 26)
         addInteractiveWindowButton.addActionListener {
             val input = JOptionPane.showInputDialog(
@@ -324,42 +245,43 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 } else {
                     blacklistModel.add(blacklistModel.size, input.trim())
                 }
-
-                isInteractiveWindowReloadRequired = true
             }
         }
 
-        removeInteractiveWindowButton = JButton(localize("Remove"))
+        val removeInteractiveWindowButton = JButton(localize("Remove"))
         removeInteractiveWindowButton.preferredSize = Dimension(130, 26)
         removeInteractiveWindowButton.addActionListener {
             if (interactiveWindowsTabs.selectedIndex == 0) {
                 if (whitelist.selectedIndex != -1) {
                     whitelistModel.remove(whitelist.selectedIndex)
-                    isInteractiveWindowReloadRequired = true
                 }
             } else {
                 if (blacklist.selectedIndex != -1) {
                     blacklistModel.remove(blacklist.selectedIndex)
-                    isInteractiveWindowReloadRequired = true
                 }
             }
         }
 
-        interactiveWindowsButtonsPanel = JPanel(FlowLayout())
         interactiveWindowsButtonsPanel.add(addInteractiveWindowButton)
         interactiveWindowsButtonsPanel.add(removeInteractiveWindowButton)
 
-        interactiveWindowsTab = JPanel(BorderLayout())
         interactiveWindowsTab.add(interactiveWindowsTabs, BorderLayout.CENTER)
         interactiveWindowsTab.add(interactiveWindowsButtonsPanel, BorderLayout.SOUTH)
 
-        menuScalingSlider = JSlider()
+        val menuTab = JPanel(BorderLayout())
+
+        val menuScalingPanel = JPanel()
+        menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
+        menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
+
+        val menuScalingSlider = JSlider()
         menuScalingSlider.minimum = 1
         menuScalingSlider.maximum = 3
         menuScalingSlider.majorTickSpacing = 1
+        menuScalingSlider.paintLabels = true
         menuScalingSlider.paintTicks = true
         menuScalingSlider.snapToTicks = true
-        menuScalingSlider.paintLabels = true
+        menuScalingSlider.value = menuScaling
         menuScalingSlider.labelTable = Hashtable(
             mapOf(
                 1 to JLabel("1x"),
@@ -367,26 +289,53 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 3 to JLabel("3x")
             )
         )
-        menuScalingSlider.value = menuScaling
         menuScalingSlider.addChangeListener {
-            if (menuScalingSlider.value != menuScaling) {
-                menuScaling = menuScalingSlider.value
-                isRestartRequired = true
-            }
+            menuScaling = menuScalingSlider.value
         }
 
-        menuScalingPanel = JPanel()
-        menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
-        menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
         menuScalingPanel.add(menuScalingSlider)
 
-        themeComboBox = JComboBox<String>()
+        val themePanel = JPanel()
+        themePanel.layout = BoxLayout(themePanel, BoxLayout.Y_AXIS)
+        themePanel.border = BorderFactory.createTitledBorder(localize("Theme"))
+
+        val themeCards = CardLayout()
+        val themeCardsPanel = JPanel(themeCards)
+
+        val themes = listOf(
+            Pair(0, "FlatDark"),
+            Pair(1, "FlatLight"),
+            Pair(2, "GTK")
+        )
+
+        val themeComboBox = JComboBox<String>()
         themeComboBox.addItem(localize("FlatDark"))
         themeComboBox.addItem(localize("FlatLight"))
         themeComboBox.addItem(localize("Gtk"))
+        themeComboBox.selectedIndex = themes.find { it.second == theme }?.first ?: 0
+        themeComboBox.addActionListener {
+            theme = themes.find { it.first == themeComboBox.selectedIndex }?.second ?: "FlatDark"
+            refreshTheme()
 
-        backgroundColorButton = JButton(localize("Change"))
-        backgroundColorButton.addActionListener {
+            if (theme.startsWith("Flat")) {
+                themeCards.show(themeCardsPanel, "Flat")
+            } else {
+                themeCards.show(themeCardsPanel, "Gtk")
+            }
+        }
+
+        val flatThemeCard = JPanel(BorderLayout())
+
+        val flatThemeColorsPanel = JPanel()
+        flatThemeColorsPanel.layout = BoxLayout(flatThemeColorsPanel, BoxLayout.Y_AXIS)
+
+        val flatThemeBackgroundColorPanel = JPanel(BorderLayout())
+
+        val flatThemeBackgroundColorRightPanel = JPanel()
+        flatThemeBackgroundColorRightPanel.layout = BoxLayout(flatThemeBackgroundColorRightPanel, BoxLayout.X_AXIS)
+
+        val flatThemeBackgroundColorButton = JButton(localize("Change"))
+        flatThemeBackgroundColorButton.addActionListener {
             val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
             val defaultColor = if (themeComboBox.selectedIndex == 0) DEFAULT_DARK_BACKGROUND_COLOR else DEFAULT_LIGHT_BACKGROUND_COLOR
 
@@ -403,35 +352,39 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        backgroundColorRightPanel = JPanel()
-        backgroundColorRightPanel.layout = BoxLayout(backgroundColorRightPanel, BoxLayout.X_AXIS)
-        backgroundColorRightPanel.add(
-            object : JPanel() {
-                override fun getPreferredSize() = Dimension(
-                    backgroundColorButton.preferredSize.height,
-                    backgroundColorButton.preferredSize.height
-                )
-
-                override fun getBackground() = Color.decode(
-                    if (themeComboBox.selectedIndex == 0) {
-                        darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
-                    } else {
-                        lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
-                    }
-                )
-
-                override fun getBorder() = SoftBevelBorder(BevelBorder.LOWERED)
+        val flatThemeBackgroundColorPreview = object : JPanel() {
+            init {
+                border = SoftBevelBorder(BevelBorder.LOWERED)
             }
-        )
-        backgroundColorRightPanel.add(Box.createHorizontalStrut(3))
-        backgroundColorRightPanel.add(backgroundColorButton)
 
-        backgroundColorPanel = JPanel(BorderLayout())
-        backgroundColorPanel.add(JLabel(localize("BackgroundColor")), BorderLayout.WEST)
-        backgroundColorPanel.add(backgroundColorRightPanel, BorderLayout.EAST)
+            override fun getPreferredSize() = Dimension(
+                flatThemeBackgroundColorButton.preferredSize.height,
+                flatThemeBackgroundColorButton.preferredSize.height,
+            )
 
-        textColorButton = JButton(localize("Change"))
-        textColorButton.addActionListener {
+            override fun getBackground() = Color.decode(
+                if (themeComboBox.selectedIndex == 0) {
+                    darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
+                } else {
+                    lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
+                }
+            )
+        }
+
+        flatThemeBackgroundColorRightPanel.add(flatThemeBackgroundColorPreview)
+        flatThemeBackgroundColorRightPanel.add(Box.createHorizontalStrut(3))
+        flatThemeBackgroundColorRightPanel.add(flatThemeBackgroundColorButton)
+
+        flatThemeBackgroundColorPanel.add(JLabel(localize("BackgroundColor")), BorderLayout.WEST)
+        flatThemeBackgroundColorPanel.add(flatThemeBackgroundColorRightPanel, BorderLayout.EAST)
+
+        val flatThemeTextColorPanel = JPanel(BorderLayout())
+
+        val flatThemeTextColorRightPanel = JPanel()
+        flatThemeTextColorRightPanel.layout = BoxLayout(flatThemeTextColorRightPanel, BoxLayout.X_AXIS)
+
+        val flatThemeTextColorButton = JButton(localize("Change"))
+        flatThemeTextColorButton.addActionListener {
             val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
             val defaultColor = if (themeComboBox.selectedIndex == 0) DEFAULT_DARK_TEXT_COLOR else DEFAULT_LIGHT_TEXT_COLOR
 
@@ -443,48 +396,50 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
-                val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
                 selectedTheme.setProperty("@foreground", getHex(color))
                 refreshTheme()
             }
         }
 
-        textColorRightPanel = JPanel()
-        textColorRightPanel.layout = BoxLayout(textColorRightPanel, BoxLayout.X_AXIS)
-        textColorRightPanel.add(
-            object : JPanel() {
-                override fun getPreferredSize() = Dimension(
-                    textColorButton.preferredSize.height,
-                    textColorButton.preferredSize.height
-                )
-
-                override fun getBackground() = Color.decode(
-                    if (themeComboBox.selectedIndex == 0) {
-                        darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
-                    } else {
-                        lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
-                    }
-                )
-
-                override fun getBorder() = SoftBevelBorder(BevelBorder.LOWERED)
+        val flatThemeTextColorPreview = object : JPanel() {
+            init {
+                border = SoftBevelBorder(BevelBorder.LOWERED)
             }
-        )
-        textColorRightPanel.add(Box.createHorizontalStrut(3))
-        textColorRightPanel.add(textColorButton)
 
-        textColorPanel = JPanel(BorderLayout())
-        textColorPanel.add(JLabel(localize("TextColor")), BorderLayout.WEST)
-        textColorPanel.add(textColorRightPanel, BorderLayout.EAST)
+            override fun getPreferredSize() = Dimension(
+                flatThemeTextColorButton.preferredSize.height,
+                flatThemeTextColorButton.preferredSize.height,
+            )
 
-        accentColorButton = JButton(localize("Change"))
-        accentColorButton.addActionListener {
+            override fun getBackground() = Color.decode(
+                if (themeComboBox.selectedIndex == 0) {
+                    darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
+                } else {
+                    lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
+                }
+            )
+        }
+
+        flatThemeTextColorRightPanel.add(flatThemeTextColorPreview)
+        flatThemeTextColorRightPanel.add(Box.createHorizontalStrut(3))
+        flatThemeTextColorRightPanel.add(flatThemeTextColorButton)
+
+        flatThemeTextColorPanel.add(JLabel(localize("TextColor")), BorderLayout.WEST)
+        flatThemeTextColorPanel.add(flatThemeTextColorRightPanel, BorderLayout.EAST)
+
+        val flatThemeAccentColorPanel = JPanel(BorderLayout())
+
+        val flatThemeAccentColorRightPanel = JPanel()
+        flatThemeAccentColorRightPanel.layout = BoxLayout(flatThemeAccentColorRightPanel, BoxLayout.X_AXIS)
+
+        val flatThemeAccentColorButton = JButton(localize("Change"))
+        flatThemeAccentColorButton.addActionListener {
             val selectedTheme = if (themeComboBox.selectedIndex == 0) darkTheme else lightTheme
-            val defaultColor = DEFAULT_ACCENT_COLOR
 
             val color = JColorChooser.showDialog(
                 this,
                 localize("ChooseAccentColor"),
-                Color.decode(selectedTheme.getProperty("@accentColor", defaultColor)),
+                Color.decode(selectedTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)),
                 false
             )
 
@@ -494,45 +449,43 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        accentColorRightPanel = JPanel()
-        accentColorRightPanel.layout = BoxLayout(accentColorRightPanel, BoxLayout.X_AXIS)
-        accentColorRightPanel.add(
-            object : JPanel() {
-                override fun getPreferredSize() = Dimension(
-                    accentColorButton.preferredSize.height,
-                    accentColorButton.preferredSize.height
-                )
-
-                override fun getBackground() = Color.decode(
-                    if (themeComboBox.selectedIndex == 0) {
-                        darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-                    } else {
-                        lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-                    }
-                )
-
-                override fun getBorder() = SoftBevelBorder(BevelBorder.LOWERED)
+        val flatThemeAccentColorPreview = object : JPanel() {
+            init {
+                border = SoftBevelBorder(BevelBorder.LOWERED)
             }
-        )
-        accentColorRightPanel.add(Box.createHorizontalStrut(3))
-        accentColorRightPanel.add(accentColorButton)
 
-        accentColorPanel = JPanel(BorderLayout())
-        accentColorPanel.add(JLabel(localize("AccentColor")), BorderLayout.WEST)
-        accentColorPanel.add(accentColorRightPanel, BorderLayout.EAST)
+            override fun getPreferredSize() = Dimension(
+                flatThemeTextColorButton.preferredSize.height,
+                flatThemeTextColorButton.preferredSize.height,
+            )
 
-        flatThemeColorsPanel = JPanel()
-        flatThemeColorsPanel.layout = BoxLayout(flatThemeColorsPanel, BoxLayout.Y_AXIS)
-        flatThemeColorsPanel.add(Box.createVerticalStrut(6))
-        flatThemeColorsPanel.add(backgroundColorPanel)
-        flatThemeColorsPanel.add(Box.createVerticalStrut(6))
-        flatThemeColorsPanel.add(textColorPanel)
-        flatThemeColorsPanel.add(Box.createVerticalStrut(6))
-        flatThemeColorsPanel.add(accentColorPanel)
+            override fun getBackground() = Color.decode(
+                if (themeComboBox.selectedIndex == 0) {
+                    darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+                } else {
+                    lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+                }
+            )
+        }
 
-        resetButton = JButton(localize("Reset"))
-        resetButton.addActionListener {
-            // Reset current theme colors
+        flatThemeAccentColorRightPanel.add(flatThemeAccentColorPreview)
+        flatThemeAccentColorRightPanel.add(Box.createHorizontalStrut(3))
+        flatThemeAccentColorRightPanel.add(flatThemeAccentColorButton)
+
+        flatThemeAccentColorPanel.add(JLabel(localize("AccentColor")), BorderLayout.WEST)
+        flatThemeAccentColorPanel.add(flatThemeAccentColorRightPanel, BorderLayout.EAST)
+
+        flatThemeColorsPanel.add(Box.createVerticalStrut(3))
+        flatThemeColorsPanel.add(flatThemeBackgroundColorPanel)
+        flatThemeColorsPanel.add(Box.createVerticalStrut(3))
+        flatThemeColorsPanel.add(flatThemeTextColorPanel)
+        flatThemeColorsPanel.add(Box.createVerticalStrut(3))
+        flatThemeColorsPanel.add(flatThemeAccentColorPanel)
+
+        val flatThemeButtonsPanel = JPanel(FlowLayout())
+
+        val resetFlatThemeButton = JButton(localize("Reset"))
+        resetFlatThemeButton.addActionListener {
             if (themeComboBox.selectedIndex == 0) {
                 darkTheme.setProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
                 darkTheme.setProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
@@ -546,85 +499,88 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             refreshTheme()
         }
 
-        resetButtonPanel = JPanel()
-        resetButtonPanel.alignmentX = CENTER_ALIGNMENT
-        resetButtonPanel.add(resetButton)
+        flatThemeButtonsPanel.add(resetFlatThemeButton)
 
-        flatThemePanel = JPanel(BorderLayout())
-        flatThemePanel.add(flatThemeColorsPanel, BorderLayout.NORTH)
-        flatThemePanel.add(resetButtonPanel, BorderLayout.SOUTH)
+        flatThemeCard.add(flatThemeColorsPanel, BorderLayout.NORTH)
+        flatThemeCard.add(flatThemeButtonsPanel, BorderLayout.SOUTH)
 
-        gtkThemePanel = JPanel(GridBagLayout())
-        gtkThemePanel.add(JLabel(localize("GtkThemeMessage")))
+        val gtkThemeCard = JPanel(GridBagLayout())
+        gtkThemeCard.add(JLabel(localize("GtkThemeMessage")))
 
-        val themeMap = mapOf(0 to "FlatDark", 1 to "FlatLight", 2 to "GTK")
-        val themeIndexMap = themeMap.entries.associate { it.value to it.key }
+        themeCardsPanel.add(flatThemeCard, "Flat")
+        themeCardsPanel.add(gtkThemeCard, "Gtk")
 
-        themeComboBox.selectedIndex = themeIndexMap[theme] ?: 0
-        themeComboBox.addItemListener {
-            theme = themeMap[themeComboBox.selectedIndex] ?: "FlatDark"
-            refreshTheme()
-            flatThemePanel.isVisible = themeComboBox.selectedIndex != 2
-            gtkThemePanel.isVisible = themeComboBox.selectedIndex == 2
+        if (theme.startsWith("Flat")) {
+            themeCards.show(themeCardsPanel, "Flat")
+        } else {
+            themeCards.show(themeCardsPanel, "Gtk")
         }
 
-        flatThemePanel.isVisible = themeComboBox.selectedIndex != 2
-        gtkThemePanel.isVisible = themeComboBox.selectedIndex == 2
-
-        themePanel = JPanel()
-        themePanel.layout = BoxLayout(themePanel, BoxLayout.Y_AXIS)
-        themePanel.border = BorderFactory.createTitledBorder(localize("Theme"))
         themePanel.add(themeComboBox)
-        themePanel.add(flatThemePanel)
-        themePanel.add(gtkThemePanel)
+        themePanel.add(themeCardsPanel)
 
-        menuTab = JPanel(BorderLayout())
-        menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         menuTab.add(menuScalingPanel, BorderLayout.NORTH)
         menuTab.add(themePanel, BorderLayout.CENTER)
 
-        val windowArray = windowSize.split("x")
+        val windowModeTab = JPanel(BorderLayout())
 
-        widthSpinner = JSpinner()
-        widthSpinner.value = windowArray[0].toInt()
+        val windowModePanel = JPanel()
+        windowModePanel.layout = BoxLayout(windowModePanel, BoxLayout.Y_AXIS)
+
+        val windowModeSettingsPanel = JPanel()
+        windowModeSettingsPanel.layout = BoxLayout(windowModeSettingsPanel, BoxLayout.Y_AXIS)
+        windowModeSettingsPanel.isVisible = environment == "virtual"
+
+        val windowModeEnabledCheckBox = JCheckBox(localize("WindowedModeEnabled"))
+        windowModeEnabledCheckBox.isSelected = environment == "virtual"
+        windowModeEnabledCheckBox.addActionListener {
+            environment = if (windowModeEnabledCheckBox.isSelected) "virtual" else "linux"
+            windowModeSettingsPanel.isVisible = windowModeEnabledCheckBox.isSelected
+        }
+
+        val windowDimensionsPanel = JPanel(BorderLayout())
+        windowDimensionsPanel.alignmentX = LEFT_ALIGNMENT
+
+        val windowDimensionsRightPanel = JPanel()
+        windowDimensionsRightPanel.layout = BoxLayout(windowDimensionsRightPanel, BoxLayout.X_AXIS)
+
+        val (windowWidth, windowHeight) = windowSize.split("x").map { it.toIntOrNull() ?: 0 }
+
+        val widthSpinner = JSpinner()
+        widthSpinner.value = windowWidth
         widthSpinner.addChangeListener {
-            val windowArray = windowSize.split("x")
-            val oldWidth = windowArray[0].toInt()
-
-            if (widthSpinner.value != oldWidth) {
-                windowSize = "${widthSpinner.value}x${windowArray[1]}"
-                isEnvironmentReloadRequired = true
-            }
+            val (_, windowHeight) = windowSize.split("x")
+            windowSize = "${widthSpinner.value}x${windowHeight}"
         }
 
-        heightSpinner = JSpinner()
-        heightSpinner.value = windowArray[1].toInt()
+        val heightSpinner = JSpinner()
+        heightSpinner.value = windowHeight
         heightSpinner.addChangeListener {
-            val windowArray = windowSize.split("x")
-            val oldHeight = windowArray[1].toInt()
-
-            if (heightSpinner.value != oldHeight) {
-                windowSize = "${windowArray[0]}x${heightSpinner.value}"
-                isEnvironmentReloadRequired = true
-            }
+            val (windowWidth, _) = windowSize.split("x")
+            windowSize = "${windowWidth}x${heightSpinner.value}"
         }
 
-        dimensionsSpinnersPanel = JPanel(FlowLayout())
-        dimensionsSpinnersPanel.alignmentX = LEFT_ALIGNMENT
-        dimensionsSpinnersPanel.add(widthSpinner)
-        dimensionsSpinnersPanel.add(JLabel("x"))
-        dimensionsSpinnersPanel.add(heightSpinner)
+        windowDimensionsRightPanel.add(widthSpinner)
+        windowDimensionsRightPanel.add(Box.createHorizontalStrut(3))
+        windowDimensionsRightPanel.add(JLabel("x"))
+        windowDimensionsRightPanel.add(Box.createHorizontalStrut(3))
+        windowDimensionsRightPanel.add(heightSpinner)
+        windowDimensionsRightPanel.add(Box.createHorizontalStrut(6))
 
-        dimensionsContainerPanel = JPanel(BorderLayout())
-        dimensionsContainerPanel.alignmentX = LEFT_ALIGNMENT
-        dimensionsContainerPanel.add(JLabel(localize("Dimensions")), BorderLayout.WEST)
-        dimensionsContainerPanel.add(dimensionsSpinnersPanel, BorderLayout.EAST)
+        windowDimensionsPanel.add(JLabel(localize("Dimensions")), BorderLayout.WEST)
+        windowDimensionsPanel.add(windowDimensionsRightPanel, BorderLayout.EAST)
 
-        dimensionsPanel = JPanel(BorderLayout())
-        dimensionsPanel.alignmentX = LEFT_ALIGNMENT
-        dimensionsPanel.add(dimensionsContainerPanel, BorderLayout.NORTH)
+        val windowBackgroundPanel = JPanel()
+        windowBackgroundPanel.layout = BoxLayout(windowBackgroundPanel, BoxLayout.Y_AXIS)
+        windowBackgroundPanel.alignmentX = LEFT_ALIGNMENT
 
-        windowBackgroundColorButton = JButton(localize("Change"))
+        val windowBackgroundColorPanel = JPanel(BorderLayout())
+        windowBackgroundPanel.border = BorderFactory.createEmptyBorder(6, 12, 6, 6)
+
+        val windowBackgroundColorRightPanel = JPanel()
+        windowBackgroundColorRightPanel.layout = BoxLayout(windowBackgroundColorRightPanel, BoxLayout.X_AXIS)
+
+        val windowBackgroundColorButton = JButton(localize("Change"))
         windowBackgroundColorButton.addActionListener {
             val color = JColorChooser.showDialog(
                 this,
@@ -635,156 +591,140 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             if (color != null) {
                 windowBackgroundColor = getHex(color)
-                isEnvironmentReloadRequired = true
+                refreshTheme()
             }
         }
 
-        windowBackgroundColorRightPanel = JPanel()
-        windowBackgroundColorRightPanel.layout = BoxLayout(windowBackgroundColorRightPanel, BoxLayout.X_AXIS)
-        windowBackgroundColorRightPanel.add(object : JPanel() {
+        val windowBackgroundColorPreview = object : JPanel() {
+            init {
+                border = SoftBevelBorder(BevelBorder.LOWERED)
+            }
+
             override fun getPreferredSize() = Dimension(
                 windowBackgroundColorButton.preferredSize.height,
                 windowBackgroundColorButton.preferredSize.height
             )
 
-            override fun getBackground() = Color.decode(this@SettingsWindow.windowBackgroundColor)
+            override fun getBackground() = Color.decode(windowBackgroundColor)
+        }
 
-            override fun getBorder() = SoftBevelBorder(BevelBorder.LOWERED)
-        })
+        windowBackgroundColorRightPanel.add(windowBackgroundColorPreview)
         windowBackgroundColorRightPanel.add(Box.createHorizontalStrut(3))
         windowBackgroundColorRightPanel.add(windowBackgroundColorButton)
 
-        windowBackgroundColorPanel = JPanel(BorderLayout())
-        windowBackgroundColorPanel.alignmentX = LEFT_ALIGNMENT
         windowBackgroundColorPanel.add(JLabel(localize("Color")), BorderLayout.WEST)
         windowBackgroundColorPanel.add(windowBackgroundColorRightPanel, BorderLayout.EAST)
 
-        val modeMap = mapOf(0 to "Center", 1 to "Fit", 2 to "Stretch", 3 to "Fill")
-        val modeIndexMap = modeMap.entries.associate { it.value to it.key }
+        val windowBackgroundImagePanel = JPanel(BorderLayout())
 
-        backgroundModeComboBox = JComboBox<String>()
-        backgroundModeComboBox.addItem(localize("BackgroundModeCenter"))
-        backgroundModeComboBox.addItem(localize("BackgroundModeFit"))
-        backgroundModeComboBox.addItem(localize("BackgroundModeStretch"))
-        backgroundModeComboBox.addItem(localize("BackgroundModeFill"))
-        backgroundModeComboBox.selectedItem = modeIndexMap[windowBackgroundMode]
-        backgroundModeComboBox.addItemListener {
-            val newBackgroundMode = modeMap[backgroundModeComboBox.selectedIndex]
+        val windowBackgroundImageRightPanel = JPanel(GridBagLayout())
+        windowBackgroundImageRightPanel.alignmentX = RIGHT_ALIGNMENT
+        val constraints = GridBagConstraints()
 
-            if (windowBackgroundMode != newBackgroundMode) {
-                windowBackgroundMode = newBackgroundMode ?: "Center"
-                isEnvironmentReloadRequired = true
-            }
-        }
+        val windowBackgroundImagePreviewPanel = JPanel(BorderLayout())
+        windowBackgroundImagePreviewPanel.preferredSize = Dimension(96, 96)
 
-        removeBackgroundImageButton = JButton(localize("Remove"))
-        removeBackgroundImageButton.addActionListener {
-            if (windowBackgroundMode != "") {
-                windowBackgroundImage = ""
-                backgroundImageTextField.text = ""
-                isEnvironmentReloadRequired = true
-            }
-        }
+        val windowBackgroundImagePreview = JLabel()
+        windowBackgroundImagePreview.border = SoftBevelBorder(BevelBorder.LOWERED)
 
-        changeBackgroundImageButton = JButton(localize("Change"))
-        changeBackgroundImageButton.addActionListener {
+        refreshBackgroundImagePreview(windowBackgroundImagePreview)
+
+        windowBackgroundImagePreviewPanel.add(windowBackgroundImagePreview, BorderLayout.CENTER)
+
+        val changeWindowBackgroundImageButton = JButton(localize("Change"))
+        changeWindowBackgroundImageButton.addActionListener {
             val dialog = JFileChooser()
             dialog.dialogTitle = localize("ChooseBackgroundImage")
 
             if (dialog.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 windowBackgroundImage = dialog.selectedFile.canonicalPath
-                backgroundImageTextField.text = dialog.selectedFile.canonicalPath
-                isEnvironmentReloadRequired = true
+                refreshBackgroundImagePreview(windowBackgroundImagePreview)
             }
         }
 
-        backgroundImageRightPanel = JPanel()
-        backgroundImageRightPanel.layout = BoxLayout(backgroundImageRightPanel, BoxLayout.X_AXIS)
-        backgroundImageRightPanel.add(backgroundModeComboBox)
-        backgroundImageRightPanel.add(Box.createHorizontalStrut(3))
-        backgroundImageRightPanel.add(removeBackgroundImageButton)
-        backgroundImageRightPanel.add(Box.createHorizontalStrut(3))
-        backgroundImageRightPanel.add(changeBackgroundImageButton)
+        val windowBackgroundModes = listOf(
+            Pair(0, "Center"),
+            Pair(1, "Fit"),
+            Pair(2, "Stretch"),
+            Pair(3, "Fill")
+        )
 
-        backgroundImagePanel = JPanel(BorderLayout())
-        backgroundImagePanel.alignmentX = LEFT_ALIGNMENT
-        backgroundImagePanel.add(JLabel(localize("Image")), BorderLayout.WEST)
-        backgroundImagePanel.add(backgroundImageRightPanel, BorderLayout.EAST)
+        val windowBackgroundModeComboBox = JComboBox<String>()
+        windowBackgroundModeComboBox.addItem(localize("BackgroundModeCenter"))
+        windowBackgroundModeComboBox.addItem(localize("BackgroundModeFit"))
+        windowBackgroundModeComboBox.addItem(localize("BackgroundModeStretch"))
+        windowBackgroundModeComboBox.addItem(localize("BackgroundModeFill"))
+        windowBackgroundModeComboBox.selectedIndex = windowBackgroundModes.find { it.second == windowBackgroundMode }?.first ?: 0
+        windowBackgroundModeComboBox.addItemListener {
+            windowBackgroundMode = windowBackgroundModes.find { it.first == windowBackgroundModeComboBox.selectedIndex }?.second ?: "Center"
+            refreshBackgroundImagePreview(windowBackgroundImagePreview)
+        }
 
-        backgroundImageTextField = JTextField(windowBackgroundImage.takeUnless { it.isEmpty() } ?: "")
-        backgroundImageTextField.isEnabled = false
+        val removeWindowBackgroundImageButton = JButton(localize("Remove"))
+        removeWindowBackgroundImageButton.addActionListener {
+            windowBackgroundImage = ""
+            refreshBackgroundImagePreview(windowBackgroundImagePreview)
+        }
 
-        backgroundImagePathPanel = JPanel()
-        backgroundImagePathPanel.layout = BoxLayout(backgroundImagePathPanel, BoxLayout.X_AXIS)
-        backgroundImagePathPanel.add(backgroundImageTextField)
+        constraints.gridx = 0
+        constraints.gridy = 0
+        constraints.gridheight = 3
+        constraints.fill = GridBagConstraints.NONE
+        constraints.insets = Insets(6, 3, 0, 0)
+        windowBackgroundImageRightPanel.add(windowBackgroundImagePreviewPanel, constraints)
 
-        backgroundImagePathContainerPanel = JPanel(BorderLayout())
-        backgroundImagePathContainerPanel.alignmentX = LEFT_ALIGNMENT
-        backgroundImagePathContainerPanel.add(backgroundImagePathPanel, BorderLayout.CENTER)
+        constraints.gridx = 1
+        constraints.gridheight = 1
+        constraints.weighty = 1.0
+        constraints.fill = GridBagConstraints.HORIZONTAL
+        windowBackgroundImageRightPanel.add(changeWindowBackgroundImageButton, constraints)
 
-        windowBackgroundPanel = JPanel()
-        windowBackgroundPanel.layout = BoxLayout(windowBackgroundPanel, BoxLayout.Y_AXIS)
+        constraints.gridy = 1
+        windowBackgroundImageRightPanel.add(windowBackgroundModeComboBox, constraints)
+
+        constraints.gridy = 2
+        windowBackgroundImageRightPanel.add(removeWindowBackgroundImageButton, constraints)
+
+        windowBackgroundColorButton.preferredSize = removeWindowBackgroundImageButton.preferredSize
+
+        val imageLabel = JLabel(localize("Image"))
+        imageLabel.verticalAlignment = SwingConstants.TOP
+
+        windowBackgroundImagePanel.add(imageLabel, BorderLayout.WEST)
+        windowBackgroundImagePanel.add(windowBackgroundImageRightPanel, BorderLayout.EAST)
+
         windowBackgroundPanel.add(windowBackgroundColorPanel)
-        windowBackgroundPanel.add(Box.createVerticalStrut(3))
-        windowBackgroundPanel.add(backgroundImagePanel)
-        windowBackgroundPanel.add(Box.createVerticalStrut(3))
-        windowBackgroundPanel.add(backgroundImagePathContainerPanel)
+        windowBackgroundPanel.add(windowBackgroundImagePanel)
 
-        backgroundContainerPanel = JPanel(BorderLayout())
-        backgroundContainerPanel.border = BorderFactory.createTitledBorder(localize("Background"))
-        backgroundContainerPanel.alignmentX = LEFT_ALIGNMENT
-        backgroundContainerPanel.add(windowBackgroundPanel, BorderLayout.NORTH)
+        windowModeSettingsPanel.add(windowDimensionsPanel)
+        windowModeSettingsPanel.add(JLabel(localize("Background")))
+        windowModeSettingsPanel.add(windowBackgroundPanel)
 
-        windowModeSettingsPanel = JPanel()
-        windowModeSettingsPanel.layout = BoxLayout(windowModeSettingsPanel, BoxLayout.Y_AXIS)
-        windowModeSettingsPanel.add(dimensionsPanel)
-        windowModeSettingsPanel.add(Box.createVerticalStrut(3))
-        windowModeSettingsPanel.add(backgroundContainerPanel)
+        windowModePanel.add(windowModeEnabledCheckBox)
+        windowModePanel.add(windowModeSettingsPanel)
 
-        windowModeSettingsContainerPanel = JPanel(BorderLayout())
-        windowModeSettingsContainerPanel.alignmentX = LEFT_ALIGNMENT
-        windowModeSettingsContainerPanel.add(windowModeSettingsPanel, BorderLayout.NORTH)
+        windowModeTab.add(windowModePanel, BorderLayout.NORTH)
 
-        windowModeCheckBox = JCheckBox(localize("WindowedModeEnabled"))
-        windowModeCheckBox.isSelected = environment == "virtual"
-        windowModeCheckBox.addActionListener {
-            val newEnvironment = if (windowModeCheckBox.isSelected) "virtual" else "linux"
-            if (environment != newEnvironment) {
-                environment = newEnvironment
-                isEnvironmentReloadRequired = true
-            }
+        val aboutTab = JPanel(GridBagLayout())
+        aboutTab.layout = BoxLayout(aboutTab, BoxLayout.Y_AXIS)
 
-            windowModeSettingsContainerPanel.isVisible = windowModeCheckBox.isSelected
-        }
+        val aboutIcon = JLabel()
+        aboutIcon.icon = ImageIcon(icon.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
+        aboutIcon.alignmentX = CENTER_ALIGNMENT
 
-        windowModeSettingsContainerPanel.isVisible = windowModeCheckBox.isSelected
+        val titleLabel = JLabel("ShimeLinux")
+        titleLabel.font = titleLabel.font.deriveFont(Font.BOLD, titleLabel.font.size + 10.0f)
+        titleLabel.alignmentX = CENTER_ALIGNMENT
 
-        windowModeTab = JPanel()
-        windowModeTab.layout = BoxLayout(windowModeTab, BoxLayout.Y_AXIS)
-        windowModeTab.add(windowModeCheckBox)
-        windowModeTab.add(windowModeSettingsContainerPanel)
-
-        aboutImageLabel = JLabel()
-        aboutImageLabel.icon = ImageIcon(icon.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
-        aboutImageLabel.alignmentX = CENTER_ALIGNMENT
-
-        shimelinuxLabel = JLabel("ShimeLinux")
-        shimelinuxLabel.font = shimelinuxLabel.font.deriveFont(Font.BOLD, shimelinuxLabel.font.size + 10.0f)
-        shimelinuxLabel.alignmentX = CENTER_ALIGNMENT
-
-        versionLabel = JLabel(VERSION)
+        val versionLabel = JLabel("v1.1.3")
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
-        infoPanel = JPanel()
-        infoPanel.layout = BoxLayout(infoPanel, BoxLayout.Y_AXIS)
-        infoPanel.add(aboutImageLabel)
-        infoPanel.add(shimelinuxLabel)
-        infoPanel.add(versionLabel)
+        aboutTab.add(Box.createVerticalGlue())
+        aboutTab.add(aboutIcon)
+        aboutTab.add(titleLabel)
+        aboutTab.add(versionLabel)
+        aboutTab.add(Box.createVerticalGlue())
 
-        aboutTab = JPanel(GridBagLayout())
-        aboutTab.add(infoPanel)
-
-        tabs = JTabbedPane()
         tabs.addTab(localize("General"), generalTab)
         if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") {
             tabs.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
@@ -793,80 +733,117 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         tabs.addTab(localize("WindowMode"), windowModeTab)
         tabs.addTab(localize("About"), aboutTab)
 
-        doneButton = JButton(localize("Done"))
+        val buttonsPanel = JPanel(FlowLayout())
+
+        val doneButton = JButton(localize("Done"))
         doneButton.addActionListener {
-            if (isRestartRequired) {
-                val response = JOptionPane.showConfirmDialog(
-                    this,
-                    localize("RestartRequiredMessage"),
-                    localize("RestartRequired"),
-                    JOptionPane.YES_NO_OPTION
-                )
-
-                isRestartRequired = response == JOptionPane.YES_OPTION
-            }
-
-            Main.properties.setProperty("AlwaysShowShimejiChooser", alwaysShowShimejiChooser.toString())
-            Main.properties.setProperty("AlwaysShowInformationScreen", alwaysShowInformationScreen.toString())
-            Main.properties.setProperty("Scaling", scaling.toString())
-            Main.properties.setProperty("Opacity", opacity.toString())
-            Main.properties.setProperty("Filter", filter)
-            Main.properties.setProperty("MenuScaling", menuScaling.toString())
-            Main.properties.setProperty("Theme", theme)
-            Main.properties.setProperty("Environment", environment)
-            Main.properties.setProperty("WindowSize", windowSize)
-            Main.properties.setProperty("Background", windowBackgroundColor)
-            Main.properties.setProperty("BackgroundImage", windowBackgroundImage)
-            Main.properties.setProperty("BackgroundMode", windowBackgroundMode)
-
-            val whitelist = whitelistModel.elements().toList().toString()
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", "/")
-
-            val blacklist = blacklistModel.elements().toList().toString()
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", "/")
-
-            Main.properties.setProperty("InteractiveWindows", whitelist)
-            Main.properties.setProperty("InteractiveWindowsBlacklist", blacklist)
-
-            getPath("conf", "settings.properties").outputStream().use {
-                Main.properties.store(it, "Configuration Options")
-            }
-
+            applyChanges()
             dispose()
         }
 
-        cancelButton = JButton(localize("Cancel"))
+        val cancelButton = JButton(localize("Cancel"))
         cancelButton.addActionListener {
-            // Reset theme
-            darkTheme.setProperty("@background", initialDarkBackgroundColor)
-            darkTheme.setProperty("@foreground", initialDarkTextColor)
-            darkTheme.setProperty("@accentColor", initialDarkAccentColor)
-            lightTheme.setProperty("@background", initialLightBackgroundColor)
-            lightTheme.setProperty("@foreground", initialLightTextColor)
-            lightTheme.setProperty("@accentColor", initialLightAccentColor)
-            theme = initialTheme
-            refreshTheme()
-
-            isEnvironmentReloadRequired = false
-            isRestartRequired = false
-            isImageReloadRequired = false
-            isInteractiveWindowReloadRequired = false
-
+            cancelChanges()
             dispose()
         }
 
-        footerPanel = JPanel(FlowLayout())
-        footerPanel.add(doneButton)
-        footerPanel.add(cancelButton)
+        buttonsPanel.add(doneButton)
+        buttonsPanel.add(cancelButton)
 
         add(tabs, BorderLayout.CENTER)
-        add(footerPanel, BorderLayout.SOUTH)
+        add(buttonsPanel, BorderLayout.SOUTH)
         pack()
         setLocationRelativeTo(null)
+    }
+
+    private fun applyChanges() {
+        if (getProperty("AlwaysShowShimejiChooser", false) != alwaysShowShimejiChooser) {
+            Main.properties.setProperty("AlwaysShowShimejiChooser", alwaysShowShimejiChooser.toString())
+        }
+
+        if (getProperty("AlwaysShowInformationScreen", false) != alwaysShowInformationScreen) {
+            Main.properties.setProperty("AlwaysShowInformationScreen", alwaysShowInformationScreen.toString())
+        }
+
+        if (getProperty("Scaling", 1.0) != scaling) {
+            Main.properties.setProperty("Scaling", scaling.toString())
+            isImageReloadRequired = true
+        }
+
+        if (getProperty("Opacity", 1.0) != opacity) {
+            Main.properties.setProperty("Opacity", opacity.toString())
+            isImageReloadRequired = true
+        }
+
+        if (getProperty("Filter", "Nearest") != filter) {
+            Main.properties.setProperty("Filter", filter)
+            isImageReloadRequired = true
+        }
+
+        val whitelist = whitelistModel.elements().toList().toString()
+            .replace("[", "")
+            .replace("]", "")
+            .replace(", ", "/")
+
+        val blacklist = blacklistModel.elements().toList().toString()
+            .replace("[", "")
+            .replace("]", "")
+            .replace(", ", "/")
+
+        if (getProperty("InteractiveWindows", "") != whitelist) {
+            Main.properties.setProperty("InteractiveWindows", whitelist)
+            isInteractiveWindowReloadRequired = true
+        }
+
+        if (getProperty("InteractiveWindowsBlacklist", "") != blacklist) {
+            Main.properties.setProperty("InteractiveWindowsBlacklist", blacklist)
+            isInteractiveWindowReloadRequired = true
+        }
+
+        if (getProperty("MenuScaling", 1) != menuScaling) {
+            Main.properties.setProperty("MenuScaling", menuScaling.toString())
+            isRestartRequired = true
+        }
+
+        if (getProperty("Theme", "FlatDark") != theme) {
+            Main.properties.setProperty("Theme", theme)
+        }
+
+        if (getProperty("Environment", "linux") != environment) {
+            Main.properties.setProperty("Environment", environment)
+            isEnvironmentReloadRequired = true
+        }
+
+        if (getProperty("WindowSize", "600x500") != windowSize) {
+            Main.properties.setProperty("WindowSize", windowSize)
+            isEnvironmentReloadRequired = true
+        }
+
+        if (getProperty("Background", "#00FF00") != windowBackgroundColor) {
+            Main.properties.setProperty("Background", windowBackgroundColor)
+            isEnvironmentReloadRequired = true
+        }
+
+        if (getProperty("BackgroundImage", "") != windowBackgroundImage) {
+            Main.properties.setProperty("BackgroundImage", windowBackgroundImage)
+            isEnvironmentReloadRequired = true
+        }
+
+        if (getProperty("BackgroundMode", "Center") != windowBackgroundMode) {
+            Main.properties.setProperty("BackgroundMode", windowBackgroundMode)
+            isEnvironmentReloadRequired = true
+        }
+
+        getPath("conf", "settings.properties").outputStream().use {
+            Main.properties.store(it, "Configuration Options")
+        }
+    }
+
+    private fun cancelChanges() {
+        theme = initialTheme
+        darkTheme.putAll(initialDarkTheme)
+        lightTheme.putAll(initialLightTheme)
+        refreshTheme()
     }
 
     private fun refreshTheme() {
@@ -896,9 +873,30 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         pack()
     }
 
-    companion object {
-        private const val VERSION = "v1.1.3"
+    private fun refreshBackgroundImagePreview(preview: JLabel) {
+        var image = ImageIcon(windowBackgroundImage).image
+        val size = Dimension(96, 96)
 
+        if (windowBackgroundMode == "Stretch") {
+            image = image.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH)
+        } else if (windowBackgroundMode != "Center") {
+            val factor = when (windowBackgroundMode) {
+                "Fit" -> (size.width / image.getWidth(null).toDouble()).coerceAtMost(size.height / image.getHeight(null).toDouble())
+                else -> (size.width / image.getWidth(null).toDouble()).coerceAtLeast(size.height / image.getHeight(null).toDouble())
+            }
+
+            image = image.getScaledInstance(
+                (factor * image.getWidth(null)).toInt(),
+                (factor * image.getHeight(null)).toInt(),
+                Image.SCALE_SMOOTH
+            )
+        }
+
+        preview.icon = ImageIcon(image)
+        preview.preferredSize = Dimension(image.getWidth(null), image.getHeight(null))
+    }
+
+    companion object {
         private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
         private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
         private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"

@@ -409,11 +409,20 @@ object Main {
                 settings.isVisible = true
 
                 if (settings.isRestartRequired) {
-                    val jarPath = this::class.java.protectionDomain.codeSource.location.path
-                    val restartProcess = ProcessBuilder("java", "-jar", jarPath)
-                    restartProcess.directory(File(System.getProperty("user.dir")))
-                    restartProcess.start()
-                    exit()
+                    val response = JOptionPane.showConfirmDialog(
+                        null,
+                        localize("RestartRequiredMessage"),
+                        localize("RestartRequired"),
+                        JOptionPane.YES_NO_OPTION
+                    )
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        val jarPath = this::class.java.protectionDomain.codeSource.location.path
+                        val restartProcess = ProcessBuilder("java", "-jar", jarPath)
+                        restartProcess.directory(File(System.getProperty("user.dir")))
+                        restartProcess.start()
+                        exit()
+                    }
                 }
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()
@@ -882,8 +891,6 @@ fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".conf
 
 fun localize(key: String): String = Main.languageBundle.getString(key)
 
-fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
-
 inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     Main.properties.getProperty(key, defaultValue.toString()).let { value ->
         when (T::class) {
@@ -893,6 +900,8 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
             else -> value
         } as? T ?: defaultValue
     }
+
+fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
 
 fun showError(message: String) {
     JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)

@@ -58,13 +58,13 @@ class VirtualContentPanel(
                         resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
                     } else if (mode != Mode.CENTER) {
                         val factor = when (mode) {
-                            Mode.FIT -> (width / image.getWidth(null)).coerceAtMost(height / image.getHeight(null))
-                            else -> (width / image.getWidth(null)).coerceAtLeast(height / image.getHeight(null))
+                            Mode.FIT -> (width / image.getWidth(null).toDouble()).coerceAtMost(height / image.getHeight(null).toDouble())
+                            else -> (width / image.getWidth(null).toDouble()).coerceAtLeast(height / image.getHeight(null).toDouble())
                         }
 
                         resizedImage = image.getScaledInstance(
-                            factor * image.getWidth(null),
-                            factor * image.getHeight(null),
+                            (factor * image.getWidth(null)).toInt(),
+                            (factor * image.getHeight(null)).toInt(),
                             Image.SCALE_SMOOTH
                         )
                     }
