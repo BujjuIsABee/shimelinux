@@ -32,17 +32,30 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 class DebugWindow(imageSet: String) : JFrame() {
+    private val panel: JPanel
+    private val behaviorLabel: JLabel
     private val behaviorValue: JLabel
+    private val shimejiXLabel: JLabel
     private val shimejiXValue: JLabel
+    private val shimejiYLabel: JLabel
     private val shimejiYValue: JLabel
+    private val activeIELabel: JLabel
     private val activeIEValue: JLabel
+    private val windowXLabel: JLabel
     private val windowXValue: JLabel
+    private val windowYLabel: JLabel
     private val windowYValue: JLabel
+    private val windowWidthLabel: JLabel
     private val windowWidthValue: JLabel
+    private val windowHeightLabel: JLabel
     private val windowHeightValue: JLabel
+    private val environmentXLabel: JLabel
     private val environmentXValue: JLabel
+    private val environmentYLabel: JLabel
     private val environmentYValue: JLabel
+    private val environmentWidthLabel: JLabel
     private val environmentWidthValue: JLabel
+    private val environmentHeightLabel: JLabel
     private val environmentHeightValue: JLabel
 
     init {
@@ -52,65 +65,65 @@ class DebugWindow(imageSet: String) : JFrame() {
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
-        val panel = JPanel(GridLayout(12, 2, 42, 0))
+        panel = JPanel(GridLayout(12, 2, 42, 0))
         panel.border = BorderFactory.createEmptyBorder(0, 0, 0, 42)
 
-        val behaviorLabel = JLabel(localize("Behavior"))
+        behaviorLabel = JLabel(localize("Behavior"))
         behaviorLabel.font = behaviorLabel.font.deriveFont(Font.BOLD)
         behaviorValue = JLabel("N/A")
         behaviorValue.alignmentX = LEFT_ALIGNMENT
 
-        val shimejiXLabel = JLabel(localize("ShimejiX"))
+        shimejiXLabel = JLabel(localize("ShimejiX"))
         shimejiXLabel.font = shimejiXLabel.font.deriveFont(Font.BOLD)
         shimejiXValue = JLabel("N/A")
         shimejiXValue.alignmentX = LEFT_ALIGNMENT
 
-        val shimejiYLabel = JLabel(localize("ShimejiY"))
+        shimejiYLabel = JLabel(localize("ShimejiY"))
         shimejiYLabel.font = shimejiYLabel.font.deriveFont(Font.BOLD)
         shimejiYValue = JLabel("N/A")
         shimejiYValue.alignmentX = LEFT_ALIGNMENT
 
-        val activeIELabel = JLabel(localize("WindowTitle"))
+        activeIELabel = JLabel(localize("WindowTitle"))
         activeIELabel.font = activeIELabel.font.deriveFont(Font.BOLD)
         activeIEValue = JLabel("N/A")
         activeIEValue.alignmentX = LEFT_ALIGNMENT
 
-        val windowXLabel = JLabel(localize("WindowX"))
+        windowXLabel = JLabel(localize("WindowX"))
         windowXLabel.font = windowXLabel.font.deriveFont(Font.BOLD)
         windowXValue = JLabel("N/A")
         windowXValue.alignmentX = LEFT_ALIGNMENT
 
-        val windowYLabel = JLabel(localize("WindowY"))
+        windowYLabel = JLabel(localize("WindowY"))
         windowYLabel.font = windowYLabel.font.deriveFont(Font.BOLD)
         windowYValue = JLabel("N/A")
         windowYValue.alignmentX = LEFT_ALIGNMENT
 
-        val windowWidthLabel = JLabel(localize("WindowWidth"))
+        windowWidthLabel = JLabel(localize("WindowWidth"))
         windowWidthLabel.font = windowWidthLabel.font.deriveFont(Font.BOLD)
         windowWidthValue = JLabel("N/A")
         windowWidthValue.alignmentX = LEFT_ALIGNMENT
 
-        val windowHeightLabel = JLabel(localize("WindowHeight"))
+        windowHeightLabel = JLabel(localize("WindowHeight"))
         windowHeightLabel.font = windowHeightLabel.font.deriveFont(Font.BOLD)
         windowHeightValue = JLabel("N/A")
         windowHeightValue.alignmentX = LEFT_ALIGNMENT
 
-        val environmentXLabel = JLabel(localize("EnvironmentX"))
+        environmentXLabel = JLabel(localize("EnvironmentX"))
         environmentXLabel.font = environmentXLabel.font.deriveFont(Font.BOLD)
         environmentXValue = JLabel("N/A")
         environmentXValue.alignmentX = LEFT_ALIGNMENT
 
-        val environmentYLabel = JLabel(localize("EnvironmentY"))
+        environmentYLabel = JLabel(localize("EnvironmentY"))
         environmentYLabel.font = environmentYLabel.font.deriveFont(Font.BOLD)
         environmentYValue = JLabel("N/A")
         environmentYValue.alignmentX = LEFT_ALIGNMENT
 
-        val environmentWidthLabel = JLabel(localize("EnvironmentWidth"))
+        environmentWidthLabel = JLabel(localize("EnvironmentWidth"))
         environmentWidthLabel.font = environmentWidthLabel.font.deriveFont(Font.BOLD)
         environmentWidthValue = JLabel("N/A")
         environmentWidthValue.alignmentX = LEFT_ALIGNMENT
 
-        val environmentHeightLabel = JLabel(localize("EnvironmentHeight"))
+        environmentHeightLabel = JLabel(localize("EnvironmentHeight"))
         environmentHeightLabel.font = environmentHeightLabel.font.deriveFont(Font.BOLD)
         environmentHeightValue = JLabel("N/A")
         environmentHeightValue.alignmentX = LEFT_ALIGNMENT

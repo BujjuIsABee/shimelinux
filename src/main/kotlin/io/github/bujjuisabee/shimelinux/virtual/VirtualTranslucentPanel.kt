@@ -51,7 +51,9 @@ class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     override fun contains(x: Int, y: Int) = super.contains(x, y) && image?.let { (it.rgb[y * width + x] shr 24) and 0xFF > 0 } == true
 
     override fun dispose() {
-        parent?.remove(this)
-        parent?.repaint()
+        parent?.let {
+            it.remove(this)
+            it.repaint()
+        }
     }
 }

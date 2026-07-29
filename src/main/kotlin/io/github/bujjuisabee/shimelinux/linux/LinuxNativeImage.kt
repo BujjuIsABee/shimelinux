@@ -31,7 +31,7 @@ class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage {
     val height = managedImage.height
     val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 
-    override fun hashCode() = Objects.hash(managedImage.width, managedImage.height)
+    override fun hashCode() = Objects.hash(rgb)
 
     override fun equals(other: Any?) = other is LinuxNativeImage && rgb.contentEquals(other.rgb)
 }

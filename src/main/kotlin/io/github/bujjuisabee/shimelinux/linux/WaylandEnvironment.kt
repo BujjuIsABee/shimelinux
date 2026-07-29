@@ -34,7 +34,7 @@ class WaylandEnvironment : Environment() {
     override val activeIE = Area()
     override val activeIETitle = ""
 
-    private val lib = requireNotNull(WaylandLib.instance)
+    private val lib = requireNotNull(WaylandLib.instance) { "Wayland library is required on ${System.getenv("XDG_CURRENT_DESKTOP")}" }
 
     override fun tick() {
         val (x, y, width, height) = lib.getScreenRect()

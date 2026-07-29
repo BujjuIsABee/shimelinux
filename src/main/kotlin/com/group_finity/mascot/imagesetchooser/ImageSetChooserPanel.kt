@@ -43,26 +43,33 @@ class ImageSetChooserPanel(
     imageLocation: String,
     captionText: String
 ) : JPanel() {
-    private val checkbox: JCheckBox = JCheckBox()
+    private val imageLabel: JLabel
+    private val textPanel: JPanel
+    private val captionLabel: JLabel
+    private val checkbox: JCheckBox
 
     init {
         minimumSize = Dimension(248, 80)
         preferredSize = Dimension(248, 80)
         layout = BoxLayout(this, BoxLayout.X_AXIS)
-        border = BorderFactory.createLineBorder(UIManager.getColor("Table.gridColor"))
 
-        val imageLabel = JLabel()
+        checkbox = JCheckBox()
+        checkbox.isOpaque = false
+
+        imageLabel = JLabel()
         imageLabel.icon = runCatching {
             ImageIO.read(File(imageLocation))
         }.getOrNull()?.let {
             ImageIcon(it.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
         }
 
-        val captionLabel = JLabel(captionText)
+        textPanel = JPanel()
+        textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
+        textPanel.isOpaque = false
+
+        captionLabel = JLabel(captionText)
         captionLabel.font = captionLabel.font.deriveFont(Font.BOLD)
 
-        val textPanel = JPanel()
-        textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
         textPanel.add(captionLabel)
         textPanel.add(JLabel(actions))
         textPanel.add(JLabel(behaviors))
@@ -75,5 +82,13 @@ class ImageSetChooserPanel(
 
     fun setCheckbox(value: Boolean) {
         checkbox.isSelected = value
+
+        if (value) {
+            border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"), 1)
+            isOpaque = true
+        } else {
+            border = BorderFactory.createEmptyBorder(1, 1, 1, 1)
+            isOpaque = false
+        }
     }
 }

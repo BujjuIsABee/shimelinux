@@ -108,6 +108,6 @@ class VirtualEnvironment : Environment() {
 
     fun addShimeji(shimeji: JPanel) {
         shimeji.isOpaque = false
-        display.contentPane.add(shimeji)
+        display.add(shimeji)
     }
 }

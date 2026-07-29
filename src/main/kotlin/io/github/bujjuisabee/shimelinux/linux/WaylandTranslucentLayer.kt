@@ -54,7 +54,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
     }
 
-    private val lib = requireNotNull(WaylandLib.instance)
+    private val lib = requireNotNull(WaylandLib.instance) { "Wayland library is required on ${System.getenv("XDG_CURRENT_DESKTOP")}" }
     private val senderIndex: Int = lib.createMascot(this)
     private var image: LinuxNativeImage? = null
     private var imageChanged = false

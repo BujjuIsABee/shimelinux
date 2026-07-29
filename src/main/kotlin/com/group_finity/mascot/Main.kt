@@ -56,6 +56,54 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
+fun main() {
+    try {
+        Main.run()
+    } catch (_: OutOfMemoryError) {
+        showError(
+            """
+            Out of memory. There are probably too many
+            Shimeji mascots for your computer to handle.
+            Select fewer image sets or move some to the
+            img/unused folder and try again.
+            """.trimIndent()
+        )
+        exitProcess(0)
+    }
+}
+
+fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
+
+fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
+
+fun localize(key: String): String = Main.languageBundle.getString(key)
+
+inline fun <reified T> getProperty(key: String, defaultValue: T): T =
+    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
+        when (T::class) {
+            Int::class -> value.toInt()
+            Double::class -> value.toDouble()
+            Boolean::class -> value.toBoolean()
+            else -> value
+        } as? T ?: defaultValue
+    }
+
+fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
+
+fun showError(message: String) {
+    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
+}
+
+fun showError(message: String, exception: Throwable) {
+    val message = message + if (exception is SAXParseException) {
+        "\nLine ${exception.lineNumber}: ${exception.message}"
+    } else {
+        "\n${exception.message}"
+    }
+
+    showError("$message\n${localize("SeeLogForDetails")}")
+}
+
 object Main {
     private val log = Logger.getLogger(this::class.java.name)
 
@@ -867,52 +915,4 @@ object Main {
         manager.stop()
         exitProcess(0)
     }
-}
-
-fun main() {
-    try {
-        Main.run()
-    } catch (_: OutOfMemoryError) {
-        showError(
-            """
-            Out of memory. There are probably too many
-            Shimeji mascots for your computer to handle.
-            Select fewer image sets or move some to the
-            img/unused folder and try again.
-            """.trimIndent()
-        )
-        exitProcess(0)
-    }
-}
-
-fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
-
-fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
-
-fun localize(key: String): String = Main.languageBundle.getString(key)
-
-inline fun <reified T> getProperty(key: String, defaultValue: T): T =
-    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
-        when (T::class) {
-            Int::class -> value.toInt()
-            Double::class -> value.toDouble()
-            Boolean::class -> value.toBoolean()
-            else -> value
-        } as? T ?: defaultValue
-    }
-
-fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
-
-fun showError(message: String) {
-    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
-}
-
-fun showError(message: String, exception: Throwable) {
-    val message = message + if (exception is SAXParseException) {
-        "\nLine ${exception.lineNumber}: ${exception.message}"
-    } else {
-        "\n${exception.message}"
-    }
-
-    showError("$message\n${localize("SeeLogForDetails")}")
 }

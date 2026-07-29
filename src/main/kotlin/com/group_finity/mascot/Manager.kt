@@ -27,7 +27,7 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import java.awt.Point
 import java.lang.ref.WeakReference
-import java.util.Timer
+import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.concurrent.timer
@@ -165,7 +165,7 @@ class Manager {
     fun remainOne() {
         synchronized(mascots) {
             val totalMascots = mascots.size
-            for (i in totalMascots - 1 downTo 0) {
+            for (i in totalMascots - 1 downTo 1) {
                 mascots[i].dispose()
             }
         }
