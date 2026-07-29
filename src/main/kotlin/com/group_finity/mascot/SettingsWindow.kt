@@ -22,6 +22,9 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatDarkLaf
+import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.FlatLightLaf
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.BorderLayout
 import java.awt.CardLayout
@@ -62,6 +65,7 @@ import javax.swing.JTextField
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
+import javax.swing.UnsupportedLookAndFeelException
 import javax.swing.border.BevelBorder
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
@@ -409,10 +413,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             val color = runCatching { Color.decode(flatThemeBackgroundColorTextField.text) }.getOrNull()
 
             if (color != null) {
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.setProperty("@background", getHex(color))
+                    darkTheme.setProperty("@background", hex)
                 } else {
-                    lightTheme.setProperty("@background", getHex(color))
+                    lightTheme.setProperty("@background", hex)
                 }
                 refreshTheme()
             }
@@ -453,10 +458,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.setProperty("@background", getHex(color))
+                    darkTheme.setProperty("@background", hex)
                 } else {
-                    lightTheme.setProperty("@background", getHex(color))
+                    lightTheme.setProperty("@background", hex)
                 }
                 refreshTheme()
             }
@@ -483,10 +489,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             val color = runCatching { Color.decode(flatThemeTextColorTextField.text) }.getOrNull()
 
             if (color != null) {
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.setProperty("@foreground", getHex(color))
+                    darkTheme.setProperty("@foreground", hex)
                 } else {
-                    lightTheme.setProperty("@foreground", getHex(color))
+                    lightTheme.setProperty("@foreground", hex)
                 }
                 refreshTheme()
             }
@@ -527,10 +534,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.setProperty("@foreground", getHex(color))
+                    darkTheme.setProperty("@foreground", hex)
                 } else {
-                    lightTheme.setProperty("@foreground", getHex(color))
+                    lightTheme.setProperty("@foreground", hex)
                 }
                 refreshTheme()
             }
@@ -557,10 +565,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             val color = runCatching { Color.decode(flatThemeAccentColorTextField.text) }.getOrNull()
 
             if (color != null) {
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.setProperty("@accentColor", getHex(color))
+                    darkTheme.setProperty("@accentColor", hex)
                 } else {
-                    lightTheme.setProperty("@accentColor", getHex(color))
+                    lightTheme.setProperty("@accentColor", hex)
                 }
                 refreshTheme()
             }
@@ -601,10 +610,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.setProperty("@accentColor", getHex(color))
+                    darkTheme.setProperty("@accentColor", hex)
                 } else {
-                    lightTheme.setProperty("@accentColor", getHex(color))
+                    lightTheme.setProperty("@accentColor", hex)
                 }
                 refreshTheme()
             }
@@ -726,7 +736,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             val color = runCatching { Color.decode(windowBackgroundColorTextField.text) }.getOrNull()
 
             if (color != null) {
-                windowBackgroundColor = getHex(color)
+                windowBackgroundColor = String.format("#%06X", color.rgb and 0xFFFFFF)
                 repaint()
             }
         }
@@ -755,8 +765,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
 
             if (color != null) {
-                windowBackgroundColor = getHex(color)
-                windowBackgroundColorTextField.text = getHex(color)
+                val hex = String.format("#%06X", color.rgb and 0xFFFFFF)
+                windowBackgroundColor = hex
+                windowBackgroundColorTextField.text = hex
                 repaint()
             }
         }
@@ -993,37 +1004,64 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun refreshTheme() {
-        getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
-            darkTheme.store(it, "Flat Dark Theme")
-        }
-        getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
-            lightTheme.store(it, "Flat Light Theme")
-        }
+        try {
+            if (theme != "Gtk") {
+                FlatLaf.setGlobalExtraDefaults(mapOf())
 
-        UIManager.setLookAndFeel(
-            when (theme) {
-                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                else -> "com.formdev.flatlaf.FlatDarkLaf"
+                if (themeComboBox.selectedIndex == 0) {
+                    flatThemeBackgroundColorTextField.text = darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
+                    flatThemeTextColorTextField.text = darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
+                    flatThemeAccentColorTextField.text = darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+                } else if (themeComboBox.selectedIndex == 1) {
+                    flatThemeBackgroundColorTextField.text = lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
+                    flatThemeTextColorTextField.text = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
+                    flatThemeAccentColorTextField.text = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+                }
+
+                getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
+                    darkTheme.store(it, "Flat Dark Theme")
+                }
+                getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
+                    lightTheme.store(it, "Flat Light Theme")
+                }
             }
-        )
 
-        if (themeComboBox.selectedIndex == 0) {
-            flatThemeBackgroundColorTextField.text = darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
-            flatThemeTextColorTextField.text = darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
-            flatThemeAccentColorTextField.text = darkTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
-        } else if (themeComboBox.selectedIndex == 1) {
-            flatThemeBackgroundColorTextField.text = lightTheme.getProperty("@background", DEFAULT_LIGHT_BACKGROUND_COLOR)
-            flatThemeTextColorTextField.text = lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
-            flatThemeAccentColorTextField.text = lightTheme.getProperty("@accentColor", DEFAULT_ACCENT_COLOR)
+            var isDark = theme == "FlatDark"
+
+            if (theme == "Gtk") {
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+
+                val backgroundColor = UIManager.getColor("Panel.background")
+                val textColor = UIManager.getColor("Label.foreground")
+                val accentColor = UIManager.getColor("textHighlight")
+
+                val hsb = Color.RGBtoHSB(backgroundColor.red, backgroundColor.green, backgroundColor.blue, null)
+                isDark = hsb[2] < 0.5
+
+                FlatLaf.setGlobalExtraDefaults(
+                    mapOf(
+                        "@background" to String.format("#%06X", backgroundColor.rgb and 0xFFFFFF),
+                        "@foreground" to String.format("#%06X", textColor.rgb and 0xFFFFFF),
+                        "@accentColor" to String.format("#%06X", accentColor.rgb and 0xFFFFFF)
+                    )
+                )
+            }
+
+            FlatLaf.setup(
+                if (isDark) {
+                    FlatDarkLaf()
+                } else {
+                    FlatLightLaf()
+                }
+            )
+
+            for (window in getWindows().filter { it !is TranslucentWindow }) {
+                SwingUtilities.updateComponentTreeUI(window)
+            }
+
+            pack()
+        } catch (_: UnsupportedLookAndFeelException) {
         }
-
-        for (window in getWindows().filter { it !is TranslucentWindow }) {
-            SwingUtilities.updateComponentTreeUI(window)
-        }
-
-        pack()
     }
 
     private fun refreshBackgroundImagePreview() {
@@ -1061,14 +1099,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         private fun getIndexFromTheme(theme: String) = when (theme) {
             "FlatDark" -> 0
             "FlatLight" -> 1
-            "GTK" -> 2
+            "Gtk" -> 2
             else -> 0
         }
 
         private fun getThemeFromIndex(index: Int) = when (index) {
             0 -> "FlatDark"
             1 -> "FlatLight"
-            2 -> "GTK"
+            2 -> "Gtk"
             else -> "FlatDark"
         }
 
@@ -1087,7 +1125,5 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             3 -> "Fill"
             else -> "Center"
         }
-
-        private fun getHex(color: Color) = String.format("#%06X", color.rgb and 0xFFFFFF)
     }
 }

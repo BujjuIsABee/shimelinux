@@ -22,7 +22,9 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.FlatLightLaf
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
@@ -34,6 +36,7 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
+import java.awt.Color
 import java.awt.Point
 import java.io.File
 import java.io.InputStream
@@ -72,24 +75,6 @@ fun main() {
     }
 }
 
-fun Any.loadResource(name: String): InputStream? = this::class.java.getResourceAsStream(name)
-
-fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
-
-fun localize(key: String): String = Main.languageBundle.getString(key)
-
-inline fun <reified T> getProperty(key: String, defaultValue: T): T =
-    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
-        when (T::class) {
-            Int::class -> value.toInt()
-            Double::class -> value.toDouble()
-            Boolean::class -> value.toBoolean()
-            else -> value
-        } as? T ?: defaultValue
-    }
-
-fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
-
 fun showError(message: String) {
     JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
 }
@@ -103,6 +88,24 @@ fun showError(message: String, exception: Throwable) {
 
     showError("$message\n${localize("SeeLogForDetails")}")
 }
+
+inline fun <reified T> getProperty(key: String, defaultValue: T): T =
+    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
+        when (T::class) {
+            Int::class -> value.toInt()
+            Double::class -> value.toDouble()
+            Boolean::class -> value.toBoolean()
+            else -> value
+        } as? T ?: defaultValue
+    }
+
+fun localize(key: String): String = Main.languageBundle.getString(key)
+
+fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
+
+fun loadResource(name: String): InputStream? = Main::class.java.getResourceAsStream(name)
+
+fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
 
 object Main {
     private val log = Logger.getLogger(this::class.java.name)
@@ -165,10 +168,9 @@ object Main {
 
         // Load properties
         properties = Properties().apply {
-            runCatching {
-                getPath("conf", "settings.properties").inputStream().use {
-                    load(it)
-                }
+            try {
+                getPath("conf", "settings.properties").inputStream().use { load(it) }
+            } catch (_: Exception) {
             }
         }
 
@@ -181,12 +183,34 @@ object Main {
         try {
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
-            UIManager.setLookAndFeel(
-                when (getProperty("Theme", "FlatDark")) {
-                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    "GTK" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                    else -> "com.formdev.flatlaf.FlatDarkLaf"
+            val theme = getProperty("Theme", "FlatDark")
+
+            var isDark = theme == "FlatDark"
+
+            if (theme == "Gtk") {
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+
+                val backgroundColor = UIManager.getColor("Panel.background")
+                val textColor = UIManager.getColor("Label.foreground")
+                val accentColor = UIManager.getColor("textHighlight")
+
+                val hsb = Color.RGBtoHSB(backgroundColor.red, backgroundColor.green, backgroundColor.blue, null)
+                isDark = hsb[2] < 0.5
+
+                FlatLaf.setGlobalExtraDefaults(
+                    mapOf(
+                        "@background" to String.format("#%06X", backgroundColor.rgb and 0xFFFFFF),
+                        "@foreground" to String.format("#%06X", textColor.rgb and 0xFFFFFF),
+                        "@accentColor" to String.format("#%06X", accentColor.rgb and 0xFFFFFF)
+                    )
+                )
+            }
+
+            FlatLaf.setup(
+                if (isDark) {
+                    FlatDarkLaf()
+                } else {
+                    FlatLightLaf()
                 }
             )
         } catch (_: Exception) {
