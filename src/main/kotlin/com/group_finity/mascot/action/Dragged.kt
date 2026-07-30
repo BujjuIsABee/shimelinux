@@ -80,7 +80,7 @@ class Dragged(
 
         val newX = cursor.x
 
-        footDx += ((newX - footX) * 0.1) * 0.8
+        footDx = (footDx + ((newX - footX) * 0.1)) * 0.8
         footX += footDx
 
         putVariable(schema.getString(VARIABLE_FOOTDX), footDx)
