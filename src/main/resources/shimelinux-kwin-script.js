@@ -31,10 +31,10 @@ function setActiveWindow(window) {
         busName, clientPath, interfaceName,
         "setActiveWindow",
         window.caption,
-        window.x,
-        window.y,
-        window.width,
-        window.height,
+        window.x | 0,
+        window.y | 0,
+        window.width | 0,
+        window.height | 0,
         () => {}
     );
 }
@@ -103,7 +103,6 @@ function onWindowActivated(window) {
         window.frameGeometryChanged.connect(setActiveWindow.bind(null, window));
         window.closed.connect(resetActiveWindow.bind(null));
         window.minimizedChanged.connect(resetActiveWindow.bind(null));
-        window.moveResizedChanged.connect(resetActiveWindow.bind(null));
     }
 }
 
