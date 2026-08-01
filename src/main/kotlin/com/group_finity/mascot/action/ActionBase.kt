@@ -42,7 +42,7 @@ abstract class ActionBase(
         get() = animations.firstOrNull { it.isEffective(variables) }
 
     private var startTime = 0
-    var time: Int
+    internal var time: Int
         get() = mascot.time - startTime
         set(value) {
             startTime = mascot.time - value
@@ -99,7 +99,6 @@ abstract class ActionBase(
 
     internal open fun refreshHotspots() {
         mascot.hotspots.clear()
-
         try {
             mascot.hotspots.addAll(animation?.hotspots.orEmpty())
         } catch (_: VariableException) {
@@ -117,7 +116,7 @@ abstract class ActionBase(
 
     internal inline fun <reified T> eval(name: String, defaultValue: T): T {
         synchronized(variables) {
-            return variables.rawMap[name]?.get(variables) as? T ?: defaultValue
+            return variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue
         }
     }
 

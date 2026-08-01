@@ -36,7 +36,6 @@ import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
-import java.util.logging.Level
 import java.util.logging.Logger
 
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
@@ -49,7 +48,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
     private val actionRefs = mutableListOf<IActionBuilder>()
 
     init {
-        log.log(Level.INFO, "Loading action: $this")
+        log.info { "Loading action: $this" }
 
         try {
             params.putAll(actionNode.attributes)
@@ -69,7 +68,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
             throw ConfigurationException("${localize("FailedLoadActionErrorMessage")} \"$name\" ${localize("ForShimeji")} \"$imageSet.\"", e)
         }
 
-        log.log(Level.INFO, "Finished loading action")
+        log.info { "Finished loading action" }
     }
 
     @Suppress("UNCHECKED_CAST")

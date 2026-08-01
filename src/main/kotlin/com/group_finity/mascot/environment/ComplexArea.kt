@@ -59,7 +59,7 @@ class ComplexArea {
     @Suppress("unused")
     fun getLeftBorder(location: Point) = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.rightBorder.isOn(location) } }
-        ?.leftBorder
+        ?.rightBorder
 
     @Suppress("unused")
     fun getRightBorder(location: Point) = areaMap.values.lastOrNull { it.rightBorder.isOn(location) }

@@ -22,7 +22,6 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.loadResource
 import java.io.File
 import kotlin.io.outputStream
 
@@ -43,7 +42,7 @@ class WaylandLib {
         var instance: WaylandLib? = null
 
         init {
-            loadResource("/lib/libshimelinux_wayland.so")?.use { input ->
+            this::class.java.getResourceAsStream("/lib/libshimelinux_wayland.so")?.use { input ->
                 val libFile = File.createTempFile("libshimelinux_wayland", ".so")
                 libFile.deleteOnExit()
                 libFile.outputStream().use { output ->

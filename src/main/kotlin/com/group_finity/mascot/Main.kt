@@ -39,7 +39,6 @@ import org.xml.sax.SAXParseException
 import java.awt.Color
 import java.awt.Point
 import java.io.File
-import java.io.InputStream
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -103,10 +102,6 @@ fun localize(key: String): String = Main.languageBundle.getString(key)
 
 fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
 
-fun loadResource(name: String): InputStream? = Main::class.java.getResourceAsStream(name)
-
-fun getConfiguration(imageSet: String) = checkNotNull(Main.getConfiguration(imageSet))
-
 object Main {
     private val log = Logger.getLogger(this::class.java.name)
 
@@ -122,7 +117,7 @@ object Main {
 
     init {
         try {
-            loadResource("/conf/logging.properties").use {
+            this::class.java.getResourceAsStream("/conf/logging.properties").use {
                 LogManager.getLogManager().readConfiguration(it)
             }
         } catch (e: Exception) {
@@ -155,7 +150,7 @@ object Main {
                 } else if (!destination.exists()) {
                     destination.createParentDirectories()
                     destination.outputStream().use { output ->
-                        loadResource(resource)?.use { input ->
+                        this::class.java.getResourceAsStream(resource)?.use { input ->
                             input.copyTo(output)
                         }
                     }
@@ -396,7 +391,7 @@ object Main {
 
         try {
             val icon = SystemTray.get()
-            loadResource("/img/icon.png").use { icon.setImage(it) }
+            this::class.java.getResourceAsStream("/img/icon.png").use { icon.setImage(it) }
             icon.status = "ShimeLinux"
 
             val callShimejiMenu = MenuItem(localize("CallShimeji")) {
@@ -712,7 +707,7 @@ object Main {
         mascot.isLookRight = Math.random() < 0.5
 
         try {
-            mascot.behavior = checkNotNull(getConfiguration(imageSet)).buildNextBehavior(null, mascot)
+            mascot.behavior = getConfiguration(imageSet).buildNextBehavior(null, mascot)
             manager.add(mascot)
         } catch (e: Exception) {
             when (e) {
@@ -932,7 +927,9 @@ object Main {
         }
     }
 
-    fun getConfiguration(imageSet: String) = configurations[imageSet]
+    fun hasConfiguration(imageSet: String) = configurations.containsKey(imageSet)
+
+    fun getConfiguration(imageSet: String) = checkNotNull(configurations[imageSet])
 
     fun exit() {
         manager.disposeAll()

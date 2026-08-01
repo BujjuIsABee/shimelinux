@@ -104,7 +104,7 @@ open class Fall(
             }
         }
 
-        animation?.next(mascot, time)
+        checkNotNull(animation).next(mascot, time)
     }
 
     companion object {

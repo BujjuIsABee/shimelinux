@@ -60,11 +60,11 @@ object Sounds {
 
         (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = sound.volume
 
-        clip.addLineListener {
-            if (it.type == LineEvent.Type.STOP) {
+        clip.addLineListener { event ->
+            if (event.type == LineEvent.Type.STOP) {
                 clip.stop()
                 clip.close()
-                sounds.remove(sound)
+                sounds.find { it.clip == clip }?.clip = null
             }
         }
 

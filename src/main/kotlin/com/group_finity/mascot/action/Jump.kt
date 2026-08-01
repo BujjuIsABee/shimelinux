@@ -50,11 +50,16 @@ open class Jump(
     }
 
     override fun tick() {
+        val targetX = targetX
+        val targetY = targetY
+
         mascot.isLookRight = mascot.anchor.x < targetX
 
         val distanceX = (targetX - mascot.anchor.x).toDouble()
         val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
+
+        val velocity = velocity
 
         if (distance != 0.0) {
             val velocityX = (velocity * distanceX / distance).toInt()
@@ -63,12 +68,9 @@ open class Jump(
             putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
             putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
 
-            mascot.anchor = Point(
-                mascot.anchor.x + velocityX,
-                mascot.anchor.y + velocityY
-            )
+            mascot.anchor = Point(mascot.anchor.x + velocityX, mascot.anchor.y + velocityY)
 
-            animation?.next(mascot, time)
+            checkNotNull(animation).next(mascot, time)
         }
 
         if (distance <= velocity) {

@@ -26,7 +26,6 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
-import java.util.logging.Level
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -43,7 +42,7 @@ class Turn(
     override fun hasNext(): Boolean {
         isTurning = isTurning || isLookRight != mascot.isLookRight
 
-        return super.hasNext() && animation?.let { time < it.duration } == true && isTurning
+        return super.hasNext() && time < checkNotNull(animation).duration && isTurning
     }
 
     override fun tick() {
@@ -52,11 +51,11 @@ class Turn(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            log.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
-        animation?.next(mascot, time)
+        checkNotNull(animation).next(mascot, time)
     }
 
     companion object {

@@ -22,16 +22,17 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.showError
 import java.awt.Point
+import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -43,7 +44,7 @@ class ComplexMove(
     params: VariableMap
 ) : BorderedAction(schema, animations, params) {
     private val delegate = Breed.Delegate(this)
-    private var target: Mascot? = null
+    private var target: WeakReference<Mascot>? = null
     private var isBreedEnabled = false
     private var isScanEnabled = false
     internal val hasTurningAnimation = animations.any { it.isTurn }
@@ -58,7 +59,7 @@ class ComplexMove(
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
     private val targetBehavior: String
-        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
+        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
     private val targetX: Int
@@ -87,22 +88,27 @@ class ComplexMove(
             // Cannot broadcast while scanning for an affordance
             mascot.affordances.clear()
 
-            target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
+            target = mascot.manager?.getMascotWithAffordance(affordance)
 
-            putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
-            putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
+            putVariable(schema.getString(VARIABLE_TARGETX), target?.get()?.anchor?.x)
+            putVariable(schema.getString(VARIABLE_TARGETY), target?.get()?.anchor?.y)
         }
     }
 
     override fun hasNext(): Boolean {
         if (isScanEnabled) {
-            if (mascot.manager == null) return super.hasNext()
+            if (mascot.manager == null) {
+                return super.hasNext()
+            }
 
-            return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) == true)
+            return super.hasNext() && (isTurning || target?.get()?.affordances?.contains(affordance) == true)
         } else {
-            val reachedX = targetX == Int.MIN_VALUE || mascot.anchor.x != targetX
-            val reachedY = targetY == Int.MIN_VALUE || mascot.anchor.y != targetY
-            return super.hasNext() && (isTurning || reachedX && reachedY)
+            val targetX = targetX
+            val targetY = targetY
+
+            val hasReached = (targetX == Int.MIN_VALUE || mascot.anchor.x != targetX) && (targetY == Int.MIN_VALUE || mascot.anchor.y != targetY)
+
+            return super.hasNext() && (isTurning || hasReached)
         }
     }
 
@@ -115,7 +121,7 @@ class ComplexMove(
         }
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            log.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
@@ -123,8 +129,7 @@ class ComplexMove(
         val targetY: Int
 
         if (isScanEnabled) {
-            val target = checkNotNull(target)
-
+            val target = checkNotNull(target?.get())
             targetX = target.anchor.x
             targetY = target.anchor.y
 
@@ -136,28 +141,32 @@ class ComplexMove(
         }
 
         if (mascot.anchor.x != targetX) {
+            // Activate turn animation when direction changes
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
             mascot.isLookRight = mascot.anchor.x < targetX
         }
 
         val down = mascot.anchor.y < targetY
 
-        if (isTurning && animation?.let { time >= it.duration } == true) {
+        val animation = checkNotNull(animation)
+
+        // Check if turning animation has finished
+        if (isTurning && time >= animation.duration) {
             isTurning = false
         }
 
-        animation?.next(mascot, time)
+        animation.next(mascot, time)
 
-        if ((targetX != DEFAULT_TARGETX || isScanEnabled) &&
-            mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX
-        ) {
-            mascot.anchor = Point(targetX, mascot.anchor.y)
+        if (targetX != DEFAULT_TARGETX || isScanEnabled) {
+            if (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX) {
+                mascot.anchor = Point(targetX, mascot.anchor.y)
+            }
         }
 
-        if ((targetY != DEFAULT_TARGETY || isScanEnabled) &&
-            down && mascot.anchor.y >= targetY || !down && mascot.anchor.y <= targetY
-        ) {
-            mascot.anchor = Point(mascot.anchor.x, targetY)
+        if (targetY != DEFAULT_TARGETY || isScanEnabled) {
+            if (down && mascot.anchor.y >= targetY || !down && mascot.anchor.y <= targetY) {
+                mascot.anchor = Point(mascot.anchor.x, targetY)
+            }
         }
 
         if (isBreedEnabled && delegate.isIntervalFrame && delegate.isEnabled) {
@@ -166,10 +175,9 @@ class ComplexMove(
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                val target = checkNotNull(target)
-
-                mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
-                target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
+                val target = checkNotNull(target?.get())
+                mascot.behavior = Main.getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
+                target.behavior = Main.getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
@@ -178,7 +186,7 @@ class ComplexMove(
                     is IllegalStateException,
                     is BehaviorInstantiationException,
                     is CantBeAliveException -> {
-                        log.log(Level.SEVERE, "Failed to set behavior", e)
+                        log.log(Level.SEVERE, e) { "Failed to set behavior" }
                         showError(localize("FailedSetBehaviorErrorMessage"), e)
                     }
 
@@ -197,8 +205,8 @@ class ComplexMove(
         const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOR = ""
 
-        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehavior"
-        private const val DEFAULT_TARGETBEHAVIOUR = ""
+        const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
+        private const val DEFAULT_TARGETBEHAVIOR = ""
 
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false

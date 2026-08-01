@@ -56,13 +56,13 @@ class AnimationBuilder(
     private val turn = animationNode.getAttribute(schema.getString("IsTurn")) ?: "false"
 
     init {
-        log.log(Level.INFO, "Loading animation")
+        log.info { "Loading animation" }
 
         for (frameNode in animationNode.selectChildren(schema.getString("Pose"))) {
             try {
                 poses.add(loadPose(frameNode))
             } catch (e: Exception) {
-                log.log(Level.SEVERE, "Failed to load pose: ${frameNode.attributes}", e)
+                log.log(Level.SEVERE, e) { "Failed to load pose: ${frameNode.attributes}" }
                 throw ConfigurationException(localize("FailedLoadPoseErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
@@ -71,12 +71,12 @@ class AnimationBuilder(
             try {
                 hotspots.add(loadHotspot(frameNode))
             } catch (e: Exception) {
-                log.log(Level.SEVERE, "Failed to load hotspot: ${frameNode.attributes}", e)
+                log.log(Level.SEVERE, e) { "Failed to load hotspot: ${frameNode.attributes}" }
                 throw ConfigurationException(localize("FailedLoadHotspotErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
-        log.log(Level.INFO, "Finished loading animation")
+        log.info { "Finished loading animation" }
     }
 
     private fun loadPose(frameNode: Entry): Pose {
@@ -108,7 +108,7 @@ class AnimationBuilder(
             try {
                 ImagePairLoader.load(leftImagePath, rightImagePath, anchor, scaling, filter, opacity)
             } catch (e: Exception) {
-                log.log(Level.SEVERE, "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}", e)
+                log.log(Level.SEVERE, e) { "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}" }
                 throw ConfigurationException(localize("FailedLoadImageErrorMessage") + ": $leftImagePath, ${rightImagePath ?: ""}", e)
             }
         }
@@ -131,13 +131,13 @@ class AnimationBuilder(
                 Sounds.load(soundText, volumeText.toFloat())
                 soundText += volumeText.toFloat()
             } catch (e: Exception) {
-                log.log(Level.SEVERE, "Failed to load sound: $soundText", e)
+                log.log(Level.SEVERE, e) { "Failed to load sound: $soundText" }
                 throw ConfigurationException(localize("FailedLoadSoundErrorMessage") + ": $soundText", e)
             }
         }
 
         return Pose(leftImagePath, rightImagePath, moveX, moveY, duration, soundText).also {
-            log.log(Level.INFO, "Loaded pose: $it")
+            log.info { "Loaded pose: $it" }
         }
     }
 
@@ -171,13 +171,13 @@ class AnimationBuilder(
             )
 
             else -> {
-                log.log(Level.SEVERE, "Failed to load hotspot shape: $shapeText")
+                log.severe { "Failed to load hotspot shape: $shapeText" }
                 throw ConfigurationException(localize("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
             }
         }
 
         return Hotspot(behaviorText, shape).also {
-            log.log(Level.INFO, "Loaded hotspot: $it")
+            log.info { "Loaded hotspot: $it" }
         }
     }
 

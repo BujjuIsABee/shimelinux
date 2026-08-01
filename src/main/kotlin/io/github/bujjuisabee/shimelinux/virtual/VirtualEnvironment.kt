@@ -26,7 +26,6 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
-import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
@@ -47,7 +46,7 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
-        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         display.iconImage = icon
         display.title = "ShimeLinux"
         display.isAutoRequestFocus = false

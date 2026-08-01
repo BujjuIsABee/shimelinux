@@ -100,7 +100,7 @@ class Mascot(var imageSet: String) {
         get() = manager?.count ?: 0
 
     init {
-        log.log(Level.INFO, "Created a mascot ($this)")
+        log.info { "Created a mascot ($this)" }
 
         window.setAlwaysOnTop(true)
         window.asComponent().addMouseListener(object : MouseAdapter() {
@@ -115,7 +115,7 @@ class Mascot(var imageSet: String) {
                         try {
                             behavior.mousePressed(e)
                         } catch (e: CantBeAliveException) {
-                            log.log(Level.SEVERE, "Fatal Error", e)
+                            log.log(Level.SEVERE, e) { "Fatal Error" }
                             showError(localize("SevereShimejiErrorErrorMessage"), e)
                             dispose()
                         }
@@ -134,7 +134,7 @@ class Mascot(var imageSet: String) {
                         try {
                             behavior.mouseReleased(e)
                         } catch (e: CantBeAliveException) {
-                            log.log(Level.SEVERE, "Fatal Error", e)
+                            log.log(Level.SEVERE, e) { "Fatal Error" }
                             showError(localize("SevereShimejiErrorErrorMessage"), e)
                             dispose()
                         }
@@ -198,7 +198,7 @@ class Mascot(var imageSet: String) {
 
         val followCursorMenu = JMenuItem(localize("FollowCursor"))
         followCursorMenu.addActionListener {
-            manager?.setBehaviorAll(getConfiguration(imageSet), "ChaseMouse", imageSet)
+            manager?.setBehaviorAll(Main.getConfiguration(imageSet), "ChaseMouse", imageSet)
         }
 
         val restoreWindowsMenu = JMenuItem(localize("RestoreWindows"))
@@ -247,7 +247,7 @@ class Mascot(var imageSet: String) {
 
         val behaviorsSubmenu = JMenu(localize("SetBehavior"))
         val allowedSubmenu = JMenu(localize("AllowedBehaviors"))
-        val config = getConfiguration(imageSet)
+        val config = Main.getConfiguration(imageSet)
         for (behaviorName in config.behaviorNames) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
@@ -258,7 +258,7 @@ class Mascot(var imageSet: String) {
                             try {
                                 behavior = config.buildBehavior(behaviorName)
                             } catch (e: Exception) {
-                                log.log(Level.SEVERE, "Failed to set behavior ($this)")
+                                log.log(Level.SEVERE, e) { "Failed to set behavior ($this)" }
                                 showError(localize("CouldNotSetBehaviorErrorMessage"), e)
                             }
                         }
@@ -310,7 +310,7 @@ class Mascot(var imageSet: String) {
             try {
                 behavior?.next()
             } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, "Fatal Error", e)
+                log.log(Level.SEVERE, e) { "Fatal Error" }
                 showError(localize("CouldNotGetNextBehaviorErrorMessage"), e)
                 dispose()
             }
@@ -376,7 +376,7 @@ class Mascot(var imageSet: String) {
     }
 
     fun dispose() {
-        log.log(Level.INFO, "Destroying mascot: $this")
+        log.info { "Destroying mascot: $this" }
 
         debugWindow?.let {
             it.isVisible = false
@@ -392,7 +392,7 @@ class Mascot(var imageSet: String) {
     private fun refreshCursor(position: Point) {
         var useHand = false
         for (hotspot in hotspots) {
-            val isEnabled = getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)
+            val isEnabled = Main.getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)
             if (hotspot.contains(this, position) && isEnabled) {
                 useHand = true
                 break

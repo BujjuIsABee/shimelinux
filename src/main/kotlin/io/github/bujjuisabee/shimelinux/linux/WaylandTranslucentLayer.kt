@@ -107,7 +107,6 @@ class WaylandTranslucentLayer : TranslucentWindow {
         val newCursorPosition = Point(positionX + grabStart.x, positionY + grabStart.y)
         if (previousCursorPosition != newCursorPosition) {
             previousCursorPosition = newCursorPosition
-
             when (System.getenv("XDG_CURRENT_DESKTOP")) {
                 "niri" -> {
                     WaylandEnvironment.cursorPosition = newCursorPosition

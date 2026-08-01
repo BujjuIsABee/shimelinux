@@ -39,7 +39,7 @@ class Animation(
         require(poses.isNotEmpty()) { "Animation requires at least one pose" }
     }
 
-    fun isEffective(variables: VariableMap) = condition.get(variables) as? Boolean == true
+    fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
 
     fun init() {
         condition.init()

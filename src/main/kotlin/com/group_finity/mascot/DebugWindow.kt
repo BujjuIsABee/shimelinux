@@ -59,11 +59,10 @@ class DebugWindow(imageSet: String) : JFrame() {
     private val environmentHeightValue: JLabel
 
     init {
-        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
         title = imageSet
         isResizable = false
-        defaultCloseOperation = DISPOSE_ON_CLOSE
 
         panel = JPanel(GridLayout(12, 2, 42, 0))
         panel.border = BorderFactory.createEmptyBorder(0, 0, 0, 42)

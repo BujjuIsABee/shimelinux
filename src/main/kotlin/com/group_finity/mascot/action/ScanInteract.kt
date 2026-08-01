@@ -22,15 +22,16 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.showError
+import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -41,7 +42,7 @@ class ScanInteract(
     animations: List<Animation>,
     context: VariableMap
 ) : BorderedAction(schema, animations, context) {
-    private var target: Mascot? = null
+    private var target: WeakReference<Mascot>? = null
     internal val hasTurningAnimation = animations.any { it.isTurn }
     internal var isTurning = false
         private set
@@ -66,7 +67,7 @@ class ScanInteract(
         putVariable(schema.getString(VARIABLE_TARGETY), null)
     }
 
-    override fun hasNext() = super.hasNext() && (isTurning || animation?.let { time < it.duration } == true)
+    override fun hasNext() = super.hasNext() && isTurning || time < checkNotNull(animation).duration
 
     override fun tick() {
         super.tick()
@@ -75,25 +76,26 @@ class ScanInteract(
         mascot.affordances.clear()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            log.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
-        if (target?.affordances?.contains(affordance) == false) {
-            target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
+        if (target?.get()?.affordances?.contains(affordance) == false) {
+            target = mascot.manager?.getMascotWithAffordance(affordance)
         }
 
-        putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
-        putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
+        putVariable(schema.getString(VARIABLE_TARGETX), target?.get()?.anchor?.x)
+        putVariable(schema.getString(VARIABLE_TARGETY), target?.get()?.anchor?.y)
 
-        if (target?.affordances?.contains(affordance) == true) {
-            val target = checkNotNull(target)
-            val animation = checkNotNull(animation)
+        if (target?.get()?.affordances?.contains(affordance) == true) {
+            val target = checkNotNull(target?.get())
 
             if (mascot.anchor.x != target.anchor.x) {
                 isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
                 mascot.isLookRight = mascot.anchor.x < target.anchor.x
             }
+
+            val animation = checkNotNull(animation)
 
             if (isTurning && time >= animation.duration) {
                 time -= animation.duration
@@ -104,9 +106,9 @@ class ScanInteract(
 
             if (!isTurning && (time == animation.duration - 1 || animation.duration == 1) && behavior.isNotBlank()) {
                 try {
-                    mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
+                    mascot.behavior = Main.getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
                     if (targetBehavior.isNotBlank()) {
-                        target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
+                        target.behavior = Main.getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                     }
                     if (targetLook && target.isLookRight == mascot.isLookRight) {
                         target.isLookRight = !mascot.isLookRight
@@ -116,7 +118,7 @@ class ScanInteract(
                         is IllegalStateException,
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, "Failed to set behavior", e)
+                            log.log(Level.SEVERE, e) { "Failed to set behavior" }
                             showError(localize("FailedSetBehaviorErrorMessage"), e)
                         }
 

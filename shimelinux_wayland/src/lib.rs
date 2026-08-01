@@ -119,8 +119,6 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         shm,
         pool,
         layer,
-        layer_width: 0,
-        layer_height: 0,
         layer_mask: Vec::new(),
         configured: false,
         image_rgb: Vec::new(),

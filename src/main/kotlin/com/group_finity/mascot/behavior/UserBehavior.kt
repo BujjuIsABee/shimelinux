@@ -22,6 +22,7 @@
 
 package com.group_finity.mascot.behavior
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.action.ActionBase
@@ -31,10 +32,8 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.exception.VariableException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.localize
 import java.awt.event.MouseEvent
-import java.util.logging.Level
 import java.util.logging.Logger
 import javax.swing.SwingUtilities
 
@@ -51,7 +50,7 @@ class UserBehavior(
     override fun init(mascot: Mascot) {
         this.mascot = mascot
 
-        log.log(Level.INFO, "Behavior ($mascot, $this)")
+        log.info { "Behavior ($mascot, $this)" }
 
         try {
             action.init(mascot)
@@ -100,18 +99,18 @@ class UserBehavior(
                         environment.screen.right <= mascot.bounds.x ||
                         environment.screen.bottom <= mascot.bounds.y
                     ) {
-                        log.log(Level.INFO, "Out of the screen bounds ($mascot, $this)")
+                        log.info { "Out of the screen bounds ($mascot, $this)" }
 
                         mascot.resetAnchor()
 
                         try {
-                            mascot.behavior = configuration.buildBehavior(BEHAVIOR_FALL)
+                            mascot.behavior = configuration.buildBehavior(BEHAVIORNAME_FALL)
                         } catch (e: BehaviorInstantiationException) {
                             throw CantBeAliveException(localize("FailedFallingActionInitializeErrorMessage"), e)
                         }
                     }
                 } else {
-                    log.log(Level.INFO, "Completed behavior ($mascot, $this)")
+                    log.info { "Completed behavior ($mascot, $this)" }
 
                     try {
                         mascot.behavior = configuration.buildNextBehavior(name, mascot)
@@ -125,7 +124,7 @@ class UserBehavior(
             mascot.isDragging = false
 
             try {
-                mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_FALL))
+                mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIORNAME_FALL))
             } catch (e: BehaviorInstantiationException) {
                 throw CantBeAliveException(localize("FailedFallingActionInitializeErrorMessage"), e)
             }
@@ -140,7 +139,7 @@ class UserBehavior(
             var handled = false
 
             for (hotspot in mascot.hotspots) {
-                val behaviorEnabled = getConfiguration(mascot.imageSet).isBehaviorEnabled(hotspot.behavior, mascot)
+                val behaviorEnabled = Main.getConfiguration(mascot.imageSet).isBehaviorEnabled(hotspot.behavior, mascot)
                 if (hotspot.contains(mascot, e.point) && behaviorEnabled) {
                     handled = true
                     mascot.cursorPosition = e.point
@@ -167,7 +166,7 @@ class UserBehavior(
 
             if (!handled) {
                 try {
-                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_DRAGGED))
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIORNAME_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(localize("FailedDragActionInitializeErrorMessage"), e)
                 }
@@ -186,7 +185,7 @@ class UserBehavior(
                 mascot.isDragging = false
 
                 try {
-                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOR_THROWN))
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIORNAME_THROWN))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(localize("FailedDropActionInitializeErrorMessage"), e)
                 }
@@ -201,8 +200,8 @@ class UserBehavior(
     companion object {
         private val log = Logger.getLogger(this::class.java.name)
 
-        const val BEHAVIOR_FALL = "Fall"
-        const val BEHAVIOR_DRAGGED = "Dragged"
-        const val BEHAVIOR_THROWN = "Thrown"
+        const val BEHAVIORNAME_FALL = "Fall"
+        const val BEHAVIORNAME_DRAGGED = "Dragged"
+        const val BEHAVIORNAME_THROWN = "Thrown"
     }
 }

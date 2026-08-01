@@ -22,10 +22,10 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.showError
@@ -51,13 +51,13 @@ class Interact(
 
         if ((time == animation.duration - 1 || animation.duration == 1) && behavior.isNotBlank()) {
             try {
-                mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
+                mascot.behavior = Main.getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
             } catch (e: Exception) {
                 when (e) {
                     is IllegalStateException,
                     is BehaviorInstantiationException,
                     is CantBeAliveException -> {
-                        log.log(Level.SEVERE, "Failed to set behavior", e)
+                        log.log(Level.SEVERE, e) { "Failed to set behavior" }
                         showError(localize("FailedSetBehaviorErrorMessage"), e)
                     }
 

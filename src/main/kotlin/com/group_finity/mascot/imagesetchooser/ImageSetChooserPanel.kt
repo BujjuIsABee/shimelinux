@@ -48,6 +48,9 @@ class ImageSetChooserPanel(
     private val captionLabel: JLabel
     private val checkbox: JCheckBox
 
+    private val activeBorder = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"), 1)
+    private val inactiveBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1)
+
     init {
         minimumSize = Dimension(248, 80)
         preferredSize = Dimension(248, 80)
@@ -84,10 +87,10 @@ class ImageSetChooserPanel(
         checkbox.isSelected = value
 
         if (value) {
-            border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"), 1)
+            border = activeBorder
             isOpaque = true
         } else {
-            border = BorderFactory.createEmptyBorder(1, 1, 1, 1)
+            border = inactiveBorder
             isOpaque = false
         }
     }

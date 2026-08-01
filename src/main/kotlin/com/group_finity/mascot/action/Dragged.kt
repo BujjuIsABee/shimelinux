@@ -68,10 +68,9 @@ class Dragged(
         var offsetX = (offsetX * scaling).roundToInt()
         var offsetY = (offsetY * scaling).roundToInt()
         if (offsetType == schema.getString("Origin")) {
-            mascot.image?.let {
-                offsetX = 0 - offsetX + it.center.x
-                offsetY = 0 - offsetY + it.center.y
-            }
+            val image = checkNotNull(mascot.image)
+            offsetX = 0 - offsetX + image.center.x
+            offsetY = 0 - offsetY + image.center.y
         }
 
         if (abs(cursor.x - mascot.anchor.x + offsetX) >= 5) {
@@ -86,12 +85,9 @@ class Dragged(
         putVariable(schema.getString(VARIABLE_FOOTDX), footDx)
         putVariable(schema.getString(VARIABLE_FOOTX), footX)
 
-        animation?.next(mascot, time)
+        checkNotNull(animation).next(mascot, time)
 
-        mascot.anchor = Point(
-            cursor.x + offsetX,
-            cursor.y + offsetY
-        )
+        mascot.anchor = Point(cursor.x + offsetX, cursor.y + offsetY)
 
         if (time == timeToRegist - 1 && Math.random() >= 0.1) {
             timeToRegist++

@@ -28,7 +28,6 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.VariableException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
@@ -66,7 +65,7 @@ class Breed(
         val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
         val isPenultimateFrame: Boolean
-            get() = action.animation?.let { action.time == it.duration - 1 } == true
+            get() = action.time == checkNotNull(action.animation).duration - 1
 
         private val bornX: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNX), DEFAULT_BORNX).toInt()
@@ -85,12 +84,12 @@ class Breed(
 
         fun breed() {
             val scaling = getProperty("Scaling", 1.0)
-            val childType = bornMascot.takeUnless { Main.getConfiguration(it) == null } ?: action.mascot.imageSet
+            val childType = bornMascot.takeIf { Main.hasConfiguration(it) } ?: action.mascot.imageSet
 
             repeat(bornCount) {
                 val mascot = Mascot(childType)
 
-                log.log(Level.INFO, "Mascot breeding (${action.mascot}, $action, $mascot)")
+                log.info { "Mascot breeding (${action.mascot}, $action, $mascot)" }
 
                 mascot.anchor = if (action.mascot.isLookRight) {
                     Point(
@@ -107,14 +106,14 @@ class Breed(
                 mascot.isLookRight = action.mascot.isLookRight
 
                 try {
-                    mascot.behavior = getConfiguration(childType).buildBehavior(bornBehavior, action.mascot)
+                    mascot.behavior = Main.getConfiguration(childType).buildBehavior(bornBehavior, action.mascot)
                     checkNotNull(action.mascot.manager).add(mascot)
                 } catch (e: Exception) {
                     when (e) {
                         is IllegalStateException,
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, "Failed to create new Shimeji", e)
+                            log.log(Level.SEVERE, e) { "Failed to create new Shimeji" }
                             showError(localize("FailedCreateNewShimejiErrorMessage"), e)
                             mascot.dispose()
                         }

@@ -26,7 +26,6 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
@@ -49,25 +48,26 @@ class Transform(
     override fun tick() {
         super.tick()
 
-        if (animation?.let { time == it.duration - 1 || it.duration == 1 } == true &&
-            getProperty("Transformation", true)
-        ) {
-            transform()
+        val animation = checkNotNull(animation)
+        if (time == animation.duration - 1 || animation.duration == 1) {
+            if (getProperty("Transformation", true)) {
+                transform()
+            }
         }
     }
 
     private fun transform() {
-        val childType = transformMascot.takeUnless { Main.getConfiguration(it) == null } ?: mascot.imageSet
+        val childType = transformMascot.takeIf { Main.hasConfiguration(it) } ?: mascot.imageSet
 
         try {
             mascot.imageSet = childType
-            mascot.behavior = getConfiguration(childType).buildBehavior(transformBehavior, mascot)
+            mascot.behavior = Main.getConfiguration(childType).buildBehavior(transformBehavior, mascot)
         } catch (e: Exception) {
             when (e) {
                 is IllegalStateException,
                 is BehaviorInstantiationException,
                 is CantBeAliveException -> {
-                    log.log(Level.SEVERE, "Failed to set behavior", e)
+                    log.log(Level.SEVERE, e) { "Failed to set behavior" }
                     showError(localize("FailedSetBehaviorErrorMessage"), e)
                 }
 

@@ -120,13 +120,13 @@ class Manager {
         synchronized(mascots) {
             for (mascot in mascots) {
                 try {
-                    val configuration = getConfiguration(mascot.imageSet)
+                    val configuration = Main.getConfiguration(mascot.imageSet)
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(name), mascot)
                 } catch (e: Exception) {
                     when (e) {
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, "Failed to set behavior.", e)
+                            log.log(Level.SEVERE, e) { "Failed to set behavior." }
                             showError(localize("FailedSetBehaviorErrorMessage"), e)
                             mascot.dispose()
                         }
@@ -149,7 +149,7 @@ class Manager {
                     when (e) {
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, "Failed to set behavior ($name)", e)
+                            log.log(Level.SEVERE, e) { "Failed to set behavior ($name)" }
                             showError(localize("FailedSetBehaviorErrorMessage"), e)
                             mascot.dispose()
                         }

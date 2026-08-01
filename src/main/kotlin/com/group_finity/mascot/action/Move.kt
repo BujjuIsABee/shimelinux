@@ -27,7 +27,6 @@ import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
-import java.util.logging.Level
 import java.util.logging.Logger
 
 open class Move(
@@ -47,22 +46,29 @@ open class Move(
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 
     override fun hasNext(): Boolean {
-        val reachedX = targetX == Int.MIN_VALUE || mascot.anchor.x != targetX
-        val reachedY = targetY == Int.MIN_VALUE || mascot.anchor.y != targetY
-        return super.hasNext() && (isTurning || reachedX && reachedY)
+        val targetX = targetX
+        val targetY = targetY
+
+        val hasReached = (targetX == Int.MIN_VALUE || mascot.anchor.x != targetX) && (targetY == Int.MIN_VALUE || mascot.anchor.y != targetY)
+
+        return super.hasNext() && (isTurning || hasReached)
     }
 
     override fun tick() {
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            log.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
+
+        val targetX = targetX
+        val targetY = targetY
 
         var isDown = false
 
         if (targetX != DEFAULT_TARGETX && mascot.anchor.x != targetX) {
+            // Activate turn animation when direction changes
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
             mascot.isLookRight = mascot.anchor.x < targetX
         }
@@ -71,22 +77,25 @@ open class Move(
             isDown = mascot.anchor.y < targetY
         }
 
-        if (isTurning && animation?.let { time >= it.duration } == true) {
+        val animation = checkNotNull(animation)
+
+        // Check if turning animation has finished
+        if (isTurning && time >= animation.duration) {
             isTurning = false
         }
 
-        animation?.next(mascot, time)
+        animation.next(mascot, time)
 
-        if (targetX != DEFAULT_TARGETX &&
-            (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX)
-        ) {
-            mascot.anchor = Point(targetX, mascot.anchor.y)
+        if (targetX != DEFAULT_TARGETX) {
+            if (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX) {
+                mascot.anchor = Point(targetX, mascot.anchor.y)
+            }
         }
 
-        if (targetY != DEFAULT_TARGETY &&
-            (isDown && mascot.anchor.y >= targetY || !isDown && mascot.anchor.y <= targetY)
-        ) {
-            mascot.anchor = Point(mascot.anchor.x, targetY)
+        if (targetY != DEFAULT_TARGETY) {
+            if (isDown && mascot.anchor.y >= targetY || !isDown && mascot.anchor.y <= targetY) {
+                mascot.anchor = Point(mascot.anchor.x, targetY)
+            }
         }
     }
 

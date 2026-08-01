@@ -27,7 +27,6 @@ import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.getProperty
-import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import dorkbox.desktop.Desktop
 import java.awt.BorderLayout
@@ -81,7 +80,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var cancelled = true
 
     init {
-        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)

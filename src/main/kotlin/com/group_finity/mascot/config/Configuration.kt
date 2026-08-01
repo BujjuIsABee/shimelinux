@@ -25,7 +25,7 @@ package com.group_finity.mascot.config
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.behavior.Behavior
-import com.group_finity.mascot.behavior.UserBehavior.Companion.BEHAVIOR_FALL
+import com.group_finity.mascot.behavior.UserBehavior.Companion.BEHAVIORNAME_FALL
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
@@ -48,16 +48,16 @@ class Configuration {
         get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {
-        log.log(Level.INFO, "Reading configuration file")
+        log.info { "Reading configuration file" }
 
         // Check for Japanese XML tag
         val locale = if (configurationNode.hasChild("\u52D5\u4F5C\u30EA\u30B9\u30C8") ||
             configurationNode.hasChild("\u884C\u52D5\u30EA\u30B9\u30C8")
         ) {
-            log.log(Level.INFO, "Using ja-JP schema")
+            log.info { "Using ja-JP schema" }
             Locale.forLanguageTag("ja-JP")
         } else {
-            log.log(Level.INFO, "Using en-US schema")
+            log.info { "Using en-US schema" }
             Locale.forLanguageTag("en-US")
         }
 
@@ -70,19 +70,19 @@ class Configuration {
         }
 
         for (list in configurationNode.selectChildren(schema.getString("ActionList"))) {
-            log.log(Level.INFO, "Reading action list")
+            log.info { "Reading action list" }
 
             loadActions(list, imageSet)
         }
 
         for (list in configurationNode.selectChildren(schema.getString("BehaviorList"))) {
-            log.log(Level.INFO, "Reading behavior list")
+            log.info { "Reading behavior list" }
 
             loadBehaviors(list, ArrayList())
         }
 
         for (list in configurationNode.selectChildren(schema.getString("Information"))) {
-            log.log(Level.INFO, "Reading information list")
+            log.info { "Reading information list" }
 
             loadInformation(list)
         }
@@ -158,7 +158,7 @@ class Configuration {
             factory.buildBehavior()
         } else {
             mascot.resetAnchor()
-            buildBehavior(schema.getString(BEHAVIOR_FALL))
+            buildBehavior(schema.getString(BEHAVIORNAME_FALL))
         }
     }
 
@@ -179,7 +179,7 @@ class Configuration {
                     totalFrequency += behaviorFactory.frequency
                 }
             } catch (e: VariableException) {
-                log.log(Level.WARNING, "An error occurred calculating the frequency of the action", e)
+                log.log(Level.WARNING, e) { "An error occurred calculating the frequency of the action" }
             }
         }
 
@@ -197,14 +197,14 @@ class Configuration {
                         totalFrequency += behaviorFactory.frequency
                     }
                 } catch (e: VariableException) {
-                    log.log(Level.WARNING, "An error occurred calculating the frequency of the action", e)
+                    log.log(Level.WARNING, e) { "An error occurred calculating the frequency of the action" }
                 }
             }
         }
 
         if (totalFrequency == 0L) {
             mascot.resetAnchor()
-            return buildBehavior(schema.getString(BEHAVIOR_FALL))
+            return buildBehavior(schema.getString(BEHAVIORNAME_FALL))
         }
 
         // Randomly pick behavior from candidates

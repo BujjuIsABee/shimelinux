@@ -28,7 +28,6 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
-import java.util.logging.Level
 import java.util.logging.Logger
 
 class WalkWithIE(
@@ -47,15 +46,20 @@ class WalkWithIE(
         val activeIE = environment.activeIE
 
         if (!activeIE.isVisible) {
-            log.log(Level.INFO, "IE not visible ($mascot, $this)")
+            log.info { "IE not visible ($mascot, $this)" }
             throw LostGroundException()
         }
 
-        if (mascot.isLookRight && (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom) ||
-            !mascot.isLookRight && (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom)
-        ) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
-            throw LostGroundException()
+        if (mascot.isLookRight) {
+            if (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom) {
+                log.info { "Lost ground ($mascot, $this)" }
+                throw LostGroundException()
+            }
+        } else {
+            if (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom) {
+                log.info { "Lost ground ($mascot, $this)" }
+                throw LostGroundException()
+            }
         }
 
         super.tick()

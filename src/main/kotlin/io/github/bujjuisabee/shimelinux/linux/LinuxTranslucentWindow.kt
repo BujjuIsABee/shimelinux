@@ -36,100 +36,77 @@ import java.awt.geom.AffineTransform
 import java.awt.geom.Area
 import java.awt.geom.Path2D
 import javax.swing.JWindow
-import javax.swing.UIManager
 
-class LinuxTranslucentWindow : TranslucentWindow {
-    private val window: JWindow
+class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
     private var image: LinuxNativeImage? = null
-    private var imageChanged = false
     private var offset = Point(0, 0)
 
     init {
         System.setProperty("sun.awt.noerasebackground", "true") // Reduces flickering
 
-        // Initialize window with a LaF that supports transparency
-        UIManager.getLookAndFeel().let { previous ->
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-            window = object : JWindow() {
-                init {
-                    background = Color(0, 0, 0, 0)
-                }
+        background = Color(0, 0, 0, 0)
+        rootPane.background = Color(0, 0, 0, 0)
+    }
 
-                override fun paint(g: Graphics) {
-                    image?.let {
-                        val g2d = g as Graphics2D
-                        g2d.composite = AlphaComposite.Src
-                        g2d.drawImage(it.managedImage, offset.x, offset.y, null)
-                        g2d.dispose()
-                    }
-                }
+    override fun paint(g: Graphics) {
+        image?.let {
+            setWindowMask()
 
-                override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
-                    val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
-                    val windowBounds = Rectangle(x, y, width, height)
-                    val newBounds = screenBounds.intersection(windowBounds)
-
-                    // Allow mascots to go partially offscreen by offsetting the image and resizing the window
-                    offset = Point(windowBounds.x - newBounds.x, windowBounds.y - newBounds.y)
-                    super.setBounds(
-                        newBounds.x,
-                        newBounds.y,
-                        newBounds.width,
-                        newBounds.height
-                    )
-                }
-
-                override fun getGraphicsConfiguration() = gc ?: super.graphicsConfiguration
-            }
-            UIManager.setLookAndFeel(previous)
+            val g2d = g as Graphics2D
+            g2d.composite = AlphaComposite.Src
+            g2d.drawImage(it.managedImage, offset.x, offset.y, null)
+            g2d.dispose()
         }
     }
 
-    override fun asComponent() = window
+    override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
+        val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
+        val windowBounds = Rectangle(x, y, width, height)
+        val newBounds = screenBounds.intersection(windowBounds)
+
+        // Allow mascots to go partially offscreen by offsetting the image and resizing the window
+        offset = Point(windowBounds.x - newBounds.x, windowBounds.y - newBounds.y)
+
+        super.setBounds(
+            newBounds.x,
+            newBounds.y,
+            newBounds.width,
+            newBounds.height
+        )
+    }
+
+    override fun asComponent() = this
 
     override fun setImage(image: NativeImage) {
-        if (image is LinuxNativeImage && this.image != image) {
-            imageChanged = true
+        if (image is LinuxNativeImage) {
             this.image = image
         }
     }
 
     override fun updateImage() {
-        setWindowMask()
-
-        if (imageChanged) {
-            imageChanged = false
-            window.repaint()
-        }
-    }
-
-    override fun setAlwaysOnTop(onTop: Boolean) {
-        window.isAlwaysOnTop = onTop
-    }
-
-    override fun dispose() {
-        window.dispose()
+        validate()
+        repaint()
     }
 
     private fun setWindowMask() {
         val image = image ?: return
 
         val mask = maskCache.getOrPut(image) {
-            val path = Path2D.Double()
-            val rect = Rectangle(0, 0, 1, 1)
-            for (i in 0 until image.width * image.height) {
-                val alpha = (image.rgb[i] shr 24) and 0xFF
-                if (alpha > 0) {
-                    rect.x = i % image.width
-                    rect.y = i / image.width
-                    path.append(rect, false)
+            val path = Path2D.Float()
+            for (y in 0 until image.height) {
+                for (x in 0 until image.width) {
+                    val alpha = (image.rgb[y * image.width + x] shr 24) and 0xFF
+                    if (alpha > 0) {
+                        path.append(Rectangle(x, y, 1, 1), false)
+                    }
                 }
             }
+
             return@getOrPut Area(path)
         }
 
         if (!mask.isEmpty) {
-            window.shape = mask.createTransformedArea(
+            shape = mask.createTransformedArea(
                 AffineTransform.getTranslateInstance(
                     offset.x.toDouble(),
                     offset.y.toDouble()
@@ -140,10 +117,6 @@ class LinuxTranslucentWindow : TranslucentWindow {
 
     companion object {
         private val maskCache = mutableMapOf<LinuxNativeImage, Area>()
-        private val gc = GraphicsEnvironment
-            .getLocalGraphicsEnvironment()
-            .defaultScreenDevice
-            .configurations
-            .firstOrNull { it.isTranslucencyCapable }
+        private val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
     }
 }

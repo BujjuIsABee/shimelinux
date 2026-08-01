@@ -90,8 +90,6 @@ pub struct Mascot {
     pub pool: SlotPool,
 
     pub layer: LayerSurface,
-    pub layer_width: u32,
-    pub layer_height: u32,
     pub layer_mask: Vec<Rect>,
     pub configured: bool,
 
@@ -197,13 +195,9 @@ impl LayerShellHandler for Mascot {
         _conn: &Connection,
         qh: &QueueHandle<Self>,
         _layer: &LayerSurface,
-        configure: LayerSurfaceConfigure,
+        _configure: LayerSurfaceConfigure,
         _serial: u32,
     ) {
-        let (width, height) = configure.new_size;
-        self.layer_width = width;
-        self.layer_height = height;
-
         if !self.configured {
             self.configured = true;
             self.draw(qh);
@@ -366,19 +360,12 @@ delegate_noop!(Mascot: ignore WlRegion);
 impl Mascot {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
-        self.layer.set_size(
-            cmp::max(1, bounds.width as u32),
-            cmp::max(1, bounds.height as u32),
-        );
-
         self.layer.set_margin(
             bounds.y,
             0,
             0,
             bounds.x,
         );
-
-        self.layer.commit();
     }
 
     pub fn set_image(&mut self, rgb: Vec<i32>) {
@@ -401,6 +388,8 @@ impl Mascot {
             // Attach the new buffer
             surface.attach(Some(&cursor[0]), 0, 0);
             surface.commit();
+
+            self.cursor_state.surface = Some(surface.clone());
         }
     }
 
@@ -409,9 +398,14 @@ impl Mascot {
     }
 
     fn draw(&mut self, qh: &QueueHandle<Self>) {
-        let width = self.layer_width as i32;
-        let height = self.layer_height as i32;
+        let width = cmp::max(1, self.image_bounds.width);
+        let height = cmp::max(1, self.image_bounds.height);
         let stride = width * 4;
+
+        self.layer.set_size(
+            width as u32,
+            height as u32,
+        );
 
         let (buffer, canvas) = self
             .pool
@@ -420,12 +414,19 @@ impl Mascot {
 
         if !self.image_rgb.is_empty() {
             // Draw the image to the canvas
-            for i in 0..width * height {
-                let (x, y) = (i % width, i / width);
-                let canvas_index = ((y * width + x) * 4) as usize;
-                let image_index = (y * self.image_bounds.width as i32 + x) as usize;
+            for y in 0..height {
+                for x in 0..width {
+                    let canvas_index = cmp::min(
+                        ((y * width + x) * 4) as usize,
+                        canvas.len() - 1,
+                    );
+                    let image_index = cmp::min(
+                        (y * width + x) as usize,
+                        self.image_rgb.len() - 1,
+                    );
 
-                canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
+                    canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
+                }
             }
 
             // Set the mask shape
@@ -448,7 +449,10 @@ impl Mascot {
         for y in 0..self.image_bounds.height as u32 {
             let mut section_start: Option<u32> = None;
             for x in 0..self.image_bounds.width as u32 {
-                let index: usize = (y * self.image_bounds.width as u32 + x) as usize;
+                let index = cmp::min(
+                    (y * self.image_bounds.width as u32 + x) as usize,
+                    self.image_rgb.len() - 1,
+                );
                 let alpha = (self.image_rgb[index] >> 24) & 0xFF;
                 if alpha > 0 && section_start.is_none() {
                     section_start = Some(x);

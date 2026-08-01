@@ -48,13 +48,13 @@ class BehaviorBuilder(
     private val params = linkedMapOf<String, String>()
 
     init {
-        log.log(Level.INFO, "Loading behavior: $this")
+        log.info { "Loading behavior: $this" }
 
         conditions = conditions.toMutableList()
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
         isToggleable = when (name) {
-            UserBehavior.BEHAVIOR_FALL, UserBehavior.BEHAVIOR_DRAGGED, UserBehavior.BEHAVIOR_THROWN -> false
+            UserBehavior.BEHAVIORNAME_FALL, UserBehavior.BEHAVIORNAME_DRAGGED, UserBehavior.BEHAVIORNAME_THROWN -> false
             else -> behaviorNode.getAttribute(configuration.schema.getString("Toggleable")).toBoolean()
         }
 
@@ -73,7 +73,7 @@ class BehaviorBuilder(
         var isNextAdditive = true
 
         for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviorList"))) {
-            log.log(Level.INFO, "Lists the following behaviors...")
+            log.info { "Lists the following behaviors..." }
 
             isNextAdditive = nextList.getAttribute(configuration.schema.getString("Add")).toBoolean()
             loadBehaviors(nextList, mutableListOf())
@@ -81,7 +81,7 @@ class BehaviorBuilder(
 
         this.isNextAdditive = isNextAdditive
 
-        log.log(Level.INFO, "Finished loading behavior")
+        log.info { "Finished loading behavior" }
     }
 
     private fun loadBehaviors(list: Entry, conditions: MutableList<String?>) {
@@ -99,7 +99,7 @@ class BehaviorBuilder(
 
     fun validate() {
         if (!configuration.hasAction(actionName)) {
-            log.log(Level.SEVERE, "There is no corresponding action ($this)")
+            log.severe { "There is no corresponding action ($this)" }
             throw ConfigurationException(localize("NoActionFoundErrorMessage") + " ($this)")
         }
     }
@@ -108,7 +108,7 @@ class BehaviorBuilder(
         try {
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
         } catch (e: ActionInstantiationException) {
-            log.log(Level.SEVERE, "Failed to initialize the corresponding action ($this)", e)
+            log.log(Level.SEVERE, e) { "Failed to initialize the corresponding action ($this)" }
             throw BehaviorInstantiationException(localize("FailedInitializeCorrespondingActionErrorMessage") + " ($this)", e)
         }
     }

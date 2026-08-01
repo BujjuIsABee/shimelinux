@@ -36,10 +36,7 @@ class Offset(
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
 
     override fun apply() {
-        mascot.anchor = Point(
-            mascot.anchor.x + offsetX,
-            mascot.anchor.y + offsetY
-        )
+        mascot.anchor = Point(mascot.anchor.x + offsetX, mascot.anchor.y + offsetY)
     }
 
     companion object {

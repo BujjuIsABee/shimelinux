@@ -28,7 +28,6 @@ import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
-import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -52,10 +51,9 @@ class Regist(
     }
 
     override fun hasNext(): Boolean {
-        val offsetX = if (offsetType == schema.getString("Origin")) {
-            0 - offsetX + checkNotNull(mascot.image).center.x
-        } else {
-            (offsetX * scaling).roundToInt()
+        var offsetX = (offsetX * scaling).roundToInt()
+        if (offsetType == "Origin") {
+            offsetX = 0 - offsetX + checkNotNull(mascot.image).center.x
         }
 
         return super.hasNext() && abs(environment.cursor.x - mascot.anchor.x + offsetX) < 5
@@ -64,12 +62,14 @@ class Regist(
     override fun tick() {
         mascot.isDragging = true
 
-        animation?.next(mascot, time)
+        val animation = checkNotNull(animation)
 
-        if (animation?.let { time + 1 >= it.duration } == true) {
+        animation.next(mascot, time)
+
+        if (time + 1 >= animation.duration) {
             mascot.isLookRight = Math.random() < 0.5
 
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            log.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
     }

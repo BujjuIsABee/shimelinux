@@ -22,16 +22,17 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
-import com.group_finity.mascot.getConfiguration
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.showError
 import java.awt.Point
+import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -42,7 +43,7 @@ class ScanMove(
     animations: List<Animation>,
     params: VariableMap
 ) : BorderedAction(schema, animations, params) {
-    private var target: Mascot? = null
+    private var target: WeakReference<Mascot>? = null
     internal val hasTurningAnimation = animations.any { it.isTurn }
     internal var isTurning = false
 
@@ -62,28 +63,30 @@ class ScanMove(
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
-        target = mascot.manager?.getMascotWithAffordance(affordance)?.get()
+        target = mascot.manager?.getMascotWithAffordance(affordance)
 
-        putVariable(schema.getString(VARIABLE_TARGETX), target?.anchor?.x)
-        putVariable(schema.getString(VARIABLE_TARGETY), target?.anchor?.y)
+        putVariable(schema.getString(VARIABLE_TARGETX), target?.get()?.anchor?.x)
+        putVariable(schema.getString(VARIABLE_TARGETY), target?.get()?.anchor?.y)
     }
 
     override fun hasNext(): Boolean {
-        if (mascot.manager == null) return super.hasNext()
+        if (mascot.manager == null) {
+            return super.hasNext()
+        }
 
-        return super.hasNext() && (isTurning || target?.affordances?.contains(affordance) == true)
+        return super.hasNext() && (isTurning || target?.get()?.affordances?.contains(affordance) == true)
     }
 
     override fun tick() {
         super.tick()
 
-        val target = checkNotNull(target)
+        val target = checkNotNull(target?.get())
 
         // Cannot broadcast while scanning for an affordance
         mascot.affordances.clear()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.log(Level.INFO, "Lost ground ($mascot, $this)")
+            log.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
@@ -100,11 +103,13 @@ class ScanMove(
 
         val down = mascot.anchor.y < targetY
 
-        if (isTurning && animation?.let { time >= it.duration } == true) {
+        val animation = checkNotNull(animation)
+
+        if (isTurning && time >= animation.duration) {
             isTurning = false
         }
 
-        animation?.next(mascot, time)
+        animation.next(mascot, time)
 
         if (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX) {
             mascot.anchor = Point(targetX, mascot.anchor.y)
@@ -116,8 +121,8 @@ class ScanMove(
 
         if (!isTurning && mascot.anchor.x == targetX && mascot.anchor.y == targetY) {
             try {
-                mascot.behavior = getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
-                target.behavior = getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
+                mascot.behavior = Main.getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)
+                target.behavior = Main.getConfiguration(target.imageSet).buildBehavior(targetBehavior, target)
                 if (targetLook && target.isLookRight == mascot.isLookRight) {
                     target.isLookRight = !mascot.isLookRight
                 }
@@ -126,7 +131,7 @@ class ScanMove(
                     is IllegalStateException,
                     is BehaviorInstantiationException,
                     is CantBeAliveException -> {
-                        log.log(Level.SEVERE, "Failed to set behavior", e)
+                        log.log(Level.SEVERE, e) { "Failed to set behavior" }
                         showError(localize("FailedSetBehaviorErrorMessage"), e)
                     }
 

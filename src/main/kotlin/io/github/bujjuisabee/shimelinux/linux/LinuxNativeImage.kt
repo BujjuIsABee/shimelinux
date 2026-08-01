@@ -33,5 +33,5 @@ class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage {
 
     override fun hashCode() = Objects.hash(rgb)
 
-    override fun equals(other: Any?) = other is LinuxNativeImage && rgb.contentEquals(other.rgb)
+    override fun equals(other: Any?) = other === this || other is LinuxNativeImage && rgb.contentEquals(other.rgb)
 }

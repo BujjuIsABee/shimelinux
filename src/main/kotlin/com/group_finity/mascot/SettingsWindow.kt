@@ -190,7 +190,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     var isInteractiveWindowReloadRequired = false
 
     init {
-        val icon = loadResource("/img/icon.png").use { ImageIO.read(it) }
+        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("Settings")
         layout = BorderLayout()
