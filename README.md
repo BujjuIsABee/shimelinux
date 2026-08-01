@@ -28,6 +28,27 @@ You can also use an AUR helper.
 
 `yay -S shimelinux` or `paru -S shimelinux`
 
+### Nix and NixOS
+
+If you are on **NixOS** or are using the nix package manager, you can install ShimeLinux from the Nix User Repository.
+
+First setup the NUR by following its [documentation](https://nur.nix-community.org/documentation/)
+
+Then add ShimeLinux to your packages:
+```nix
+{
+  # System-wide install
+  environment.systemPackages = with pkgs; [
+    nur.repos.claymorwan.shimelinux
+  ];
+
+  # User side / Home Manager install
+  home.packages = with pkgs; [
+    nur.claymorwan.shimelinux
+  ];
+}
+```
+
 ### Other distributions
 
 If none of these options work for you, you can download the `.jar` file [here](https://github.com/BujjuIsABee/shimelinux/releases). You will also need to install the following dependencies:
