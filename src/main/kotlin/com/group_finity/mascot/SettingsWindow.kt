@@ -1063,7 +1063,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     companion object {
-        private const val VERSION = "1.1.3"
+        private const val VERSION = "1.2.0"
 
         private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
         private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"

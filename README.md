@@ -56,15 +56,11 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 | Ubuntu 26.04    | GNOME 50                                                                  |
 | NixOS 26.05     | KDE Plasma 6.7, niri v26.04                                               |
 
-### NixOS
-
-The system tray icon does not work on NixOS. To access the settings menu and Shimeji chooser, you will need to right-click on ShimeLinux in your application launcher and select "Settings" or "Choose Shimeji," or launch the application from the terminal with the `--settings` or `--chooser` flags.
-
 ### Tiling Window Managers
 
-ShimeLinux supports **Hyprland** and **niri**. On these compositors, Shimeji are displayed using Wayland layers instead of windows. Some menus may be buggy, as ShimeLinux uses an outdated UI library with limited Wayland support.
+ShimeLinux supports **Hyprland** and **niri**.
 
-> [!TIP]
+> [!Note]
 > On niri, the settings menu, Shimeji chooser, and right-click popup menus will be displayed as full windows by default. To make them display as floating windows, add this to your niri config file:
 > 
 > ```kdl
@@ -73,6 +69,8 @@ ShimeLinux supports **Hyprland** and **niri**. On these compositors, Shimeji are
 >   open-floating true
 > }
 > ```
+> 
+> Some menus may still be buggy, as ShimeLinux uses an outdated UI library with limited Wayland support.
 
 ## Licenses
 
