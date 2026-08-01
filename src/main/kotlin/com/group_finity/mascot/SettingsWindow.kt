@@ -22,10 +22,7 @@
 
 package com.group_finity.mascot
 
-import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLaf
-import com.formdev.flatlaf.FlatLightLaf
-import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -1026,36 +1023,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 }
             }
 
-            var isDark = theme == "FlatDark"
+            UIManager.setLookAndFeel(when (theme) {
+                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
+                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                else -> "com.formdev.flatlaf.FlatDarkLaf"
+            })
 
-            if (theme == "Gtk") {
-                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
-
-                val backgroundColor = UIManager.getColor("Panel.background")
-                val textColor = UIManager.getColor("Label.foreground")
-                val accentColor = UIManager.getColor("textHighlight")
-
-                val hsb = Color.RGBtoHSB(backgroundColor.red, backgroundColor.green, backgroundColor.blue, null)
-                isDark = hsb[2] < 0.5
-
-                FlatLaf.setGlobalExtraDefaults(
-                    mapOf(
-                        "@background" to String.format("#%06X", backgroundColor.rgb and 0xFFFFFF),
-                        "@foreground" to String.format("#%06X", textColor.rgb and 0xFFFFFF),
-                        "@accentColor" to String.format("#%06X", accentColor.rgb and 0xFFFFFF)
-                    )
-                )
-            }
-
-            FlatLaf.setup(
-                if (isDark) {
-                    FlatDarkLaf()
-                } else {
-                    FlatLightLaf()
-                }
-            )
-
-            for (window in getWindows().filter { it !is TranslucentWindow }) {
+            for (window in getWindows()) {
                 SwingUtilities.updateComponentTreeUI(window)
             }
 

@@ -22,9 +22,7 @@
 
 package com.group_finity.mascot
 
-import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLaf
-import com.formdev.flatlaf.FlatLightLaf
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
@@ -36,7 +34,6 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
-import java.awt.Color
 import java.awt.Point
 import java.io.File
 import java.util.Locale
@@ -178,36 +175,12 @@ object Main {
         try {
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
-            val theme = getProperty("Theme", "FlatDark")
-
-            var isDark = theme == "FlatDark"
-
-            if (theme == "Gtk") {
-                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
-
-                val backgroundColor = UIManager.getColor("Panel.background")
-                val textColor = UIManager.getColor("Label.foreground")
-                val accentColor = UIManager.getColor("textHighlight")
-
-                val hsb = Color.RGBtoHSB(backgroundColor.red, backgroundColor.green, backgroundColor.blue, null)
-                isDark = hsb[2] < 0.5
-
-                FlatLaf.setGlobalExtraDefaults(
-                    mapOf(
-                        "@background" to String.format("#%06X", backgroundColor.rgb and 0xFFFFFF),
-                        "@foreground" to String.format("#%06X", textColor.rgb and 0xFFFFFF),
-                        "@accentColor" to String.format("#%06X", accentColor.rgb and 0xFFFFFF)
-                    )
-                )
-            }
-
-            FlatLaf.setup(
-                if (isDark) {
-                    FlatDarkLaf()
-                } else {
-                    FlatLightLaf()
-                }
-            )
+            UIManager.setLookAndFeel(when (getProperty("Theme", "FlatDark")) {
+                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
+                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                else -> "com.formdev.flatlaf.FlatDarkLaf"
+            })
         } catch (_: Exception) {
             log.log(Level.WARNING, "Failed to set theme.")
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
