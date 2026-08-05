@@ -26,15 +26,15 @@ import java.io.File
 import kotlin.io.outputStream
 
 class WaylandLib {
-    external fun createMascot(obj: Any?): Int
+    external fun createMascot(obj: Any?): Long
 
-    external fun setBounds(senderIndex: Int, x: Int, y: Int, width: Int, height: Int)
+    external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
-    external fun setImage(senderIndex: Int, rgb: IntArray)
+    external fun setImage(senderPtr: Long, rgb: IntArray)
 
-    external fun setCursor(senderIndex: Int, useHand: Boolean)
+    external fun setCursor(senderPtr: Long, useHand: Boolean)
 
-    external fun dispose(id: Int)
+    external fun dispose(senderPtr: Long)
 
     external fun getScreenRect(): IntArray
 

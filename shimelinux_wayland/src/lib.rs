@@ -22,7 +22,7 @@
 
 use std::{
     cmp,
-    sync::{Mutex, mpsc},
+    sync::mpsc::{Sender, channel},
     thread,
 };
 
@@ -31,7 +31,7 @@ use jni::{
     elements::ReleaseMode,
     errors::{Error, ThrowRuntimeExAndDefault},
     objects::{JClass, JIntArray, JObject},
-    sys::jboolean,
+    sys::{jboolean, jint, jlong},
 };
 use smithay_client_toolkit::{
     compositor::CompositorState,
@@ -71,152 +71,165 @@ enum Event {
     Dispose(),
 }
 
-static SENDERS: Mutex<Vec<mpsc::Sender<Event>>> = Mutex::new(Vec::new());
-
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createMascot<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     object: JObject<'caller>,
-) -> i32 {
-    let mut senders = SENDERS.lock().unwrap();
-    let (sender, receiver) = mpsc::channel::<Event>();
-    senders.push(sender);
+) -> jlong {
+    unowned_env
+        .with_env(|env| -> Result<jlong, Error> {
+            let (sender, receiver) = channel::<Event>();
 
-    let connection = Connection::connect_to_env().expect("Failed to get connection.");
-    let (globals, mut event_queue) = registry_queue_init(&connection).expect("Failed to initialize event queue");
-    let qh = event_queue.handle();
+            let connection = Connection::connect_to_env().unwrap();
+            let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
+            let qh = event_queue.handle();
 
-    let compositor_state = CompositorState::bind(&globals, &qh).expect("Failed to get compositor state");
-    let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
-    let shm = Shm::bind(&globals, &qh).expect("Failed to get shm");
-    let pool = SlotPool::new(256 * 256 * 4, &shm).expect("Failed to get pool");
-    let surface = compositor_state.create_surface(&qh);
-    let layer = layer_shell.create_layer_surface(
-        &qh,
-        surface,
-        Layer::Overlay,
-        Some("shimelinux"),
-        None
-    );
+            let compositor_state = CompositorState::bind(&globals, &qh)
+                .expect("Failed to get compositor state");
+            let layer_shell: LayerShell = LayerShell::bind(&globals, &qh)
+                .expect("Failed to get layer shell");
+            let shm = Shm::bind(&globals, &qh)
+                .expect("Failed to get shm");
+            let pool = SlotPool::new(256 * 256 * 4, &shm)
+                .expect("Failed to create pool");
 
-    layer.set_exclusive_zone(-1);
-    layer.set_anchor(Anchor::TOP | Anchor::LEFT);
-    layer.set_size(1, 1);
-    layer.commit();
+            let surface = compositor_state.create_surface(&qh);
+            let layer = layer_shell.create_layer_surface(
+                &qh,
+                surface,
+                Layer::Overlay,
+                Some("shimelinux"),
+                None,
+            );
 
-    let object_ref = unowned_env.with_env(|env| -> Result<_, Error> {
-        Ok(env.new_global_ref(object).expect("Failed to get object ref"))
-    }).resolve::<ThrowRuntimeExAndDefault>();
+            layer.set_exclusive_zone(-1);
+            layer.set_anchor(Anchor::TOP | Anchor::LEFT);
+            layer.set_size(1, 1);
+            layer.commit();
 
-    let mut mascot = Mascot {
-        object: object_ref,
-        compositor_state,
-        registry_state: RegistryState::new(&globals),
-        output_state: OutputState::new(&globals, &qh),
-        seat_state: SeatState::new(&globals, &qh),
-        cursor_state: CursorState::default(),
-        shm,
-        pool,
-        layer,
-        layer_mask: Vec::new(),
-        configured: false,
-        image_rgb: Vec::new(),
-        image_bounds: Rect::default(),
-    };
+            let mut mascot = Mascot {
+                object: env.new_global_ref(object).unwrap(),
 
-    thread::spawn(move || {
-        loop {
-            _ = event_queue.blocking_dispatch(&mut mascot);
+                compositor_state,
+                registry_state: RegistryState::new(&globals),
+                output_state: OutputState::new(&globals, &qh),
+                seat_state: SeatState::new(&globals, &qh),
+                cursor_state: CursorState::default(),
+                shm,
+                pool,
 
-            // Handle events
-            while let Ok(event) = receiver.try_recv() {
-                match event {
-                    Event::SetBounds(bounds) => {
-                        mascot.set_bounds(bounds);
-                    }
-                    Event::SetImage(rgb) => {
-                        mascot.set_image(rgb);
-                    }
-                    Event::SetCursor(use_hand) => {
-                        mascot.set_cursor(&connection, &qh, use_hand);
-                    }
-                    Event::Dispose() => {
-                        mascot.dispose();
+                layer,
+                layer_mask: Vec::new(),
+                configured: false,
+                image_rgb: Vec::new(),
+                image_bounds: Rect::default(),
+            };
+
+            thread::spawn(move || {
+                loop {
+                    event_queue.blocking_dispatch(&mut mascot).unwrap();
+
+                    // Handle events
+                    while let Ok(event) = receiver.try_recv() {
+                        match event {
+                            Event::SetBounds(bounds) => {
+                                mascot.set_bounds(bounds);
+                            }
+                            Event::SetImage(rgb) => {
+                                mascot.set_image(rgb);
+                            }
+                            Event::SetCursor(use_hand) => {
+                                mascot.set_cursor(&connection, &qh, use_hand);
+                            }
+                            Event::Dispose() => {
+                                mascot.dispose();
+                            }
+                        }
                     }
                 }
-            }
-        }
-    });
+            });
 
-    senders.len() as i32 - 1 // return the sender index; it is used as an identifier for the mascot
+            Ok(Box::into_raw(Box::new(sender)) as jlong) // Return a raw pointer to the sender
+        })
+        .resolve::<ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setBounds<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
+    mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    sender_index: i32,
-    x: i32,
-    y: i32,
-    width: i32,
-    height: i32,
+    sender_ptr: jlong,
+    x: jint,
+    y: jint,
+    width: jint,
+    height: jint,
 ) {
-    let senders = SENDERS.lock().unwrap();
-    if let Some(sender) = senders.get(sender_index as usize) {
-        let _ = sender.send(Event::SetBounds(Rect {
-            x: cmp::max(-width + 1, x),
-            y: cmp::max(-height + 1, y),
-            width: cmp::max(1, width),
-            height: cmp::max(1, height),
-        }));
-    }
+    unowned_env
+        .with_env(|_env| -> Result<(), Error> {
+            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+            sender.send(Event::SetBounds(Rect {
+                x: cmp::max(-width + 1, x),
+                y: cmp::max(-height + 1, y),
+                width: cmp::max(1, width),
+                height: cmp::max(1, height),
+            })).unwrap();
+
+            Ok(())
+        })
+        .resolve::<ThrowRuntimeExAndDefault>();
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setImage<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    sender_index: i32,
+    sender_ptr: jlong,
     rgb: JIntArray,
 ) {
-    let senders = SENDERS.lock().unwrap();
-    if let Some(sender) = senders.get(sender_index as usize) {
-        let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
-            let rgb = unsafe {
-                rgb.get_elements(env, ReleaseMode::NoCopyBack).unwrap().to_vec()
-            };
+    unowned_env
+        .with_env(|env| -> Result<(), Error> {
+            let rgb = unsafe { rgb.get_elements(env, ReleaseMode::NoCopyBack).unwrap() };
 
-            Ok(rgb)
-        });
+            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+            sender.send(Event::SetImage(rgb.to_vec())).unwrap();
 
-        _ = sender.send(Event::SetImage(outcome.resolve::<ThrowRuntimeExAndDefault>()));
-    }
+            Ok(())
+        })
+        .resolve::<ThrowRuntimeExAndDefault>();
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setCursor<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
+    mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    sender_index: i32,
+    sender_ptr: jlong,
     use_hand: jboolean,
 ) {
-    let senders = SENDERS.lock().unwrap();
-    if let Some(sender) = senders.get(sender_index as usize) {
-        _ = sender.send(Event::SetCursor(use_hand));
-    }
+    unowned_env
+        .with_env(|_env| -> Result<(), Error> {
+            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+            sender.send(Event::SetCursor(use_hand)).unwrap();
+
+            Ok(())
+        })
+        .resolve::<ThrowRuntimeExAndDefault>();
 }
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_dispose<'caller>(
-    mut _unowned_env: EnvUnowned<'caller>,
+    mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
-    sender_index: i32,
+    sender_ptr: jlong,
 ) {
-    let senders = SENDERS.lock().unwrap();
-    if let Some(sender) = senders.get(sender_index as usize) {
-        _ = sender.send(Event::Dispose());
-    }
+    unowned_env
+        .with_env(|_env| -> Result<(), Error> {
+            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+            sender.send(Event::Dispose()).unwrap();
+
+            Ok(())
+        })
+        .resolve::<ThrowRuntimeExAndDefault>();
 }
 
 #[unsafe(no_mangle)]
@@ -224,18 +237,25 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
 ) -> JIntArray<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
-        let array = JIntArray::new(env, 4).unwrap();
-        let screen_rect = get_screen_rect();
-        array.set_region(env, 0, &[
-            screen_rect.x,
-            screen_rect.y,
-            screen_rect.width,
-            screen_rect.height,
-        ]).expect("Failed to set array");
+    unowned_env
+        .with_env(|env| -> Result<_, Error> {
+            let screen_rect = get_screen_rect();
 
-        Ok(array)
-    });
+            let array = JIntArray::new(env, 4).unwrap();
+            array
+                .set_region(
+                    env,
+                    0,
+                    &[
+                        screen_rect.x,
+                        screen_rect.y,
+                        screen_rect.width,
+                        screen_rect.height,
+                    ],
+                )
+                .unwrap();
 
-    outcome.resolve::<ThrowRuntimeExAndDefault>()
+            Ok(array)
+        })
+        .resolve::<ThrowRuntimeExAndDefault>()
 }

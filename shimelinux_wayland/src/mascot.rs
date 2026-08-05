@@ -22,17 +22,11 @@
 
 use std::{
     cmp,
+    panic::{AssertUnwindSafe, catch_unwind},
     sync::{LazyLock, Mutex, OnceLock},
 };
 
-use jni::{
-    JNIVersion, JValue,
-    errors::Error,
-    jni_sig, jni_str,
-    objects::JObject,
-    refs::Global,
-    vm::{InitArgsBuilder, JavaVM},
-};
+use jni::{JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
     delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
@@ -92,7 +86,6 @@ pub struct Mascot {
     pub layer: LayerSurface,
     pub layer_mask: Vec<Rect>,
     pub configured: bool,
-
     pub image_rgb: Vec<i32>,
     pub image_bounds: Rect,
 }
@@ -134,7 +127,7 @@ impl CompositorHandler for Mascot {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        self.set_screen_rect(output);
+        set_screen_rect(&self.output_state, output);
     }
 
     fn surface_leave(
@@ -153,42 +146,20 @@ impl OutputHandler for Mascot {
         &mut self.output_state
     }
 
-    fn new_output(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        output: WlOutput,
-    ) {
-        self.set_screen_rect(&output);
+    fn new_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, output: WlOutput) {
+        set_screen_rect(&self.output_state, &output);
     }
 
-    fn update_output(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        output: WlOutput,
-    ) {
-        self.set_screen_rect(&output);
+    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, output: WlOutput) {
+        set_screen_rect(&self.output_state, &output);
     }
 
-    fn output_destroyed(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _output: WlOutput,
-    ) {
-    }
+    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 }
 
 delegate_layer!(Mascot);
 impl LayerShellHandler for Mascot {
-    fn closed(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _layer: &LayerSurface
-    ) {
-    }
+    fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {}
 
     fn configure(
         &mut self,
@@ -211,13 +182,7 @@ impl SeatHandler for Mascot {
         &mut self.seat_state
     }
 
-    fn new_seat(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _seat: WlSeat
-    ) {
-    }
+    fn new_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
 
     fn new_capability(
         &mut self,
@@ -227,8 +192,7 @@ impl SeatHandler for Mascot {
         capability: Capability,
     ) {
         if capability == Capability::Pointer && self.cursor_state.pointer.is_none() {
-            let pointer = self.seat_state.get_pointer(qh, &seat).expect("Failed to get pointer");
-            self.cursor_state.pointer = Some(pointer);
+            self.cursor_state.pointer = self.seat_state.get_pointer(qh, &seat).ok();
         }
     }
 
@@ -244,13 +208,7 @@ impl SeatHandler for Mascot {
         }
     }
 
-    fn remove_seat(
-        &mut self,
-        _conn: &Connection,
-        _qh: &QueueHandle<Self>,
-        _seat: WlSeat
-    ) {
-    }
+    fn remove_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
 }
 
 delegate_pointer!(Mascot);
@@ -305,33 +263,25 @@ impl PointerHandler for Mascot {
             }
         }
 
-        let jvm = JVM.get_or_init(|| {
-            let jvm_args = InitArgsBuilder::new()
-                .version(JNIVersion::V1_8)
-                .option("-Xcheck:jni")
-                .build()
-                .unwrap();
+        if let Ok(jvm) = JavaVM::singleton() {
+            let _ = jvm.attach_current_thread(|env| -> Result<(), Error> {
+                env.call_method(
+                    &self.object,
+                    jni_str!("updateCursor"),
+                    jni_sig!((bool, bool, bool, bool, i32, i32)),
+                    &[
+                        JValue::from(self.cursor_state.left_pressed),
+                        JValue::from(self.cursor_state.right_pressed),
+                        JValue::from(self.cursor_state.left_released),
+                        JValue::from(self.cursor_state.right_released),
+                        JValue::from(self.cursor_state.position.x),
+                        JValue::from(self.cursor_state.position.y),
+                    ],
+                )?;
 
-            JavaVM::new(jvm_args).expect("Failed to get JVM")
-        });
-
-        let _ = jvm.attach_current_thread(|env| -> Result<_, Error> {
-            let _ = env.call_method(
-                &self.object,
-                jni_str!("updateCursor"),
-                jni_sig!((bool, bool, bool, bool, i32, i32)),
-                &[
-                    JValue::from(self.cursor_state.left_pressed),
-                    JValue::from(self.cursor_state.right_pressed),
-                    JValue::from(self.cursor_state.left_released),
-                    JValue::from(self.cursor_state.right_released),
-                    JValue::from(self.cursor_state.position.x),
-                    JValue::from(self.cursor_state.position.y),
-                ],
-            );
-
-            Ok(())
-        });
+                Ok(())
+            });
+        }
 
         self.cursor_state.left_pressed = false;
         self.cursor_state.right_pressed = false;
@@ -360,12 +310,7 @@ delegate_noop!(Mascot: ignore WlRegion);
 impl Mascot {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
-        self.layer.set_margin(
-            bounds.y,
-            0,
-            0,
-            bounds.x,
-        );
+        self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
     pub fn set_image(&mut self, rgb: Vec<i32>) {
@@ -374,12 +319,14 @@ impl Mascot {
     }
 
     pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
-        let mut theme = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24)
-            .expect("Failed to get cursor theme");
-
+        let Ok(mut theme) = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24) else { return; };
         let name = if use_hand { "pointer" } else { "left_ptr" };
-        if let Some(cursor) = theme.get_cursor(name) {
-            let surface = self.cursor_state.surface.get_or_insert(self.compositor_state.create_surface(qh));
+        if let Some(cursor) = theme.get_cursor(name)
+        {
+            let surface = self
+                .cursor_state
+                .surface
+                .get_or_insert(self.compositor_state.create_surface(qh));
 
             // Attach None to clear the previous buffer
             surface.attach(None, 0, 0);
@@ -398,66 +345,58 @@ impl Mascot {
     }
 
     fn draw(&mut self, qh: &QueueHandle<Self>) {
-        let width = cmp::max(1, self.image_bounds.width);
-        let height = cmp::max(1, self.image_bounds.height);
-        let stride = width * 4;
+        let _ = catch_unwind(AssertUnwindSafe(|| {
+            let width = cmp::max(1, self.image_bounds.width);
+            let height = cmp::max(1, self.image_bounds.height);
+            let stride = width * 4;
 
-        self.layer.set_size(
-            width as u32,
-            height as u32,
-        );
+            self.layer.set_size(width as u32, height as u32);
 
-        let (buffer, canvas) = self
-            .pool
-            .create_buffer(width, height, stride, Format::Argb8888)
-            .expect("Failed to create buffer");
+            let (buffer, canvas) = self
+                .pool
+                .create_buffer(width, height, stride, Format::Argb8888)
+                .unwrap();
 
-        if !self.image_rgb.is_empty() {
-            // Draw the image to the canvas
-            for y in 0..height {
-                for x in 0..width {
-                    let canvas_index = cmp::min(
-                        ((y * width + x) * 4) as usize,
-                        canvas.len() - 1,
-                    );
-                    let image_index = cmp::min(
-                        (y * width + x) as usize,
-                        self.image_rgb.len() - 1,
-                    );
-
-                    canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
+            if !self.image_rgb.is_empty() {
+                // Draw the image to the canvas
+                for y in 0..height {
+                    for x in 0..width {
+                        let canvas_index = cmp::min(((y * width + x) * 4) as usize, canvas.len() - 1);
+                        let image_index = cmp::min((y * width + x) as usize, self.image_rgb.len() - 1);
+                        canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
+                    }
                 }
+
+                // Set the mask shape
+                let region = self.compositor_state.wl_compositor().create_region(&qh, ());
+                for rect in &self.layer_mask {
+                    region.add(rect.x, rect.y, rect.width, rect.height);
+                }
+                self.layer.set_input_region(Some(&region));
             }
 
-            // Set the mask shape
-            let region = self.compositor_state.wl_compositor().create_region(&qh, ());
-            for rect in &self.layer_mask {
-                region.add(rect.x, rect.y, rect.width, rect.height);
-            }
-            self.layer.set_input_region(Some(&region));
-        }
-
-        // Update the layer
-        self.layer.wl_surface().damage_buffer(0, 0, width, height);
-        self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
-        buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
-        self.layer.commit();
+            // Update the layer
+            self.layer.wl_surface().damage_buffer(0, 0, width, height);
+            self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
+            buffer.attach_to(self.layer.wl_surface()).unwrap();
+            self.layer.commit();
+        }));
     }
 
     fn update_layer_mask(&mut self) {
         let mut rects: Vec<Rect> = Vec::new();
-        for y in 0..self.image_bounds.height as u32 {
-            let mut section_start: Option<u32> = None;
-            for x in 0..self.image_bounds.width as u32 {
-                let index = cmp::min(
-                    (y * self.image_bounds.width as u32 + x) as usize,
-                    self.image_rgb.len() - 1,
-                );
+        let width = self.image_bounds.width;
+        let height = self.image_bounds.height;
+
+        for y in 0..height as u32 {
+            let mut start: Option<u32> = None;
+            for x in 0..width as u32 {
+                let index = cmp::min((y * width as u32 + x) as usize, self.image_rgb.len() - 1);
                 let alpha = (self.image_rgb[index] >> 24) & 0xFF;
-                if alpha > 0 && section_start.is_none() {
-                    section_start = Some(x);
-                } else if alpha == 0 && let Some(start) = section_start {
-                    section_start = None;
+                if alpha > 0 && start.is_none() {
+                    start = Some(x);
+                } else if alpha == 0 && start.is_some() {
+                    let start = start.take().unwrap();
                     rects.push(Rect {
                         x: start as i32,
                         y: y as i32,
@@ -467,31 +406,30 @@ impl Mascot {
                 }
             }
         }
+
         self.layer_mask = rects;
     }
-
-    fn set_screen_rect(&mut self, output: &WlOutput) {
-        if let Some(info) = self.output_state.info(output) {
-            if *OUTPUT_ID.get_or_init(|| info.id) == info.id {
-                let (width, height) = info.logical_size.unwrap_or_default();
-                let mut screen_rect = SCREEN_RECT.lock().unwrap();
-                *screen_rect = Rect {
-                    x: 0,
-                    y: 0,
-                    width,
-                    height,
-                };
-            }
-        }
-    }
 }
+
+static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
+static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
 
 pub fn get_screen_rect() -> Rect {
     let screen_rect = SCREEN_RECT.lock().unwrap();
     screen_rect.clone()
 }
 
-
-static JVM: OnceLock<JavaVM> = OnceLock::new();
-static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
-static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
+fn set_screen_rect(output_state: &OutputState, output: &WlOutput) {
+    if let Some(info) = output_state.info(output) {
+        if *OUTPUT_ID.get_or_init(|| info.id) == info.id {
+            let (width, height) = info.logical_size.unwrap_or_default();
+            let mut screen_rect = SCREEN_RECT.lock().unwrap();
+            *screen_rect = Rect {
+                x: 0,
+                y: 0,
+                width,
+                height,
+            };
+        }
+    }
+}

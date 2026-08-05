@@ -42,7 +42,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
 
         override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
             bounds = Rectangle(x, y, width, height)
-            lib.setBounds(senderIndex, x, y, width, height)
+            wl.setBounds(senderPtr, x, y, width, height)
         }
 
         override fun isShowing() = true
@@ -50,12 +50,12 @@ class WaylandTranslucentLayer : TranslucentWindow {
         override fun getLocationOnScreen() = Point(bounds.x, bounds.y)
 
         override fun setCursor(cursor: Cursor) {
-            lib.setCursor(senderIndex, cursor.type == Cursor.HAND_CURSOR)
+            wl.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
         }
     }
 
-    private val lib = requireNotNull(WaylandLib.instance) { "Wayland library is required on ${System.getenv("XDG_CURRENT_DESKTOP")}" }
-    private val senderIndex: Int = lib.createMascot(this)
+    private val wl: WaylandLib = requireNotNull(WaylandLib.instance) { "Wayland library is missing" }
+    private val senderPtr = wl.createMascot(this)
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var previousCursorPosition = Point(0, 0)
@@ -71,16 +71,16 @@ class WaylandTranslucentLayer : TranslucentWindow {
     }
 
     override fun updateImage() {
-        if (image != null) {
+        image?.let {
             imageChanged = false
-            lib.setImage(senderIndex, image!!.rgb)
+            wl.setImage(senderPtr, it.rgb)
         }
     }
 
     override fun setAlwaysOnTop(onTop: Boolean) {}
 
     override fun dispose() {
-        lib.dispose(senderIndex)
+        wl.dispose(senderPtr)
     }
 
     @Suppress("unused")
@@ -105,8 +105,10 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
 
         val newCursorPosition = Point(positionX + grabStart.x, positionY + grabStart.y)
-        if (previousCursorPosition != newCursorPosition) {
-            previousCursorPosition = newCursorPosition
+        val cursorMoved = previousCursorPosition != newCursorPosition
+        previousCursorPosition = newCursorPosition
+
+        if (cursorMoved) {
             when (System.getenv("XDG_CURRENT_DESKTOP")) {
                 "niri" -> {
                     WaylandEnvironment.cursorPosition = newCursorPosition
@@ -157,7 +159,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
             )
         }
 
-        if (previousCursorPosition != newCursorPosition) {
+        if (cursorMoved) {
             component.dispatchEvent(
                 MouseEvent(
                     component,
