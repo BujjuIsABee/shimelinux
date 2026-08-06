@@ -1,6 +1,6 @@
 .gradle
 build/
-distribution/
+distribution/build/
 shimelinux_wayland/target/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
