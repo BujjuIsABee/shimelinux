@@ -1,0 +1,38 @@
+name: Build
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Install Build Dependencies
+        run: sudo apt-get install -y libxkbcommon-dev rpm
+      - name: Build JAR
+        run: |
+          ./gradlew build
+          mkdir shimelinux
+          cp build/libs/*.jar .
+      - name: Build DEB and RPM
+        run: |
+          distribution/package_deb.sh
+          distribution/package_rpm.sh
+          cp distribution/build/*.deb .
+          cp distribution/build/*.rpm .
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: shimelinux
+          path: |
+            ./*.jar
+            ./*.deb
+            ./*.rpm

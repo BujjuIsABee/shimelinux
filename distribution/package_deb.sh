@@ -7,26 +7,6 @@ ARCHITECTURE='all'
 MAINTAINER='Bujju (https://github.com/BujjuIsABee)'
 DESCRIPTION='An unofficial Linux port of Shimeji-ee Desktop Pet'
 
-cd ../
-
-# Get installed size
-files=(
-  'shimelinux.sh'
-  'shimelinux.desktop'
-  'icon.svg'
-  "build/libs/${PACKAGE}-${VERSION}.jar"
-  'LICENSE'
-  'LICENSE-ORIGINAL'
-)
-
-total_size = 0
-for file in "${files[@]}"; do
-  size=$(wc -c < "$file")
-  total_size=$((total_size+size))
-done
-
-INSTALLED_SIZE=$((total_size / 1024))
-
 mkdir -p distribution/build/${PACKAGE}_${VERSION}_${ARCHITECTURE}/DEBIAN
 cat > distribution/build/${PACKAGE}_${VERSION}_${ARCHITECTURE}/DEBIAN/control << EOF
 Package: $PACKAGE
@@ -35,7 +15,6 @@ Depends: $DEPENDS
 Section: $SECTION
 Priority: $PRIORITY
 Architecture: $ARCHITECTURE
-Installed-Size: $INSTALLED_SIZE
 Maintainer: $MAINTAINER
 Description: $DESCRIPTION
 EOF

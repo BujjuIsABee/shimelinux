@@ -7,8 +7,6 @@ LICENSE='BSD-3-CLAUSE'
 SOURCE0='%{name}-%{version}.tar.gz'
 REQUIRES=('bash' 'java >= 21' 'libappindicator-gtk3')
 
-cd ../
-
 mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 cat > ~/rpmbuild/SPECS/${NAME}.spec << EOF
 Name:           $NAME
@@ -29,20 +27,20 @@ $SUMMARY
 %setup -q
 
 %install
-rm -rf \$RPM_BUILD_ROOT
-mkdir -p \$RPM_BUILD_ROOT/%{_bindir}
-mkdir -p \$RPM_BUILD_ROOT/%{_datadir}/java
-mkdir -p \$RPM_BUILD_ROOT/%{_datadir}/icons/hicolor/scalable/apps
-mkdir -p \$RPM_BUILD_ROOT/%{_datadir}/applications
+rm -rf \%{buildroot}
+mkdir -p \%{buildroot}/%{_bindir}
+mkdir -p \%{buildroot}/%{_datadir}/java
+mkdir -p \%{buildroot}/%{_datadir}/icons/hicolor/scalable/apps
+mkdir -p \%{buildroot}/%{_datadir}/applications
 
-cp %{name}.sh \$RPM_BUILD_ROOT/%{_bindir}/%{name}
-cp %{name}-%{version}.jar \$RPM_BUILD_ROOT/%{_datadir}/java/%{name}.jar
-cp icon.svg \$RPM_BUILD_ROOT/%{_datadir}/icons/hicolor/scalable/apps/shimelinux.svg
-cp %{name}.desktop \$RPM_BUILD_ROOT/%{_datadir}/applications/
-chmod +x \$RPM_BUILD_ROOT/%{_bindir}/%{name}
+cp %{name}.sh \%{buildroot}/%{_bindir}/%{name}
+cp %{name}-%{version}.jar \%{buildroot}/%{_datadir}/java/%{name}.jar
+cp icon.svg \%{buildroot}/%{_datadir}/icons/hicolor/scalable/apps/shimelinux.svg
+cp %{name}.desktop \%{buildroot}/%{_datadir}/applications/
+chmod +x \%{buildroot}/%{_bindir}/%{name}
 
 %clean
-rm -rf \$RPM_BUILD_ROOT
+rm -rf \%{buildroot}
 
 %files
 %{_bindir}/%{name}
