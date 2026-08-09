@@ -61,6 +61,5 @@ cp LICENSE-ORIGINAL ~/rpmbuild/SOURCES/${NAME}-${VERSION}/LICENSE-ORIGINAL
 tar -czf ~/rpmbuild/SOURCES/${NAME}-${VERSION}.tar.gz -C ~/rpmbuild/SOURCES ${NAME}-${VERSION}
 
 rpmbuild -bb ~/rpmbuild/SPECS/shimelinux.spec
-mkdir -p distribution/build
-mv ~/rpmbuild/RPMS/${BUILD_ARCH}/*.rpm distribution/build
+mv ~/rpmbuild/RPMS/${BUILD_ARCH}/*.rpm .
 rm -rf ~/rpmbuild
