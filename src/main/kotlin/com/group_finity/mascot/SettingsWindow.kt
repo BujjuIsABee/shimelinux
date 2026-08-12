@@ -23,6 +23,7 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
+import dorkbox.desktop.Desktop
 import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import java.awt.BorderLayout
 import java.awt.CardLayout
@@ -35,6 +36,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Image
 import java.awt.Insets
+import java.net.URI
 import java.util.Hashtable
 import java.util.Properties
 import javax.imageio.ImageIO
@@ -175,6 +177,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val aboutIcon: JLabel
     private val titleLabel: JLabel
     private val versionLabel: JLabel
+    private val aboutButtonsPanel: JPanel
+    private val githubButton: JButton
+    private val issuesButton: JButton
+    private val shimejieeButton: JButton
     private val footerPanel: JPanel
     private val doneButton: JButton
     private val cancelButton: JButton
@@ -914,10 +920,34 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         versionLabel = JLabel(VERSION)
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
+        aboutButtonsPanel = JPanel(FlowLayout())
+
+        githubButton = JButton("GitHub")
+        githubButton.addActionListener {
+            Desktop.browseURL(URI("https://github.com/BujjuIsABee/shimelinux"))
+        }
+
+        issuesButton = JButton("Issues")
+        issuesButton.addActionListener {
+            Desktop.browseURL(URI("https://github.com/BujjuIsABee/shimelinux/issues"))
+        }
+
+        shimejieeButton = JButton("Shimeji-ee")
+        shimejieeButton.addActionListener {
+            Desktop.browseURL(URI("https://kilkakon.com/shimeji"))
+        }
+
+        aboutButtonsPanel.add(githubButton)
+        aboutButtonsPanel.add(issuesButton)
+        aboutButtonsPanel.add(shimejieeButton)
+
         aboutTab.add(Box.createVerticalGlue())
+        aboutTab.add(Box.createVerticalStrut(30))
         aboutTab.add(aboutIcon)
         aboutTab.add(titleLabel)
         aboutTab.add(versionLabel)
+        aboutTab.add(Box.createVerticalStrut(30))
+        aboutTab.add(aboutButtonsPanel)
         aboutTab.add(Box.createVerticalGlue())
 
         tabbedPane.addTab(localize("General"), generalTab)
