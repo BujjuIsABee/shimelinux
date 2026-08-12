@@ -25,7 +25,19 @@ package io.github.bujjuisabee.shimelinux.linux
 import java.io.File
 import kotlin.io.outputStream
 
-class WaylandLib {
+object WaylandLib {
+    init {
+        val libFile = File.createTempFile("libshimelinux_wayland", ".so")
+        libFile.deleteOnExit()
+        this::class.java.getResourceAsStream("/lib/libshimelinux_wayland.so")?.use { input ->
+            libFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        System.load(libFile.absolutePath)
+    }
+
     external fun createMascot(obj: Any?): Long
 
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
@@ -37,21 +49,4 @@ class WaylandLib {
     external fun dispose(senderPtr: Long)
 
     external fun getScreenRect(): IntArray
-
-    companion object {
-        var instance: WaylandLib? = null
-
-        init {
-            this::class.java.getResourceAsStream("/lib/libshimelinux_wayland.so")?.use { input ->
-                val libFile = File.createTempFile("libshimelinux_wayland", ".so")
-                libFile.deleteOnExit()
-                libFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-
-                System.load(libFile.absolutePath)
-                instance = WaylandLib()
-            }
-        }
-    }
 }

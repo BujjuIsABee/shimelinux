@@ -29,6 +29,8 @@ import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(Move::class.java.name)
+
 open class Move(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -58,7 +60,7 @@ open class Move(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.info { "Lost ground ($mascot, $this)" }
+            logger.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
@@ -100,8 +102,6 @@ open class Move(
     }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val PARAMETER_TARGETX = "TargetX"
         private const val DEFAULT_TARGETX = Int.MAX_VALUE
 

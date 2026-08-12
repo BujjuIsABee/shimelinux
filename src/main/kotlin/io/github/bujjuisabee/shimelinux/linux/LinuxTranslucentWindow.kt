@@ -37,6 +37,13 @@ import java.awt.geom.Area
 import java.awt.geom.Path2D
 import javax.swing.JWindow
 
+private val maskCache = mutableMapOf<LinuxNativeImage, Area>()
+private val gc = GraphicsEnvironment
+    .getLocalGraphicsEnvironment()
+    .defaultScreenDevice
+    .configurations
+    .firstOrNull { it.isTranslucencyCapable }
+
 class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
     private var image: LinuxNativeImage? = null
     private var offset = Point(0, 0)
@@ -78,13 +85,10 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
     override fun asComponent() = this
 
     override fun setImage(image: NativeImage) {
-        if (image is LinuxNativeImage) {
-            this.image = image
-        }
+        this.image = image as LinuxNativeImage
     }
 
     override fun updateImage() {
-        validate()
         repaint()
     }
 
@@ -113,10 +117,5 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
                 )
             )
         }
-    }
-
-    companion object {
-        private val maskCache = mutableMapOf<LinuxNativeImage, Area>()
-        private val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
     }
 }

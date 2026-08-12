@@ -55,8 +55,10 @@ abstract class BorderedAction(
     }
 
     companion object {
-        const val PARAMETER_BORDERTYPE = "BorderType"
-        private val DEFAULT_BORDERTYPE: String? = null
+        private const val PARAMETER_BORDERTYPE = "BorderType"
+
+        @JvmField
+        val DEFAULT_BORDERTYPE: String? = null
 
         const val BORDERTYPE_CEILING = "Ceiling"
         const val BORDERTYPE_WALL = "Wall"

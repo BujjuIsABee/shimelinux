@@ -29,6 +29,7 @@ import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.MascotImage
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
+import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import java.awt.Cursor
 import java.awt.Point
 import java.awt.Rectangle
@@ -46,24 +47,31 @@ import javax.swing.SwingUtilities
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 
+private val logger = Logger.getLogger(Mascot::class.java.name)
+private val lastId = AtomicInteger()
+
 class Mascot(var imageSet: String) {
     private val id = lastId.incrementAndGet()
     private val window = NativeFactory.instance.newTranslucentWindow()
-    private var debugWindow: DebugWindow? = null
-    val environment = MascotEnvironment(this)
-    val variables = VariableMap()
-    val affordances = mutableListOf<String>()
-    val hotspots = mutableListOf<Hotspot>()
-    val isHotspotClicked get() = cursorPosition != null
     var manager: Manager? = null
     var anchor = Point(0, 0)
     var image: MascotImage? = null
-    var sound: String? = null
     var isLookRight = false
-    var isPaused = false
-    var isDragging = false
+    var behavior: Behavior? = null
+        set(value) {
+            field = value?.also { it.init(this) }
+        }
+    var time = 0
+        private set
     private var isAnimating = true
         get() = field && !isPaused
+    var isPaused = false
+    var isDragging = false
+    val environment = MascotEnvironment(this)
+    var sound: String? = null
+    private var debugWindow: DebugWindow? = null
+    val affordances = mutableListOf<String>()
+    val hotspots = mutableListOf<Hotspot>()
     var cursorPosition: Point? = null
         set(value) {
             field = value
@@ -73,6 +81,8 @@ class Mascot(var imageSet: String) {
                 refreshCursor(value)
             }
         }
+    val variables = VariableMap()
+    val isHotspotClicked get() = cursorPosition != null
     val bounds: Rectangle
         get() {
             val image = image
@@ -84,12 +94,6 @@ class Mascot(var imageSet: String) {
                 return window.asComponent().bounds
             }
         }
-    var behavior: Behavior? = null
-        set(value) {
-            field = value?.also { it.init(this) }
-        }
-    var time = 0
-        private set
 
     @Suppress("unused")
     val count: Int
@@ -100,7 +104,7 @@ class Mascot(var imageSet: String) {
         get() = manager?.count ?: 0
 
     init {
-        log.info { "Created a mascot ($this)" }
+        logger.info { "Created a mascot ($this)" }
 
         window.setAlwaysOnTop(true)
         window.asComponent().addMouseListener(object : MouseAdapter() {
@@ -115,8 +119,8 @@ class Mascot(var imageSet: String) {
                         try {
                             behavior.mousePressed(e)
                         } catch (e: CantBeAliveException) {
-                            log.log(Level.SEVERE, e) { "Fatal Error" }
-                            showError(localize("SevereShimejiErrorErrorMessage"), e)
+                            logger.log(Level.SEVERE, e) { "Fatal Error" }
+                            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
                             dispose()
                         }
                     }
@@ -134,8 +138,8 @@ class Mascot(var imageSet: String) {
                         try {
                             behavior.mouseReleased(e)
                         } catch (e: CantBeAliveException) {
-                            log.log(Level.SEVERE, e) { "Fatal Error" }
-                            showError(localize("SevereShimejiErrorErrorMessage"), e)
+                            logger.log(Level.SEVERE, e) { "Fatal Error" }
+                            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
                             dispose()
                         }
                     }
@@ -175,9 +179,7 @@ class Mascot(var imageSet: String) {
         popup.addPopupMenuListener(object : PopupMenuListener {
             override fun popupMenuCanceled(e: PopupMenuEvent) {
                 // Prevent freezing on Wayland environment when closing the menu
-                if (System.getenv("XDG_CURRENT_DESKTOP") == "Hyprland" ||
-                    System.getenv("XDG_CURRENT_DESKTOP") == "niri"
-                ) {
+                if (DesktopType.current == DesktopType.WAYLAND) {
                     SwingUtilities.getWindowAncestor(popup).dispose()
                 }
             }
@@ -234,13 +236,7 @@ class Mascot(var imageSet: String) {
             Main.exit()
         }
 
-        val pauseMenu = JMenuItem(
-            if (isAnimating) {
-                localize("PauseAnimations")
-            } else {
-                localize("ResumeAnimations")
-            }
-        )
+        val pauseMenu = JMenuItem(localize(if (isAnimating) "PauseAnimations" else "ResumeAnimations"))
         pauseMenu.addActionListener {
             isPaused = !isPaused
         }
@@ -258,8 +254,8 @@ class Mascot(var imageSet: String) {
                             try {
                                 behavior = config.buildBehavior(behaviorName)
                             } catch (e: Exception) {
-                                log.log(Level.SEVERE, e) { "Failed to set behavior ($this)" }
-                                showError(localize("CouldNotSetBehaviorErrorMessage"), e)
+                                logger.log(Level.SEVERE, e) { "Failed to set behavior ($this)" }
+                                Main.showError(localize("CouldNotSetBehaviorErrorMessage"), e)
                             }
                         }
                         behaviorsSubmenu.add(item)
@@ -310,8 +306,8 @@ class Mascot(var imageSet: String) {
             try {
                 behavior?.next()
             } catch (e: CantBeAliveException) {
-                log.log(Level.SEVERE, e) { "Fatal Error" }
-                showError(localize("CouldNotGetNextBehaviorErrorMessage"), e)
+                logger.log(Level.SEVERE, e) { "Fatal Error" }
+                Main.showError(localize("CouldNotGetNextBehaviorErrorMessage"), e)
                 dispose()
             }
             time++
@@ -376,7 +372,7 @@ class Mascot(var imageSet: String) {
     }
 
     fun dispose() {
-        log.info { "Destroying mascot: $this" }
+        logger.info { "Destroying mascot: $this" }
 
         debugWindow?.let {
             it.isVisible = false
@@ -406,9 +402,4 @@ class Mascot(var imageSet: String) {
     }
 
     override fun toString() = "Mascot[id=$id, imageSet=$imageSet]"
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-        private val lastId = AtomicInteger()
-    }
 }

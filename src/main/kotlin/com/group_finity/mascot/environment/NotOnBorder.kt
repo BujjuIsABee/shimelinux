@@ -24,12 +24,8 @@ package com.group_finity.mascot.environment
 
 import java.awt.Point
 
-class NotOnBorder private constructor() : Border {
+object NotOnBorder : Border {
     override fun isOn(location: Point) = false
 
     override fun move(location: Point) = location
-
-    companion object {
-        val instance = NotOnBorder()
-    }
 }

@@ -28,10 +28,11 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
-import com.group_finity.mascot.showError
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
+
+private val logger = Logger.getLogger(Interact::class.java.name)
 
 @Suppress("unused")
 class Interact(
@@ -57,8 +58,8 @@ class Interact(
                     is IllegalStateException,
                     is BehaviorInstantiationException,
                     is CantBeAliveException -> {
-                        log.log(Level.SEVERE, e) { "Failed to set behavior" }
-                        showError(localize("FailedSetBehaviorErrorMessage"), e)
+                        logger.log(Level.SEVERE, e) { "Failed to set behavior" }
+                        Main.showError(localize("FailedSetBehaviorErrorMessage"), e)
                     }
 
                     else -> throw e
@@ -68,8 +69,6 @@ class Interact(
     }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val PARAMETER_BEHAVIOR = "Behavior"
         private const val DEFAULT_BEHAVIOR = ""
     }

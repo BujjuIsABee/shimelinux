@@ -33,7 +33,7 @@ import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.ImagePairLoader
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.Variable
-import com.group_finity.mascot.sound.Sounds
+import com.group_finity.mascot.sound.SoundLoader
 import java.awt.Dimension
 import java.awt.Point
 import java.awt.Rectangle
@@ -44,6 +44,8 @@ import java.util.logging.Logger
 import kotlin.io.path.exists
 import kotlin.math.abs
 import kotlin.math.roundToInt
+
+private val logger = Logger.getLogger(AnimationBuilder::class.java.name)
 
 class AnimationBuilder(
     private val schema: ResourceBundle,
@@ -56,27 +58,29 @@ class AnimationBuilder(
     private val turn = animationNode.getAttribute(schema.getString("IsTurn")) ?: "false"
 
     init {
-        log.info { "Loading animation" }
+        logger.info { "Loading animation" }
 
+        // Load poses
         for (frameNode in animationNode.selectChildren(schema.getString("Pose"))) {
             try {
                 poses.add(loadPose(frameNode))
             } catch (e: Exception) {
-                log.log(Level.SEVERE, e) { "Failed to load pose: ${frameNode.attributes}" }
+                logger.log(Level.SEVERE, e) { "Failed to load pose: ${frameNode.attributes}" }
                 throw ConfigurationException(localize("FailedLoadPoseErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
+        // Load hotspots
         for (frameNode in animationNode.selectChildren(schema.getString("Hotspot"))) {
             try {
                 hotspots.add(loadHotspot(frameNode))
             } catch (e: Exception) {
-                log.log(Level.SEVERE, e) { "Failed to load hotspot: ${frameNode.attributes}" }
+                logger.log(Level.SEVERE, e) { "Failed to load hotspot: ${frameNode.attributes}" }
                 throw ConfigurationException(localize("FailedLoadHotspotErrorMessage") + ": ${frameNode.attributes}", e)
             }
         }
 
-        log.info { "Finished loading animation" }
+        logger.info { "Finished loading animation" }
     }
 
     private fun loadPose(frameNode: Entry): Pose {
@@ -108,7 +112,7 @@ class AnimationBuilder(
             try {
                 ImagePairLoader.load(leftImagePath, rightImagePath, anchor, scaling, filter, opacity)
             } catch (e: Exception) {
-                log.log(Level.SEVERE, e) { "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}" }
+                logger.log(Level.SEVERE, e) { "Failed to load image: $leftImagePath, ${rightImagePath ?: ""}" }
                 throw ConfigurationException(localize("FailedLoadImageErrorMessage") + ": $leftImagePath, ${rightImagePath ?: ""}", e)
             }
         }
@@ -128,16 +132,16 @@ class AnimationBuilder(
                     getPath("sound", imageSet, soundText).takeIf { it.exists() }?.toString() ?:
                     getPath("img", imageSet, "sound", soundText).toString()
 
-                Sounds.load(soundText, volumeText.toFloat())
+                SoundLoader.load(soundText, volumeText.toFloat())
                 soundText += volumeText.toFloat()
             } catch (e: Exception) {
-                log.log(Level.SEVERE, e) { "Failed to load sound: $soundText" }
+                logger.log(Level.SEVERE, e) { "Failed to load sound: $soundText" }
                 throw ConfigurationException(localize("FailedLoadSoundErrorMessage") + ": $soundText", e)
             }
         }
 
         return Pose(leftImagePath, rightImagePath, moveX, moveY, duration, soundText).also {
-            log.info { "Loaded pose: $it" }
+            logger.info { "Loaded pose: $it" }
         }
     }
 
@@ -171,13 +175,13 @@ class AnimationBuilder(
             )
 
             else -> {
-                log.severe { "Failed to load hotspot shape: $shapeText" }
+                logger.severe { "Failed to load hotspot shape: $shapeText" }
                 throw ConfigurationException(localize("HotspotShapeNotSupportedErrorMessage") + ": $shapeText")
             }
         }
 
         return Hotspot(behaviorText, shape).also {
-            log.info { "Loaded hotspot: $it" }
+            logger.info { "Loaded hotspot: $it" }
         }
     }
 
@@ -192,9 +196,5 @@ class AnimationBuilder(
         } catch (e: VariableException) {
             throw AnimationInstantiationException(localize("FailedConditionEvaluationErrorMessage"), e)
         }
-    }
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
     }
 }

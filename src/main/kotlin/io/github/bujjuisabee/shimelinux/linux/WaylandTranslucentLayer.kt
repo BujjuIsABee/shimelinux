@@ -42,7 +42,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
 
         override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
             bounds = Rectangle(x, y, width, height)
-            wl.setBounds(senderPtr, x, y, width, height)
+            WaylandLib.setBounds(senderPtr, x, y, width, height)
         }
 
         override fun isShowing() = true
@@ -50,12 +50,11 @@ class WaylandTranslucentLayer : TranslucentWindow {
         override fun getLocationOnScreen() = Point(bounds.x, bounds.y)
 
         override fun setCursor(cursor: Cursor) {
-            wl.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
+            WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
         }
     }
 
-    private val wl: WaylandLib = requireNotNull(WaylandLib.instance) { "Wayland library is missing" }
-    private val senderPtr = wl.createMascot(this)
+    private val senderPtr = WaylandLib.createMascot(this)
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var previousCursorPosition = Point(0, 0)
@@ -64,8 +63,8 @@ class WaylandTranslucentLayer : TranslucentWindow {
     override fun asComponent() = component
 
     override fun setImage(image: NativeImage) {
-        if (image is LinuxNativeImage && this.image != image) {
-            this.image = image
+        if (this.image != image) {
+            this.image = image as LinuxNativeImage
             imageChanged = true
         }
     }
@@ -73,14 +72,14 @@ class WaylandTranslucentLayer : TranslucentWindow {
     override fun updateImage() {
         image?.let {
             imageChanged = false
-            wl.setImage(senderPtr, it.rgb)
+            WaylandLib.setImage(senderPtr, it.rgb)
         }
     }
 
     override fun setAlwaysOnTop(onTop: Boolean) {}
 
     override fun dispose() {
-        wl.dispose(senderPtr)
+        WaylandLib.dispose(senderPtr)
     }
 
     @Suppress("unused")

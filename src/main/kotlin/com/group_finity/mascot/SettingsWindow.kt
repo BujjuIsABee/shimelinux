@@ -23,6 +23,7 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
+import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -66,6 +67,43 @@ import javax.swing.UnsupportedLookAndFeelException
 import javax.swing.border.BevelBorder
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
+
+private const val VERSION = "v1.2.0"
+private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
+private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
+private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
+private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
+private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
+
+private fun getIndexFromTheme(theme: String) = when (theme) {
+    "FlatDark" -> 0
+    "FlatLight" -> 1
+    "Gtk" -> 2
+    else -> 0
+}
+
+private fun getThemeFromIndex(index: Int) = when (index) {
+    0 -> "FlatDark"
+    1 -> "FlatLight"
+    2 -> "Gtk"
+    else -> "FlatDark"
+}
+
+private fun getIndexFromBackgroundMode(mode: String) = when (mode) {
+    "Center" -> 0
+    "Fit" -> 1
+    "Stretch" -> 2
+    "Fill" -> 3
+    else -> 0
+}
+
+private fun getBackgroundModeFromIndex(index: Int) = when (index) {
+    0 -> "Center"
+    1 -> "Fit"
+    2 -> "Stretch"
+    3 -> "Fill"
+    else -> "Center"
+}
 
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val tabbedPane: JTabbedPane
@@ -153,9 +191,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var windowBackgroundColor = getProperty("Background", "#00FF00")
     private var windowBackgroundImage = getProperty("BackgroundImage", "")
     private var windowBackgroundMode = getProperty("BackgroundMode", "Center")
+
     private val initialTheme = theme
     private val initialDarkTheme = Properties()
     private val initialLightTheme = Properties()
+
     private val darkTheme = Properties().apply {
         try {
             getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { load(it) }
@@ -170,6 +210,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         } catch (_: Exception) {
         }
     }
+
     private val interactiveWindowsWhitelistModel = DefaultListModel<String>().apply {
         addAll(
             getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
@@ -880,7 +921,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab.add(Box.createVerticalGlue())
 
         tabbedPane.addTab(localize("General"), generalTab)
-        if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") {
+        if (DesktopType.current == DesktopType.KDE) {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
         tabbedPane.addTab(localize("Menu"), menuTab)
@@ -1023,12 +1064,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 }
             }
 
-            UIManager.setLookAndFeel(when (theme) {
-                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                else -> "com.formdev.flatlaf.FlatDarkLaf"
-            })
+            UIManager.setLookAndFeel(
+                when (theme) {
+                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
+                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                    else -> "com.formdev.flatlaf.FlatDarkLaf"
+                }
+            )
 
             for (window in getWindows()) {
                 SwingUtilities.updateComponentTreeUI(window)
@@ -1060,45 +1103,5 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowBackgroundImagePreview.icon = ImageIcon(image)
         windowBackgroundImagePreview.preferredSize = Dimension(image.getWidth(null), image.getHeight(null))
-    }
-
-    companion object {
-        private const val VERSION = "1.2.0"
-
-        private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
-        private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
-        private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
-        private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
-        private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
-
-        private fun getIndexFromTheme(theme: String) = when (theme) {
-            "FlatDark" -> 0
-            "FlatLight" -> 1
-            "Gtk" -> 2
-            else -> 0
-        }
-
-        private fun getThemeFromIndex(index: Int) = when (index) {
-            0 -> "FlatDark"
-            1 -> "FlatLight"
-            2 -> "Gtk"
-            else -> "FlatDark"
-        }
-
-        private fun getIndexFromBackgroundMode(mode: String) = when (mode) {
-            "Center" -> 0
-            "Fit" -> 1
-            "Stretch" -> 2
-            "Fill" -> 3
-            else -> 0
-        }
-
-        private fun getBackgroundModeFromIndex(index: Int) = when (index) {
-            0 -> "Center"
-            1 -> "Fit"
-            2 -> "Stretch"
-            3 -> "Fill"
-            else -> "Center"
-        }
     }
 }

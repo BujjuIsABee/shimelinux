@@ -31,12 +31,13 @@ import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
-import com.group_finity.mascot.showError
 import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.math.roundToInt
+
+private val logger = Logger.getLogger(Breed.Delegate::class.java.name)
 
 class Breed(
     schema: ResourceBundle,
@@ -89,7 +90,7 @@ class Breed(
             repeat(bornCount) {
                 val mascot = Mascot(childType)
 
-                log.info { "Mascot breeding (${action.mascot}, $action, $mascot)" }
+                logger.info { "Mascot breeding (${action.mascot}, $action, $mascot)" }
 
                 mascot.anchor = if (action.mascot.isLookRight) {
                     Point(
@@ -113,8 +114,8 @@ class Breed(
                         is IllegalStateException,
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, e) { "Failed to create new Shimeji" }
-                            showError(localize("FailedCreateNewShimejiErrorMessage"), e)
+                            logger.log(Level.SEVERE, e) { "Failed to create new Shimeji" }
+                            Main.showError(localize("FailedCreateNewShimejiErrorMessage"), e)
                             mascot.dispose()
                         }
 
@@ -137,8 +138,6 @@ class Breed(
         }
 
         companion object {
-            private val log = Logger.getLogger(this::class.java.name)
-
             const val PARAMETER_BORNX = "BornX"
             private const val DEFAULT_BORNX = 0
 

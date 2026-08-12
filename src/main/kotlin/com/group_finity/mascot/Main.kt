@@ -55,36 +55,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-fun main() {
-    try {
-        Main.run()
-    } catch (_: OutOfMemoryError) {
-        showError(
-            """
-            Out of memory. There are probably too many
-            Shimeji mascots for your computer to handle.
-            Select fewer image sets or move some to the
-            img/unused folder and try again.
-            """.trimIndent()
-        )
-        exitProcess(0)
-    }
-}
-
-fun showError(message: String) {
-    JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
-}
-
-fun showError(message: String, exception: Throwable) {
-    val message = message + if (exception is SAXParseException) {
-        "\nLine ${exception.lineNumber}: ${exception.message}"
-    } else {
-        "\n${exception.message}"
-    }
-
-    showError("$message\n${localize("SeeLogForDetails")}")
-}
-
 inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     Main.properties.getProperty(key, defaultValue.toString()).let { value ->
         when (T::class) {
@@ -99,8 +69,12 @@ fun localize(key: String): String = Main.languageBundle.getString(key)
 
 fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
 
+private val logger = Logger.getLogger(Main::class.java.name)
+
 object Main {
-    private val log = Logger.getLogger(this::class.java.name)
+    @JvmStatic
+    @Suppress("unused")
+    val instance = this
 
     private val manager = Manager()
     private var imageSets = mutableListOf<String>()
@@ -119,6 +93,39 @@ object Main {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    @JvmStatic
+    fun showError(message: String) {
+        JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
+    }
+
+    @JvmStatic
+    fun showError(message: String, exception: Throwable) {
+        val message = message + if (exception is SAXParseException) {
+            "\nLine ${exception.lineNumber}: ${exception.message}"
+        } else {
+            "\n${exception.message}"
+        }
+
+        showError("$message\n${localize("SeeLogForDetails")}")
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        try {
+            run()
+        } catch (_: OutOfMemoryError) {
+            showError(
+                """
+                Out of memory. There are probably too many
+                Shimeji mascots for your computer to handle.
+                Select fewer image sets or move some to the
+                img/unused folder and try again.
+                """.trimIndent()
+            )
+            exitProcess(0)
         }
     }
 
@@ -155,7 +162,7 @@ object Main {
             }
         } catch (e: Exception) {
             showError("Failed to create the config directory.", e)
-            exitProcess(0)
+            exit()
         }
 
         // Load properties
@@ -166,13 +173,23 @@ object Main {
             }
         }
 
-        // Set menu scaling
-        val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
-        val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
-        System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+        // Load languages
+        try {
+            val defaultLocale = Locale.getDefault().toLanguageTag()
+            val locale = Locale.forLanguageTag(getProperty("Language", defaultLocale))
+            languageBundle = ResourceBundle.getBundle("conf.language", locale)
+        } catch (e: Exception) {
+            showError("The default language file could not be loaded.", e)
+            exit()
+        }
 
         // Set theme
         try {
+            // Set menu scaling
+            val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
+            val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
+            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
             UIManager.setLookAndFeel(when (getProperty("Theme", "FlatDark")) {
@@ -182,20 +199,12 @@ object Main {
                 else -> "com.formdev.flatlaf.FlatDarkLaf"
             })
         } catch (_: Exception) {
-            log.log(Level.WARNING, "Failed to set theme.")
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-        }
-
-        // Load languages
-        try {
-            updateConfigFile()
-
-            val defaultLocale = Locale.getDefault().toLanguageTag()
-            val locale = Locale.forLanguageTag(getProperty("Language", defaultLocale))
-            languageBundle = ResourceBundle.getBundle("conf.language", locale)
-        } catch (_: Exception) {
-            showError("The default language file could not be loaded.")
-            exit()
+            try {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+            } catch (_: Exception) {
+                logger.warning { "Failed to set theme." }
+                exit()
+            }
         }
 
         // Get the image sets to use
@@ -273,7 +282,7 @@ object Main {
             filePath = getPath("img", imageSet, "conf")
             actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
-            log.log(Level.INFO, "Reading action file ($actionsPath)")
+            logger.info { "Reading action file ($actionsPath)" }
 
             val actions = actionsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
             val configuration = Configuration()
@@ -299,7 +308,7 @@ object Main {
             filePath = getPath("img", imageSet, "conf")
             behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
-            log.log(Level.INFO, "Reading behavior file ($behaviorsPath)")
+            logger.info { "Reading behavior file ($behaviorsPath)" }
 
             val behaviors = behaviorsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
             configuration.load(Entry(behaviors.documentElement), imageSet)
@@ -315,7 +324,7 @@ object Main {
             infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
 
             if (infoPath.exists()) {
-                log.log(Level.INFO, "Reading information file ($infoPath)")
+                logger.info { "Reading information file ($infoPath)" }
 
                 val information = infoPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
                 configuration.load(Entry(information.documentElement), imageSet)
@@ -352,7 +361,7 @@ object Main {
 
             return true
         } catch (e: Exception) {
-            log.log(Level.SEVERE, "Failed to load configuration files", e)
+            logger.log(Level.SEVERE, e) { "Failed to load configuration files" }
             showError(localize("FailedLoadConfigErrorMessage"), e)
         }
 
@@ -360,7 +369,7 @@ object Main {
     }
 
     private fun createTrayIcon() {
-        log.log(Level.INFO, "Creating the tray icon")
+        logger.info { "Creating the tray icon" }
 
         try {
             val icon = SystemTray.get()
@@ -633,11 +642,7 @@ object Main {
                 manager.togglePauseAll()
 
                 // Update pause menu item text
-                pauseAllMenu.text = if (manager.isPaused) {
-                    localize("ResumeAnimations")
-                } else {
-                    localize("PauseAnimations")
-                }
+                pauseAllMenu.text = localize(if (manager.isPaused) "ResumeAnimations" else "PauseAnimations")
             }
 
             val dismissAllMenu = MenuItem(localize("DismissAll")) {
@@ -656,9 +661,9 @@ object Main {
             icon.menu.add(JSeparator())
             icon.menu.add(pauseAllMenu)
             icon.menu.add(dismissAllMenu)
-        } catch (_: Exception) {
-            log.log(Level.SEVERE, "Failed to create tray icon")
-            showError(localize("FailedDisplaySystemTrayErrorMessage"))
+        } catch (e: Exception) {
+            logger.log(Level.SEVERE, e) { "Failed to create tray icon" }
+            showError(localize("FailedDisplaySystemTrayErrorMessage"), e)
         }
     }
 
@@ -669,7 +674,7 @@ object Main {
     }
 
     fun createMascot(imageSet: String) {
-        log.log(Level.INFO, "Creating a mascot ($imageSet)")
+        logger.info { "Creating a mascot ($imageSet)" }
 
         val mascot = Mascot(imageSet)
 
@@ -686,13 +691,13 @@ object Main {
             when (e) {
                 is BehaviorInstantiationException,
                 is CantBeAliveException -> {
-                    log.log(Level.SEVERE, "Failed to initialize the first action", e)
+                    logger.log(Level.SEVERE, e) { "Failed to initialize the first action" }
                     showError(localize("FailedInitializeFirstActionErrorMessage"), e)
                     mascot.dispose()
                 }
 
                 else -> {
-                    log.log(Level.SEVERE, "Could not be started ($imageSet)", e)
+                    logger.log(Level.SEVERE, e) { "Could not be started ($imageSet)" }
                     showError(localize("CouldNotCreateShimejiErrorMessage") + " ($imageSet)", e)
                     mascot.dispose()
                 }

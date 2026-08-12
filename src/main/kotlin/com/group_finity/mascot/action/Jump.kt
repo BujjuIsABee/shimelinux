@@ -79,14 +79,14 @@ open class Jump(
     }
 
     companion object {
+        const val PARAMETER_VELOCITY = "VelocityParam"
+        private const val DEFAULT_VELOCITY = 20.0
+
         const val PARAMETER_TARGETX = "TargetX"
         private const val DEFAULT_TARGETX = 0
 
         const val PARAMETER_TARGETY = "TargetY"
         private const val DEFAULT_TARGETY = 0
-
-        const val PARAMETER_VELOCITY = "VelocityParam"
-        private const val DEFAULT_VELOCITY = 20.0
 
         const val VARIABLE_VELOCITYX = "VelocityX"
         const val VARIABLE_VELOCITYY = "VelocityY"

@@ -26,31 +26,9 @@ import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
 
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = when (type) {
-        Type.GENERIC -> LinuxEnvironment()
-        Type.KDE -> KdeEnvironment()
-        Type.WAYLAND -> WaylandEnvironment()
-    }
+    override val environment = DesktopType.current.getEnvironment()
 
-    override fun newNativeImage(src: BufferedImage) = when (type) {
-        Type.GENERIC,
-        Type.KDE,
-        Type.WAYLAND -> LinuxNativeImage(src)
-    }
+    override fun newNativeImage(src: BufferedImage) = DesktopType.current.getNativeImage(src)
 
-    override fun newTranslucentWindow() = when (type) {
-        Type.GENERIC,
-        Type.KDE -> LinuxTranslucentWindow()
-        Type.WAYLAND -> WaylandTranslucentLayer()
-    }
-
-    enum class Type { GENERIC, KDE, WAYLAND }
-
-    companion object {
-        private val type = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-            "KDE" -> Type.KDE
-            "Hyprland", "niri" -> Type.WAYLAND
-            else -> Type.GENERIC
-        }
-    }
+    override fun newTranslucentWindow() = DesktopType.current.getTranslucentWindow()
 }

@@ -24,6 +24,6 @@ package com.group_finity.mascot.script
 
 import org.openjdk.nashorn.api.scripting.ClassFilter
 
-class ScriptFilter : ClassFilter {
+object ScriptFilter : ClassFilter {
     override fun exposeToScripts(className: String) = className.startsWith("com.group_finity.mascot")
 }

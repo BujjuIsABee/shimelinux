@@ -32,6 +32,8 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.concurrent.timer
 
+private val logger = Logger.getLogger(Manager::class.java.name)
+
 class Manager {
     private val mascots = mutableListOf<Mascot>()
     private val added = linkedSetOf<Mascot>()
@@ -126,8 +128,8 @@ class Manager {
                     when (e) {
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, e) { "Failed to set behavior." }
-                            showError(localize("FailedSetBehaviorErrorMessage"), e)
+                            logger.log(Level.SEVERE, e) { "Failed to set behavior." }
+                            Main.showError(localize("FailedSetBehaviorErrorMessage"), e)
                             mascot.dispose()
                         }
 
@@ -149,8 +151,8 @@ class Manager {
                     when (e) {
                         is BehaviorInstantiationException,
                         is CantBeAliveException -> {
-                            log.log(Level.SEVERE, e) { "Failed to set behavior ($name)" }
-                            showError(localize("FailedSetBehaviorErrorMessage"), e)
+                            logger.log(Level.SEVERE, e) { "Failed to set behavior ($name)" }
+                            Main.showError(localize("FailedSetBehaviorErrorMessage"), e)
                             mascot.dispose()
                         }
 
@@ -226,7 +228,9 @@ class Manager {
 
             var result = 0
             for (mascot in mascots) {
-                if (mascot.imageSet == imageSet) result++
+                if (mascot.imageSet == imageSet) {
+                    result++
+                }
             }
             return result
         }
@@ -235,7 +239,9 @@ class Manager {
     fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? {
         synchronized(mascots) {
             for (mascot in mascots) {
-                if (mascot.affordances.contains(affordance)) return WeakReference(mascot)
+                if (mascot.affordances.contains(affordance)) {
+                    return WeakReference(mascot)
+                }
             }
         }
         return null
@@ -245,8 +251,12 @@ class Manager {
         synchronized(mascots) {
             var count = 0
             for (mascot in mascots) {
-                if (mascot.anchor == anchor) count++
-                if (count > 1) return true
+                if (mascot.anchor == anchor) {
+                    count++
+                }
+                if (count > 1) {
+                    return true
+                }
             }
         }
         return false
@@ -259,9 +269,5 @@ class Manager {
                 mascots[i].dispose()
             }
         }
-    }
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
     }
 }

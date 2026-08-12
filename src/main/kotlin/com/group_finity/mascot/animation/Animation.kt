@@ -50,7 +50,7 @@ class Animation(
     }
 
     fun next(mascot: Mascot, time: Int) {
-        getPoseAt(time)?.next(mascot)
+        checkNotNull(getPoseAt(time)).next(mascot)
     }
 
     fun getPoseAt(time: Int): Pose? {

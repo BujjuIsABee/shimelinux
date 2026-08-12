@@ -33,6 +33,8 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.logging.Level
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(BehaviorBuilder::class.java.name)
+
 class BehaviorBuilder(
     private val configuration: Configuration,
     behaviorNode: Entry,
@@ -48,7 +50,7 @@ class BehaviorBuilder(
     private val params = linkedMapOf<String, String>()
 
     init {
-        log.info { "Loading behavior: $this" }
+        logger.info { "Loading behavior: $this" }
 
         conditions = conditions.toMutableList()
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
@@ -73,7 +75,7 @@ class BehaviorBuilder(
         var isNextAdditive = true
 
         for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviorList"))) {
-            log.info { "Lists the following behaviors..." }
+            logger.info { "Lists the following behaviors..." }
 
             isNextAdditive = nextList.getAttribute(configuration.schema.getString("Add")).toBoolean()
             loadBehaviors(nextList, mutableListOf())
@@ -81,7 +83,7 @@ class BehaviorBuilder(
 
         this.isNextAdditive = isNextAdditive
 
-        log.info { "Finished loading behavior" }
+        logger.info { "Finished loading behavior" }
     }
 
     private fun loadBehaviors(list: Entry, conditions: MutableList<String?>) {
@@ -99,7 +101,7 @@ class BehaviorBuilder(
 
     fun validate() {
         if (!configuration.hasAction(actionName)) {
-            log.severe { "There is no corresponding action ($this)" }
+            logger.severe { "There is no corresponding action ($this)" }
             throw ConfigurationException(localize("NoActionFoundErrorMessage") + " ($this)")
         }
     }
@@ -108,21 +110,18 @@ class BehaviorBuilder(
         try {
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
         } catch (e: ActionInstantiationException) {
-            log.log(Level.SEVERE, e) { "Failed to initialize the corresponding action ($this)" }
+            logger.log(Level.SEVERE, e) { "Failed to initialize the corresponding action ($this)" }
             throw BehaviorInstantiationException(localize("FailedInitializeCorrespondingActionErrorMessage") + " ($this)", e)
         }
     }
 
     fun isEffective(context: VariableMap): Boolean {
         if (frequency == 0) return false
+
         return conditions.none {
             Variable.parse(it)?.get(context) as? Boolean == false
         }
     }
 
     override fun toString() = "BehaviorBuilder[name=$name, frequency=$frequency, actionName=$actionName]"
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-    }
 }

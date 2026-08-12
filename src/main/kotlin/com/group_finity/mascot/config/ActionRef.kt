@@ -27,6 +27,8 @@ import com.group_finity.mascot.exception.ConfigurationException
 import com.group_finity.mascot.localize
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(ActionRef::class.java.name)
+
 class ActionRef(private val configuration: Configuration, refNode: Entry) : IActionBuilder {
     private val name = requireNotNull(refNode.getAttribute(configuration.schema.getString("Name"))) { "ActionReference requires Name attribute." }
     private val params = linkedMapOf<String, String>()
@@ -37,7 +39,7 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
 
     override fun validate() {
         if (!configuration.hasAction(name)) {
-            log.severe { "There is no corresponding behavior: $this" }
+            logger.severe { "There is no corresponding behavior: $this" }
             throw ConfigurationException(localize("NoBehaviorFoundErrorMessage") + ": $this")
         }
     }
@@ -49,8 +51,4 @@ class ActionRef(private val configuration: Configuration, refNode: Entry) : IAct
     }
 
     override fun toString() = "ActionRef[name=$name]"
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-    }
 }

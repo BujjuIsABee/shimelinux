@@ -32,6 +32,8 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+private val logger = Logger.getLogger(Regist::class.java.name)
+
 class Regist(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -69,7 +71,7 @@ class Regist(
         if (time + 1 >= animation.duration) {
             mascot.isLookRight = Math.random() < 0.5
 
-            log.info { "Lost ground ($mascot, $this)" }
+            logger.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
     }
@@ -80,8 +82,6 @@ class Regist(
     }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val PARAMETER_OFFSETX = "OffsetX"
         private const val DEFAULT_OFFSETX = 0
 

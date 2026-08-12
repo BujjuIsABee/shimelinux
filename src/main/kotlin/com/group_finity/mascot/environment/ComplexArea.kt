@@ -36,7 +36,7 @@ class ComplexArea {
     }
 
     fun set(name: String, value: Rectangle) {
-        if (areaMap.values.any { it.left == value.x && it.top == value.y && it.width == value.width && it.height == value.height }) return
+        if (areaMap.values.any { it.toRectangle() == value }) return
 
         val area = areaMap.getOrPut(name) { Area() }
         area.set(value)

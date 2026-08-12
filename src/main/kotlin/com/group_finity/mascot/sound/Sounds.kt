@@ -23,53 +23,37 @@
 package com.group_finity.mascot.sound
 
 import com.group_finity.mascot.getProperty
-import java.io.File
-import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
-import javax.sound.sampled.FloatControl
-import javax.sound.sampled.LineEvent
 
 object Sounds {
-    private val sounds = mutableListOf<Sound>()
+    private val sounds = mutableMapOf<String, Sound>()
 
+    @JvmStatic
     var isMuted: Boolean
         get() = !getProperty("Sounds", true)
         set(value) {
             if (value) {
-                for (clip in sounds.mapNotNull { it.clip }) {
+                for (clip in sounds.values.map { it.clip }) {
                     clip.stop()
                 }
             }
         }
 
-    fun load(name: String, volume: Float) {
-        sounds.add(Sound(name, volume, null))
-    }
-
-    fun contains(name: String) = sounds.any { name == it.name + it.volume }
-
-    fun getSound(name: String) = sounds.find { name == it.name + it.volume }?.let { getClip(it) }
-
-    fun getSoundsIgnoringVolume(name: String) = sounds.filter { it.name == name }.mapNotNull { it.clip }
-
-    private fun getClip(sound: Sound): Clip {
-        sound.clip?.let { return it }
-
-        val clip = AudioSystem.getClip()
-        AudioSystem.getAudioInputStream(File(sound.name)).use { clip.open(it) }
-
-        (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = sound.volume
-
-        clip.addLineListener { event ->
-            if (event.type == LineEvent.Type.STOP) {
-                clip.stop()
-                clip.close()
-                sounds.find { it.clip == clip }?.clip = null
-            }
+    @JvmStatic
+    fun load(name: String, sound: Sound) {
+        if (!sounds.containsKey(name)) {
+            sounds[name] = sound
         }
-
-        return clip.also { sound.clip = it }
     }
 
-    data class Sound(val name: String, val volume: Float, var clip: Clip?)
+    @JvmStatic
+    fun contains(name: String) = sounds.containsKey(name)
+
+    @JvmStatic
+    fun getSound(name: String) = sounds[name]?.also { it.open() }?.clip
+
+    @JvmStatic
+    fun getSoundsIgnoringVolume(name: String) = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
+
+    data class Sound(val clip: Clip, val open: () -> Unit)
 }

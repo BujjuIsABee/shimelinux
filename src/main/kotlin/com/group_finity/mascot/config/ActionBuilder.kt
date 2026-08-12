@@ -38,6 +38,8 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(ActionBuilder::class.java.name)
+
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema
     val type = requireNotNull(actionNode.getAttribute(schema.getString("Type"))) { "Action requires Type attribute." }
@@ -48,7 +50,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
     private val actionRefs = mutableListOf<IActionBuilder>()
 
     init {
-        log.info { "Loading action: $this" }
+        logger.info { "Loading action: $this" }
 
         try {
             params.putAll(actionNode.attributes)
@@ -68,7 +70,7 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
             throw ConfigurationException("${localize("FailedLoadActionErrorMessage")} \"$name\" ${localize("ForShimeji")} \"$imageSet.\"", e)
         }
 
-        log.info { "Finished loading action" }
+        logger.info { "Finished loading action" }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -81,14 +83,12 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
             when (type) {
                 "Embedded" -> {
                     try {
-                        val cls = Class.forName(className) as Class<out Action>
+                        val cls = Class.forName(className) as Class<Action>
 
                         return runCatching {
-                            cls.getConstructor(ResourceBundle::class.java, List::class.java, VariableMap::class.java)
-                                .newInstance(schema, animations, variables)
+                            cls.getConstructor(ResourceBundle::class.java, List::class.java, VariableMap::class.java).newInstance(schema, animations, variables)
                         }.recoverCatching {
-                            cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java)
-                                .newInstance(schema, variables)
+                            cls.getConstructor(ResourceBundle::class.java, VariableMap::class.java).newInstance(schema, variables)
                         }.getOrElse {
                             cls.getConstructor().newInstance()
                         }
@@ -131,8 +131,4 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
     }
 
     override fun toString() = "ActionBuilder[name=$name, type=$type, className=$className]"
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-    }
 }

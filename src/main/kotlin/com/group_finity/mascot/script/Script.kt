@@ -29,6 +29,8 @@ import javax.script.Compilable
 import javax.script.CompiledScript
 import javax.script.ScriptException
 
+private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
+
 class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
     private val compiled: CompiledScript
     private var value: Any? = null
@@ -60,8 +62,4 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
     }
 
     override fun toString() = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
-
-    companion object {
-        private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter())
-    }
 }

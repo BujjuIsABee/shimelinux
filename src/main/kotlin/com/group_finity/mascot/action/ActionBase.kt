@@ -61,7 +61,7 @@ abstract class ActionBase(
 
     override fun init(mascot: Mascot) {
         this.mascot = mascot
-        time = 0
+        this.time = 0
 
         variables["mascot"] = mascot
         variables["action"] = this
@@ -127,14 +127,14 @@ abstract class ActionBase(
     }
 
     companion object {
-        const val PARAMETER_DURATION = "Duration"
-        private const val DEFAULT_DURATION = Int.MAX_VALUE
+        const val PARAMETER_DRAGGABLE = "Draggable"
+        private const val DEFAULT_DRAGGABLE = true
 
         const val PARAMETER_CONDITION = "Condition"
         private const val DEFAULT_CONDITION = true
 
-        const val PARAMETER_DRAGGABLE = "Draggable"
-        private const val DEFAULT_DRAGGABLE = true
+        const val PARAMETER_DURATION = "Duration"
+        private const val DEFAULT_DURATION = Int.MAX_VALUE
 
         const val PARAMETER_AFFORDANCE = "Affordance"
         private const val DEFAULT_AFFORDANCE = ""

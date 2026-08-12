@@ -37,6 +37,8 @@ import java.awt.event.MouseEvent
 import java.util.logging.Logger
 import javax.swing.SwingUtilities
 
+private val logger = Logger.getLogger(UserBehavior::class.java.name)
+
 class UserBehavior(
     private val name: String,
     private val action: Action,
@@ -50,17 +52,19 @@ class UserBehavior(
     override fun init(mascot: Mascot) {
         this.mascot = mascot
 
-        log.info { "Behavior ($mascot, $this)" }
+        logger.info { "Behavior ($mascot, $this)" }
 
         try {
             action.init(mascot)
             if (!action.hasNext()) {
-                mascot.behavior = configuration.buildNextBehavior(name, mascot)
+                try {
+                    mascot.behavior = configuration.buildNextBehavior(name, mascot)
+                } catch (e: BehaviorInstantiationException) {
+                    throw CantBeAliveException(localize("FailedInitializeFollowingBehaviorErrorMessage"), e)
+                }
             }
         } catch (e: VariableException) {
             throw CantBeAliveException(localize("VariableEvaluationErrorMessage"), e)
-        } catch (e: BehaviorInstantiationException) {
-            throw CantBeAliveException(localize("FailedInitializeFollowingBehaviorErrorMessage"), e)
         }
     }
 
@@ -99,7 +103,7 @@ class UserBehavior(
                         environment.screen.right <= mascot.bounds.x ||
                         environment.screen.bottom <= mascot.bounds.y
                     ) {
-                        log.info { "Out of the screen bounds ($mascot, $this)" }
+                        logger.info { "Out of the screen bounds ($mascot, $this)" }
 
                         mascot.resetAnchor()
 
@@ -110,7 +114,7 @@ class UserBehavior(
                         }
                     }
                 } else {
-                    log.info { "Completed behavior ($mascot, $this)" }
+                    logger.info { "Completed behavior ($mascot, $this)" }
 
                     try {
                         mascot.behavior = configuration.buildNextBehavior(name, mascot)
@@ -198,8 +202,6 @@ class UserBehavior(
     enum class HotspotResult { INACTIVE, ACTIVE_NULL, ACTIVE }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val BEHAVIORNAME_FALL = "Fall"
         const val BEHAVIORNAME_DRAGGED = "Dragged"
         const val BEHAVIORNAME_THROWN = "Thrown"

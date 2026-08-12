@@ -61,7 +61,7 @@ tasks.processResources {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "com.group_finity.mascot.MainKt"
+        attributes["Main-Class"] = "com.group_finity.mascot.Main"
     }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

@@ -28,6 +28,8 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(Animate::class.java.name)
+
 open class Animate(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -37,7 +39,7 @@ open class Animate(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.info { "Lost ground ($mascot, $this)" }
+            logger.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
@@ -45,8 +47,4 @@ open class Animate(
     }
 
     override fun hasNext() = super.hasNext() && time < checkNotNull(animation).duration
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-    }
 }

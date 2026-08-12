@@ -127,6 +127,7 @@ class KdeEnvironment : Environment() {
             scripting?.unloadScript("shimelinux-kwin-script")
             dbus?.disconnect()
 
+            // Disable shutdown hook when switching to virtual environment
             if (!isShuttingDown) {
                 Runtime.getRuntime().removeShutdownHook(shutdownThread)
             }
@@ -213,9 +214,7 @@ class KdeEnvironment : Environment() {
         }
 
         override fun getWindowPosition(): Map<String, Variant<*>> {
-            val windowPosition = windowPosition.also {
-                this@KdeEnvironment.windowPosition = null
-            }
+            val windowPosition = windowPosition.also { windowPosition = null }
 
             return if (windowPosition == null) {
                 mapOf(

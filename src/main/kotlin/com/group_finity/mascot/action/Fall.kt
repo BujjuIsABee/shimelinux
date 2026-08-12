@@ -43,12 +43,12 @@ open class Fall(
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
     private val initialVy: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()
-    private val gravity: Double
-        get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
     private val resistanceX: Double
         get() = eval<Number>(schema.getString(PARAMETER_RESISTANCEX), DEFAULT_RESISTANCEX).toDouble()
     private val resistanceY: Double
         get() = eval<Number>(schema.getString(PARAMETER_RESISTANCEY), DEFAULT_RESISTANCEY).toDouble()
+    private val gravity: Double
+        get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 
     override fun init(mascot: Mascot) {
         super.init(mascot)

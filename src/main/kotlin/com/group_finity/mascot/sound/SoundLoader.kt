@@ -20,40 +20,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.virtual
+package com.group_finity.mascot.sound
 
-import com.group_finity.mascot.image.NativeImage
-import com.group_finity.mascot.image.TranslucentWindow
-import java.awt.Graphics
-import javax.swing.JPanel
+import java.io.File
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.FloatControl
+import javax.sound.sampled.LineEvent
 
-class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
-    private var image: VirtualNativeImage? = null
+object SoundLoader {
+    @JvmStatic
+    fun load(filename: String, volume: Float) {
+        if (Sounds.contains(filename + volume)) return
 
-    override fun paintComponent(g: Graphics) {
-        image?.let { g.drawImage(it.managedImage, 0, 0, null) }
-    }
-
-    override fun contains(x: Int, y: Int) = super.contains(x, y) && image?.let {
-        (it.rgb[y * width + x] shr 24) and 0xFF > 0 // check if pixel at (x,y) has alpha greater than 0
-    } == true
-
-    override fun asComponent() = this
-
-    override fun setImage(image: NativeImage) {
-        this.image = image as VirtualNativeImage
-    }
-
-    override fun updateImage() {
-        repaint()
-    }
-
-    override fun setAlwaysOnTop(onTop: Boolean) {}
-
-    override fun dispose() {
-        parent?.let {
-            it.remove(this)
-            it.repaint()
+        val clip = AudioSystem.getClip()
+        clip.addLineListener { event ->
+            if (event.type == LineEvent.Type.STOP) {
+                clip.stop()
+                clip.close()
+            }
         }
+
+        Sounds.load(filename + volume, Sounds.Sound(clip) {
+            if (!clip.isRunning) {
+                AudioSystem.getAudioInputStream(File(filename)).use { clip.open(it) }
+                (clip.getControl(FloatControl.Type.MASTER_GAIN) as FloatControl).value = volume
+            }
+        })
     }
 }

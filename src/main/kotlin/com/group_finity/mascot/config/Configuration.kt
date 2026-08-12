@@ -38,6 +38,8 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(Configuration::class.java.name)
+
 class Configuration {
     lateinit var schema: ResourceBundle
     private val constants = linkedMapOf<String, String>()
@@ -48,41 +50,45 @@ class Configuration {
         get() = behaviorBuilders.keys
 
     fun load(configurationNode: Entry, imageSet: String) {
-        log.info { "Reading configuration file" }
+        logger.info { "Reading configuration file" }
 
         // Check for Japanese XML tag
         val locale = if (configurationNode.hasChild("\u52D5\u4F5C\u30EA\u30B9\u30C8") ||
             configurationNode.hasChild("\u884C\u52D5\u30EA\u30B9\u30C8")
         ) {
-            log.info { "Using ja-JP schema" }
+            logger.info { "Using ja-JP schema" }
             Locale.forLanguageTag("ja-JP")
         } else {
-            log.info { "Using en-US schema" }
+            logger.info { "Using en-US schema" }
             Locale.forLanguageTag("en-US")
         }
 
         schema = ResourceBundle.getBundle("conf.schema", locale)
 
+        // Load constants
         for (constant in configurationNode.selectChildren(schema.getString("Constant"))) {
             val key = requireNotNull(constant.getAttribute(schema.getString("Name"))) { "Constant requires Name attribute." }
             val value = requireNotNull(constant.getAttribute(schema.getString("Value"))) { "Constant requires Value attribute." }
             constants[key] = value
         }
 
+        // Load actions
         for (list in configurationNode.selectChildren(schema.getString("ActionList"))) {
-            log.info { "Reading action list" }
+            logger.info { "Reading action list" }
 
             loadActions(list, imageSet)
         }
 
+        // Load behaviors
         for (list in configurationNode.selectChildren(schema.getString("BehaviorList"))) {
-            log.info { "Reading behavior list" }
+            logger.info { "Reading behavior list" }
 
             loadBehaviors(list, ArrayList())
         }
 
+        // Load information
         for (list in configurationNode.selectChildren(schema.getString("Information"))) {
-            log.info { "Reading information list" }
+            logger.info { "Reading information list" }
 
             loadInformation(list)
         }
@@ -91,8 +97,7 @@ class Configuration {
     private fun loadActions(list: Entry, imageSet: String) {
         for (node in list.selectChildren(schema.getString("Action"))) {
             val action = ActionBuilder(this, node, imageSet)
-            actionBuilders.putIfAbsent(action.name, action)
-                ?: ConfigurationException(localize("DuplicateActionErrorMessage") + ": ${action.name}")
+            actionBuilders.putIfAbsent(action.name, action) ?: ConfigurationException(localize("DuplicateActionErrorMessage") + ": ${action.name}")
         }
     }
 
@@ -144,16 +149,12 @@ class Configuration {
     }
 
     fun buildAction(name: String, params: Map<String, String>): Action {
-        val factory = actionBuilders[name]
-            ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
-
+        val factory = actionBuilders[name] ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
         return factory.buildAction(params)
     }
 
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
-        val factory = behaviorBuilders[name]
-            ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
-
+        val factory = behaviorBuilders[name] ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
         return if (isBehaviorEnabled(name, mascot)) {
             factory.buildBehavior()
         } else {
@@ -162,8 +163,7 @@ class Configuration {
         }
     }
 
-    fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior()
-        ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
+    fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior() ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -179,7 +179,7 @@ class Configuration {
                     totalFrequency += behaviorFactory.frequency
                 }
             } catch (e: VariableException) {
-                log.log(Level.WARNING, e) { "An error occurred calculating the frequency of the action" }
+                logger.log(Level.WARNING, e) { "An error occurred calculating the frequency of the action" }
             }
         }
 
@@ -197,7 +197,7 @@ class Configuration {
                         totalFrequency += behaviorFactory.frequency
                     }
                 } catch (e: VariableException) {
-                    log.log(Level.WARNING, e) { "An error occurred calculating the frequency of the action" }
+                    logger.log(Level.WARNING, e) { "An error occurred calculating the frequency of the action" }
                 }
             }
         }
@@ -211,19 +211,18 @@ class Configuration {
         var random = Math.random() * totalFrequency
         for (behaviorFactory in candidates) {
             random -= behaviorFactory.frequency
-            if (random < 0) return behaviorFactory.buildBehavior()
+            if (random < 0.0) {
+                return behaviorFactory.buildBehavior()
+            }
         }
         return null
     }
 
     fun hasAction(name: String) = actionBuilders.containsKey(name)
 
-    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot) =
-        !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/")
-            .none { it == builder.name }
+    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot) = !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/").none { it == builder.name }
 
-    fun isBehaviorEnabled(name: String?, mascot: Mascot) =
-        behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
+    fun isBehaviorEnabled(name: String?, mascot: Mascot) = behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
 
     fun isBehaviorHidden(name: String?) = behaviorBuilders[name]?.isHidden == true
 
@@ -232,8 +231,4 @@ class Configuration {
     fun containsInformationKey(key: String?) = information.containsKey(key)
 
     fun getInformation(key: String) = information[key]
-
-    companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-    }
 }

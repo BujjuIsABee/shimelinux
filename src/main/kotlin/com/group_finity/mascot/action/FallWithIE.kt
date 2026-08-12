@@ -30,6 +30,8 @@ import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(FallWithIE::class.java.name)
+
 class FallWithIE(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -46,7 +48,7 @@ class FallWithIE(
         val activeIE = environment.activeIE
 
         if (!activeIE.isVisible) {
-            log.info { "IE not visible ($mascot, $this)" }
+            logger.info { "IE not visible ($mascot, $this)" }
             throw LostGroundException()
         }
 
@@ -55,12 +57,12 @@ class FallWithIE(
 
         if (mascot.isLookRight) {
             if (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom) {
-                log.info { "Lost ground ($mascot, $this)" }
+                logger.info { "Lost ground ($mascot, $this)" }
                 throw LostGroundException()
             }
         } else {
             if (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom) {
-                log.info { "Lost ground ($mascot, $this)" }
+                logger.info { "Lost ground ($mascot, $this)" }
                 throw LostGroundException()
             }
         }
@@ -85,8 +87,6 @@ class FallWithIE(
     }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val PARAMETER_IEOFFSETX = "IeOffsetX"
         private const val DEFAULT_IEOFFSETX = 0
 

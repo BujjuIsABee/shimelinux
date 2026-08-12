@@ -28,6 +28,8 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger(Turn::class.java.name)
+
 @Suppress("unused")
 class Turn(
     schema: ResourceBundle,
@@ -51,7 +53,7 @@ class Turn(
         super.tick()
 
         if (border?.isOn(mascot.anchor) == false) {
-            log.info { "Lost ground ($mascot, $this)" }
+            logger.info { "Lost ground ($mascot, $this)" }
             throw LostGroundException()
         }
 
@@ -59,8 +61,6 @@ class Turn(
     }
 
     companion object {
-        private val log = Logger.getLogger(this::class.java.name)
-
         const val PARAMETER_LOOKRIGHT = "LookRight"
     }
 }

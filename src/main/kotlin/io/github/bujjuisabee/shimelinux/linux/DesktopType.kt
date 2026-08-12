@@ -20,40 +20,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.virtual
+package io.github.bujjuisabee.shimelinux.linux
 
+import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import java.awt.Graphics
-import javax.swing.JPanel
+import java.awt.image.BufferedImage
 
-class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
-    private var image: VirtualNativeImage? = null
+enum class DesktopType(
+    val getEnvironment: () -> Environment,
+    val getNativeImage: (BufferedImage) -> NativeImage,
+    val getTranslucentWindow: () -> TranslucentWindow
+) {
+    KDE({ KdeEnvironment() }, { src -> LinuxNativeImage(src) }, { LinuxTranslucentWindow() }),
+    WAYLAND({ WaylandEnvironment() }, { src -> LinuxNativeImage(src) }, { WaylandTranslucentLayer() }),
+    GENERIC({ LinuxEnvironment() }, { src -> LinuxNativeImage(src) }, { LinuxTranslucentWindow() });
 
-    override fun paintComponent(g: Graphics) {
-        image?.let { g.drawImage(it.managedImage, 0, 0, null) }
-    }
-
-    override fun contains(x: Int, y: Int) = super.contains(x, y) && image?.let {
-        (it.rgb[y * width + x] shr 24) and 0xFF > 0 // check if pixel at (x,y) has alpha greater than 0
-    } == true
-
-    override fun asComponent() = this
-
-    override fun setImage(image: NativeImage) {
-        this.image = image as VirtualNativeImage
-    }
-
-    override fun updateImage() {
-        repaint()
-    }
-
-    override fun setAlwaysOnTop(onTop: Boolean) {}
-
-    override fun dispose() {
-        parent?.let {
-            it.remove(this)
-            it.repaint()
+    companion object {
+        val current = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+            "KDE" -> KDE
+            "Hyprland", "niri" -> WAYLAND
+            else -> GENERIC
         }
     }
 }
