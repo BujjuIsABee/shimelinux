@@ -279,7 +279,9 @@ class Mascot(var imageSet: String) {
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
-        popup.add(restoreWindowsMenu)
+        if (DesktopType.current == DesktopType.KDE) {
+            popup.add(restoreWindowsMenu)
+        }
         popup.add(debugMenu)
         popup.addSeparator()
         if (behaviorsSubmenu.menuComponentCount > 0) {

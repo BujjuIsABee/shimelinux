@@ -33,6 +33,7 @@ import dorkbox.systemTray.Checkbox
 import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
+import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.File
@@ -432,7 +433,9 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            allowedBehaviorsSubmenu.add(throwingMenu)
+            if (DesktopType.current == DesktopType.KDE) {
+                allowedBehaviorsSubmenu.add(throwingMenu)
+            }
             allowedBehaviorsSubmenu.add(soundsMenu)
             allowedBehaviorsSubmenu.add(multiscreenMenu)
 
@@ -652,7 +655,9 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            icon.menu.add(restoreWindowsMenu)
+            if (DesktopType.current == DesktopType.KDE) {
+                icon.menu.add(restoreWindowsMenu)
+            }
             icon.menu.add(JSeparator())
             icon.menu.add(allowedBehaviorsSubmenu)
             icon.menu.add(chooseShimejiMenu)
