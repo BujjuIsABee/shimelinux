@@ -26,15 +26,16 @@ If you are on **Arch** or an Arch-based distribution, you can install ShimeLinux
 
 You can also use an AUR helper.
 
-`yay -S shimelinux` or `paru -S shimelinux`
+`paru -S shimelinux` or `yay -S shimelinux`
 
 ### Nix and NixOS
 
-If you are on **NixOS** or are using the nix package manager, you can install ShimeLinux from the Nix User Repository.
+If you are on **NixOS** or are using the Nix package manager, you can install ShimeLinux from the Nix User Repository.
 
-First setup the NUR by following its [documentation](https://nur.nix-community.org/documentation/)
+First, set up the NUR by following its [documentation](https://nur.nix-community.org/documentation/)
 
-Then add ShimeLinux to your packages:
+Then, add ShimeLinux to your packages:
+
 ```nix
 {
   # System-wide install
@@ -42,7 +43,7 @@ Then add ShimeLinux to your packages:
     nur.repos.claymorwan.shimelinux
   ];
 
-  # User side / Home Manager install
+  # User-side / Home Manager install
   home.packages = with pkgs; [
     nur.claymorwan.shimelinux
   ];
@@ -63,7 +64,7 @@ When you open ShimeLinux, a Shimeji will appear. You can right-click on a Shimej
 To add more Shimeji, click the system tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to use.
 
 > [!WARNING]
-> ShimeLinux can use a lot of your computer's memory, so you should make sure not to select too many Shimeji at once. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
+> Make sure not to select too many Shimeji at once, as ShimeLinux can use a lot of your computer's memory. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
 
 ## Compatibility
 
@@ -79,19 +80,30 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 
 ### Tiling Window Managers
 
-ShimeLinux supports **Hyprland** and **niri**.
+ShimeLinux supports some tiling Wayland compositors, though you may need to make some changes to configuration files for it to work properly.
 
-> [!Note]
-> On niri, the settings menu, Shimeji chooser, and right-click popup menus will be displayed as full windows by default. To make them display as floating windows, add this to your niri config file:
-> 
-> ```kdl
-> window-rule {
->   match app-id="com-group_finity-mascot-MainKt"
->   open-floating true
-> }
-> ```
-> 
-> Some menus may still be buggy, as ShimeLinux uses an outdated UI library with limited Wayland support.
+#### Hyprland
+
+Add this to your Hyprland configuration file (`~/.config/hypr/hyprland.lua`):
+
+```lua
+hl.env("_JAVA_AWT_WM_NONREPARENTING", "1")
+```
+
+#### Niri
+
+Add this to your niri configuration file (`~/.config/niri/config.kdl`):
+
+```kdl
+environment {
+    _JAVA_AWT_WM_NONREPARENTING "1"
+}
+
+window-rule {
+    match app-id="com-group_finity-mascot"
+    open-floating true
+}
+```
 
 ## Licenses
 
