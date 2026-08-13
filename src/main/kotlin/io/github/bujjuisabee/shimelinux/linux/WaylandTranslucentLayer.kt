@@ -54,7 +54,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
     }
 
-    private val senderPtr = WaylandLib.createMascot(this)
+    private val senderPtr = WaylandLib.createLayer(this)
     private var image: LinuxNativeImage? = null
     private var imageChanged = false
     private var previousCursorPosition = Point(0, 0)
@@ -82,7 +82,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
         WaylandLib.dispose(senderPtr)
     }
 
-    @Suppress("unused")
+    @Suppress("unused", "KotlinConstantConditions")
     fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,
@@ -91,12 +91,15 @@ class WaylandTranslucentLayer : TranslucentWindow {
         positionX: Int,
         positionY: Int,
     ) {
-        val (modifiers, button) = if (leftPressed || leftReleased) {
-            Pair(MouseEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1)
-        } else if (rightPressed || rightReleased) {
-            Pair(MouseEvent.BUTTON3_DOWN_MASK, MouseEvent.BUTTON3)
-        } else {
-            Pair(MouseEvent.NOBUTTON, MouseEvent.NOBUTTON)
+        var modifiers = MouseEvent.NOBUTTON
+        var button = MouseEvent.NOBUTTON
+        if (leftPressed || leftReleased) {
+            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
+            button = button or MouseEvent.BUTTON1
+        }
+        if (rightPressed || rightReleased) {
+            modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
+            button = button or MouseEvent.BUTTON3
         }
 
         if (leftPressed) {
@@ -167,7 +170,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
                     modifiers,
                     positionX,
                     positionY,
-                    1,
+                    0,
                     rightReleased,
                     button
                 )

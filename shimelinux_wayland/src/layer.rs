@@ -72,7 +72,7 @@ pub struct CursorState {
     pub position: Point,
 }
 
-pub struct Mascot {
+pub struct LayerState {
     pub object: Global<JObject<'static>>,
 
     pub compositor_state: CompositorState,
@@ -90,8 +90,8 @@ pub struct Mascot {
     pub image_bounds: Rect,
 }
 
-delegate_compositor!(Mascot);
-impl CompositorHandler for Mascot {
+delegate_compositor!(LayerState);
+impl CompositorHandler for LayerState {
     fn scale_factor_changed(
         &mut self,
         _conn: &Connection,
@@ -140,8 +140,8 @@ impl CompositorHandler for Mascot {
     }
 }
 
-delegate_output!(Mascot);
-impl OutputHandler for Mascot {
+delegate_output!(LayerState);
+impl OutputHandler for LayerState {
     fn output_state(&mut self) -> &mut OutputState {
         &mut self.output_state
     }
@@ -157,8 +157,8 @@ impl OutputHandler for Mascot {
     fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 }
 
-delegate_layer!(Mascot);
-impl LayerShellHandler for Mascot {
+delegate_layer!(LayerState);
+impl LayerShellHandler for LayerState {
     fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {}
 
     fn configure(
@@ -176,8 +176,8 @@ impl LayerShellHandler for Mascot {
     }
 }
 
-delegate_seat!(Mascot);
-impl SeatHandler for Mascot {
+delegate_seat!(LayerState);
+impl SeatHandler for LayerState {
     fn seat_state(&mut self) -> &mut SeatState {
         &mut self.seat_state
     }
@@ -211,8 +211,8 @@ impl SeatHandler for Mascot {
     fn remove_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
 }
 
-delegate_pointer!(Mascot);
-impl PointerHandler for Mascot {
+delegate_pointer!(LayerState);
+impl PointerHandler for LayerState {
     fn pointer_frame(
         &mut self,
         _conn: &Connection,
@@ -290,15 +290,15 @@ impl PointerHandler for Mascot {
     }
 }
 
-delegate_shm!(Mascot);
-impl ShmHandler for Mascot {
+delegate_shm!(LayerState);
+impl ShmHandler for LayerState {
     fn shm_state(&mut self) -> &mut Shm {
         &mut self.shm
     }
 }
 
-delegate_registry!(Mascot);
-impl ProvidesRegistryState for Mascot {
+delegate_registry!(LayerState);
+impl ProvidesRegistryState for LayerState {
     fn registry(&mut self) -> &mut RegistryState {
         &mut self.registry_state
     }
@@ -306,8 +306,8 @@ impl ProvidesRegistryState for Mascot {
     registry_handlers![];
 }
 
-delegate_noop!(Mascot: ignore WlRegion);
-impl Mascot {
+delegate_noop!(LayerState: ignore WlRegion);
+impl LayerState {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
         self.layer.set_margin(bounds.y, 0, 0, bounds.x);
@@ -368,11 +368,13 @@ impl Mascot {
                 }
 
                 // Set the mask shape
-                let region = self.compositor_state.wl_compositor().create_region(&qh, ());
-                for rect in &self.layer_mask {
-                    region.add(rect.x, rect.y, rect.width, rect.height);
+                if !self.layer_mask.is_empty() {
+                    let region = self.compositor_state.wl_compositor().create_region(&qh, ());
+                    for rect in &self.layer_mask {
+                        region.add(rect.x, rect.y, rect.width, rect.height);
+                    }
+                    self.layer.set_input_region(Some(&region));
                 }
-                self.layer.set_input_region(Some(&region));
             }
 
             // Update the layer

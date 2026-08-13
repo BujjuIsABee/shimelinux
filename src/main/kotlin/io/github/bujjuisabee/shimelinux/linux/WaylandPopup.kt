@@ -1,0 +1,225 @@
+/*
+ * Copyright (c) 2026, Bujju
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ *        following disclaimer.
+ *     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *        following disclaimer in the documentation and/or other materials provided with the distribution.
+ *     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *        products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.github.bujjuisabee.shimelinux.linux
+
+import com.group_finity.mascot.NativeFactory
+import java.awt.Component
+import java.awt.Graphics2D
+import java.awt.Point
+import java.awt.event.MouseEvent
+import java.awt.image.BufferedImage
+import javax.swing.JMenu
+import javax.swing.JMenuItem
+import javax.swing.JPopupMenu
+import javax.swing.MenuElement
+import javax.swing.MenuSelectionManager
+import javax.swing.Popup
+import javax.swing.PopupFactory
+import javax.swing.SwingUtilities
+import javax.swing.UIManager
+
+class WaylandPopup(
+    private val owner: Component?,
+    private val contents: Component,
+    private val x: Int,
+    private val y: Int,
+) : Popup(owner, contents, x, y) {
+    private val senderPtr: Long = WaylandLib.createLayer(this)
+    private var previousCursorPosition = Point(0, 0)
+    private var previousTarget: Component? = null
+    private var submenu: Popup? = null
+
+    override fun show() {
+        contents.size = contents.preferredSize
+        val width = contents.width
+        val height = contents.height
+        if (width <= 0 || height <= 0) return
+
+        contents.doLayout()
+
+        WaylandLib.setBounds(senderPtr, x, y, width, height)
+
+        setImage()
+    }
+
+    override fun hide() {
+        super.hide()
+
+        WaylandLib.dispose(senderPtr)
+        submenu?.hide()
+    }
+
+    @Suppress("unused", "KotlinConstantConditions")
+    fun updateCursor(
+        leftPressed: Boolean,
+        rightPressed: Boolean,
+        leftReleased: Boolean,
+        rightReleased: Boolean,
+        positionX: Int,
+        positionY: Int,
+    ) {
+        var modifiers = MouseEvent.NOBUTTON
+        var button = MouseEvent.NOBUTTON
+        if (leftPressed || leftReleased) {
+            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
+            button = button or MouseEvent.BUTTON1
+        }
+        if (rightPressed || rightReleased) {
+            modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
+            button = button or MouseEvent.BUTTON3
+        }
+
+        val newCursorPosition = Point(positionX, positionY)
+        val cursorMoved = previousCursorPosition != newCursorPosition
+        previousCursorPosition = newCursorPosition
+
+        val target = SwingUtilities.getDeepestComponentAt(contents, positionX, positionY) ?: contents
+        val targetPosition = SwingUtilities.convertPoint(contents, positionX, positionY, target)
+
+        if (previousTarget != target) {
+            val selectedPath = mutableListOf<MenuElement>()
+            if (owner is MenuElement) {
+                selectedPath.add(owner)
+            }
+            if (contents is MenuElement) {
+                selectedPath.add(contents)
+            }
+            if (target is JMenuItem) {
+                selectedPath.add(target)
+            }
+
+            if (target is JMenu) {
+                if (!(target.getClientProperty("isShowing") as? Boolean ?: false)) {
+                    val x = x + contents.width + UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
+                    val y = y + target.y + UIManager.getInt("Menu.submenuPopupOffsetY")
+                    val location = adjustPopupLocationToFitScreen(x, y, target.popupMenu)
+
+                    submenu =
+                        PopupFactory.getSharedInstance().getPopup(contents, target.popupMenu, location.x, location.y)
+                    submenu?.show()
+                    target.putClientProperty("isShowing", true)
+                }
+            } else {
+                (previousTarget as? JMenu)?.putClientProperty("isShowing", false)
+                submenu?.hide()
+            }
+
+            MenuSelectionManager.defaultManager().selectedPath = selectedPath.toTypedArray()
+
+            setImage()
+
+            previousTarget = target
+        }
+
+        if (leftPressed || rightPressed) {
+            target.dispatchEvent(
+                MouseEvent(
+                    target,
+                    MouseEvent.MOUSE_PRESSED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    targetPosition.x,
+                    targetPosition.y,
+                    1,
+                    false,
+                    button
+                )
+            )
+        }
+
+        if (leftReleased || rightReleased) {
+            target.dispatchEvent(
+                MouseEvent(
+                    target,
+                    MouseEvent.MOUSE_RELEASED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    targetPosition.x,
+                    targetPosition.y,
+                    1,
+                    false,
+                    button
+                )
+            )
+        }
+
+        if (cursorMoved) {
+            target.dispatchEvent(
+                MouseEvent(
+                    target,
+                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    targetPosition.x,
+                    targetPosition.y,
+                    0,
+                    false,
+                    button
+                )
+            )
+        }
+    }
+
+    private fun setImage() {
+        val width = contents.width
+        val height = contents.height
+
+        val buffer = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val g2d = buffer.createGraphics() as Graphics2D
+        contents.paint(g2d)
+        g2d.dispose()
+
+        val rgb = buffer.getRGB(0, 0, width, height, null, 0, width)
+        WaylandLib.setImage(senderPtr, rgb)
+    }
+
+    private fun adjustPopupLocationToFitScreen(x: Int, y: Int, popup: JPopupMenu): Point {
+        val popupLocation = Point(x, y)
+        val popupSize = popup.preferredSize
+        val popupRight = popupLocation.x.toLong() + popupSize.width.toLong()
+        val popupBottom = popupLocation.y.toLong() + popupSize.height.toLong()
+
+        val screenBounds = NativeFactory.instance.environment.workArea.toRectangle()
+        val screenSize = screenBounds.size
+        val screenRight = screenBounds.x + screenSize.width
+        val screenBottom = screenBounds.y + screenSize.height
+
+        if (popupRight > screenRight.toLong()) {
+            popupLocation.x = screenRight - popupSize.width
+        }
+
+        if (popupBottom > screenBottom.toLong()) {
+            popupLocation.y = screenBottom - popupSize.height
+        }
+
+        if (popupLocation.x < screenBounds.x) {
+            popupLocation.x = screenBounds.x
+        }
+
+        if (popupLocation.y < screenBounds.y) {
+            popupLocation.y = screenBounds.y
+        }
+
+        return popupLocation
+    }
+}

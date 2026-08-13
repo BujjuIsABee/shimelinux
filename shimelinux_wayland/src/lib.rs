@@ -46,9 +46,9 @@ use smithay_client_toolkit::{
 };
 use wayland_client::{Connection, globals::registry_queue_init};
 
-use crate::mascot::{CursorState, Mascot, get_screen_rect};
+use crate::layer::{CursorState, LayerState, get_screen_rect};
 
-mod mascot;
+mod layer;
 
 #[derive(Default, Clone)]
 pub struct Point {
@@ -72,7 +72,7 @@ enum Event {
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createMascot<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createLayer<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     object: JObject<'caller>,
@@ -108,7 +108,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
             layer.set_size(1, 1);
             layer.commit();
 
-            let mut mascot = Mascot {
+            let mut layer_state = LayerState {
                 object: env.new_global_ref(object).unwrap(),
 
                 compositor_state,
@@ -128,22 +128,22 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 
             thread::spawn(move || {
                 loop {
-                    event_queue.blocking_dispatch(&mut mascot).unwrap();
+                    event_queue.blocking_dispatch(&mut layer_state).unwrap();
 
                     // Handle events
                     while let Ok(event) = receiver.try_recv() {
                         match event {
                             Event::SetBounds(bounds) => {
-                                mascot.set_bounds(bounds);
+                                layer_state.set_bounds(bounds);
                             }
                             Event::SetImage(rgb) => {
-                                mascot.set_image(rgb);
+                                layer_state.set_image(rgb);
                             }
                             Event::SetCursor(use_hand) => {
-                                mascot.set_cursor(&connection, &qh, use_hand);
+                                layer_state.set_cursor(&connection, &qh, use_hand);
                             }
                             Event::Dispose() => {
-                                mascot.dispose();
+                                layer_state.dispose();
                             }
                         }
                     }

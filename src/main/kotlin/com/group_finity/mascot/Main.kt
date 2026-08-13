@@ -34,6 +34,7 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import io.github.bujjuisabee.shimelinux.linux.DesktopType
+import io.github.bujjuisabee.shimelinux.linux.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.File
@@ -46,6 +47,7 @@ import java.util.logging.LogManager
 import java.util.logging.Logger
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
+import javax.swing.PopupFactory
 import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
@@ -457,8 +459,16 @@ object Main {
                     manager.togglePauseAll()
                 }
 
+                if (DesktopType.current == DesktopType.WAYLAND) {
+                    PopupFactory.setSharedInstance(PopupFactory())
+                }
+
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
+
+                if (DesktopType.current == DesktopType.WAYLAND) {
+                    PopupFactory.setSharedInstance(WaylandPopupFactory)
+                }
 
                 if (settings.isRestartRequired) {
                     val response = JOptionPane.showConfirmDialog(

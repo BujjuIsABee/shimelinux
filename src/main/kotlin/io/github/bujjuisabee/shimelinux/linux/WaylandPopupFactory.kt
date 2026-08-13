@@ -22,34 +22,9 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import java.io.File
+import java.awt.Component
 import javax.swing.PopupFactory
-import kotlin.io.outputStream
 
-object WaylandLib {
-    init {
-        val libFile = File.createTempFile("libshimelinux_wayland", ".so")
-        libFile.deleteOnExit()
-        this::class.java.getResourceAsStream("/lib/libshimelinux_wayland.so")?.use { input ->
-            libFile.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-
-        System.load(libFile.absolutePath)
-
-        PopupFactory.setSharedInstance(WaylandPopupFactory)
-    }
-
-    external fun createLayer(obj: Any?): Long
-
-    external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
-
-    external fun setImage(senderPtr: Long, rgb: IntArray)
-
-    external fun setCursor(senderPtr: Long, useHand: Boolean)
-
-    external fun dispose(senderPtr: Long)
-
-    external fun getScreenRect(): IntArray
+object WaylandPopupFactory : PopupFactory() {
+    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int) = WaylandPopup(owner, contents, x, y)
 }

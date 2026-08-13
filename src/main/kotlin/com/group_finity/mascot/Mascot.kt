@@ -177,12 +177,7 @@ class Mascot(var imageSet: String) {
         val popup = JPopupMenu()
 
         popup.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuCanceled(e: PopupMenuEvent) {
-                // Prevent freezing on Wayland environment when closing the menu
-                if (DesktopType.current == DesktopType.WAYLAND) {
-                    SwingUtilities.getWindowAncestor(popup).dispose()
-                }
-            }
+            override fun popupMenuCanceled(e: PopupMenuEvent) {}
 
             override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
                 isAnimating = true
@@ -210,10 +205,12 @@ class Mascot(var imageSet: String) {
 
         val debugMenu = JMenuItem(localize("RevealStatistics"))
         debugMenu.addActionListener {
-            if (debugWindow == null) {
-                debugWindow = DebugWindow(imageSet)
+            SwingUtilities.invokeLater {
+                if (debugWindow == null) {
+                    debugWindow = DebugWindow(imageSet)
+                }
+                debugWindow?.isVisible = true
             }
-            debugWindow?.isVisible = true
         }
 
         val dismissMenu = JMenuItem(localize("Dismiss"))
