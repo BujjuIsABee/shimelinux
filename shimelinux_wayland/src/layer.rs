@@ -22,7 +22,6 @@
 
 use std::{
     cmp,
-    panic::{AssertUnwindSafe, catch_unwind},
     sync::{LazyLock, Mutex, OnceLock},
 };
 
@@ -345,44 +344,42 @@ impl LayerState {
     }
 
     fn draw(&mut self, qh: &QueueHandle<Self>) {
-        let _ = catch_unwind(AssertUnwindSafe(|| {
-            let width = cmp::max(1, self.image_bounds.width);
-            let height = cmp::max(1, self.image_bounds.height);
-            let stride = width * 4;
+        let width = cmp::max(1, self.image_bounds.width);
+        let height = cmp::max(1, self.image_bounds.height);
+        let stride = width * 4;
 
-            self.layer.set_size(width as u32, height as u32);
+        self.layer.set_size(width as u32, height as u32);
 
-            let (buffer, canvas) = self
-                .pool
-                .create_buffer(width, height, stride, Format::Argb8888)
-                .unwrap();
+        let (buffer, canvas) = self
+            .pool
+            .create_buffer(width, height, stride, Format::Argb8888)
+            .expect("Failed to create buffer");
 
-            if !self.image_rgb.is_empty() {
-                // Draw the image to the canvas
-                for y in 0..height {
-                    for x in 0..width {
-                        let canvas_index = cmp::min(((y * width + x) * 4) as usize, canvas.len() - 1);
-                        let image_index = cmp::min((y * width + x) as usize, self.image_rgb.len() - 1);
-                        canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
-                    }
-                }
-
-                // Set the mask shape
-                if !self.layer_mask.is_empty() {
-                    let region = self.compositor_state.wl_compositor().create_region(&qh, ());
-                    for rect in &self.layer_mask {
-                        region.add(rect.x, rect.y, rect.width, rect.height);
-                    }
-                    self.layer.set_input_region(Some(&region));
+        if !self.image_rgb.is_empty() {
+            // Draw the image to the canvas
+            for y in 0..height {
+                for x in 0..width {
+                    let canvas_index = cmp::min(((y * width + x) * 4) as usize, canvas.len() - 1);
+                    let image_index = cmp::min((y * width + x) as usize, self.image_rgb.len() - 1);
+                    canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
                 }
             }
 
-            // Update the layer
-            self.layer.wl_surface().damage_buffer(0, 0, width, height);
-            self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
-            buffer.attach_to(self.layer.wl_surface()).unwrap();
-            self.layer.commit();
-        }));
+            // Set the mask shape
+            if !self.layer_mask.is_empty() {
+                let region = self.compositor_state.wl_compositor().create_region(&qh, ());
+                for rect in &self.layer_mask {
+                    region.add(rect.x, rect.y, rect.width, rect.height);
+                }
+                self.layer.set_input_region(Some(&region));
+            }
+        }
+
+        // Update the layer
+        self.layer.wl_surface().damage_buffer(0, 0, width, height);
+        self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
+        buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
+        self.layer.commit();
     }
 
     fn update_layer_mask(&mut self) {

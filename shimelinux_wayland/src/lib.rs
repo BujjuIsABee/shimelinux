@@ -81,8 +81,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
         .with_env(|env| -> Result<jlong, Error> {
             let (sender, receiver) = channel::<Event>();
 
-            let connection = Connection::connect_to_env().unwrap();
-            let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
+            let connection = Connection::connect_to_env().expect("Failed to get compositor state");
+            let (globals, mut event_queue) = registry_queue_init(&connection).expect("Failed to initialize event queue");
             let qh = event_queue.handle();
 
             let compositor_state = CompositorState::bind(&globals, &qh)
@@ -109,7 +109,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
             layer.commit();
 
             let mut layer_state = LayerState {
-                object: env.new_global_ref(object).unwrap(),
+                object: env.new_global_ref(object).expect("Failed to get global reference to object"),
 
                 compositor_state,
                 registry_state: RegistryState::new(&globals),
@@ -128,7 +128,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 
             thread::spawn(move || {
                 loop {
-                    event_queue.blocking_dispatch(&mut layer_state).unwrap();
+                    let _ = event_queue.blocking_dispatch(&mut layer_state);
 
                     // Handle events
                     while let Ok(event) = receiver.try_recv() {
@@ -173,7 +173,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
                 y: cmp::max(-height + 1, y),
                 width: cmp::max(1, width),
                 height: cmp::max(1, height),
-            })).unwrap();
+            })).expect("Failed to send SetBounds event");
 
             Ok(())
         })
@@ -189,10 +189,12 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 ) {
     unowned_env
         .with_env(|env| -> Result<(), Error> {
-            let rgb = unsafe { rgb.get_elements(env, ReleaseMode::NoCopyBack).unwrap() };
+            let rgb = unsafe {
+                rgb.get_elements(env, ReleaseMode::NoCopyBack).expect("Failed to get array elements")
+            };
 
             let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
-            sender.send(Event::SetImage(rgb.to_vec())).unwrap();
+            sender.send(Event::SetImage(rgb.to_vec())).expect("Failed to send SetImage event");
 
             Ok(())
         })
@@ -209,7 +211,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
     unowned_env
         .with_env(|_env| -> Result<(), Error> {
             let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
-            sender.send(Event::SetCursor(use_hand)).unwrap();
+            sender.send(Event::SetCursor(use_hand)).expect("Failed to send SetCursor event");
 
             Ok(())
         })
@@ -225,7 +227,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_di
     unowned_env
         .with_env(|_env| -> Result<(), Error> {
             let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
-            sender.send(Event::Dispose()).unwrap();
+            sender.send(Event::Dispose()).expect("Failed to send dispose event");
 
             Ok(())
         })
@@ -241,7 +243,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
         .with_env(|env| -> Result<_, Error> {
             let screen_rect = get_screen_rect();
 
-            let array = JIntArray::new(env, 4).unwrap();
+            let array = JIntArray::new(env, 4).expect("Failed to create array");
             array
                 .set_region(
                     env,
@@ -253,7 +255,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_ge
                         screen_rect.height,
                     ],
                 )
-                .unwrap();
+                .expect("Failed to set array");
 
             Ok(array)
         })
