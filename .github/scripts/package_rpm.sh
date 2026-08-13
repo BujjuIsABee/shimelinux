@@ -1,5 +1,5 @@
 NAME='shimelinux'
-VERSION='1.2.0'
+VERSION='1.2.1'
 RELEASE='1%{?dist}'
 SUMMARY='An unofficial Linux port of Shimeji-ee Desktop Pet'
 BUILD_ARCH='noarch'

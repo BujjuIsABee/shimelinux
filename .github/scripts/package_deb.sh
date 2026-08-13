@@ -1,5 +1,5 @@
 PACKAGE='shimelinux'
-VERSION='1.2.0'
+VERSION='1.2.1'
 DEPENDS='openjdk-21-jre, libayatana-appindicator3-1'
 SECTION='java'
 PRIORITY='optional'

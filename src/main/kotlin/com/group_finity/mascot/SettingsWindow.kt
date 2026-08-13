@@ -70,7 +70,7 @@ import javax.swing.border.BevelBorder
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
-private const val VERSION = "v1.2.0"
+private const val VERSION = "v1.2.1"
 private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
 private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
 private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
