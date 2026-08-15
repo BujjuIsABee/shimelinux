@@ -34,7 +34,23 @@ If you are on **NixOS** or are using the Nix package manager, you can install Sh
 
 First, set up the NUR by following its [documentation](https://nur.nix-community.org/documentation/)
 
-Then, add ShimeLinux to your packages:
+You can then install it with the Home Manager module:
+
+```nix
+{
+  imports = [
+    inputs.nur.repos.claymorwan.homeModules.shimelinux
+  ];
+
+  shimelinux = {
+    enable = true;
+    # If you want shimelinux to launch on boot (off by default)
+    autostart = true;
+  };
+}
+```
+
+Alternatively, you can also add ShimeLinux to your packages:
 
 ```nix
 {
@@ -45,7 +61,7 @@ Then, add ShimeLinux to your packages:
 
   # User-side / Home Manager install
   home.packages = with pkgs; [
-    nur.claymorwan.shimelinux
+    nur.repos.claymorwan.shimelinux
   ];
 }
 ```
