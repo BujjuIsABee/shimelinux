@@ -22,25 +22,45 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
-import com.group_finity.mascot.environment.Environment
-import com.group_finity.mascot.image.NativeImage
-import com.group_finity.mascot.image.TranslucentWindow
+import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.ui.FlatPopupFactory
+import com.group_finity.mascot.getProperty
 import java.awt.image.BufferedImage
+import javax.swing.PopupFactory
+import javax.swing.UIManager
 
-enum class DesktopType(
-    val getEnvironment: () -> Environment,
-    val getNativeImage: (BufferedImage) -> NativeImage,
-    val getTranslucentWindow: () -> TranslucentWindow
-) {
-    KDE({ KdeEnvironment() }, { src -> LinuxNativeImage(src) }, { LinuxTranslucentWindow() }),
-    WAYLAND({ WaylandEnvironment() }, { src -> LinuxNativeImage(src) }, { WaylandTranslucentLayer() }),
-    GENERIC({ LinuxEnvironment() }, { src -> LinuxNativeImage(src) }, { LinuxTranslucentWindow() });
+enum class DesktopType {
+    KDE, WAYLAND, GENERIC;
 
     companion object {
         val current = when (System.getenv("XDG_CURRENT_DESKTOP")) {
             "KDE" -> KDE
-            "Hyprland", "niri" -> WAYLAND
+            "Hyprland", "niri", "sway" -> WAYLAND
             else -> GENERIC
+        }
+
+        fun getEnvironment() = when (current) {
+            KDE -> KdeEnvironment()
+            WAYLAND -> WaylandEnvironment()
+            GENERIC -> LinuxEnvironment()
+        }
+
+        fun getNativeImage(src: BufferedImage) = when (current) {
+            KDE -> LinuxNativeImage(src)
+            WAYLAND -> LinuxNativeImage(src)
+            GENERIC -> LinuxNativeImage(src)
+        }
+
+        fun getTranslucentWindow() = when (current) {
+            KDE -> LinuxTranslucentWindow()
+            WAYLAND -> WaylandTranslucentLayer()
+            GENERIC -> LinuxTranslucentWindow()
+        }
+
+        fun getPopupFactory() = when (current) {
+            WAYLAND if (getProperty("Environment", "linux") == "linux") -> WaylandPopupFactory
+            else if (UIManager.getLookAndFeel() is FlatLaf) -> FlatPopupFactory()
+            else -> PopupFactory()
         }
     }
 }

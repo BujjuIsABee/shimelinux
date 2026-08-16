@@ -25,7 +25,9 @@ package com.group_finity.mascot
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
+import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import java.awt.image.BufferedImage
+import javax.swing.PopupFactory
 
 import io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl as LinuxNativeFactory
 import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
@@ -45,6 +47,8 @@ abstract class NativeFactory {
         }
 
         fun resetInstance() {
+            PopupFactory.setSharedInstance(DesktopType.getPopupFactory())
+
             val environment = getProperty("Environment", "linux")
             instance = when (environment) {
                 "linux" -> LinuxNativeFactory()

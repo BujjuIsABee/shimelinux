@@ -26,9 +26,9 @@ import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
 
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = DesktopType.current.getEnvironment()
+    override val environment = DesktopType.getEnvironment()
 
-    override fun newNativeImage(src: BufferedImage) = DesktopType.current.getNativeImage(src)
+    override fun newNativeImage(src: BufferedImage) = DesktopType.getNativeImage(src)
 
-    override fun newTranslucentWindow() = DesktopType.current.getTranslucentWindow()
+    override fun newTranslucentWindow() = DesktopType.getTranslucentWindow()
 }

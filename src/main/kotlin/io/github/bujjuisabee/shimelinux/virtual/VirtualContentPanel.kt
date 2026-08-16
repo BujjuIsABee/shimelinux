@@ -94,16 +94,10 @@ class VirtualContentPanel(
             Mode.CENTER -> {
                 g.drawImage(
                     resizedImage,
-                    if (resizedImage.getWidth(null) > width) {
-                        (resizedImage.getWidth(null) - width) / -2
-                    } else {
-                        (width - resizedImage.getWidth(null)) / 2
-                    },
-                    if (resizedImage.getHeight(null) > height) {
-                        (resizedImage.getHeight(null) - height) / -2
-                    } else {
-                        (height - resizedImage.getHeight(null)) / 2
-                    },
+                    if (resizedImage.getWidth(null) > width) (resizedImage.getWidth(null) - width) / -2
+                    else (width - resizedImage.getWidth(null)) / 2,
+                    if (resizedImage.getHeight(null) > height) (resizedImage.getHeight(null) - height) / -2
+                    else (height - resizedImage.getHeight(null)) / 2,
                     null
                 )
             }

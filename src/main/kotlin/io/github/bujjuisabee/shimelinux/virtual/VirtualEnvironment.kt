@@ -86,11 +86,9 @@ class VirtualEnvironment : Environment() {
     }
 
     override fun tick() {
-        if (display.isVisible) {
-            screenRect.bounds = display.contentPane.bounds
-            screen.set(screenRect)
-            cursor.set(display.mousePosition ?: Point(0, 0))
-        }
+        screenRect.bounds = display.contentPane.bounds
+        screen.set(screenRect)
+        cursor.set(display.mousePosition ?: Point(0, 0))
 
         activeIE.isVisible = false
     }

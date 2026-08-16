@@ -32,7 +32,7 @@ You can also use an AUR helper.
 
 If you are on **NixOS** or are using the Nix package manager, you can install ShimeLinux from the Nix User Repository.
 
-First, set up the NUR by following its [documentation](https://nur.nix-community.org/documentation/)
+First, set up the NUR by following its [documentation](https://nur.nix-community.org/documentation/).
 
 You can then install it with the Home Manager module:
 
@@ -86,19 +86,20 @@ To add more Shimeji, click the system tray icon and select "Choose Shimeji...." 
 
 ShimeLinux has been tested on the following Linux distributions and desktop environments:
 
-| Distro          | Desktop Environment(s)                                                    |
-|-----------------|---------------------------------------------------------------------------|
-| Arch Linux      | KDE Plasma 6.6/6.7, GNOME 50, Cinnamon 6.6, Hyprland v0.55.4, niri v26.04 |
-| Fedora 44       | KDE Plasma 6.7                                                            |
-| Linux Mint 22.3 | Cinnamon 6.6                                                              |
-| Ubuntu 26.04    | GNOME 50                                                                  |
-| NixOS 26.05     | KDE Plasma 6.7, niri v26.04                                               |
+| Distribution | Desktop Environment / Compositor | Notes                                                                                         |
+|--------------|----------------------------------|-----------------------------------------------------------------------------------------------|
+| Arch Linux   | KDE Plasma                       | Supports interactive windows                                                                  |
+| Arch Linux   | GNOME                            |                                                                                               |
+| Arch Linux   | Hyprland                         | Requires additional setup; see [Hyprland](https://github.com/BujjuIsABee/shimelinux#hyprland) |
+| Arch Linux   | niri                             | Requires additional setup; see [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
+| Arch Linux   | sway                             | Requires additional setup; see [sway](https://github.com/BujjuIsABee/shimelinux#sway)         |
+| Fedora       | KDE Plasma                       | Supports interactive windows                                                                  |
+| Linux Mint   | Cinnamon                         |                                                                                               |
+| NixOS        | KDE Plasma                       | Supports interactive windows                                                                  |
+| NixOS        | niri                             | Requires additional setup; see [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
+| Ubuntu       | GNOME                            |                                                                                               |
 
-### Tiling Window Managers
-
-ShimeLinux supports some tiling Wayland compositors, though you may need to make some changes to configuration files for it to work properly.
-
-#### Hyprland
+### Hyprland
 
 Add this to your Hyprland configuration file (`~/.config/hypr/hyprland.lua`):
 
@@ -106,7 +107,7 @@ Add this to your Hyprland configuration file (`~/.config/hypr/hyprland.lua`):
 hl.env("_JAVA_AWT_WM_NONREPARENTING", "1")
 ```
 
-#### Niri
+### Niri
 
 Add this to your niri configuration file (`~/.config/niri/config.kdl`):
 
@@ -119,6 +120,21 @@ window-rule {
     match app-id="com-group_finity-mascot"
     open-floating true
 }
+```
+
+### Sway
+
+Add this to your sway configuration file (`~/.config/sway/config`):
+
+```
+for_window [class="com-group_finity-mascot"] floating enable
+```
+
+Ensure these environment variables are set before launching the program:
+
+```env
+XDG_CURRENT_DESKTOP=sway
+_JAVA_AWT_WM_NONREPARENTING=1
 ```
 
 ## Licenses

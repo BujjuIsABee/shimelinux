@@ -116,10 +116,8 @@ class BehaviorBuilder(
     }
 
     fun isEffective(context: VariableMap): Boolean {
-        if (frequency == 0) return false
-
-        return conditions.none {
-            Variable.parse(it)?.get(context) as? Boolean == false
+        return frequency != 0 && conditions.filterNotNull().none {
+            !(checkNotNull(Variable.parse(it)).get(context) as Boolean)
         }
     }
 

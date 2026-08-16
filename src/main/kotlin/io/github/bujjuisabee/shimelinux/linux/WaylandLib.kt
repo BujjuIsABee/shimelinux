@@ -23,7 +23,6 @@
 package io.github.bujjuisabee.shimelinux.linux
 
 import java.io.File
-import javax.swing.PopupFactory
 import kotlin.io.outputStream
 
 object WaylandLib {
@@ -37,8 +36,6 @@ object WaylandLib {
         }
 
         System.load(libFile.absolutePath)
-
-        PopupFactory.setSharedInstance(WaylandPopupFactory)
     }
 
     external fun createLayer(obj: Any?): Long

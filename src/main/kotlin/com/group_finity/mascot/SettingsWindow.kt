@@ -389,10 +389,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         menuScalingPanel = JPanel()
+        menuScalingPanel.isEnabled = DesktopType.current != DesktopType.WAYLAND
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
         menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
 
         menuScalingSlider = JSlider()
+        menuScalingSlider.isEnabled = DesktopType.current != DesktopType.WAYLAND
         menuScalingSlider.minimum = 1
         menuScalingSlider.maximum = 3
         menuScalingSlider.majorTickSpacing = 1
@@ -725,12 +727,17 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowModeEnabledCheckBox.isSelected = environment == "virtual"
         windowModeEnabledCheckBox.addActionListener {
             environment = if (windowModeEnabledCheckBox.isSelected) "virtual" else "linux"
-            windowModeSettingsPanel.isVisible = windowModeEnabledCheckBox.isSelected
+            widthSpinner.isEnabled = windowModeEnabledCheckBox.isSelected
+            heightSpinner.isEnabled = windowModeEnabledCheckBox.isSelected
+            windowBackgroundColorTextField.isEnabled = windowModeEnabledCheckBox.isSelected
+            windowBackgroundColorButton.isEnabled = windowModeEnabledCheckBox.isSelected
+            changeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected
+            windowBackgroundModeComboBox.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
+            removeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
         }
 
         windowModeSettingsPanel = JPanel()
         windowModeSettingsPanel.layout = BoxLayout(windowModeSettingsPanel, BoxLayout.Y_AXIS)
-        windowModeSettingsPanel.isVisible = environment == "virtual"
 
         windowDimensionsPanel = JPanel(BorderLayout())
         windowDimensionsPanel.alignmentX = LEFT_ALIGNMENT
@@ -741,6 +748,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val (windowWidth, windowHeight) = windowSize.split("x").map { it.toIntOrNull() ?: 0 }
 
         widthSpinner = JSpinner()
+        widthSpinner.isEnabled = environment == "virtual"
         widthSpinner.value = windowWidth
         widthSpinner.addChangeListener {
             val (_, windowHeight) = windowSize.split("x")
@@ -748,6 +756,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         heightSpinner = JSpinner()
+        heightSpinner.isEnabled = environment == "virtual"
         heightSpinner.value = windowHeight
         heightSpinner.addChangeListener {
             val (windowWidth, _) = windowSize.split("x")
@@ -776,6 +785,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundColorTextField = object : JTextField(windowBackgroundColor) {
             override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
+        windowBackgroundColorTextField.isEnabled = environment == "virtual"
         windowBackgroundColorTextField.addActionListener {
             val color = runCatching { Color.decode(windowBackgroundColorTextField.text) }.getOrNull()
 
@@ -799,6 +809,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         windowBackgroundColorButton = JButton(localize("Change"))
+        windowBackgroundColorButton.isEnabled = environment == "virtual"
         windowBackgroundColorButton.preferredSize = removeInteractiveWindowButton.preferredSize
         windowBackgroundColorButton.addActionListener {
             val color = JColorChooser.showDialog(
@@ -844,6 +855,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundImagePreviewPanel.add(windowBackgroundImagePreview)
 
         changeWindowBackgroundImageButton = JButton(localize("Change"))
+        changeWindowBackgroundImageButton.isEnabled = environment == "virtual"
         changeWindowBackgroundImageButton.addActionListener {
             val dialog = JFileChooser()
             dialog.dialogTitle = localize("ChooseBackgroundImage")
@@ -851,10 +863,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             if (dialog.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 windowBackgroundImage = dialog.selectedFile.canonicalPath
                 refreshBackgroundImagePreview()
+                windowBackgroundModeComboBox.isEnabled = true
+                removeWindowBackgroundImageButton.isEnabled = true
             }
         }
 
         windowBackgroundModeComboBox = JComboBox()
+        windowBackgroundModeComboBox.isEnabled = environment == "virtual" && windowBackgroundImage != ""
         windowBackgroundModeComboBox.addItem(localize("BackgroundModeCenter"))
         windowBackgroundModeComboBox.addItem(localize("BackgroundModeFit"))
         windowBackgroundModeComboBox.addItem(localize("BackgroundModeStretch"))
@@ -866,9 +881,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         removeWindowBackgroundImageButton = JButton(localize("Remove"))
+        removeWindowBackgroundImageButton.isEnabled = environment == "virtual" && windowBackgroundImage != ""
         removeWindowBackgroundImageButton.addActionListener {
             windowBackgroundImage = ""
             refreshBackgroundImagePreview()
+            windowBackgroundModeComboBox.isEnabled = false
+            removeWindowBackgroundImageButton.isEnabled = false
         }
 
         val constraints = GridBagConstraints()
