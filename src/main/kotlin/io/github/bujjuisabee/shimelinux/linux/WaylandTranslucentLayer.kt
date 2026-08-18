@@ -30,6 +30,11 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
 
+/**
+ * A window that displays a mascot via [WaylandLib]
+ *
+ * @author Bujju
+ */
 class WaylandTranslucentLayer : TranslucentWindow {
     private val component = object : Component() {
         private var bounds = super.bounds

@@ -34,7 +34,17 @@ import javax.imageio.ImageIO
 import kotlin.io.path.inputStream
 import kotlin.math.roundToInt
 
+/**
+ * An object that loads image pairs
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 object ImagePairLoader {
+    /**
+     * Loads an image pair. If [rightPath] is null, the right image will be the left image flipped.
+     */
     @JvmStatic
     fun load(leftPath: Path, rightPath: Path?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
         if (ImagePairs.contains(leftPath.toString() + (rightPath?.toString() ?: ""))) return

@@ -25,10 +25,20 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * An action that causes the mascot to look in a specific direction
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Look(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
+    /**
+     * The direction that the mascot will look towards. The direction opposite of its current direction will be used if a direction is not provided.
+     */
     private val isLookRight: Boolean
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)
 

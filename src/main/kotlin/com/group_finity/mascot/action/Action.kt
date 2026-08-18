@@ -24,10 +24,26 @@ package com.group_finity.mascot.action
 
 import com.group_finity.mascot.Mascot
 
+/**
+ * Defines an action, which handles the movement and animation of a mascot
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 interface Action {
+    /**
+     * Initializes the action for [mascot]; called once when the behavior associated with the action is initialized
+     */
     fun init(mascot: Mascot)
 
+    /**
+     * Returns whether the action should continue
+     */
     fun hasNext(): Boolean
 
+    /**
+     * Triggers the next frame of the action and progresses its animation
+     */
     fun next()
 }

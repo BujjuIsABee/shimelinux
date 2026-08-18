@@ -38,6 +38,12 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(ComplexMove::class.java.name)
 
+/**
+ * An action that creates a new mascot and/or scans for an affordance while [mascot] moves
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class ComplexMove(
     schema: ResourceBundle,
@@ -55,16 +61,41 @@ class ComplexMove(
     override val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning != it.isTurn }
 
+    /**
+     * The characteristics of the action, separated by '/'. There are two options:
+     * - Breed
+     * - Scan
+     */
     private val characteristics: String
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
+
+    /**
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+
+    /**
+     * The behavior to set for the other mascot
+     */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+
+    /**
+     * Whether the mascots should face each other
+     */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
+
+    /**
+     * The X-position that the mascot moves towards. The X-position of [target] will be used instead if [isScanEnabled] is true.
+     */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+
+    /**
+     * The Y-position that the mascot moves towards. The Y-position of [target] will be used instead if [isScanEnabled] is true.
+     */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 

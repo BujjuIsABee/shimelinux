@@ -31,6 +31,12 @@ import java.awt.event.ComponentEvent
 import java.awt.event.ComponentListener
 import javax.swing.JPanel
 
+/**
+ * Displays the background of the virtual environment
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class VirtualContentPanel(
     preferredSize: Dimension,
     background: Color,

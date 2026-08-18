@@ -29,15 +29,33 @@ import java.util.ResourceBundle
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+/**
+ * An action that causes the mascot to jump
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 open class Jump(
     schema: ResourceBundle,
     animations: List<Animation>,
     context: VariableMap
 ) : ActionBase(schema, animations, context) {
+    /**
+     * The velocity of the mascot as it jumps
+     */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
+
+    /**
+     * The X-position that the mascot jumps towards
+     */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+
+    /**
+     * The Y-position that the mascot jumps towards
+     */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 

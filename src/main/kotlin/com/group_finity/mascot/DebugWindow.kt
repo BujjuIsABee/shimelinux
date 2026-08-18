@@ -31,6 +31,12 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 
+/**
+ * A menu that shows statistics about a mascot for debugging purposes
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class DebugWindow(imageSet: String) : JFrame() {
     private val panel: JPanel
     private val behaviorLabel: JLabel
@@ -59,7 +65,7 @@ class DebugWindow(imageSet: String) : JFrame() {
     private val environmentHeightValue: JLabel
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
         title = imageSet
         isResizable = false

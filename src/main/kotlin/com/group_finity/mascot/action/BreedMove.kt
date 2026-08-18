@@ -27,6 +27,12 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * An action that creates a new mascot while [mascot] moves
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class BreedMove(
     schema: ResourceBundle,

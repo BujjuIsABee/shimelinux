@@ -29,6 +29,17 @@ import java.awt.Point
 import java.util.ResourceBundle
 import kotlin.math.abs
 
+/**
+ * An action that occurs while the mascot is falling
+ *
+ * "I'm falling!"
+ *
+ * -Signery
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 open class Fall(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -39,14 +50,33 @@ open class Fall(
     private var modX = 0.0
     private var modY = 0.0
 
+    /**
+     * The initial horizontal velocity of the mascot
+     */
     private val initialVx: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
+
+    /**
+     * The initial vertical velocity of the mascot
+     */
     private val initialVy: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()
+
+    /**
+     * A fractional multiplier that is applied to the horizontal velocity every frame
+     */
     private val resistanceX: Double
         get() = eval<Number>(schema.getString(PARAMETER_RESISTANCEX), DEFAULT_RESISTANCEX).toDouble()
+
+    /**
+     * A fractional multiplier that is applied to the vertical velocity every frame
+     */
     private val resistanceY: Double
         get() = eval<Number>(schema.getString(PARAMETER_RESISTANCEY), DEFAULT_RESISTANCEY).toDouble()
+
+    /**
+     * Subtracted from the vertical velocity every frame
+     */
     private val gravity: Double
         get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 

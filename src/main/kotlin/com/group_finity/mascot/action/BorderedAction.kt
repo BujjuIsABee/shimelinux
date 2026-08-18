@@ -28,6 +28,13 @@ import com.group_finity.mascot.environment.Border
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * An action that places the mascot on a specific border
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 abstract class BorderedAction(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -36,6 +43,12 @@ abstract class BorderedAction(
     internal var border: Border? = null
         private set
 
+    /**
+     * The border that the mascot will be placed on. There are three options:
+     * - Ceiling
+     * - Wall
+     * - Floor
+     */
     private val borderType: String?
         get() = eval(schema.getString(PARAMETER_BORDERTYPE), DEFAULT_BORDERTYPE)
 
@@ -55,10 +68,8 @@ abstract class BorderedAction(
     }
 
     companion object {
-        private const val PARAMETER_BORDERTYPE = "BorderType"
-
-        @JvmField
-        val DEFAULT_BORDERTYPE: String? = null
+        const val PARAMETER_BORDERTYPE = "BorderType"
+        private val DEFAULT_BORDERTYPE: String? = null
 
         const val BORDERTYPE_CEILING = "Ceiling"
         const val BORDERTYPE_WALL = "Wall"

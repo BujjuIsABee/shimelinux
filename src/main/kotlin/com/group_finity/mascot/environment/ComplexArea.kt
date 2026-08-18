@@ -25,16 +25,29 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 import java.awt.Rectangle
 
+/**
+ * An area made of multiple areas
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
     val areas: Collection<Area>
         get() = areaMap.values
 
+    /**
+     * Sets the areas that make up the complex area
+     */
     fun set(rectangles: Map<String, Rectangle>) {
         retain(rectangles.keys)
         rectangles.forEach { (key, value) -> set(key, value) }
     }
 
+    /**
+     * Sets the bounds of the area with the [name]
+     */
     fun set(name: String, value: Rectangle) {
         if (areaMap.values.any { it.toRectangle() == value }) return
 
@@ -42,6 +55,9 @@ class ComplexArea {
         area.set(value)
     }
 
+    /**
+     * Removes all areas whose name is not in [deviceNames]
+     */
     fun retain(deviceNames: Collection<String>) {
         areaMap.entries.removeIf { !deviceNames.contains(it.key) }
     }

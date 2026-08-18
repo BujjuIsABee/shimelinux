@@ -39,6 +39,13 @@ import kotlin.math.roundToInt
 
 private val logger = Logger.getLogger(Breed.Delegate::class.java.name)
 
+/**
+ * An action that creates a new mascot
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Breed(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -60,6 +67,12 @@ class Breed(
         }
     }
 
+    /**
+     * Handles the shared functionality of breeding actions
+     *
+     * @author LavenderSnek
+     * @author Bujju
+     */
     class Delegate(private val action: ActionBase) {
         val isEnabled: Boolean
             get() = getProperty(if (bornTransient) "Transients" else "Breeding", true)
@@ -68,18 +81,45 @@ class Breed(
         val isPenultimateFrame: Boolean
             get() = action.time == checkNotNull(action.animation).duration - 1
 
+        /**
+         * The X-position of the new mascot relative to [mascot]
+         */
         private val bornX: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNX), DEFAULT_BORNX).toInt()
+
+        /**
+         * The Y-position of the new mascot relative to [mascot]
+         */
         private val bornY: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNY), DEFAULT_BORNY).toInt()
+
+        /**
+         * The initial behavior of the new mascot
+         */
         private val bornBehavior: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOR), DEFAULT_BORNBEHAVIOR)
+
+        /**
+         * The image set that will be used for the new mascot. The same image set as [mascot] will be used if a valid image set is not provided.
+         */
         private val bornMascot: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
+
+        /**
+         * Whether the new mascot will be temporary
+         */
         private val bornTransient: Boolean
             get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
+
+        /**
+         * A number which [time] must be divisible by for the new mascot to be created
+         */
         private val bornInterval: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNINTERVAL), DEFAULT_BORNINTERVAL).toInt()
+
+        /**
+         * The number of mascots to spawn
+         */
         private val bornCount: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNCOUNT), DEFAULT_BORNCOUNT).toInt()
 
@@ -125,12 +165,18 @@ class Breed(
             }
         }
 
+        /**
+         * Ensures that [bornCount] is greater than zero
+         */
         fun validateBornCount() {
             if (bornCount < 1) {
                 throw VariableException("BornCount must be positive")
             }
         }
 
+        /**
+         * Ensures that [bornInterval] is greater than zero
+         */
         fun validateBornInterval() {
             if (bornInterval < 1) {
                 throw VariableException("BornInterval must be positive")

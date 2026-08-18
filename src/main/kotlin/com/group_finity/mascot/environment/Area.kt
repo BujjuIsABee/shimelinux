@@ -24,6 +24,13 @@ package com.group_finity.mascot.environment
 
 import java.awt.Rectangle
 
+/**
+ * A movable rectangle
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Area {
     var isVisible = true
     var left = 0
@@ -45,6 +52,9 @@ class Area {
     val height: Int
         get() = bottom - top
 
+    /**
+     * Moves/resizes the area
+     */
     fun set(value: Rectangle) {
         dleft = value.x - left
         dtop = value.y - top
@@ -57,8 +67,14 @@ class Area {
         bottom = value.y + value.height
     }
 
+    /**
+     * Gets whether a point at ([x], [y]) is inside the area
+     */
     fun contains(x: Int, y: Int) = x in left..right && y in top..bottom
 
+    /**
+     * Gets the area as a [Rectangle]
+     */
     fun toRectangle() = Rectangle(left, top, width, height)
 
     override fun toString() = "Area[left=$left, top=$top, right=$right, bottom=$bottom]"

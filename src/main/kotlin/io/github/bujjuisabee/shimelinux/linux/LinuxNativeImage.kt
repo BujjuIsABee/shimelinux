@@ -26,6 +26,11 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 import java.util.Objects
 
+/**
+ * Stores an image to display in a [LinuxTranslucentWindow] or [WaylandTranslucentLayer]
+ *
+ * @author Bujju
+ */
 class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage {
     val width = managedImage.width
     val height = managedImage.height

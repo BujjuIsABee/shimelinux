@@ -22,6 +22,13 @@
 
 package com.group_finity.mascot.exception
 
+/**
+ * An exception thrown when a mascot needs to be dismissed
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class CantBeAliveException : Exception {
     constructor(message: String) : super(message)
 

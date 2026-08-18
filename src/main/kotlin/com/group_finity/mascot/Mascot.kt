@@ -50,28 +50,103 @@ import javax.swing.event.PopupMenuListener
 private val logger = Logger.getLogger(Mascot::class.java.name)
 private val lastId = AtomicInteger()
 
+/**
+ * A mascot object
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Mascot(var imageSet: String) {
     private val id = lastId.incrementAndGet()
-    private val window = NativeFactory.instance.newTranslucentWindow()
-    var manager: Manager? = null
-    var anchor = Point(0, 0)
-    var image: MascotImage? = null
-    var isLookRight = false
-    var behavior: Behavior? = null
-        set(value) {
-            field = value?.also { it.init(this) }
-        }
+
     var time = 0
         private set
     private var isAnimating = true
         get() = field && !isPaused
-    var isPaused = false
-    var isDragging = false
-    val environment = MascotEnvironment(this)
-    var sound: String? = null
+
+    /**
+     * Manages the behavior of a mascot by triggering actions
+     */
+    var behavior: Behavior? = null
+        set(value) {
+            field = value?.also { it.init(this) }
+        }
+
+    /**
+     * A window to display the mascot
+     */
+    private val window = NativeFactory.instance.newTranslucentWindow()
+
+    /**
+     * A menu to display statistics about the mascot
+     */
     private var debugWindow: DebugWindow? = null
+
+    /**
+     * The manager managing the mascot
+     */
+    var manager: Manager? = null
+
+    /**
+     * The mascot's position
+     */
+    var anchor = Point(0, 0)
+
+    /**
+     * The image to display on [window]
+     */
+    var image: MascotImage? = null
+
+    /**
+     * Whether the mascot is facing right
+     */
+    var isLookRight = false
+
+    /**
+     * Whether the mascot is currently being dragged with the cursor
+     */
+    var isDragging = false
+
+    /**
+     * Whether the mascot is paused
+     */
+    var isPaused = false
+
+    /**
+     * The sound being played by the mascot, or null if no sound is playing
+     */
+    var sound: String? = null
+
+    /**
+     * Contains information about the bounds of the screen, the location of the cursor, and the active interactive window
+     */
+    val environment = MascotEnvironment(this)
+
+    /**
+     * A list of variables that can be accessed by scripts
+     */
+    val variables = VariableMap()
+
+    /**
+     * A list of active affordances. Affordances allow the mascot to interact with other mascots.
+     */
     val affordances = mutableListOf<String>()
+
+    /**
+     * A list of active hotspots. Hotspots are clickable areas on the mascot.
+     */
     val hotspots = mutableListOf<Hotspot>()
+
+    /**
+     * Whether a hotspot is currently clicked
+     */
+    val isHotspotClicked
+        get() = cursorPosition != null
+
+    /**
+     * The position of the cursor. Always null unless a hotspot is clicked.
+     */
     var cursorPosition: Point? = null
         set(value) {
             field = value
@@ -81,8 +156,10 @@ class Mascot(var imageSet: String) {
                 refreshCursor(value)
             }
         }
-    val variables = VariableMap()
-    val isHotspotClicked get() = cursorPosition != null
+
+    /**
+     * The bounds of the mascot
+     */
     val bounds: Rectangle
         get() {
             val image = image
@@ -95,10 +172,16 @@ class Mascot(var imageSet: String) {
             }
         }
 
+    /**
+     * The number of mascots with the same image set
+     */
     @Suppress("unused")
     val count: Int
         get() = manager?.getCount(imageSet) ?: 0
 
+    /**
+     * The number of all mascots
+     */
     @Suppress("unused")
     val totalCount: Int
         get() = manager?.count ?: 0
@@ -356,6 +439,9 @@ class Mascot(var imageSet: String) {
         }
     }
 
+    /**
+     * Resets the mascot's position
+     */
     fun resetAnchor() {
         anchor = if (getProperty("Multiscreen", true)) {
             Point(
@@ -370,6 +456,9 @@ class Mascot(var imageSet: String) {
         }
     }
 
+    /**
+     * Dismisses the mascot
+     */
     fun dispose() {
         logger.info { "Destroying mascot: $this" }
 

@@ -27,6 +27,13 @@ import java.awt.Dimension
 import java.awt.Point
 import java.awt.image.BufferedImage
 
+/**
+ * An image that can be displayed in an animation
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class MascotImage(val image: NativeImage, val center: Point, val size: Dimension) {
     constructor(image: BufferedImage, center: Point) : this(
         NativeFactory.instance.newNativeImage(image),

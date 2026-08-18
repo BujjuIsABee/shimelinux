@@ -25,6 +25,11 @@ package io.github.bujjuisabee.shimelinux.linux
 import java.awt.Component
 import javax.swing.PopupFactory
 
+/**
+ * A popup factory that creates [WaylandPopup] objects
+ *
+ * @author Bujju
+ */
 object WaylandPopupFactory : PopupFactory() {
     override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int) = WaylandPopup(owner, contents, x, y)
 }

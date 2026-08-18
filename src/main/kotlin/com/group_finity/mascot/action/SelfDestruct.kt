@@ -26,6 +26,13 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * An action that dismisses the mascot on the penultimate frame of its current animation
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class SelfDestruct(
     schema: ResourceBundle,

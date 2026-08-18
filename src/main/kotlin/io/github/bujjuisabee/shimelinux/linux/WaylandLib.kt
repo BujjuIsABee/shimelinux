@@ -22,14 +22,20 @@
 
 package io.github.bujjuisabee.shimelinux.linux
 
+import com.group_finity.mascot.loadResource
 import java.io.File
 import kotlin.io.outputStream
 
+/**
+ * A foreign function interface used to create and manage Wayland layers
+ *
+ * @author Bujju
+ */
 object WaylandLib {
     init {
         val libFile = File.createTempFile("libshimelinux_wayland", ".so")
         libFile.deleteOnExit()
-        this::class.java.getResourceAsStream("/lib/libshimelinux_wayland.so")?.use { input ->
+        loadResource("lib/libshimelinux_wayland.so")?.use { input ->
             libFile.outputStream().use { output ->
                 input.copyTo(output)
             }
@@ -38,15 +44,33 @@ object WaylandLib {
         System.load(libFile.absolutePath)
     }
 
+    /**
+     * Creates a Wayland layer, returning a pointer to the mpsc sender. Mouse events are sent to [obj].
+     */
     external fun createLayer(obj: Any?): Long
 
+    /**
+     * Uses the [senderPtr] to send a SetBounds event to a layer
+     */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
+    /**
+     * Uses the [senderPtr] to send a SetImage event to a layer
+     */
     external fun setImage(senderPtr: Long, rgb: IntArray)
 
+    /**
+     * Uses the [senderPtr] to send a SetCursor event to a layer
+     */
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
+    /**
+     * Uses the [senderPtr] to send a Dispose event to a layer
+     */
     external fun dispose(senderPtr: Long)
 
+    /**
+     * Gets the bounds of the primary monitor
+     */
     external fun getScreenRect(): IntArray
 }

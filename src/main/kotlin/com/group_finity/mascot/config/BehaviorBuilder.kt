@@ -35,6 +35,13 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 
+/**
+ * Builds a behavior from a Behavior node
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class BehaviorBuilder(
     private val configuration: Configuration,
     behaviorNode: Entry,
@@ -99,6 +106,9 @@ class BehaviorBuilder(
         }
     }
 
+    /**
+     * Validates that the action builder associated with the behavior builder exists
+     */
     fun validate() {
         if (!configuration.hasAction(actionName)) {
             logger.severe { "There is no corresponding action ($this)" }
@@ -106,6 +116,9 @@ class BehaviorBuilder(
         }
     }
 
+    /**
+     * Builds the behavior and the associated action and returns it
+     */
     fun buildBehavior(): Behavior {
         try {
             return UserBehavior(name, configuration.buildAction(actionName, params), configuration)
@@ -115,6 +128,9 @@ class BehaviorBuilder(
         }
     }
 
+    /**
+     * Checks if the conditions for the behavior are currently met
+     */
     fun isEffective(context: VariableMap): Boolean {
         return frequency != 0 && conditions.filterNotNull().none {
             !(checkNotNull(Variable.parse(it)).get(context) as Boolean)

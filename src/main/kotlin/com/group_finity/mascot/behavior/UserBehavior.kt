@@ -39,6 +39,13 @@ import javax.swing.SwingUtilities
 
 private val logger = Logger.getLogger(UserBehavior::class.java.name)
 
+/**
+ * The base implementation of a behavior
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class UserBehavior(
     private val name: String,
     private val action: Action,

@@ -22,6 +22,13 @@
 
 package com.group_finity.mascot.exception
 
+/**
+ * An exception thrown when a behavior cannot be instantiated
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class BehaviorInstantiationException : Exception {
     constructor(message: String) : super(message)
 

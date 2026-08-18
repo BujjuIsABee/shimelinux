@@ -27,6 +27,7 @@ import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import dorkbox.desktop.Desktop
 import java.awt.BorderLayout
@@ -58,6 +59,12 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
+/**
+ * A menu to choose which image sets to use
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val listPanel: JPanel
     private val leftList: ShimejiList
@@ -80,7 +87,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var cancelled = true
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)
@@ -189,6 +196,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         footerPanel.add(cancelButton)
 
         val children = topDir.toFile().listFiles()
+            .orEmpty()
             .filter { it.isDirectory && !it.absolutePath.contains("unused", true) }
             .map { it.name }
 

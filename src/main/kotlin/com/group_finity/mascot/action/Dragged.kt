@@ -31,6 +31,13 @@ import java.util.ResourceBundle
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/**
+ * An action that occurs while the mascot is being dragged with the cursor
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Dragged(
     schema: ResourceBundle,
     animations: List<Animation>,
@@ -41,10 +48,23 @@ class Dragged(
     private var scaling = 0.0
     var timeToRegist = 0
 
+    /**
+     * The horizontal distance between the mascot and the cursor
+     */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
+
+    /**
+     * The vertical distance between the mascot and the cursor
+     */
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
+
+    /**
+     * Defines how the offset will be calculated. There are two options:
+     * - ImageAnchor (the top-left corner of the mascot)
+     * - Origin (the center of the mascot)
+     */
     private val offsetType: String
         get() = eval(schema.getString(PARAMETER_OFFSETTYPE), DEFAULT_OFFSETTYPE)
 

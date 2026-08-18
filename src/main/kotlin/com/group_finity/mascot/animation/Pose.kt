@@ -28,6 +28,13 @@ import com.group_finity.mascot.image.ImagePairs
 import java.awt.Point
 import java.nio.file.Path
 
+/**
+ * A frame of an animation
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Pose(
     private val leftImage: Path?,
     private val rightImage: Path?,
@@ -36,11 +43,21 @@ class Pose(
     val duration: Int,
     val soundName: String?
 ) {
+    /**
+     * The name of the image pair that the pose displays
+     */
     val imageName: String
         get() = "${leftImage ?: ""}${rightImage ?: ""}"
+
+    /**
+     * The image pair that the pose displays
+     */
     val image: ImagePair?
         get() = ImagePairs.getImagePair(imageName)
 
+    /**
+     * Applies the pose to [mascot]
+     */
     fun next(mascot: Mascot) {
         mascot.anchor = Point(mascot.anchor.x + if (mascot.isLookRight) -dx else dx, mascot.anchor.y + dy)
         mascot.image = ImagePairs.getImage(imageName, mascot.isLookRight)

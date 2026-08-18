@@ -29,6 +29,13 @@ import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * The base implementation of an action
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 abstract class ActionBase(
     internal val schema: ResourceBundle,
     internal val animations: List<Animation>,
@@ -48,14 +55,33 @@ abstract class ActionBase(
             startTime = mascot.time - value
         }
 
+    /**
+     * Whether the mascot can be dragged with the cursor
+     */
     open val isDraggable: Boolean
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), DEFAULT_DRAGGABLE)
+
+    /**
+     * Whether the conditions for the action to continue are currently met
+     */
     private val isEffective: Boolean
         get() = eval(schema.getString(PARAMETER_CONDITION), DEFAULT_CONDITION)
+
+    /**
+     * The duration of the action in 40 millisecond ticks
+     */
     private val duration: Int
         get() = eval<Number>(schema.getString(PARAMETER_DURATION), DEFAULT_DURATION).toInt()
+
+    /**
+     * An affordance that will be added to the mascot on the next frame
+     */
     internal val affordance: String
         get() = eval(schema.getString(PARAMETER_AFFORDANCE), DEFAULT_AFFORDANCE)
+
+    /**
+     * The name of the action
+     */
     private val name: String?
         get() = eval(schema.getString(PARAMETER_NAME), DEFAULT_NAME)
 
@@ -108,12 +134,18 @@ abstract class ActionBase(
 
     internal abstract fun tick()
 
+    /**
+     * Puts a variable in [variables]
+     */
     internal fun putVariable(key: String, value: Any?) {
         synchronized(variables) {
             variables[key] = value
         }
     }
 
+    /**
+     * Returns the value of a variable in [variables], or [defaultValue] if the variable does not exist
+     */
     internal inline fun <reified T> eval(name: String, defaultValue: T): T {
         synchronized(variables) {
             return variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue

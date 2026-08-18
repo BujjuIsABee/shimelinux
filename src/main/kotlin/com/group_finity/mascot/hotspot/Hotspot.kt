@@ -26,7 +26,18 @@ import com.group_finity.mascot.Mascot
 import java.awt.Point
 import java.awt.Shape
 
+/**
+ * A clickable area on a mascot
+ *
+ * @property behavior A behavior that is set for the mascot when the hotspot is clicked
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Hotspot(val behavior: String?, val shape: Shape) {
+    /**
+     * Checks if [point] is inside the hotspot
+     */
     fun contains(mascot: Mascot, point: Point) = shape.contains(
         if (mascot.isLookRight) Point(mascot.bounds.width - point.x, point.y) else point
     )

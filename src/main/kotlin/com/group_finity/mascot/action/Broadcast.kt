@@ -26,6 +26,11 @@ import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Deprecated("Deprecated in Shimeji-ee")
 class Broadcast(
     schema: ResourceBundle,

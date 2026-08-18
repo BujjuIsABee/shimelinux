@@ -25,6 +25,12 @@ package io.github.bujjuisabee.shimelinux.virtual
 import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
+/**
+ * Stores an image to display in a [VirtualTranslucentPanel]
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage {
     val width = managedImage.width
     val height = managedImage.height

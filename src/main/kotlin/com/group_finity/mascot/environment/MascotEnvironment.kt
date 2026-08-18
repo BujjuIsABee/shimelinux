@@ -27,22 +27,44 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.getProperty
 import java.awt.Point
 
+/**
+ * Exposes the [Environment] instance to mascots and variables
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class MascotEnvironment(private val mascot: Mascot) {
     private val impl = NativeFactory.instance.environment
     private var currentWorkArea: Area? = null
 
+    /**
+     * An [Area] representing the bounds of the screen; used when Multiscreen is disabled
+     */
     val workArea: Area
         get() = getWorkArea(false)
+
+    /**
+     * An [Area] representing the bounds of the screen; used when Multiscreen is enabled
+     */
+    val screen: Area
+        get() = impl.screen
+
+    /**
+     * An [Area] representing the bounds of the active interactive window
+     */
     val activeIE: Area
         get() = if (!getProperty("Multiscreen", true) && currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false) {
             Area()
         } else {
             impl.activeIE
         }
+
+    /**
+     * The title of the active interactive window
+     */
     val activeIETitle: String
         get() = impl.activeIETitle
-    val screen: Area
-        get() = impl.screen
 
     @Suppress("unused")
     val complexScreen: ComplexArea
@@ -125,15 +147,24 @@ class MascotEnvironment(private val mascot: Mascot) {
         return NotOnBorder
     }
 
+    /**
+     * Moves the active interactive window to [point]
+     */
     fun moveActiveIE(point: Point) {
         impl.moveActiveIE(point)
     }
 
+    /**
+     * Restores all interactive windows that have been thrown offscreen
+     */
     @Suppress("unused")
     fun restoreIE() {
         impl.restoreIE()
     }
 
+    /**
+     * Refreshes which screen is used for the work area
+     */
     fun refreshWorkArea() {
         getWorkArea(true)
     }

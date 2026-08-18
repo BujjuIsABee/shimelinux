@@ -27,6 +27,11 @@ import com.group_finity.mascot.environment.Environment
 import java.awt.Point
 import java.awt.Rectangle
 
+/**
+ * An environment that uses [WaylandLib] to get the cursor position and screen bounds
+ *
+ * @author Bujju
+ */
 class WaylandEnvironment : Environment() {
     override val workArea: Area
         get() = screen

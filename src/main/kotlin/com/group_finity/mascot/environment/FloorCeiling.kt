@@ -25,6 +25,13 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 import kotlin.math.abs
 
+/**
+ * A vertical border
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
     val y: Int
         get() = if (isBottom) area.bottom else area.top

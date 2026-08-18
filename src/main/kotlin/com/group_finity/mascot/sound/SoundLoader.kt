@@ -27,7 +27,16 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
 
+/**
+ * An object that loads sounds
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 object SoundLoader {
+    /**
+     * Loads a sound. The clip is not opened until the sound is played so playback entries are only shown for sounds that are currently playing.
+     */
     @JvmStatic
     fun load(filename: String, volume: Float) {
         if (Sounds.contains(filename + volume)) return

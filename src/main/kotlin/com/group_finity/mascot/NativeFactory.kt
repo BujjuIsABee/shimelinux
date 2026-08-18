@@ -32,6 +32,11 @@ import javax.swing.PopupFactory
 import io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl as LinuxNativeFactory
 import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
+/**
+ * A factory for platform-specific objects
+ *
+ * @author Bujju
+ */
 abstract class NativeFactory {
     abstract val environment: Environment
 

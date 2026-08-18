@@ -20,66 +20,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.animation
+package com.group_finity.mascot
 
-import com.group_finity.mascot.Mascot
-import com.group_finity.mascot.hotspot.Hotspot
-import com.group_finity.mascot.script.Variable
-import com.group_finity.mascot.script.VariableMap
+import java.io.InputStream
+import kotlin.io.path.Path
 
 /**
- * An animation for a mascot that can be played by an action
+ * Gets a path within the config directory
  *
- * @author Yuki Yamada
- * @author Kilkakon
  * @author Bujju
  */
-class Animation(
-    private val condition: Variable,
-    private val poses: Array<Pose>,
-    val hotspots: Array<Hotspot>,
-    val isTurn: Boolean
-) {
-    val duration = poses.sumOf { it.duration }
+fun getPath(vararg paths: String) =
+    Path(
+        System.getenv("XDG_CONFIG_HOME")?.takeUnless { it.isBlank() } ?: System.getProperty("user.home"),
+        ".config",
+        "shimelinux",
+        *paths
+    )
 
-    init {
-        require(poses.isNotEmpty()) { "Animation requires at least one pose" }
+/**
+ * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails
+ *
+ * @author Bujju
+ */
+inline fun <reified T> getProperty(key: String, defaultValue: T): T =
+    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
+        when (T::class) {
+            Int::class -> value.toInt()
+            Double::class -> value.toDouble()
+            Boolean::class -> value.toBoolean()
+            else -> value
+        } as? T ?: defaultValue
     }
 
-    /**
-     * Whether the conditions for the animation to play are currently met
-     */
-    fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
+/**
+ * Translates a string to the current language
+ *
+ * @author Bujju
+ */
+fun localize(key: String): String = Main.languageBundle.getString(key)
 
-    /**
-     * Initializes the animation
-     */
-    fun init() {
-        condition.init()
-    }
-
-    /**
-     * Initializes the first frame of the animation
-     */
-    fun initFrame() {
-        condition.initFrame()
-    }
-
-    /**
-     * Progresses the animation
-     */
-    fun next(mascot: Mascot, time: Int) {
-        checkNotNull(getPoseAt(time)).next(mascot)
-    }
-
-    /**
-     * Gets which pose should be displayed at [time]
-     */
-    fun getPoseAt(time: Int): Pose? {
-        var t = time % duration
-        return poses.find {
-            t -= it.duration
-            t < 0
-        }
-    }
-}
+/**
+ * Loads a resource and returns an input stream, or null if the resource does not exist
+ *
+ * @author Bujju
+ */
+fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")

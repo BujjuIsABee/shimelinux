@@ -29,9 +29,27 @@ import java.awt.Rectangle
 import java.awt.Toolkit
 import kotlin.concurrent.timer
 
+/**
+ * Defines a platform specific environment, which tracks the screens, cursor, and windows that mascots can interact with
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 abstract class Environment {
+    /**
+     * An [Area] representing the bounds of the screen
+     */
     internal abstract val workArea: Area
+
+    /**
+     * An [Area] representing the bounds of the active interactive window
+     */
     abstract val activeIE: Area
+
+    /**
+     * The title of the active interactive window
+     */
     abstract val activeIETitle: String
 
     var complexScreen = ComplexArea()
@@ -40,11 +58,17 @@ abstract class Environment {
     val screens: Collection<Area>
         get() = complexScreen.areas
 
+    /**
+     * Initializes the environment
+     */
     fun init() {
         timer(daemon = true, period = 5000) { updateScreenRect() }
         tick()
     }
 
+    /**
+     * Updates the environment
+     */
     open fun tick() {
         screen.set(screenRect)
         complexScreen.set(screenRects)
@@ -61,12 +85,24 @@ abstract class Environment {
         return count == 1 || count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))
     }
 
+    /**
+     * Moves the active interactive window to [point]
+     */
     abstract fun moveActiveIE(point: Point)
 
+    /**
+     * Restores all interactive windows that have been thrown offscreen
+     */
     abstract fun restoreIE()
 
+    /**
+     * Resets the cache of whitelisted/blacklisted window titles
+     */
     abstract fun refreshCache()
 
+    /**
+     * Disposes of the environment
+     */
     abstract fun dispose()
 
     companion object {

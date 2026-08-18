@@ -77,36 +77,12 @@ private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
 private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
 private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
 
-private fun getIndexFromTheme(theme: String) = when (theme) {
-    "FlatDark" -> 0
-    "FlatLight" -> 1
-    "Gtk" -> 2
-    else -> 0
-}
-
-private fun getThemeFromIndex(index: Int) = when (index) {
-    0 -> "FlatDark"
-    1 -> "FlatLight"
-    2 -> "Gtk"
-    else -> "FlatDark"
-}
-
-private fun getIndexFromBackgroundMode(mode: String) = when (mode) {
-    "Center" -> 0
-    "Fit" -> 1
-    "Stretch" -> 2
-    "Fill" -> 3
-    else -> 0
-}
-
-private fun getBackgroundModeFromIndex(index: Int) = when (index) {
-    0 -> "Center"
-    1 -> "Fit"
-    2 -> "Stretch"
-    3 -> "Fill"
-    else -> "Center"
-}
-
+/**
+ * The settings menu
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val tabbedPane: JTabbedPane
     private val generalTab: JPanel
@@ -234,7 +210,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     var isInteractiveWindowReloadRequired = false
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("Settings")
         layout = BorderLayout()
@@ -1151,5 +1127,37 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowBackgroundImagePreview.icon = ImageIcon(image)
         windowBackgroundImagePreview.preferredSize = Dimension(image.getWidth(null), image.getHeight(null))
+    }
+
+    companion object {
+        private fun getIndexFromTheme(theme: String) = when (theme) {
+            "FlatDark" -> 0
+            "FlatLight" -> 1
+            "Gtk" -> 2
+            else -> 0
+        }
+
+        private fun getThemeFromIndex(index: Int) = when (index) {
+            0 -> "FlatDark"
+            1 -> "FlatLight"
+            2 -> "Gtk"
+            else -> "FlatDark"
+        }
+
+        private fun getIndexFromBackgroundMode(mode: String) = when (mode) {
+            "Center" -> 0
+            "Fit" -> 1
+            "Stretch" -> 2
+            "Fill" -> 3
+            else -> 0
+        }
+
+        private fun getBackgroundModeFromIndex(index: Int) = when (index) {
+            0 -> "Center"
+            1 -> "Fit"
+            2 -> "Stretch"
+            3 -> "Fill"
+            else -> "Center"
+        }
     }
 }

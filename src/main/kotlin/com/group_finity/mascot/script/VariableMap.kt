@@ -25,6 +25,13 @@ package com.group_finity.mascot.script
 import java.util.AbstractMap
 import javax.script.Bindings
 
+/**
+ * Stores a collection of variables
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class VariableMap : Bindings {
     val rawMap = linkedMapOf<String, Variable>()
 
@@ -37,12 +44,18 @@ class VariableMap : Bindings {
     override val size: Int
         get() = rawMap.size
 
+    /**
+     * Initializes every variable
+     */
     fun init() {
         for (variable in rawMap.values) {
             variable.init()
         }
     }
 
+    /**
+     * Calls initFrame on every variable
+     */
     fun initFrame() {
         for (variable in rawMap.values) {
             variable.initFrame()
@@ -55,7 +68,7 @@ class VariableMap : Bindings {
 
     override fun containsKey(key: String) = true
 
-    override fun get(key: String) = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() }
+    override fun get(key: String) = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() } //
 
     override fun remove(key: String) = rawMap.remove(key)
 
@@ -70,8 +83,8 @@ class VariableMap : Bindings {
     }
 
     override fun putAll(entries: Map<out String, Any?>) {
-        for (entry in entries) {
-            put(entry.key, entry.value)
+        for ((key, value) in entries) {
+            put(key, value)
         }
     }
 

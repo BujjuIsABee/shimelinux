@@ -29,6 +29,14 @@ import java.awt.image.BufferedImage
 import javax.swing.PopupFactory
 import javax.swing.UIManager
 
+/**
+ * Represents different kinds of desktop environments. There are three options:
+ * - KDE (supports interactive windows via KWin scripting)
+ * - Wayland (uses [WaylandLib] to display mascots via wlr-layer-shell)
+ * - Generic (uses regular XWayland windows and environment without interactive window support)
+ *
+ * @author Bujju
+ */
 enum class DesktopType {
     KDE, WAYLAND, GENERIC;
 

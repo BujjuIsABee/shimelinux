@@ -26,6 +26,11 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import java.awt.Point
 
+/**
+ * A Linux-compatible environment
+ *
+ * @author Bujju
+ */
 class LinuxEnvironment : Environment() {
     override val workArea: Area
         get() = screen

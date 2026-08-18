@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.linux
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.loadResource
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
@@ -34,6 +35,11 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
 
+/**
+ * An environment that supports interactive windows via KWin scripting
+ *
+ * @author Bujju
+ */
 class KdeEnvironment : Environment() {
     override val workArea: Area
         get() = screen
@@ -65,7 +71,7 @@ class KdeEnvironment : Environment() {
 
             val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
             scriptFile.deleteOnExit()
-            this::class.java.getResourceAsStream("/shimelinux-kwin-script.js")?.use { input ->
+            loadResource("shimelinux-kwin-script.js")?.use { input ->
                 scriptFile.outputStream().use { output ->
                     input.copyTo(output)
                 }

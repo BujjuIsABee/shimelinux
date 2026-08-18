@@ -25,6 +25,12 @@ package io.github.bujjuisabee.shimelinux.virtual
 import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
 
+/**
+ * A native factory used for windowed mode
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class NativeFactoryImpl : NativeFactory() {
     override val environment = VirtualEnvironment()
 

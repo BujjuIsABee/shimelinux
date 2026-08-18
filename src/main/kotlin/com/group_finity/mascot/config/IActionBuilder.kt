@@ -24,8 +24,21 @@ package com.group_finity.mascot.config
 
 import com.group_finity.mascot.action.Action
 
+/**
+ * Builds an action
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 interface IActionBuilder {
+    /**
+     * Validates the action builder
+     */
     fun validate()
 
+    /**
+     * Builds the action and returns it
+     */
     fun buildAction(params: Map<String, String>): Action
 }

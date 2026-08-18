@@ -26,6 +26,7 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
@@ -36,6 +37,12 @@ import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
 
+/**
+ * An environment that displays mascots within a single window
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class VirtualEnvironment : Environment() {
     override val workArea: Area
         get() = screen
@@ -46,7 +53,7 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         display.iconImage = icon
         display.title = "ShimeLinux"
         display.isAutoRequestFocus = false

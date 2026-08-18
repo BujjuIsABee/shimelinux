@@ -25,6 +25,12 @@ package com.group_finity.mascot.sound
 import com.group_finity.mascot.getProperty
 import javax.sound.sampled.Clip
 
+/**
+ * Stores sounds
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 object Sounds {
     private val sounds = mutableMapOf<String, Sound>()
 
@@ -39,6 +45,9 @@ object Sounds {
             }
         }
 
+    /**
+     * Adds a sound to [sounds]
+     */
     @JvmStatic
     fun load(name: String, sound: Sound) {
         if (!sounds.containsKey(name)) {
@@ -46,14 +55,28 @@ object Sounds {
         }
     }
 
+    /**
+     * Gets whether [sounds] contains a sound with [name] as its key
+     */
     @JvmStatic
     fun contains(name: String) = sounds.containsKey(name)
 
+    /**
+     * Gets a sound from [sounds]. The sound is closed when the sound is done playing.
+     */
     @JvmStatic
     fun getSound(name: String) = sounds[name]?.also { it.open() }?.clip
 
+    /**
+     * Gets all sounds from with the [name], regardless of their volume
+     */
     @JvmStatic
     fun getSoundsIgnoringVolume(name: String) = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
 
+    /**
+     * Contains a sound clip and a function to open it
+     *
+     * @param open Opens the clip
+     */
     data class Sound(val clip: Clip, val open: () -> Unit)
 }

@@ -34,13 +34,42 @@ import kotlin.concurrent.timer
 
 private val logger = Logger.getLogger(Manager::class.java.name)
 
+/**
+ * Manages a list of mascots
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Manager {
+    /**
+     * The list of mascots
+     */
     private val mascots = mutableListOf<Mascot>()
+
+    /**
+     * A list of mascots that will be added on the next tick
+     */
     private val added = linkedSetOf<Mascot>()
+
+    /**
+     * A list of mascots that will be removed on the next tick
+     */
     private val removed = linkedSetOf<Mascot>()
-    private var timer: Timer? = null
+
+    /**
+     * Whether the program should close if [mascots] is empty
+     */
     var isExitOnLastRemoved = true
 
+    /**
+     * A timer that calls [tick] every 40 milliseconds
+     */
+    private var timer: Timer? = null
+
+    /**
+     * Whether all mascots are paused
+     */
     val isPaused: Boolean
         get() {
             var isPaused = true
@@ -54,6 +83,10 @@ class Manager {
             }
             return isPaused
         }
+
+    /**
+     * Gets the number of mascots in the list
+     */
     val count: Int
         get() = getCount(null)
 

@@ -43,6 +43,12 @@ import javax.swing.JScrollPane
 import javax.swing.UIManager
 import javax.swing.event.HyperlinkEvent
 
+/**
+ * A menu that displays information about a mascot
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     private val imagePanel: JPanel
     private val splashImageLabel: JLabel
@@ -51,7 +57,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     private val editorPane: JEditorPane
 
     init {
-        val icon = this::class.java.getResourceAsStream("/img/icon.png").use { ImageIO.read(it) }
+        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
         title = if (config.containsInformationKey("Name")) config.getInformation("Name") else localize("Information")
         isResizable = false

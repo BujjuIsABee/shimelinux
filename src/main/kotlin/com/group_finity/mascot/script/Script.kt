@@ -31,6 +31,16 @@ import javax.script.ScriptException
 
 private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
 
+/**
+ * A variable whose value is evaluated from JavaScript code
+ *
+ * @property source The script to evaluate
+ * @property isClearAtInitFrame Whether the variable's value should be cleared when [initFrame] is called
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
     private val compiled: CompiledScript
     private var value: Any? = null

@@ -37,6 +37,12 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(ScanInteract::class.java.name)
 
+/**
+ * An action that scans for a mascot with the [affordance], then sets [mascot]'s behavior if one is found
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class ScanInteract(
     schema: ResourceBundle,
@@ -51,10 +57,21 @@ class ScanInteract(
     override val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
 
+    /**
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+
+    /**
+     * The behavior to set for the other mascot
+     */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+
+    /**
+     * Whether the mascots should face each other
+     */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 

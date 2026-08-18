@@ -25,6 +25,13 @@ package io.github.bujjuisabee.shimelinux.linux
 import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
 
+/**
+ * A native factory that returns objects compatible with the current desktop type
+ *
+ * @see DesktopType
+ *
+ * @author Bujju
+ */
 class NativeFactoryImpl : NativeFactory() {
     override val environment = DesktopType.getEnvironment()
 

@@ -34,12 +34,22 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(Interact::class.java.name)
 
+/**
+ * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class Interact(
     schema: ResourceBundle,
     animations: List<Animation>,
     context: VariableMap
 ) : Animate(schema, animations, context) {
+    /**
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 

@@ -35,14 +35,28 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(Transform::class.java.name)
 
+/**
+ * An action that causes the mascot to transform into another mascot
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class Transform(
     schema: ResourceBundle,
     animations: List<Animation>,
     params: VariableMap
 ) : Animate(schema, animations, params) {
+    /**
+     * The behavior to set for the mascot after it transforms
+     */
     private val transformBehavior: String
         get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOR), DEFAULT_TRANSFORMBEHAVIOR)
+
+    /**
+     * The image set that the mascot will transform into. The same image set as [mascot] will be used if a valid image set is not provided.
+     */
     private val transformMascot: String
         get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), DEFAULT_TRANSFORMMASCOT)
 

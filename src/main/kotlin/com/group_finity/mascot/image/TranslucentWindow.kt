@@ -24,14 +24,36 @@ package com.group_finity.mascot.image
 
 import java.awt.Component
 
+/**
+ * Defines a platform-specific window that can be used to display a mascot
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 interface TranslucentWindow {
+    /**
+     * Get the window as an AWT component
+     */
     fun asComponent(): Component
 
+    /**
+     * Set the image displayed by the window
+     */
     fun setImage(image: NativeImage)
 
+    /**
+     * Redraws the window
+     */
     fun updateImage()
 
+    /**
+     * Makes the window appear above all other windows
+     */
     fun setAlwaysOnTop(onTop: Boolean)
 
+    /**
+     * Closes the window
+     */
     fun dispose()
 }

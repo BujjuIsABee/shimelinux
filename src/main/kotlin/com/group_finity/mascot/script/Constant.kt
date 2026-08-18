@@ -22,6 +22,13 @@
 
 package com.group_finity.mascot.script
 
+/**
+ * A variable that stores a constant value
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Constant(private val value: Any?) : Variable() {
     override fun init() {}
 

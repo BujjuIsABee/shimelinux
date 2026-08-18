@@ -36,6 +36,12 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.UIManager
 
+/**
+ * Displays information about an image set
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class ImageSetChooserPanel(
     val imageSet: String,
     actions: String,

@@ -25,6 +25,13 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 import kotlin.math.abs
 
+/**
+ * A horizontal border
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Wall(val area: Area, val isRight: Boolean) : Border {
     val x: Int
         get() = if (isRight) area.right else area.left

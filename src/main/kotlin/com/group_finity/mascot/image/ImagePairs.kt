@@ -25,28 +25,53 @@ package com.group_finity.mascot.image
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
 
+/**
+ * Stores image pairs
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
 
+    /**
+     * Adds [imagePair] to [imagePairs] with [fileName] as its key
+     */
     @JvmStatic
     fun load(fileName: String, imagePair: ImagePair) {
         imagePairs.putIfAbsent(fileName, imagePair)
     }
 
+    /**
+     * Gets an image pair from [imagePairs]
+     */
     @JvmStatic
     fun getImagePair(fileName: String) = imagePairs[fileName]
 
+    /**
+     * Gets whether [imagePairs] contains an image pair with [fileName] as its key
+     */
     @JvmStatic
     fun contains(fileName: String) = imagePairs.containsKey(fileName)
 
+    /**
+     * Returns the right image from an image pair in [imagePairs] if [isLookRight] is true, or the left image if it is false
+     */
     @JvmStatic
     fun getImage(fileName: String, isLookRight: Boolean) = imagePairs[fileName]?.getImage(isLookRight)
 
+    /**
+     * Removes all image pairs from [imagePairs]
+     */
     @JvmStatic
     fun clear() {
         imagePairs.clear()
     }
 
+    /**
+     * Removes all image pairs from the image set called [searchTerm]
+     */
     @JvmStatic
     fun removeAll(searchTerm: String) {
         imagePairs.entries.removeIf { searchTerm == Path(it.key).getName(2).toString() }

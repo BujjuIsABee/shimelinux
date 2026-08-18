@@ -24,12 +24,22 @@ package com.group_finity.mascot.environment
 
 import java.awt.Point
 
+/**
+ * A movable point
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Location {
     var x = 0
     var y = 0
     var dx = 0
     var dy = 0
 
+    /**
+     * Moves the location
+     */
     fun set(value: Point) {
         dx = (dx + value.x - x) / 2
         dy = (dy + value.y - y) / 2

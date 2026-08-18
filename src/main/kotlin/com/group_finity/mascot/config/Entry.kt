@@ -25,14 +25,46 @@ package com.group_finity.mascot.config
 import org.w3c.dom.Attr
 import org.w3c.dom.Element
 
+/**
+ * An XML node
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Entry(private val element: Element) {
     private val selected = hashMapOf<String, List<Entry>>()
 
+    /**
+     * The name of the node
+     *
+     * ```text
+     * <Node>Text</Node>
+     *  ^~~~ this
+     * ```
+     */
     val name: String
         get() = element.tagName
+
+    /**
+     * The text inside the node
+     *
+     * ```text
+     * <Node>Text</Node>
+     *       ^~~~ this
+     * ```
+     */
     val text: String
         get() = element.textContent
 
+    /**
+     * The attributes of the node
+     *
+     * ```text
+     * <Node name="value" />
+     *       ^~~~~~~~~~~~ this
+     * ```
+     */
     val attributes: Map<String, String> by lazy {
         val result = linkedMapOf<String, String>()
         val attrs = element.attributes
@@ -42,6 +74,17 @@ class Entry(private val element: Element) {
         }
         return@lazy result
     }
+
+    /**
+     * The child nodes inside the node
+     *
+     * ```text
+     * <Node>
+     *     <Child />
+     *     ^~~~~~~~~ this
+     * </Node>
+     * ```
+     */
     val children: List<Entry> by lazy {
         val result = mutableListOf<Entry>()
         val childNodes = element.childNodes
@@ -54,9 +97,18 @@ class Entry(private val element: Element) {
         return@lazy result
     }
 
+    /**
+     * Gets the value of an attribute from its name
+     */
     fun getAttribute(name: String) = element.getAttributeNode(name)?.value
 
+    /**
+     * Gets whether the node has a child with the [name]
+     */
     fun hasChild(name: String) = children.any { it.name == name }
 
+    /**
+     * Gets all child nodes with the [name]
+     */
     fun selectChildren(name: String) = selected.getOrPut(name) { children.filter { it.name == name } }
 }

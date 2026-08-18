@@ -38,6 +38,11 @@ import javax.swing.Popup
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
+/**
+ * A popup menu that is displayed via [WaylandLib]
+ *
+ * @author Bujju
+ */
 class WaylandPopup(
     private val owner: Component?,
     private val contents: Component,

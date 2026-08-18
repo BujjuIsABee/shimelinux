@@ -28,15 +28,33 @@ import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
 
+/**
+ * An action that causes the mascot to throw a window
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class ThrowIE(
     schema: ResourceBundle,
     animations: List<Animation>,
     params: VariableMap
 ) : Animate(schema, animations, params) {
+    /**
+     * The initial horizontal velocity of the window
+     */
     private val initialVx: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
+
+    /**
+     * The initial vertical velocity of the window
+     */
     private val initialVy: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()
+
+    /**
+     * The strength of gravity to apply to the window
+     */
     private val gravity: Double
         get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 

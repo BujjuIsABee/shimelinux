@@ -39,6 +39,13 @@ import kotlin.math.sqrt
 
 private val logger = Logger.getLogger(ScanJump::class.java.name)
 
+/**
+ * An action that scans for a mascot with the [affordance] and causes [mascot] to jump towards it if one is found
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class ScanJump(
     schema: ResourceBundle,
@@ -47,12 +54,27 @@ class ScanJump(
 ) : ActionBase(schema, animations, params) {
     private var target: WeakReference<Mascot>? = null
 
+    /**
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+
+    /**
+     * The behavior to set for the other mascot
+     */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+
+    /**
+     * Whether the mascots should face each other
+     */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
+
+    /**
+     * The velocity of the mascot as it jumps
+     */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
 

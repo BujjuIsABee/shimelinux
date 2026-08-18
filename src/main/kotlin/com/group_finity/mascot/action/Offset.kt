@@ -26,12 +26,26 @@ import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
 
+/**
+ * An action that instantly moves the mascot
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Offset(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
+    /**
+     * The horizontal distance to move the mascot
+     */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
+
+    /**
+     * The vertical distance to move the mascot
+     */
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
 

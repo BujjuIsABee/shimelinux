@@ -25,6 +25,15 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * An action that triggers the first effective action in [actions]
+ *
+ * @param actions The list of actions to select from
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Select(
     schema: ResourceBundle,
     params: VariableMap,

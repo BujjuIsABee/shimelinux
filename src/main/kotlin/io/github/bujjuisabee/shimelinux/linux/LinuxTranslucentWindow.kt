@@ -44,6 +44,11 @@ private val gc = GraphicsEnvironment
     .configurations
     .firstOrNull { it.isTranslucencyCapable }
 
+/**
+ * A window that displays a mascot via X11 or XWayland
+ *
+ * @author Bujju
+ */
 class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
     private var image: LinuxNativeImage? = null
     private var offset = Point(0, 0)

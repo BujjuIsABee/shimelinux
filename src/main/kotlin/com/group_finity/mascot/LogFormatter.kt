@@ -29,6 +29,12 @@ import java.time.format.FormatStyle
 import java.util.logging.LogRecord
 import java.util.logging.SimpleFormatter
 
+/**
+ * Formats the logs
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 class LogFormatter : SimpleFormatter() {
     private val dateFormatter = DateTimeFormatter
         .ofLocalizedDateTime(FormatStyle.MEDIUM)

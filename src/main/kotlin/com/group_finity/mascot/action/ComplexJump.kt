@@ -39,6 +39,12 @@ import kotlin.math.sqrt
 
 private val logger = Logger.getLogger(ComplexJump::class.java.name)
 
+/**
+ * An action that creates a new mascot and/or scans for an affordance while [mascot] jumps
+ *
+ * @author Kilkakon
+ * @author Bujju
+ */
 @Suppress("unused")
 class ComplexJump(
     schema: ResourceBundle,
@@ -50,18 +56,47 @@ class ComplexJump(
     private var isBreedEnabled = false
     private var isScanEnabled = false
 
+    /**
+     * The characteristics of the action, separated by '/'. There are two options:
+     * - Breed
+     * - Scan
+     */
     private val characteristics: String
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
+
+    /**
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+
+    /**
+     * The behavior to set for the other mascot
+     */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+
+    /**
+     * Whether the mascots should face each other
+     */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
+
+    /**
+     * The velocity of the mascot as it jumps towards the target position
+     */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
+
+    /**
+     * The X-position that the mascot jumps towards. The X-position of [target] will be used instead if [isScanEnabled] is true.
+     */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
+
+    /**
+     * The Y-position that the mascot jumps towards. The Y-position of [target] will be used instead if [isScanEnabled] is true.
+     */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 

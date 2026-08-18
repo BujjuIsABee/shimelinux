@@ -40,6 +40,13 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(Configuration::class.java.name)
 
+/**
+ * Parses an XML configuration file for a mascot
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class Configuration {
     lateinit var schema: ResourceBundle
     private val constants = linkedMapOf<String, String>()
@@ -139,6 +146,9 @@ class Configuration {
         }
     }
 
+    /**
+     * Validates the action and behavior builders
+     */
     fun validate() {
         for (builder in actionBuilders.values) {
             builder.validate()
@@ -148,11 +158,17 @@ class Configuration {
         }
     }
 
+    /**
+     * Builds an action from its name and returns it
+     */
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name] ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
         return factory.buildAction(params)
     }
 
+    /**
+     * Builds a behavior from its name and returns it, or resets [mascot] if it fails
+     */
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name] ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
         return if (isBehaviorEnabled(name, mascot)) {
@@ -163,8 +179,14 @@ class Configuration {
         }
     }
 
+    /**
+     * Builds a behavior from its name and returns it
+     */
     fun buildBehavior(name: String) = behaviorBuilders[name]?.buildBehavior() ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
+    /**
+     * Builds the next behavior for a [mascot]
+     */
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
         context.putAll(constants)
@@ -218,17 +240,38 @@ class Configuration {
         return null
     }
 
+    /**
+     * Returns whether an action builder with the [name] exists
+     */
     fun hasAction(name: String) = actionBuilders.containsKey(name)
 
+    /**
+     * Returns whether the behavior builder is enabled for [mascot]
+     */
     fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot) = !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/").none { it == builder.name }
 
+    /**
+     * Returns whether a behavior builder with the [name] exists and is enabled for [mascot]
+     */
     fun isBehaviorEnabled(name: String?, mascot: Mascot) = behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
 
+    /**
+     * Returns whether a behavior builder with the [name] exists and should be hidden from the Set Behavior and Allowed Behaviors lists
+     */
     fun isBehaviorHidden(name: String?) = behaviorBuilders[name]?.isHidden == true
 
+    /**
+     * Returns whether a behavior builder with the [name] exists and should be toggleable in the Allowed Behaviors list
+     */
     fun isBehaviorToggleable(name: String?) = behaviorBuilders[name]?.isToggleable == true
 
+    /**
+     * Returns whether [information] contains the [key]
+     */
     fun containsInformationKey(key: String?) = information.containsKey(key)
 
+    /**
+     * Gets the value associated with the [key] in [information]
+     */
     fun getInformation(key: String) = information[key]
 }

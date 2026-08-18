@@ -34,7 +34,6 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import io.github.bujjuisabee.shimelinux.linux.DesktopType
-import io.github.bujjuisabee.shimelinux.linux.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.File
@@ -50,7 +49,6 @@ import javax.swing.JSeparator
 import javax.swing.PopupFactory
 import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -58,22 +56,15 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-inline fun <reified T> getProperty(key: String, defaultValue: T): T =
-    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
-        when (T::class) {
-            Int::class -> value.toInt()
-            Double::class -> value.toDouble()
-            Boolean::class -> value.toBoolean()
-            else -> value
-        } as? T ?: defaultValue
-    }
-
-fun localize(key: String): String = Main.languageBundle.getString(key)
-
-fun getPath(vararg paths: String) = Path(System.getProperty("user.home"), ".config", "shimelinux", *paths)
-
 private val logger = Logger.getLogger(Main::class.java.name)
 
+/**
+ * The entry point of the program
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 object Main {
     @JvmStatic
     @Suppress("unused")
@@ -91,7 +82,7 @@ object Main {
 
     init {
         try {
-            this::class.java.getResourceAsStream("/conf/logging.properties").use {
+            loadResource("conf/logging.properties").use {
                 LogManager.getLogManager().readConfiguration(it)
             }
         } catch (e: Exception) {
@@ -136,28 +127,28 @@ object Main {
         // Set up config directory
         try {
             val resources = mutableListOf(
-                "/conf/actions.xml",
-                "/conf/behaviors.xml",
-                "/conf/settings.properties",
-                "/conf/theme/FlatDarkLaf.properties",
-                "/conf/theme/FlatLightLaf.properties",
-                "/img/unused/",
+                "conf/actions.xml",
+                "conf/behaviors.xml",
+                "conf/settings.properties",
+                "conf/theme/FlatDarkLaf.properties",
+                "conf/theme/FlatLightLaf.properties",
+                "img/unused/",
             )
 
             // Only add default mascot if the entire image directory is missing
             if (!getPath("img").exists()) {
-                resources += (1..46).map { "/img/Shimeji/shime$it.png" }
+                resources += (1..46).map { "img/Shimeji/shime$it.png" }
             }
 
             for (resource in resources) {
-                val destination = getPath().resolve(resource.removePrefix("/"))
+                val destination = getPath().resolve(resource)
 
                 if (resource.endsWith("/")) {
                     destination.createDirectories()
                 } else if (!destination.exists()) {
                     destination.createParentDirectories()
                     destination.outputStream().use { output ->
-                        this::class.java.getResourceAsStream(resource)?.use { input ->
+                        loadResource(resource)?.use { input ->
                             input.copyTo(output)
                         }
                     }
@@ -188,10 +179,11 @@ object Main {
 
         // Set theme
         try {
-            // Set menu scaling
-            val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
-            val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
-            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+            if (DesktopType.current != DesktopType.WAYLAND) {
+                val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
+                val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
+                System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+            }
 
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
@@ -263,6 +255,9 @@ object Main {
         manager.start()
     }
 
+    /**
+     * Loads a mascot from its configuration files
+     */
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
             // Load actions
@@ -371,12 +366,15 @@ object Main {
         return false
     }
 
+    /**
+     * Creates a tray icon
+     */
     private fun createTrayIcon() {
         logger.info { "Creating the tray icon" }
 
         try {
             val icon = SystemTray.get()
-            this::class.java.getResourceAsStream("/img/icon.png").use { icon.setImage(it) }
+            loadResource("img/icon.png").use { icon.setImage(it) }
             icon.status = "ShimeLinux"
 
             val callShimejiMenu = MenuItem(localize("CallShimeji")) {
@@ -459,16 +457,12 @@ object Main {
                     manager.togglePauseAll()
                 }
 
-                if (DesktopType.current == DesktopType.WAYLAND) {
-                    PopupFactory.setSharedInstance(PopupFactory())
-                }
+                PopupFactory.setSharedInstance(PopupFactory())
 
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                if (DesktopType.current == DesktopType.WAYLAND) {
-                    PopupFactory.setSharedInstance(WaylandPopupFactory)
-                }
+                PopupFactory.setSharedInstance(DesktopType.getPopupFactory())
 
                 if (settings.isRestartRequired) {
                     val response = JOptionPane.showConfirmDialog(
@@ -682,12 +676,18 @@ object Main {
         }
     }
 
+    /**
+     * Creates a random mascot
+     */
     private fun createMascot() {
         val length = imageSets.size
         val random = (length * Math.random()).toInt()
         createMascot(imageSets[random])
     }
 
+    /**
+     * Creates a specific mascot
+     */
     fun createMascot(imageSet: String) {
         logger.info { "Creating a mascot ($imageSet)" }
 
@@ -717,13 +717,6 @@ object Main {
                     mascot.dispose()
                 }
             }
-        }
-    }
-
-    private fun updateLanguage(language: String) {
-        if (getProperty("Language", "en-US") != language) {
-            properties.setProperty("Language", language)
-            refreshLanguage()
         }
     }
 
@@ -761,33 +754,11 @@ object Main {
         }
     }
 
-    fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
-        val list = mutableListOf<String>()
-        val data = getProperty("DisabledBehaviors.${mascot.imageSet}", "").split("/")
-
-        if (data.isNotEmpty() && data[0] != "") {
-            list.addAll(data)
+    private fun updateLanguage(language: String) {
+        if (getProperty("Language", "en-US") != language) {
+            properties.setProperty("Language", language)
+            refreshLanguage()
         }
-
-        if (list.contains(name) && enabled) {
-            list.remove(name)
-        } else if (!list.contains(name) && !enabled) {
-            list.add(name)
-        }
-
-        if (list.isNotEmpty()) {
-            properties.setProperty(
-                "DisabledBehaviors.${mascot.imageSet}",
-                list.toString()
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(", ", "/")
-            )
-        } else {
-            properties.remove("DisabledBehaviors.${mascot.imageSet}")
-        }
-
-        updateConfigFile()
     }
 
     @Suppress("SameParameterValue")
@@ -819,6 +790,35 @@ object Main {
         )
     }
 
+    fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
+        val list = mutableListOf<String>()
+        val data = getProperty("DisabledBehaviors.${mascot.imageSet}", "").split("/")
+
+        if (data.isNotEmpty() && data[0] != "") {
+            list.addAll(data)
+        }
+
+        if (list.contains(name) && enabled) {
+            list.remove(name)
+        } else if (!list.contains(name) && !enabled) {
+            list.add(name)
+        }
+
+        if (list.isNotEmpty()) {
+            properties.setProperty(
+                "DisabledBehaviors.${mascot.imageSet}",
+                list.toString()
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(", ", "/")
+            )
+        } else {
+            properties.remove("DisabledBehaviors.${mascot.imageSet}")
+        }
+
+        updateConfigFile()
+    }
+
     private fun updateConfigFile() {
         try {
             getPath("conf", "settings.properties").outputStream().use {
@@ -828,6 +828,13 @@ object Main {
         }
     }
 
+    /**
+     * Updates the active image sets without affecting mascots that are already active
+     *
+     * @author LavenderSnek
+     * @author Kilkakon
+     * @author Bujju
+     */
     private fun setActiveImageSets(newImageSets: MutableList<String>?) {
         if (newImageSets == null) return
 
@@ -924,6 +931,9 @@ object Main {
 
     fun getConfiguration(imageSet: String) = checkNotNull(configurations[imageSet])
 
+    /**
+     * Dismisses all mascots and closes the program
+     */
     fun exit() {
         manager.disposeAll()
         manager.stop()

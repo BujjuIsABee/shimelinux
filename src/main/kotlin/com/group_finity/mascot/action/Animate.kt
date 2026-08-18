@@ -30,6 +30,13 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(Animate::class.java.name)
 
+/**
+ * An action that plays an animation
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 open class Animate(
     schema: ResourceBundle,
     animations: List<Animation>,

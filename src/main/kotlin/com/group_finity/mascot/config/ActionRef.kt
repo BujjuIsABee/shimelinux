@@ -29,6 +29,13 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(ActionRef::class.java.name)
 
+/**
+ * Creates an action from an ActionRef node
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 class ActionRef(private val configuration: Configuration, refNode: Entry) : IActionBuilder {
     private val name = requireNotNull(refNode.getAttribute(configuration.schema.getString("Name"))) { "ActionReference requires Name attribute." }
     private val params = linkedMapOf<String, String>()

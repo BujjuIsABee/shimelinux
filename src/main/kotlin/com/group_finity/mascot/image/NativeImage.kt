@@ -22,4 +22,11 @@
 
 package com.group_finity.mascot.image
 
+/**
+ * Defines a platform-specific image object
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 interface NativeImage

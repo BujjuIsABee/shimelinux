@@ -30,6 +30,13 @@ import java.util.logging.Logger
 
 private val logger = Logger.getLogger(Stay::class.java.name)
 
+/**
+ * An action that causes the mascot to stand still
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 open class Stay(
     schema: ResourceBundle,
     animations: List<Animation>,

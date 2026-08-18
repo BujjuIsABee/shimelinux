@@ -26,6 +26,15 @@ import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
+/**
+ * An action that triggers other actions
+ *
+ * @param actions An array of actions that can be triggered by the complex action
+ *
+ * @author Yuki Yamada
+ * @author Kilkakon
+ * @author Bujju
+ */
 abstract class ComplexAction(
     schema: ResourceBundle,
     params: VariableMap,
@@ -42,7 +51,7 @@ abstract class ComplexAction(
         get() = actions[currentAction]
 
     override val isDraggable: Boolean
-        get() = if (currentAction < actions.size && action is ActionBase) (action as ActionBase).isDraggable else true
+        get() = !(currentAction < actions.size && action is ActionBase) || (action as ActionBase).isDraggable
 
     init {
         require(actions.isNotEmpty()) { "ComplexAction requires at least one Action or ActionReference node" }
@@ -65,6 +74,9 @@ abstract class ComplexAction(
         }
     }
 
+    /**
+     * Sets [action] to the next effective action in [actions]
+     */
     internal fun seek() {
         if (super.hasNext()) {
             while (currentAction < actions.size) {
