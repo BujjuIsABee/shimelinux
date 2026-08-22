@@ -125,6 +125,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val flatThemeAccentColorPreview: JPanel
     private val flatThemeAccentColorButton: JButton
     private val flatThemeFooterPanel: JPanel
+    private val matchGtkThemeButton: JButton
     private val resetFlatThemeButton: JButton
     private val gtkThemeCard: JPanel
     private val windowModeTab: JPanel
@@ -660,6 +661,31 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         flatThemeFooterPanel = JPanel(FlowLayout())
 
+        matchGtkThemeButton = JButton(localize("MatchGtkTheme"))
+        matchGtkThemeButton.addActionListener {
+            val backgroundColor: Color
+            val textColor: Color
+            val accentColor: Color
+            UIManager.getLookAndFeel().let { previous ->
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+                backgroundColor = UIManager.getColor("Panel.background")
+                textColor = UIManager.getColor("Panel.foreground")
+                accentColor = UIManager.getColor("textHighlight")
+                UIManager.setLookAndFeel(previous)
+            }
+
+            if (themeComboBox.selectedIndex == 0) {
+                darkTheme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
+                darkTheme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
+                darkTheme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
+            } else {
+                lightTheme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
+                lightTheme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
+                lightTheme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
+            }
+            refreshTheme()
+        }
+
         resetFlatThemeButton = JButton(localize("Reset"))
         resetFlatThemeButton.addActionListener {
             if (themeComboBox.selectedIndex == 0) {
@@ -675,6 +701,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         flatThemeFooterPanel.add(resetFlatThemeButton)
+        flatThemeFooterPanel.add(matchGtkThemeButton)
 
         flatThemeCard.add(flatThemeColorsPanel, BorderLayout.NORTH)
         flatThemeCard.add(flatThemeFooterPanel, BorderLayout.SOUTH)
