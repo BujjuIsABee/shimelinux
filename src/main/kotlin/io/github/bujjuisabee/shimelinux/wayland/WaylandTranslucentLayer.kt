@@ -56,7 +56,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
             }
         }
 
-        override fun getLocationOnScreen() = grabStart.takeUnless { it == Point(0, 0) } ?: location
+        override fun getLocationOnScreen() = grabStart ?: location
 
         override fun setCursor(cursor: Cursor) {
             try {
@@ -150,7 +150,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
 
                 "KDE" -> {
                     WaylandEnvironment.cursorPosition = runCatching {
-                        val result = execute("kdotool", "getmouseposition")
+                        val result = execute("kdotool", "getmouselocation")
                         val x = result.substringAfter("x:").substringBefore(" ").toIntOrNull() ?: 0
                         val y = result.substringAfter("y:").substringBefore(" ").toIntOrNull() ?: 0
                         return@runCatching Point(x, y)

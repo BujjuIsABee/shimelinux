@@ -153,7 +153,7 @@ On Intel integrated graphics and some older GPUs, you may experience some visual
 Environment=wayland
 ```
 
-This should fix most visual issues, but it will disable interactive windows and may break features that rely on the cursor position on some desktop environments.
+This should fix most visual issues, but it will disable interactive windows, restrict Shimeji to a single monitor, and may break features that rely on the cursor position on some desktop environments.
 
 > [!IMPORTANT]
 > If you are using KDE Plasma, you will need to install `kdotool` for the Wayland environment to work properly.
