@@ -86,20 +86,22 @@ To add more Shimeji, click the system tray icon and select "Choose Shimeji...." 
 
 ShimeLinux has been tested on the following Linux distributions and desktop environments:
 
-| Distribution | Desktop Environment / Compositor | Notes                                                                                         |
-|--------------|----------------------------------|-----------------------------------------------------------------------------------------------|
-| Arch Linux   | KDE Plasma                       |                                                                                               |
-| Arch Linux   | GNOME                            |                                                                                               |
-| Arch Linux   | Hyprland                         | Requires additional setup; see [Hyprland](https://github.com/BujjuIsABee/shimelinux#hyprland) |
-| Arch Linux   | niri                             | Requires additional setup; see [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
-| Arch Linux   | sway                             | Requires additional setup; see [sway](https://github.com/BujjuIsABee/shimelinux#sway)         |
-| Fedora       | KDE Plasma                       |                                                                                               |
-| Linux Mint   | Cinnamon                         |                                                                                               |
-| NixOS        | KDE Plasma                       |                                                                                               |
-| NixOS        | niri                             | Requires additional setup; see [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
-| Ubuntu       | GNOME                            |                                                                                               |
+| Distribution | DE / Compositor | How to Setup                                                       |
+|--------------|-----------------|--------------------------------------------------------------------|
+| Arch Linux   | KDE Plasma      | Works out of the box                                               |
+| Arch Linux   | GNOME           | Works out of the box                                               |
+| Arch Linux   | Hyprland        | See [Hyprland](https://github.com/BujjuIsABee/shimelinux#hyprland) |
+| Arch Linux   | niri            | See [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
+| Arch Linux   | sway            | See [sway](https://github.com/BujjuIsABee/shimelinux#sway)         |
+| Fedora       | KDE Plasma      | Works out of the box                                               |
+| Linux Mint   | Cinnamon        | Works out of the box                                               |
+| NixOS        | KDE Plasma      | Works out of the box                                               |
+| NixOS        | niri            | See [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
+| Ubuntu       | GNOME           | Works out of the box                                               |
 
-### Hyprland
+### Tiling Window Managers
+
+#### Hyprland
 
 Add this to your Hyprland configuration file (`~/.config/hypr/hyprland.lua`):
 
@@ -107,7 +109,7 @@ Add this to your Hyprland configuration file (`~/.config/hypr/hyprland.lua`):
 hl.env("_JAVA_AWT_WM_NONREPARENTING", "1")
 ```
 
-### Niri
+#### Niri
 
 Add this to your niri configuration file (`~/.config/niri/config.kdl`):
 
@@ -122,7 +124,7 @@ window-rule {
 }
 ```
 
-### Sway
+#### Sway
 
 Add this to your sway configuration file (`~/.config/sway/config`):
 
