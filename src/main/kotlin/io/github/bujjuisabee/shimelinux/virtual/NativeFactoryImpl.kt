@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage
  * @author Kilkakon
  * @author Bujju
  */
+@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
     override val environment = VirtualEnvironment()
 

@@ -23,6 +23,7 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
+import com.group_finity.mascot.NativeFactory.Companion.usingWaylandLibrary
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
@@ -33,7 +34,7 @@ import dorkbox.systemTray.Checkbox
 import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
-import io.github.bujjuisabee.shimelinux.linux.DesktopType
+import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.File
@@ -179,7 +180,7 @@ object Main {
 
         // Set theme
         try {
-            if (DesktopType.current != DesktopType.WAYLAND) {
+            if (getProperty("Environment", "linux") != "") {
                 val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
                 val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
                 System.setProperty("sun.java2d.uiScale", menuScaling.toString())
@@ -433,7 +434,7 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            if (DesktopType.current == DesktopType.KDE) {
+            if (NativeFactory.interactiveWindowsSupported) {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
@@ -462,7 +463,11 @@ object Main {
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                PopupFactory.setSharedInstance(DesktopType.getPopupFactory())
+                if (usingWaylandLibrary) {
+                    PopupFactory.setSharedInstance(WaylandPopupFactory)
+                } else {
+                    PopupFactory.setSharedInstance(PopupFactory())
+                }
 
                 if (settings.isRestartRequired) {
                     val response = JOptionPane.showConfirmDialog(
@@ -659,7 +664,7 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            if (DesktopType.current == DesktopType.KDE) {
+            if (NativeFactory.interactiveWindowsSupported) {
                 icon.menu.add(restoreWindowsMenu)
             }
             icon.menu.add(JSeparator())
@@ -819,7 +824,7 @@ object Main {
         updateConfigFile()
     }
 
-    private fun updateConfigFile() {
+    fun updateConfigFile() {
         try {
             getPath("conf", "settings.properties").outputStream().use {
                 properties.store(it, "Configuration Options")

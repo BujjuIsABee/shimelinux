@@ -20,22 +20,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.NativeFactory
-import java.awt.image.BufferedImage
+import java.awt.Component
+import javax.swing.PopupFactory
 
 /**
- * A native factory that returns objects compatible with the current desktop type
- *
- * @see DesktopType
+ * A popup factory that creates [WaylandPopup] objects
  *
  * @author Bujju
  */
-class NativeFactoryImpl : NativeFactory() {
-    override val environment = DesktopType.getEnvironment()
-
-    override fun newNativeImage(src: BufferedImage) = DesktopType.getNativeImage(src)
-
-    override fun newTranslucentWindow() = DesktopType.getTranslucentWindow()
+object WaylandPopupFactory : PopupFactory() {
+    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int) = WaylandPopup(owner, contents, x, y)
 }

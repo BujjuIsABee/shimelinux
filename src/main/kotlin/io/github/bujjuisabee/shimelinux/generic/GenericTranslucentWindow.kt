@@ -20,7 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.generic
 
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.image.NativeImage
@@ -37,7 +37,7 @@ import java.awt.geom.Area
 import java.awt.geom.Path2D
 import javax.swing.JWindow
 
-private val maskCache = mutableMapOf<LinuxNativeImage, Area>()
+private val maskCache = mutableMapOf<GenericNativeImage, Area>()
 private val gc = GraphicsEnvironment
     .getLocalGraphicsEnvironment()
     .defaultScreenDevice
@@ -49,8 +49,8 @@ private val gc = GraphicsEnvironment
  *
  * @author Bujju
  */
-class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
-    private var image: LinuxNativeImage? = null
+class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
+    private var image: GenericNativeImage? = null
     private var offset = Point(0, 0)
 
     init {
@@ -90,7 +90,7 @@ class LinuxTranslucentWindow : TranslucentWindow, JWindow(gc) {
     override fun asComponent() = this
 
     override fun setImage(image: NativeImage) {
-        this.image = image as LinuxNativeImage
+        this.image = image as GenericNativeImage
     }
 
     override fun updateImage() {

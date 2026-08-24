@@ -88,14 +88,14 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 
 | Distribution | Desktop Environment / Compositor | Notes                                                                                         |
 |--------------|----------------------------------|-----------------------------------------------------------------------------------------------|
-| Arch Linux   | KDE Plasma                       | Supports interactive windows                                                                  |
+| Arch Linux   | KDE Plasma                       |                                                                                               |
 | Arch Linux   | GNOME                            |                                                                                               |
 | Arch Linux   | Hyprland                         | Requires additional setup; see [Hyprland](https://github.com/BujjuIsABee/shimelinux#hyprland) |
 | Arch Linux   | niri                             | Requires additional setup; see [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
 | Arch Linux   | sway                             | Requires additional setup; see [sway](https://github.com/BujjuIsABee/shimelinux#sway)         |
-| Fedora       | KDE Plasma                       | Supports interactive windows                                                                  |
+| Fedora       | KDE Plasma                       |                                                                                               |
 | Linux Mint   | Cinnamon                         |                                                                                               |
-| NixOS        | KDE Plasma                       | Supports interactive windows                                                                  |
+| NixOS        | KDE Plasma                       |                                                                                               |
 | NixOS        | niri                             | Requires additional setup; see [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
 | Ubuntu       | GNOME                            |                                                                                               |
 
@@ -136,6 +136,27 @@ Ensure these environment variables are set before launching the program:
 XDG_CURRENT_DESKTOP=sway
 _JAVA_AWT_WM_NONREPARENTING=1
 ```
+
+### Interactive windows
+
+Actions that involve a Shimeji standing/climbing on, picking up, and throwing windows are only supported on KDE Plasma (version 6 or later).
+
+By default, the feature is disabled. You can enable it by adding windows to the whitelist or blacklist in settings.
+
+### GPU compatibility / Graphical issues
+
+ShimeLinux should work on most AMD and NVIDIA graphics cards.
+
+On Intel integrated graphics and some older GPUs, you may experience some visual issues. If you are using a Wayland compositor that supports the `wlr_layer_shell` protocol (i.e., KDE Plasma), you can try using the Wayland environment by adding this to your config file (`~/.config/shimelinux/conf/settings.properties`):
+
+```properties
+Environment=wayland
+```
+
+This should fix most visual issues, but it will disable interactive windows and may break features that rely on the cursor position on some desktop environments.
+
+> [!IMPORTANT]
+> If you are using KDE Plasma, you will need to install `kdotool` for the Wayland environment to work properly.
 
 ## Licenses
 

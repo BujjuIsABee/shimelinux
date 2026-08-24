@@ -20,60 +20,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot
+package io.github.bujjuisabee.shimelinux.wayland
 
-import java.io.InputStream
-import kotlin.io.path.Path
+import com.group_finity.mascot.environment.Area
+import com.group_finity.mascot.environment.Environment
+import java.awt.Point
+import java.awt.Rectangle
 
 /**
- * Gets a path within the config directory
+ * An environment that uses [WaylandLib] to get the cursor position and screen bounds
  *
  * @author Bujju
  */
-fun getPath(vararg paths: String) =
-    Path(
-        System.getenv("XDG_CONFIG_HOME")?.takeUnless { it.isBlank() } ?: System.getProperty("user.home"),
-        ".config",
-        "shimelinux",
-        *paths
-    )
+class WaylandEnvironment : Environment() {
+    override val workArea: Area
+        get() = screen
 
-/**
- * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails
- *
- * @author Bujju
- */
-inline fun <reified T> getProperty(key: String, defaultValue: T): T =
-    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
-        when (T::class) {
-            Int::class -> value.toInt()
-            Double::class -> value.toDouble()
-            Boolean::class -> value.toBoolean()
-            else -> value
-        } as? T ?: defaultValue
+    override val activeIE = Area()
+    override val activeIETitle = ""
+
+    override fun tick() {
+        val (x, y, width, height) = WaylandLib.getScreenRect()
+
+        screenRect.bounds = Rectangle(x, y, width, height)
+        screen.set(screenRect)
+        cursor.set(cursorPosition ?: Point(0, 0))
+
+        activeIE.isVisible = false
     }
 
-/**
- * Translates a string to the current language
- *
- * @author Bujju
- */
-fun localize(key: String): String = Main.languageBundle.getString(key)
+    override fun moveActiveIE(point: Point) {}
 
-/**
- * Loads a resource and returns an input stream, or null if the resource does not exist
- *
- * @author Bujju
- */
-fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
+    override fun restoreIE() {}
 
-/**
- * Executes a command and returns the output
- *
- * @author Bujju
- */
-fun execute(command: String, vararg args: String): String {
-    val process = ProcessBuilder(command, *args).start()
-    process.waitFor()
-    return process.inputStream.bufferedReader().use { it.readLines().joinToString("\n") }
+    override fun refreshCache() {}
+
+    override fun dispose() {}
+
+    companion object {
+        var cursorPosition: Point? = null
+    }
 }

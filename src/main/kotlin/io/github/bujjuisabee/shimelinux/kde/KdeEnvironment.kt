@@ -20,7 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.kde
 
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment

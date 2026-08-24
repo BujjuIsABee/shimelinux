@@ -29,7 +29,6 @@ import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.MascotImage
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
-import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import java.awt.Cursor
 import java.awt.Point
 import java.awt.Rectangle
@@ -359,7 +358,7 @@ class Mascot(var imageSet: String) {
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
-        if (DesktopType.current == DesktopType.KDE) {
+        if (NativeFactory.interactiveWindowsSupported) {
             popup.add(restoreWindowsMenu)
         }
         popup.add(debugMenu)

@@ -20,16 +20,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.generic
 
-import java.awt.Component
-import javax.swing.PopupFactory
+import com.group_finity.mascot.NativeFactory
+import java.awt.image.BufferedImage
 
 /**
- * A popup factory that creates [WaylandPopup] objects
+ * A cross-platform native factory
  *
  * @author Bujju
  */
-object WaylandPopupFactory : PopupFactory() {
-    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int) = WaylandPopup(owner, contents, x, y)
+@Suppress("unused")
+class NativeFactoryImpl : NativeFactory() {
+    override val environment = GenericEnvironment()
+
+    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
+
+    override fun newTranslucentWindow() = GenericTranslucentWindow()
 }

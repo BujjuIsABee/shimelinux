@@ -20,60 +20,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot
+package io.github.bujjuisabee.shimelinux.generic
 
-import java.io.InputStream
-import kotlin.io.path.Path
+import com.group_finity.mascot.image.NativeImage
+import java.awt.image.BufferedImage
+import java.util.Objects
 
 /**
- * Gets a path within the config directory
+ * A cross-platform image
  *
  * @author Bujju
  */
-fun getPath(vararg paths: String) =
-    Path(
-        System.getenv("XDG_CONFIG_HOME")?.takeUnless { it.isBlank() } ?: System.getProperty("user.home"),
-        ".config",
-        "shimelinux",
-        *paths
-    )
+class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
+    val width = managedImage.width
+    val height = managedImage.height
+    val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 
-/**
- * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails
- *
- * @author Bujju
- */
-inline fun <reified T> getProperty(key: String, defaultValue: T): T =
-    Main.properties.getProperty(key, defaultValue.toString()).let { value ->
-        when (T::class) {
-            Int::class -> value.toInt()
-            Double::class -> value.toDouble()
-            Boolean::class -> value.toBoolean()
-            else -> value
-        } as? T ?: defaultValue
-    }
+    override fun hashCode() = Objects.hash(rgb)
 
-/**
- * Translates a string to the current language
- *
- * @author Bujju
- */
-fun localize(key: String): String = Main.languageBundle.getString(key)
-
-/**
- * Loads a resource and returns an input stream, or null if the resource does not exist
- *
- * @author Bujju
- */
-fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
-
-/**
- * Executes a command and returns the output
- *
- * @author Bujju
- */
-fun execute(command: String, vararg args: String): String {
-    val process = ProcessBuilder(command, *args).start()
-    process.waitFor()
-    return process.inputStream.bufferedReader().use { it.readLines().joinToString("\n") }
+    override fun equals(other: Any?) = other === this || other is GenericNativeImage && rgb.contentEquals(other.rgb)
 }

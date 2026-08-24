@@ -20,23 +20,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.kde
 
-import com.group_finity.mascot.image.NativeImage
+import com.group_finity.mascot.NativeFactory
+import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
+import io.github.bujjuisabee.shimelinux.generic.GenericTranslucentWindow
 import java.awt.image.BufferedImage
-import java.util.Objects
 
 /**
- * Stores an image to display in a [LinuxTranslucentWindow] or [WaylandTranslucentLayer]
+ * A native factory for KDE Plasma
  *
  * @author Bujju
  */
-class LinuxNativeImage(val managedImage: BufferedImage) : NativeImage {
-    val width = managedImage.width
-    val height = managedImage.height
-    val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
+@Suppress("unused")
+class NativeFactoryImpl : NativeFactory() {
+    override val environment = KdeEnvironment()
 
-    override fun hashCode() = Objects.hash(rgb)
+    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
 
-    override fun equals(other: Any?) = other === this || other is LinuxNativeImage && rgb.contentEquals(other.rgb)
+    override fun newTranslucentWindow() = GenericTranslucentWindow()
 }

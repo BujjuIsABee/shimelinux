@@ -72,7 +72,7 @@ enum Event {
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_createLayer<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_createLayer<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     object: JObject<'caller>,
@@ -144,8 +144,14 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
                             }
                             Event::Dispose() => {
                                 layer_state.dispose();
+                                break;
                             }
                         }
+                    }
+
+                    // Handle protocol errors
+                    if let Some(error) = connection.protocol_error() {
+                        panic!("Protocol error {} on object {}@{}: {}", error.code, error.object_interface, error.object_id, error.message);
                     }
                 }
             });
@@ -156,7 +162,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_cr
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setBounds<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_setBounds<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     sender_ptr: jlong,
@@ -181,7 +187,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setImage<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_setImage<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     sender_ptr: jlong,
@@ -202,7 +208,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_setCursor<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_setCursor<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     sender_ptr: jlong,
@@ -219,7 +225,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_se
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_dispose<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_dispose<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     sender_ptr: jlong,
@@ -235,7 +241,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_di
 }
 
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_linux_WaylandLib_getScreenRect<'caller>(
+pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_getScreenRect<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
 ) -> JIntArray<'caller> {

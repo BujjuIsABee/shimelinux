@@ -24,7 +24,6 @@ package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
 import dorkbox.desktop.Desktop
-import io.github.bujjuisabee.shimelinux.linux.DesktopType
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -366,12 +365,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         menuScalingPanel = JPanel()
-        menuScalingPanel.isEnabled = DesktopType.current != DesktopType.WAYLAND
+        menuScalingPanel.isEnabled = !NativeFactory.usingWaylandLibrary
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
         menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
 
         menuScalingSlider = JSlider()
-        menuScalingSlider.isEnabled = DesktopType.current != DesktopType.WAYLAND
+        menuScalingSlider.isEnabled = !NativeFactory.usingWaylandLibrary
         menuScalingSlider.minimum = 1
         menuScalingSlider.maximum = 3
         menuScalingSlider.majorTickSpacing = 1
@@ -972,7 +971,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab.add(Box.createVerticalGlue())
 
         tabbedPane.addTab(localize("General"), generalTab)
-        if (DesktopType.current == DesktopType.KDE) {
+        if (NativeFactory.interactiveWindowsSupported) {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
         tabbedPane.addTab(localize("Menu"), menuTab)
@@ -1080,9 +1079,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             isEnvironmentReloadRequired = true
         }
 
-        getPath("conf", "settings.properties").outputStream().use {
-            Main.properties.store(it, "Configuration Options")
-        }
+        Main.updateConfigFile()
     }
 
     private fun cancelChanges() {

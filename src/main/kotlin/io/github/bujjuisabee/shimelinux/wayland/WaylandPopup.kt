@@ -20,8 +20,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.NativeFactory
 import java.awt.Component
 import java.awt.Graphics2D
@@ -37,6 +38,7 @@ import javax.swing.MenuSelectionManager
 import javax.swing.Popup
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
+import kotlin.system.exitProcess
 
 /**
  * A popup menu that is displayed via [WaylandLib]
@@ -56,13 +58,14 @@ class WaylandPopup(
 
     override fun show() {
         contents.size = contents.preferredSize
-        val width = contents.width
-        val height = contents.height
-        if (width <= 0 || height <= 0) return
-
         contents.doLayout()
 
-        WaylandLib.setBounds(senderPtr, x, y, width, height)
+        try {
+            WaylandLib.setBounds(senderPtr, x, y, contents.width, contents.height)
+        } catch (_: Exception) {
+            Main.showError("An error occurred in the Wayland library")
+            exitProcess(0)
+        }
 
         updateImage()
     }
@@ -70,7 +73,13 @@ class WaylandPopup(
     override fun hide() {
         super.hide()
 
-        WaylandLib.dispose(senderPtr)
+        try {
+            WaylandLib.dispose(senderPtr)
+        } catch (_: Exception) {
+            Main.showError("An error occurred in the Wayland library")
+            exitProcess(0)
+        }
+
         submenu?.hide()
     }
 
@@ -182,7 +191,13 @@ class WaylandPopup(
         g2d.dispose()
 
         val rgb = buffer.getRGB(0, 0, width, height, null, 0, width)
-        WaylandLib.setImage(senderPtr, rgb)
+
+        try {
+            WaylandLib.setImage(senderPtr, rgb)
+        } catch (_: Exception) {
+            Main.showError("An error occurred in the Wayland library")
+            exitProcess(0)
+        }
     }
 
     private fun adjustPopupLocationToFitScreen(x: Int, y: Int, popup: JPopupMenu): Point {

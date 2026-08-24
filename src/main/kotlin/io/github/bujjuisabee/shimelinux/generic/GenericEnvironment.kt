@@ -20,18 +20,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.generic
 
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import java.awt.Point
 
 /**
- * A Linux-compatible environment
+ * A cross-platform environment
  *
  * @author Bujju
  */
-class LinuxEnvironment : Environment() {
+class GenericEnvironment : Environment() {
     override val workArea: Area
         get() = screen
 

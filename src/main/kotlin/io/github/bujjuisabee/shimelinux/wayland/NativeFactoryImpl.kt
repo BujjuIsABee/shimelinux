@@ -20,44 +20,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.environment.Area
-import com.group_finity.mascot.environment.Environment
-import java.awt.Point
-import java.awt.Rectangle
+import com.group_finity.mascot.NativeFactory
+import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
+import java.awt.image.BufferedImage
 
 /**
- * An environment that uses [WaylandLib] to get the cursor position and screen bounds
+ * A native factory used for some Wayland compositors
  *
  * @author Bujju
  */
-class WaylandEnvironment : Environment() {
-    override val workArea: Area
-        get() = screen
+@Suppress("unused")
+class NativeFactoryImpl : NativeFactory() {
+    override val environment = WaylandEnvironment()
 
-    override val activeIE = Area()
-    override val activeIETitle = ""
+    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
 
-    override fun tick() {
-        val (x, y, width, height) = WaylandLib.getScreenRect()
-
-        screenRect.bounds = Rectangle(x, y, width, height)
-        screen.set(screenRect)
-        cursor.set(Point(cursorPosition.x, cursorPosition.y))
-
-        activeIE.isVisible = false
-    }
-
-    override fun moveActiveIE(point: Point) {}
-
-    override fun restoreIE() {}
-
-    override fun refreshCache() {}
-
-    override fun dispose() {}
-
-    companion object {
-        var cursorPosition = Point(0, 0)
-    }
+    override fun newTranslucentWindow() = WaylandTranslucentLayer()
 }

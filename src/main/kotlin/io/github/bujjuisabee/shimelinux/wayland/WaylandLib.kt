@@ -20,11 +20,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.linux
+package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.loadResource
 import java.io.File
 import kotlin.io.outputStream
+import kotlin.system.exitProcess
 
 /**
  * A foreign function interface used to create and manage Wayland layers
@@ -41,7 +43,12 @@ object WaylandLib {
             }
         }
 
-        System.load(libFile.absolutePath)
+        try {
+            System.load(libFile.absolutePath)
+        } catch (e: Exception) {
+            Main.showError("Failed to load the Wayland library", e)
+            exitProcess(0)
+        }
     }
 
     /**

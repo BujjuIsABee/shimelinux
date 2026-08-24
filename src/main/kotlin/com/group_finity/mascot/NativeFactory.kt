@@ -25,12 +25,9 @@ package com.group_finity.mascot
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import io.github.bujjuisabee.shimelinux.linux.DesktopType
+import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.image.BufferedImage
 import javax.swing.PopupFactory
-
-import io.github.bujjuisabee.shimelinux.linux.NativeFactoryImpl as LinuxNativeFactory
-import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
 /**
  * A factory for platform-specific objects
@@ -47,18 +44,45 @@ abstract class NativeFactory {
     companion object {
         lateinit var instance: NativeFactory
 
+        /**
+         * Gets whether mascots can interact with windows
+         */
+        val interactiveWindowsSupported: Boolean
+            get() = instance::class.java.name.substringBefore(".NativeFactoryImpl").endsWith("kde")
+
+        /**
+         * Gets whether the Wayland library is being used to display mascots
+         */
+        val usingWaylandLibrary: Boolean
+            get() = instance::class.java.name.substringBefore(".NativeFactoryImpl").endsWith("wayland")
+
         init {
             resetInstance()
         }
 
         fun resetInstance() {
-            PopupFactory.setSharedInstance(DesktopType.getPopupFactory())
+            val defaultEnvironment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+                "KDE" -> "kde"
+                "Hyprland", "niri", "sway" -> "wayland"
+                else -> "generic"
+            }
 
-            val environment = getProperty("Environment", "linux")
-            instance = when (environment) {
-                "linux" -> LinuxNativeFactory()
-                "virtual" -> VirtualNativeFactory()
-                else -> error("Invalid environment: $environment")
+            if (getProperty("Environment", "linux") == "linux") {
+                Main.properties.setProperty("Environment", defaultEnvironment)
+                Main.updateConfigFile()
+            }
+
+            val basepkg = "io.github.bujjuisabee.shimelinux"
+            val subpkg = getProperty("Environment", defaultEnvironment)
+
+            @Suppress("UNCHECKED_CAST")
+            val impl = Class.forName("$basepkg.$subpkg.NativeFactoryImpl") as Class<out NativeFactory>
+            instance = impl.getConstructor().newInstance()
+
+            if (usingWaylandLibrary) {
+                PopupFactory.setSharedInstance(WaylandPopupFactory)
+            } else {
+                PopupFactory.setSharedInstance(PopupFactory())
             }
         }
     }
