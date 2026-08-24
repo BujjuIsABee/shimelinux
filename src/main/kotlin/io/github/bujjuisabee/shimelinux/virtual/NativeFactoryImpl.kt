@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.NativeFactory
+import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
@@ -35,7 +36,7 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     override val environment = VirtualEnvironment()
 
-    override fun newNativeImage(src: BufferedImage) = VirtualNativeImage(src)
+    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
 
     override fun newTranslucentWindow() = VirtualTranslucentPanel().also { environment.addShimeji(it) }
 }

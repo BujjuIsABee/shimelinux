@@ -41,7 +41,7 @@ import javax.swing.UIManager
 import kotlin.system.exitProcess
 
 /**
- * A popup menu that is displayed via [WaylandLib]
+ * A popup menu that is displayed with the Wayland library
  *
  * @author Bujju
  */
@@ -90,7 +90,7 @@ class WaylandPopup(
         leftReleased: Boolean,
         rightReleased: Boolean,
         positionX: Int,
-        positionY: Int,
+        positionY: Int
     ) {
         var modifiers = MouseEvent.NOBUTTON
         var button = MouseEvent.NOBUTTON
@@ -102,10 +102,6 @@ class WaylandPopup(
             modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
             button = button or MouseEvent.BUTTON3
         }
-
-        val newCursorPosition = Point(positionX, positionY)
-        val cursorMoved = previousCursorPosition != newCursorPosition
-        previousCursorPosition = newCursorPosition
 
         val target = SwingUtilities.getDeepestComponentAt(contents, positionX, positionY) ?: contents
         val targetPosition = SwingUtilities.convertPoint(contents, positionX, positionY, target)
@@ -123,9 +119,10 @@ class WaylandPopup(
                 submenu?.hide()
             }
 
-            MenuSelectionManager.defaultManager().selectedPath = listOfNotNull(owner, contents, target.takeIf { it is JMenuItem })
-                .filterIsInstance<MenuElement>()
-                .toTypedArray()
+            MenuSelectionManager.defaultManager().selectedPath =
+                listOfNotNull(owner, contents, target.takeIf { it is JMenuItem })
+                    .filterIsInstance<MenuElement>()
+                    .toTypedArray()
 
             updateImage()
 
@@ -164,7 +161,10 @@ class WaylandPopup(
             )
         }
 
-        if (cursorMoved) {
+        val newCursorPosition = Point(positionX, positionY)
+        if (previousCursorPosition != newCursorPosition) {
+            previousCursorPosition = newCursorPosition
+
             target.dispatchEvent(
                 MouseEvent(
                     target,

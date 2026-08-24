@@ -662,6 +662,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         matchGtkThemeButton = JButton(localize("MatchGtkTheme"))
         matchGtkThemeButton.addActionListener {
+            // Get the colors from the GTK LaF
             val backgroundColor: Color
             val textColor: Color
             val accentColor: Color

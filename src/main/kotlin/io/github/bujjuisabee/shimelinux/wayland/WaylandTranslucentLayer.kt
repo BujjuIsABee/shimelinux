@@ -34,7 +34,7 @@ import java.awt.event.MouseEvent
 import kotlin.system.exitProcess
 
 /**
- * A window that displays a mascot via [WaylandLib]
+ * A window that displays a mascot with the Wayland library
  *
  * @author Bujju
  */
@@ -56,7 +56,11 @@ class WaylandTranslucentLayer : TranslucentWindow {
             }
         }
 
-        override fun getLocationOnScreen() = grabStart ?: location
+        override fun getLocationOnScreen() = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+            "Hyprland", "KDE" -> location // if a command is being used to get the cursor position, always use the mascot's on-screen position
+            else if (isDragging) -> grabStart // if the mascot is being dragged and grabStart is used to estimate its on-screen position, use grabStart
+            else -> location // if the mascot is not being dragged, use its on-screen position
+        }
 
         override fun setCursor(cursor: Cursor) {
             try {
@@ -78,14 +82,15 @@ class WaylandTranslucentLayer : TranslucentWindow {
     private var image: GenericNativeImage? = null
     private var imageChanged = false
     private var previousCursorPosition = Point(0, 0)
-    private var grabStart: Point? = null
+    private var grabStart = Point(0, 0)
+    private var isDragging = false
 
     override fun asComponent() = component
 
     override fun setImage(image: NativeImage) {
         if (this.image != image) {
-            this.image = image as GenericNativeImage
             imageChanged = true
+            this.image = image as GenericNativeImage
         }
     }
 
@@ -119,7 +124,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
         leftReleased: Boolean,
         rightReleased: Boolean,
         positionX: Int,
-        positionY: Int,
+        positionY: Int
     ) {
         var modifiers = MouseEvent.NOBUTTON
         var button = MouseEvent.NOBUTTON
@@ -133,48 +138,12 @@ class WaylandTranslucentLayer : TranslucentWindow {
         }
 
         if (leftPressed) {
+            isDragging = true
             grabStart = component.location
         }
 
-        val newCursorPosition = Point(positionX + (grabStart?.x ?: 0), positionY + (grabStart?.y ?: 0))
-        if (previousCursorPosition != newCursorPosition) {
-            previousCursorPosition = newCursorPosition
-
-            when (System.getenv("XDG_CURRENT_DESKTOP")) {
-                "Hyprland" -> {
-                    WaylandEnvironment.cursorPosition = runCatching {
-                        val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
-                        return@runCatching Point(x, y)
-                    }.getOrNull()
-                }
-
-                "KDE" -> {
-                    WaylandEnvironment.cursorPosition = runCatching {
-                        val result = execute("kdotool", "getmouselocation")
-                        val x = result.substringAfter("x:").substringBefore(" ").toIntOrNull() ?: 0
-                        val y = result.substringAfter("y:").substringBefore(" ").toIntOrNull() ?: 0
-                        return@runCatching Point(x, y)
-                    }.getOrNull()
-                }
-
-                else -> {
-                    WaylandEnvironment.cursorPosition = newCursorPosition
-                }
-            }
-
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    positionX,
-                    positionY,
-                    0,
-                    rightReleased,
-                    button
-                )
-            )
+        if (leftReleased) {
+            isDragging = false
         }
 
         if (leftPressed || rightPressed) {
@@ -203,6 +172,48 @@ class WaylandTranslucentLayer : TranslucentWindow {
                     positionX,
                     positionY,
                     1,
+                    rightReleased,
+                    button
+                )
+            )
+        }
+
+        val newCursorPosition = Point(positionX + grabStart.x, positionY + grabStart.y)
+        if (previousCursorPosition != newCursorPosition) {
+            previousCursorPosition = newCursorPosition
+
+            // Update cursor position
+            when (System.getenv("XDG_CURRENT_DESKTOP")) {
+                "Hyprland" -> {
+                    WaylandEnvironment.cursorPosition = runCatching {
+                        val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
+                        return@runCatching Point(x, y)
+                    }.getOrNull()
+                }
+
+                "KDE" -> {
+                    WaylandEnvironment.cursorPosition = runCatching {
+                        val result = execute("kdotool", "getmouselocation")
+                        val x = result.substringAfter("x:").substringBefore(" ").toIntOrNull() ?: 0
+                        val y = result.substringAfter("y:").substringBefore(" ").toIntOrNull() ?: 0
+                        return@runCatching Point(x, y)
+                    }.getOrNull()
+                }
+
+                else -> {
+                    WaylandEnvironment.cursorPosition = newCursorPosition // only an estimate of the global cursor position; accuracy varies by compositor
+                }
+            }
+
+            component.dispatchEvent(
+                MouseEvent(
+                    component,
+                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
+                    System.currentTimeMillis(),
+                    modifiers,
+                    positionX,
+                    positionY,
+                    0,
                     rightReleased,
                     button
                 )

@@ -28,7 +28,7 @@ import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * An environment that uses [WaylandLib] to get the cursor position and screen bounds
+ * An environment that uses the Wayland library to get the cursor position and screen bounds
  *
  * @author Bujju
  */

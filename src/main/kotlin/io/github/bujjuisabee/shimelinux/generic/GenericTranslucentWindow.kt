@@ -45,7 +45,7 @@ private val gc = GraphicsEnvironment
     .firstOrNull { it.isTranslucencyCapable }
 
 /**
- * A window that displays a mascot via X11 or XWayland
+ * A cross-platform window that displays a mascot
  *
  * @author Bujju
  */

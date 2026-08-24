@@ -32,6 +32,7 @@ import javax.swing.PopupFactory
 /**
  * A factory for platform-specific objects
  *
+ * @author Kilkakon
  * @author Bujju
  */
 abstract class NativeFactory {

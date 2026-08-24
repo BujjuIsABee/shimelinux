@@ -104,7 +104,7 @@ class KdeEnvironment : Environment() {
         super.tick()
 
         val activeWindow = activeWindow
-        if (activeWindow != null && isIE(activeWindow)) {
+        if (activeWindow != null && isIE(activeWindow.title)) {
             activeIE.set(activeWindow.bounds)
             activeIETitle = activeWindow.title
             activeIE.isVisible = true
@@ -142,32 +142,14 @@ class KdeEnvironment : Environment() {
         }
     }
 
-    private fun isIE(window: Window) = windowCache.getOrPut(window.title) {
-        var blacklistInUse = false
-        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split("/")
-        for (title in blacklist) {
-            if (title.isNotBlank()) {
-                blacklistInUse = true
-                if (window.title.contains(title, true)) {
-                    windowCache[window.title] = false
-                    return@getOrPut false
-                }
-            }
-        }
+    private fun isIE(title: String) = windowCache.getOrPut(title) {
+        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
+        val whitelist = getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
 
-        var whitelistInUse = false
-        val whitelist = getProperty("InteractiveWindows", "").split("/")
-        for (title in whitelist) {
-            if (title.isNotBlank()) {
-                whitelistInUse = true
-                if (window.title.contains(title, true)) {
-                    windowCache[window.title] = true
-                    return@getOrPut true
-                }
-            }
-        }
+        val blacklisted = blacklist.any { it.contains(title, true) }
+        val whitelisted = whitelist.any { it.contains(title, true) }
 
-        return@getOrPut blacklistInUse && !whitelistInUse
+        return@getOrPut !blacklisted && (whitelisted || blacklist.isNotEmpty() && whitelist.isEmpty())
     }
 
     @DBusInterfaceName("org.kde.kwin.Scripting")

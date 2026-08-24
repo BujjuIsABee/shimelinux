@@ -52,7 +52,18 @@ object WaylandLib {
     }
 
     /**
-     * Creates a Wayland layer, returning a pointer to the mpsc sender. Mouse events are sent to [obj].
+     * Creates a Wayland layer, returning a pointer to the mpsc sender.
+     *
+     * [obj] must contain the following function so it can receive mouse events:
+     *
+     *      fun updateCursor(
+     *          leftPressed: Boolean,
+     *          rightPressed: Boolean,
+     *          leftReleased: Boolean,
+     *          rightReleased: Boolean,
+     *          positionX: Int,
+     *          positionY: Int
+     *      )
      */
     external fun createLayer(obj: Any?): Long
 
