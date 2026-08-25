@@ -21,15 +21,12 @@
  */
 
 use std::{
-    cmp,
-    sync::mpsc::{Sender, channel},
-    thread,
+    cmp, sync::mpsc, thread,
 };
 
 use jni::{
     EnvUnowned,
     elements::ReleaseMode,
-    errors::{Error, ThrowRuntimeExAndDefault},
     objects::{JClass, JIntArray, JObject},
     sys::{jboolean, jint, jlong},
 };
@@ -78,8 +75,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     object: JObject<'caller>,
 ) -> jlong {
     unowned_env
-        .with_env(|env| -> Result<jlong, Error> {
-            let (sender, receiver) = channel::<Event>();
+        .with_env(|env| -> jni::errors::Result<_> {
+            let (sender, receiver) = mpsc::channel::<Event>();
 
             let connection = Connection::connect_to_env().expect("Failed to get compositor state");
             let (globals, mut event_queue) = registry_queue_init(&connection).expect("Failed to initialize event queue");
@@ -148,17 +145,12 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
                             }
                         }
                     }
-
-                    // Handle protocol errors
-                    if let Some(error) = connection.protocol_error() {
-                        panic!("Protocol error {} on object {}@{}: {}", error.code, error.object_interface, error.object_id, error.message);
-                    }
                 }
             });
 
             Ok(Box::into_raw(Box::new(sender)) as jlong) // Return a raw pointer to the sender
         })
-        .resolve::<ThrowRuntimeExAndDefault>()
+        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
@@ -172,8 +164,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     height: jint,
 ) {
     unowned_env
-        .with_env(|_env| -> Result<(), Error> {
-            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+        .with_env(|_env| -> jni::errors::Result<_> {
+            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
             sender.send(Event::SetBounds(Rect {
                 x: cmp::max(-width + 1, x),
                 y: cmp::max(-height + 1, y),
@@ -183,7 +175,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
 
             Ok(())
         })
-        .resolve::<ThrowRuntimeExAndDefault>();
+        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
@@ -194,17 +186,17 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     rgb: JIntArray,
 ) {
     unowned_env
-        .with_env(|env| -> Result<(), Error> {
+        .with_env(|env| -> jni::errors::Result<_> {
             let rgb = unsafe {
                 rgb.get_elements(env, ReleaseMode::NoCopyBack).expect("Failed to get array elements")
             };
 
-            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
             sender.send(Event::SetImage(rgb.to_vec())).expect("Failed to send SetImage event");
 
             Ok(())
         })
-        .resolve::<ThrowRuntimeExAndDefault>();
+        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
@@ -215,13 +207,13 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     use_hand: jboolean,
 ) {
     unowned_env
-        .with_env(|_env| -> Result<(), Error> {
-            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+        .with_env(|_env| -> jni::errors::Result<_> {
+            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
             sender.send(Event::SetCursor(use_hand)).expect("Failed to send SetCursor event");
 
             Ok(())
         })
-        .resolve::<ThrowRuntimeExAndDefault>();
+        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
@@ -231,13 +223,16 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     sender_ptr: jlong,
 ) {
     unowned_env
-        .with_env(|_env| -> Result<(), Error> {
-            let sender = unsafe { &*(sender_ptr as *const Sender<Event>) };
+        .with_env(|_env| -> jni::errors::Result<_> {
+            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
             sender.send(Event::Dispose()).expect("Failed to send dispose event");
+
+            // Free sender
+            let _ = unsafe { Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>) };
 
             Ok(())
         })
-        .resolve::<ThrowRuntimeExAndDefault>();
+        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
 #[unsafe(no_mangle)]
@@ -246,7 +241,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     _class: JClass<'caller>,
 ) -> JIntArray<'caller> {
     unowned_env
-        .with_env(|env| -> Result<_, Error> {
+        .with_env(|env| -> jni::errors::Result<_> {
             let screen_rect = get_screen_rect();
 
             let array = JIntArray::new(env, 4).expect("Failed to create array");
@@ -265,5 +260,5 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
 
             Ok(array)
         })
-        .resolve::<ThrowRuntimeExAndDefault>()
+        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }

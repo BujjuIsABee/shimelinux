@@ -22,16 +22,11 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.execute
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
-import java.awt.Component
-import java.awt.Cursor
 import java.awt.Point
-import java.awt.event.MouseEvent
-import kotlin.system.exitProcess
 
 /**
  * A window that displays a mascot with the Wayland library
@@ -39,53 +34,13 @@ import kotlin.system.exitProcess
  * @author Bujju
  */
 class WaylandTranslucentLayer : TranslucentWindow {
-    private val component = object : Component() {
-        override fun isVisible() = true
-
-        override fun isShowing() = true
-
-        override fun setVisible(b: Boolean) {}
-
-        override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
-            super.setBounds(x, y, width, height)
-            try {
-                WaylandLib.setBounds(senderPtr, x, y, width, height)
-            } catch (_: Exception) {
-                Main.showError("An error occurred in the Wayland library")
-                exitProcess(0)
-            }
-        }
-
-        override fun getLocationOnScreen() = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-            "Hyprland", "KDE" -> location // if a command is being used to get the cursor position, always use the mascot's on-screen position
-            else if (isDragging) -> grabStart // if the mascot is being dragged and grabStart is used to estimate its on-screen position, use grabStart
-            else -> location // if the mascot is not being dragged, use its on-screen position
-        }
-
-        override fun setCursor(cursor: Cursor) {
-            try {
-                WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
-            } catch (_: Exception) {
-                Main.showError("An error occurred in the Wayland library")
-                exitProcess(0)
-            }
-        }
-    }
-
-    private val senderPtr = try {
-        WaylandLib.createLayer(this)
-    } catch (_: Exception) {
-        Main.showError("An error occurred in the Wayland library")
-        exitProcess(0)
-    }
-
+    private val layer = WaylandLayer(this)
     private var image: GenericNativeImage? = null
     private var imageChanged = false
     private var previousCursorPosition = Point(0, 0)
     private var grabStart = Point(0, 0)
-    private var isDragging = false
 
-    override fun asComponent() = component
+    override fun asComponent() = layer
 
     override fun setImage(image: NativeImage) {
         if (this.image != image) {
@@ -96,28 +51,18 @@ class WaylandTranslucentLayer : TranslucentWindow {
 
     override fun updateImage() {
         image?.let {
+            layer.setImage(it.rgb)
             imageChanged = false
-            try {
-                WaylandLib.setImage(senderPtr, it.rgb)
-            } catch (_: Exception) {
-                Main.showError("An error occurred in the Wayland library")
-                exitProcess(0)
-            }
         }
     }
 
     override fun setAlwaysOnTop(onTop: Boolean) {}
 
     override fun dispose() {
-        try {
-            WaylandLib.dispose(senderPtr)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
-            exitProcess(0)
-        }
+        layer.dispose()
     }
 
-    @Suppress("unused", "KotlinConstantConditions")
+    @Suppress("unused")
     fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,
@@ -126,63 +71,14 @@ class WaylandTranslucentLayer : TranslucentWindow {
         positionX: Int,
         positionY: Int
     ) {
-        var modifiers = MouseEvent.NOBUTTON
-        var button = MouseEvent.NOBUTTON
-        if (leftPressed || leftReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
-            button = button or MouseEvent.BUTTON1
-        }
-        if (rightPressed || rightReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
-            button = button or MouseEvent.BUTTON3
-        }
-
         if (leftPressed) {
-            isDragging = true
-            grabStart = component.location
-        }
-
-        if (leftReleased) {
-            isDragging = false
-        }
-
-        if (leftPressed || rightPressed) {
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    MouseEvent.MOUSE_PRESSED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    positionX,
-                    positionY,
-                    1,
-                    false,
-                    button
-                )
-            )
-        }
-
-        if (leftReleased || rightReleased) {
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    MouseEvent.MOUSE_RELEASED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    positionX,
-                    positionY,
-                    1,
-                    rightReleased,
-                    button
-                )
-            )
+            grabStart = layer.location
         }
 
         val newCursorPosition = Point(positionX + grabStart.x, positionY + grabStart.y)
         if (previousCursorPosition != newCursorPosition) {
             previousCursorPosition = newCursorPosition
 
-            // Update cursor position
             when (System.getenv("XDG_CURRENT_DESKTOP")) {
                 "Hyprland" -> {
                     WaylandEnvironment.cursorPosition = runCatching {
@@ -201,23 +97,19 @@ class WaylandTranslucentLayer : TranslucentWindow {
                 }
 
                 else -> {
-                    WaylandEnvironment.cursorPosition = newCursorPosition // only an estimate of the global cursor position; accuracy varies by compositor
+                    WaylandEnvironment.cursorPosition = newCursorPosition
                 }
             }
-
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    positionX,
-                    positionY,
-                    0,
-                    rightReleased,
-                    button
-                )
-            )
         }
+
+        layer.dispatchEvents(
+            layer,
+            leftPressed,
+            rightPressed,
+            leftReleased,
+            rightReleased,
+            positionX,
+            positionY
+        )
     }
 }

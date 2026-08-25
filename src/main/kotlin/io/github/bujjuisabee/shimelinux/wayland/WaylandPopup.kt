@@ -22,13 +22,10 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.NativeFactory
 import java.awt.Component
-import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.Rectangle
-import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
 import javax.swing.JMenu
 import javax.swing.JMenuItem
@@ -38,7 +35,6 @@ import javax.swing.MenuSelectionManager
 import javax.swing.Popup
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
-import kotlin.system.exitProcess
 
 /**
  * A popup menu that is displayed with the Wayland library
@@ -51,39 +47,26 @@ class WaylandPopup(
     private val x: Int,
     private val y: Int,
 ) : Popup(owner, contents, x, y) {
-    private val senderPtr: Long = WaylandLib.createLayer(this)
-    private var previousCursorPosition = Point(0, 0)
+    private val layer = WaylandLayer(this)
+
     private var previousTarget: Component? = null
-    private var submenu: Popup? = null
+    private var submenu: WaylandPopup? = null
+    private var parent: JMenu? = null
 
     override fun show() {
         contents.size = contents.preferredSize
         contents.doLayout()
-
-        try {
-            WaylandLib.setBounds(senderPtr, x, y, contents.width, contents.height)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
-            exitProcess(0)
-        }
-
+        layer.setBounds(x, y, contents.width, contents.height)
         updateImage()
     }
 
     override fun hide() {
         super.hide()
-
-        try {
-            WaylandLib.dispose(senderPtr)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
-            exitProcess(0)
-        }
-
-        submenu?.hide()
+        closeSubmenu()
+        layer.dispose()
     }
 
-    @Suppress("unused", "KotlinConstantConditions")
+    @Suppress("unused")
     fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,
@@ -92,93 +75,40 @@ class WaylandPopup(
         positionX: Int,
         positionY: Int
     ) {
-        var modifiers = MouseEvent.NOBUTTON
-        var button = MouseEvent.NOBUTTON
-        if (leftPressed || leftReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
-            button = button or MouseEvent.BUTTON1
-        }
-        if (rightPressed || rightReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
-            button = button or MouseEvent.BUTTON3
-        }
-
         val target = SwingUtilities.getDeepestComponentAt(contents, positionX, positionY) ?: contents
         val targetPosition = SwingUtilities.convertPoint(contents, positionX, positionY, target)
 
         if (previousTarget != target) {
             if (target is JMenu) {
-                if (target.getClientProperty("isShowing") as? Boolean != true) {
+                if (target.getClientProperty("isShowing") != true) {
                     val location = getSubmenuOrigin(x, y, target)
-                    submenu = WaylandPopupFactory.getPopup(contents, target.popupMenu, location.x, location.y)
-                    submenu?.show()
+                    val popup = WaylandPopupFactory.getPopup(contents, target.popupMenu, location.x, location.y)
+                    popup.parent = target
+                    popup.show()
+                    submenu = popup
                     target.putClientProperty("isShowing", true)
                 }
             } else {
-                (previousTarget as? JMenu)?.putClientProperty("isShowing", false)
-                submenu?.hide()
+                closeSubmenu()
             }
 
-            MenuSelectionManager.defaultManager().selectedPath =
-                listOfNotNull(owner, contents, target.takeIf { it is JMenuItem })
-                    .filterIsInstance<MenuElement>()
-                    .toTypedArray()
+            val path = listOfNotNull(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
+            MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
 
             updateImage()
 
             previousTarget = target
         }
 
-        if (leftPressed || rightPressed) {
-            target.dispatchEvent(
-                MouseEvent(
-                    target,
-                    MouseEvent.MOUSE_PRESSED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    targetPosition.x,
-                    targetPosition.y,
-                    1,
-                    false,
-                    button
-                )
-            )
-        }
-
-        if (leftReleased || rightReleased) {
-            target.dispatchEvent(
-                MouseEvent(
-                    target,
-                    MouseEvent.MOUSE_RELEASED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    targetPosition.x,
-                    targetPosition.y,
-                    1,
-                    false,
-                    button
-                )
-            )
-        }
-
-        val newCursorPosition = Point(positionX, positionY)
-        if (previousCursorPosition != newCursorPosition) {
-            previousCursorPosition = newCursorPosition
-
-            target.dispatchEvent(
-                MouseEvent(
-                    target,
-                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    targetPosition.x,
-                    targetPosition.y,
-                    0,
-                    false,
-                    button
-                )
-            )
-        }
+        layer.dispatchEvents(
+            target,
+            leftPressed,
+            rightPressed,
+            leftReleased,
+            rightReleased,
+            targetPosition.x,
+            targetPosition.y
+        )
     }
 
     private fun updateImage() {
@@ -186,17 +116,20 @@ class WaylandPopup(
         val height = contents.height
 
         val buffer = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
-        val g2d = buffer.createGraphics() as Graphics2D
+        val g2d = buffer.createGraphics()
         contents.paint(g2d)
         g2d.dispose()
 
         val rgb = buffer.getRGB(0, 0, width, height, null, 0, width)
 
-        try {
-            WaylandLib.setImage(senderPtr, rgb)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
-            exitProcess(0)
+        layer.setImage(rgb)
+    }
+
+    private fun closeSubmenu() {
+        submenu?.let {
+            (it.parent as JMenu).putClientProperty("isShowing", false)
+            it.hide()
+            submenu = null
         }
     }
 

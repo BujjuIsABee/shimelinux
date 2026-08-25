@@ -49,35 +49,39 @@ abstract class NativeFactory {
          * Gets whether mascots can interact with windows
          */
         val interactiveWindowsSupported: Boolean
-            get() = instance::class.java.name.substringBefore(".NativeFactoryImpl").endsWith("kde")
+            get() = instance::class.java.name.endsWith("kde.NativeFactoryImpl")
 
         /**
          * Gets whether the Wayland library is being used to display mascots
          */
         val usingWaylandLibrary: Boolean
-            get() = instance::class.java.name.substringBefore(".NativeFactoryImpl").endsWith("wayland")
+            get() = instance::class.java.name.endsWith("wayland.NativeFactoryImpl")
+
+        /**
+         * Gets the default environment, which is chosen based on the value of `XDG_CURRENT_DESKTOP`
+         */
+        val defaultEnvironment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
+            "KDE" -> "kde"
+            "Hyprland", "niri", "sway" -> "wayland"
+            else -> "generic"
+        }
 
         init {
             resetInstance()
         }
 
         fun resetInstance() {
-            val defaultEnvironment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-                "KDE" -> "kde"
-                "Hyprland", "niri", "sway" -> "wayland"
+            val basepkg = "io.github.bujjuisabee.shimelinux"
+            val subpkg = when (getProperty("Environment", "linux")) {
+                "linux" -> defaultEnvironment
+                "kde" if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") -> "kde"
+                "wayland" if (System.getenv("XDG_SESSION_TYPE") == "wayland") -> "wayland"
+                "virtual" -> "virtual"
                 else -> "generic"
             }
 
-            if (getProperty("Environment", "linux") == "linux") {
-                Main.properties.setProperty("Environment", defaultEnvironment)
-                Main.updateConfigFile()
-            }
-
-            val basepkg = "io.github.bujjuisabee.shimelinux"
-            val subpkg = getProperty("Environment", defaultEnvironment)
-
             @Suppress("UNCHECKED_CAST")
-            val impl = Class.forName("$basepkg.$subpkg.NativeFactoryImpl") as Class<out NativeFactory>
+            val impl = Class.forName("$basepkg.$subpkg.NativeFactoryImpl") as Class<NativeFactory>
             instance = impl.getConstructor().newInstance()
 
             if (usingWaylandLibrary) {
