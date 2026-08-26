@@ -23,7 +23,6 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
-import com.group_finity.mascot.NativeFactory.Companion.usingWaylandLibrary
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
@@ -34,7 +33,6 @@ import dorkbox.systemTray.Checkbox
 import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
-import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.File
@@ -462,12 +460,6 @@ object Main {
 
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
-
-                if (usingWaylandLibrary) {
-                    PopupFactory.setSharedInstance(WaylandPopupFactory)
-                } else {
-                    PopupFactory.setSharedInstance(PopupFactory())
-                }
 
                 if (settings.isRestartRequired) {
                     val response = JOptionPane.showConfirmDialog(

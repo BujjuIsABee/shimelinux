@@ -24,15 +24,18 @@ package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
 import dorkbox.desktop.Desktop
+import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
+import java.awt.Dialog
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.Frame
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
+import java.awt.GridLayout
 import java.awt.Image
 import java.awt.Insets
 import java.net.URI
@@ -60,7 +63,9 @@ import javax.swing.JScrollPane
 import javax.swing.JSlider
 import javax.swing.JSpinner
 import javax.swing.JTabbedPane
+import javax.swing.JTextArea
 import javax.swing.JTextField
+import javax.swing.PopupFactory
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
@@ -149,6 +154,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val changeWindowBackgroundImageButton: JButton
     private val windowBackgroundModeComboBox: JComboBox<String>
     private val removeWindowBackgroundImageButton: JButton
+    private val windowModeFooterPanel: JPanel
+    private val resetWindowModeButton: JButton
+    private val environmentSettingsButton: JButton
     private val aboutTab: JPanel
     private val aboutIcon: JLabel
     private val titleLabel: JLabel
@@ -925,7 +933,43 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowModePanel.add(windowModeEnabledCheckBox)
         windowModePanel.add(windowModeSettingsPanel)
 
+        windowModeFooterPanel = JPanel(FlowLayout())
+
+        resetWindowModeButton = JButton(localize("Reset"))
+        resetWindowModeButton.addActionListener {
+            // Reset background color
+            windowBackgroundColor = "#00FF00"
+            windowBackgroundColorTextField.text = "#00FF00"
+            repaint()
+
+            // Reset background image
+            windowBackgroundImage = ""
+            refreshBackgroundImagePreview()
+
+            // Disable windowed mode
+            environment = "linux"
+            windowModeEnabledCheckBox.isSelected = false
+            widthSpinner.isEnabled = false
+            heightSpinner.isEnabled = false
+            windowBackgroundColorTextField.isEnabled = false
+            windowBackgroundColorButton.isEnabled = false
+            changeWindowBackgroundImageButton.isEnabled = false
+            windowBackgroundModeComboBox.isEnabled = false
+            removeWindowBackgroundImageButton.isEnabled = false
+        }
+
+        environmentSettingsButton = JButton(localize("Advanced"))
+        environmentSettingsButton.addActionListener {
+            val dialog = EnvironmentSettingsWindow(this, true)
+            dialog.isVisible = true
+            windowModeEnabledCheckBox.isSelected = environment == "virtual"
+        }
+
+        windowModeFooterPanel.add(resetWindowModeButton)
+        windowModeFooterPanel.add(environmentSettingsButton)
+
         windowModeTab.add(windowModePanel, BorderLayout.NORTH)
+        windowModeTab.add(windowModeFooterPanel, BorderLayout.SOUTH)
 
         aboutTab = JPanel()
         aboutTab.layout = BoxLayout(aboutTab, BoxLayout.Y_AXIS)
@@ -1058,6 +1102,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         if (getProperty("Environment", "linux") != environment) {
             Main.properties.setProperty("Environment", environment)
             isEnvironmentReloadRequired = true
+
+            if (environment == "wayland" || environment == "linux" && NativeFactory.defaultEnvironment == "wayland") {
+                if (menuScaling != 1) {
+                    Main.properties.setProperty("MenuScaling", "1")
+                    isRestartRequired = true
+                }
+            }
         }
 
         if (getProperty("WindowSize", "600x500") != windowSize) {
@@ -1126,6 +1177,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 SwingUtilities.updateComponentTreeUI(window)
             }
 
+            if (NativeFactory.usingWaylandLibrary) {
+                PopupFactory.setSharedInstance(WaylandPopupFactory)
+            } else {
+                PopupFactory.setSharedInstance(PopupFactory())
+            }
+
             pack()
         } catch (_: UnsupportedLookAndFeelException) {
         }
@@ -1152,6 +1209,125 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowBackgroundImagePreview.icon = ImageIcon(image)
         windowBackgroundImagePreview.preferredSize = Dimension(image.getWidth(null), image.getHeight(null))
+    }
+
+    inner class EnvironmentSettingsWindow(parent: Dialog?, modal: Boolean) : JDialog(parent, modal) {
+        private val environmentSettingsPanel: JPanel
+        private val environmentRadioButtonsPanel: JPanel
+        private val environmentButtonGroup: ButtonGroup
+        private val genericEnvironmentRadioButton: JRadioButton
+        private val kdeEnvironmentRadioButton: JRadioButton
+        private val waylandEnvironmentRadioButton: JRadioButton
+        private val automaticEnvironmentRadioButton: JRadioButton
+        private val environmentDescriptionTextArea: JTextArea
+        private val environmentDescriptionScrollPane: JScrollPane
+        private val environmentSettingsFooterPanel: JPanel
+        private val environmentDoneButton: JButton
+        private val environmentCancelButton: JButton
+
+        private val initialEnvironment = environment
+
+        init {
+            title = localize("EnvironmentSettings")
+
+            environmentSettingsPanel = JPanel(GridLayout(0, 2))
+
+            environmentRadioButtonsPanel = JPanel()
+            environmentRadioButtonsPanel.border = BorderFactory.createTitledBorder(localize("Options"))
+            environmentRadioButtonsPanel.layout = BoxLayout(environmentRadioButtonsPanel, BoxLayout.Y_AXIS)
+
+            environmentButtonGroup = ButtonGroup()
+
+            genericEnvironmentRadioButton = JRadioButton(localize("GenericEnvironment"))
+            genericEnvironmentRadioButton.isSelected = environment == "generic"
+            genericEnvironmentRadioButton.addActionListener {
+                if (genericEnvironmentRadioButton.isSelected) {
+                    environment = "generic"
+                    environmentDescriptionTextArea.text = localize("GenericEnvironmentDescription")
+                }
+            }
+
+            kdeEnvironmentRadioButton = JRadioButton(localize("KdeEnvironment"))
+            kdeEnvironmentRadioButton.isSelected = environment == "kde"
+            kdeEnvironmentRadioButton.addActionListener {
+                if (kdeEnvironmentRadioButton.isSelected) {
+                    environment = "kde"
+                    environmentDescriptionTextArea.text = localize("KdeEnvironmentDescription")
+                }
+            }
+
+            waylandEnvironmentRadioButton = JRadioButton(localize("WaylandEnvironment"))
+            waylandEnvironmentRadioButton.isSelected = environment == "wayland"
+            waylandEnvironmentRadioButton.addActionListener {
+                if (waylandEnvironmentRadioButton.isSelected) {
+                    environment = "wayland"
+                    environmentDescriptionTextArea.text = localize("WaylandEnvironmentDescription")
+                }
+            }
+
+            automaticEnvironmentRadioButton = JRadioButton(localize("AutomaticEnvironment"))
+            automaticEnvironmentRadioButton.isSelected = environment == "linux" || environment == "virtual"
+            automaticEnvironmentRadioButton.addActionListener {
+                if (automaticEnvironmentRadioButton.isSelected) {
+                    environment = "linux"
+                    environmentDescriptionTextArea.text = localize("AutomaticEnvironmentDescription")
+                }
+            }
+
+            environmentButtonGroup.add(genericEnvironmentRadioButton)
+            environmentButtonGroup.add(kdeEnvironmentRadioButton)
+            environmentButtonGroup.add(waylandEnvironmentRadioButton)
+            environmentButtonGroup.add(automaticEnvironmentRadioButton)
+
+            environmentRadioButtonsPanel.add(genericEnvironmentRadioButton)
+            if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") {
+                environmentRadioButtonsPanel.add(kdeEnvironmentRadioButton)
+            }
+            if (System.getenv("XDG_SESSION_TYPE") == "wayland") {
+                environmentRadioButtonsPanel.add(waylandEnvironmentRadioButton)
+            }
+            environmentRadioButtonsPanel.add(automaticEnvironmentRadioButton)
+
+            environmentDescriptionTextArea = JTextArea()
+            environmentDescriptionTextArea.preferredSize = Dimension(200, 200)
+            environmentDescriptionTextArea.lineWrap = true
+            environmentDescriptionTextArea.wrapStyleWord = true
+            environmentDescriptionTextArea.isEditable = false
+            environmentDescriptionTextArea.text = when (environment) {
+                "generic" -> localize("GenericEnvironmentDescription")
+                "kde" -> localize("KdeEnvironmentDescription")
+                "wayland" -> localize("WaylandEnvironmentDescription")
+                "linux" -> localize("AutomaticEnvironmentDescription")
+                else -> localize("AutomaticEnvironmentDescription")
+            }
+
+            environmentDescriptionScrollPane = JScrollPane(environmentDescriptionTextArea)
+            environmentDescriptionScrollPane.border = BorderFactory.createTitledBorder(localize("Description"))
+
+            environmentSettingsPanel.add(environmentRadioButtonsPanel)
+            environmentSettingsPanel.add(environmentDescriptionScrollPane)
+
+            environmentSettingsFooterPanel = JPanel(FlowLayout())
+
+            environmentDoneButton = JButton(localize("Done"))
+            environmentDoneButton.addActionListener {
+                dispose()
+            }
+
+            environmentCancelButton = JButton(localize("Cancel"))
+            environmentCancelButton.addActionListener {
+                environment = initialEnvironment
+                dispose()
+            }
+
+            environmentSettingsFooterPanel.add(environmentDoneButton)
+            environmentSettingsFooterPanel.add(environmentCancelButton)
+
+            add(environmentSettingsPanel, BorderLayout.NORTH)
+            add(environmentSettingsFooterPanel, BorderLayout.SOUTH)
+            pack()
+            setLocationRelativeTo(null)
+        }
     }
 
     companion object {
