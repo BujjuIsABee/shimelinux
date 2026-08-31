@@ -22,21 +22,25 @@
 
 package com.group_finity.mascot
 
+import java.io.File
 import java.io.InputStream
 import kotlin.io.path.Path
+
+private val configDir = System.getProperty("XDG_CONFIG_HOME").orEmpty().ifBlank { System.getProperty("user.home") + File.separatorChar + ".config" }
 
 /**
  * Gets a path within the config directory
  *
  * @author Bujju
  */
-fun getPath(vararg paths: String) =
-    Path(
-        System.getenv("XDG_CONFIG_HOME")?.takeUnless { it.isBlank() } ?: System.getProperty("user.home"),
-        ".config",
-        "shimelinux",
-        *paths
-    )
+fun getPath(vararg paths: String) = Path(configDir, "shimelinux", *paths)
+
+/**
+ * Loads a resource and returns an input stream, or null if the resource does not exist
+ *
+ * @author Bujju
+ */
+fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 
 /**
  * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails
@@ -59,13 +63,6 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
  * @author Bujju
  */
 fun localize(key: String): String = Main.languageBundle.getString(key)
-
-/**
- * Loads a resource and returns an input stream, or null if the resource does not exist
- *
- * @author Bujju
- */
-fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 
 /**
  * Executes a command and returns the output
