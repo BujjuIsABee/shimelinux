@@ -1,0 +1,34 @@
+name: Run Tests
+
+on:
+  push:
+    paths:
+      - "src/**"
+      - "shimelinux_wayland/src/**"
+      - "shimelinux_wayland/Cargo.toml"
+      - "build.gradle.kts"
+  pull_request:
+    paths:
+      - "src/**"
+      - "shimelinux_wayland/src/**"
+      - "shimelinux_wayland/Cargo.toml"
+      - "build.gradle.kts"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Install Build Dependencies
+        run: sudo apt-get install -y libxkbcommon-dev
+      - name: Run Tests
+        run: |
+          ./gradlew test
