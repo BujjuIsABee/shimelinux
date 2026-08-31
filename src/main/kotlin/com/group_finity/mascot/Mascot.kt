@@ -358,7 +358,7 @@ class Mascot(var imageSet: String) {
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
-        if (NativeFactory.interactiveWindowsSupported) {
+        if (NativeFactory.usingKdeEnvironment) {
             popup.add(restoreWindowsMenu)
         }
         popup.add(debugMenu)

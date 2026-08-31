@@ -22,12 +22,20 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.image.BufferedImage
 import javax.swing.PopupFactory
+import javax.swing.UIManager
+
+import io.github.bujjuisabee.shimelinux.generic.NativeFactoryImpl as GenericNativeFactory
+import io.github.bujjuisabee.shimelinux.kde.NativeFactoryImpl as KdeNativeFactory
+import io.github.bujjuisabee.shimelinux.wayland.NativeFactoryImpl as WaylandNativeFactory
+import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
 /**
  * A factory for platform-specific objects
@@ -46,46 +54,52 @@ abstract class NativeFactory {
         lateinit var instance: NativeFactory
 
         /**
-         * Gets whether mascots can interact with windows
+         * Gets the name of the current desktop environment
          */
-        val interactiveWindowsSupported: Boolean
-            get() = instance::class.java.name.endsWith("kde.NativeFactoryImpl")
+        val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
 
         /**
-         * Gets whether the Wayland library is being used to display mascots
+         * Gets the name of the current display protocol
          */
-        val usingWaylandLibrary: Boolean
-            get() = instance::class.java.name.endsWith("wayland.NativeFactoryImpl")
+        val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
 
         /**
-         * Gets the default environment, which is chosen based on the value of `XDG_CURRENT_DESKTOP`
+         * Gets whether the [KdeNativeFactory] is being used
          */
-        val defaultEnvironment = when (System.getenv("XDG_CURRENT_DESKTOP")) {
-            "KDE" -> "kde"
-            "Hyprland", "niri", "sway" -> "wayland"
-            else -> "generic"
-        }
+        val usingKdeEnvironment: Boolean
+            get() = instance is KdeNativeFactory
+
+        /**
+         * Gets whether the [WaylandNativeFactory] is being used
+         */
+        val usingWaylandEnvironment: Boolean
+            get() = instance is WaylandNativeFactory
 
         init {
             resetInstance()
         }
 
         fun resetInstance() {
-            val basepkg = "io.github.bujjuisabee.shimelinux"
-            val subpkg = when (getProperty("Environment", "linux")) {
-                "linux" -> defaultEnvironment
-                "kde" if (System.getenv("XDG_CURRENT_DESKTOP") == "KDE") -> "kde"
-                "wayland" if (System.getenv("XDG_SESSION_TYPE") == "wayland") -> "wayland"
-                "virtual" -> "virtual"
-                else -> "generic"
+            val defaultEnvironment = when (desktopType) {
+                "KDE" -> KdeNativeFactory()
+                "Hyprland", "niri", "sway" -> WaylandNativeFactory()
+                else -> GenericNativeFactory()
             }
 
-            @Suppress("UNCHECKED_CAST")
-            val impl = Class.forName("$basepkg.$subpkg.NativeFactoryImpl") as Class<NativeFactory>
-            instance = impl.getConstructor().newInstance()
+            instance = when (getProperty("Environment", "linux")) {
+                "linux" -> defaultEnvironment
+                "generic" -> GenericNativeFactory()
+                "kde" if (desktopType == "KDE") -> KdeNativeFactory()
+                "wayland" if (sessionType == "wayland") -> WaylandNativeFactory()
+                "virtual" -> VirtualNativeFactory()
+                else -> GenericNativeFactory()
+            }
 
-            if (usingWaylandLibrary) {
+            // Reset the popup factory
+            if (usingWaylandEnvironment) {
                 PopupFactory.setSharedInstance(WaylandPopupFactory)
+            } else if (UIManager.getLookAndFeel() is FlatLaf) {
+                PopupFactory.setSharedInstance(FlatPopupFactory())
             } else {
                 PopupFactory.setSharedInstance(PopupFactory())
             }

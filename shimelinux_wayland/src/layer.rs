@@ -312,9 +312,12 @@ impl LayerState {
         self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
-    pub fn set_image(&mut self, rgb: Vec<i32>) {
+    pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
         self.image_rgb = rgb;
-        self.update_layer_mask();
+
+        if update_mask {
+            self.update_layer_mask();
+        }
     }
 
     pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
@@ -322,10 +325,7 @@ impl LayerState {
         let name = if use_hand { "pointer" } else { "left_ptr" };
         if let Some(cursor) = theme.get_cursor(name)
         {
-            let surface = self
-                .cursor_state
-                .surface
-                .get_or_insert(self.compositor_state.create_surface(qh));
+            let surface = self.cursor_state.surface.get_or_insert(self.compositor_state.create_surface(qh));
 
             // Attach None to clear the previous buffer
             surface.attach(None, 0, 0);

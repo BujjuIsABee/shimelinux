@@ -25,15 +25,8 @@ package io.github.bujjuisabee.shimelinux.kde
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
-import com.group_finity.mascot.loadResource
-import org.freedesktop.dbus.annotations.DBusInterfaceName
-import org.freedesktop.dbus.connections.impl.DBusConnection
-import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
-import org.freedesktop.dbus.interfaces.DBusInterface
-import org.freedesktop.dbus.types.Variant
 import java.awt.Point
 import java.awt.Rectangle
-import java.io.File
 
 /**
  * An environment that supports interactive windows via KWin scripting
@@ -47,63 +40,13 @@ class KdeEnvironment : Environment() {
     override val activeIE = Area()
     override var activeIETitle = ""
 
-    private var dbus: DBusConnection? = null
-    private var scripting: KWinScripting? = null
-    private var script: KWinScript? = null
-    private val client = KWinClientImpl()
-    private var activeWindow: Window? = null
-    private var windowPosition: Point? = null
-    private var restoreWindows: Boolean = false
+    private val kwin = KWinConnection()
     private val windowCache = mutableMapOf<String, Boolean>()
-
-    private var isShuttingDown = false
-    private val shutdownThread = Thread {
-        isShuttingDown = true
-        dispose()
-    }
-
-    init {
-        try {
-            dbus = DBusConnectionBuilder.forSessionBus().build().also {
-                it.requestBusName("io.github.bujjuisabee.shimelinux")
-                it.exportObject(client)
-            }
-
-            val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
-            scriptFile.deleteOnExit()
-            loadResource("shimelinux-kwin-script.js")?.use { input ->
-                scriptFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-
-            scripting = dbus?.getRemoteObject(
-                "org.kde.KWin",
-                "/Scripting",
-                KWinScripting::class.java
-            )
-
-            script = scripting?.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")?.let { id ->
-                dbus?.getRemoteObject(
-                    "org.kde.KWin",
-                    "/Scripting/Script$id",
-                    KWinScript::class.java
-                )
-            }
-
-            script?.run()
-        } catch (_: Exception) {
-            error("Failed to start KWin script")
-        } finally {
-            // Ensure the DBus connection is closed when the program shuts down
-            Runtime.getRuntime().addShutdownHook(shutdownThread)
-        }
-    }
 
     override fun tick() {
         super.tick()
 
-        val activeWindow = activeWindow
+        val activeWindow = kwin.activeWindow
         if (activeWindow != null && isIE(activeWindow.title)) {
             activeIE.set(activeWindow.bounds)
             activeIETitle = activeWindow.title
@@ -116,11 +59,11 @@ class KdeEnvironment : Environment() {
     }
 
     override fun moveActiveIE(point: Point) {
-        windowPosition = point
+        kwin.windowPosition = point
     }
 
     override fun restoreIE() {
-        restoreWindows = true
+        kwin.restoreWindows = true
     }
 
     override fun refreshCache() {
@@ -129,14 +72,7 @@ class KdeEnvironment : Environment() {
 
     override fun dispose() {
         try {
-            script?.stop()
-            scripting?.unloadScript("shimelinux-kwin-script")
-            dbus?.disconnect()
-
-            // Disable shutdown hook when switching to virtual environment
-            if (!isShuttingDown) {
-                Runtime.getRuntime().removeShutdownHook(shutdownThread)
-            }
+            kwin.dispose()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -151,82 +87,4 @@ class KdeEnvironment : Environment() {
 
         return@getOrPut !blacklisted && (whitelisted || blacklist.isNotEmpty() && whitelist.isEmpty())
     }
-
-    @DBusInterfaceName("org.kde.kwin.Scripting")
-    interface KWinScripting : DBusInterface {
-        fun loadScript(path: String, name: String): Int
-
-        fun unloadScript(name: String)
-    }
-
-    @DBusInterfaceName("org.kde.kwin.Script")
-    interface KWinScript : DBusInterface {
-        fun run()
-
-        fun stop()
-    }
-
-    @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
-    interface KWinClient : DBusInterface {
-        fun setActiveWindow(
-            caption: String,
-            x: Int,
-            y: Int,
-            width: Int,
-            height: Int
-        )
-
-        fun resetActiveWindow()
-
-        fun getWindowPosition(): Map<String, Variant<*>>
-
-        fun getRestoreWindows(): Boolean
-    }
-
-    inner class KWinClientImpl : KWinClient {
-        override fun setActiveWindow(
-            caption: String,
-            x: Int,
-            y: Int,
-            width: Int,
-            height: Int
-        ) {
-            activeWindow = Window(
-                caption,
-                Rectangle(x, y, width, height)
-            )
-        }
-
-        override fun resetActiveWindow() {
-            activeWindow = null
-        }
-
-        override fun getWindowPosition(): Map<String, Variant<*>> {
-            val windowPosition = windowPosition.also { windowPosition = null }
-
-            return if (windowPosition == null) {
-                mapOf(
-                    "hasValue" to Variant(false),
-                    "x" to Variant(-1),
-                    "y" to Variant(-1)
-                )
-            } else {
-                mapOf(
-                    "hasValue" to Variant(true),
-                    "x" to Variant(windowPosition.x),
-                    "y" to Variant(windowPosition.y)
-                )
-            }
-        }
-
-        override fun getRestoreWindows(): Boolean {
-            return restoreWindows.also {
-                restoreWindows = false
-            }
-        }
-
-        override fun getObjectPath() = "/KWinClient"
-    }
-
-    data class Window(val title: String, val bounds: Rectangle)
 }

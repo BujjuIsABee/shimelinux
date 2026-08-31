@@ -22,13 +22,16 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.execute
+import io.github.bujjuisabee.shimelinux.kde.KWinConnection
 import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * An environment that uses the Wayland library to get the cursor position and screen bounds
+ * An environment that uses [WaylandLib] to get the cursor position and screen bounds
  *
  * @author Bujju
  */
@@ -39,8 +42,21 @@ class WaylandEnvironment : Environment() {
     override val activeIE = Area()
     override val activeIETitle = ""
 
+    private val kwin = if (NativeFactory.desktopType == "KDE") KWinConnection() else null
+
     override fun tick() {
         val (x, y, width, height) = WaylandLib.getScreenRect()
+
+        val cursorPosition = when (NativeFactory.desktopType) {
+            "Hyprland" -> runCatching {
+                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
+                return@runCatching Point(x, y)
+            }.getOrNull()
+
+            "KDE" -> kwin?.cursorPosition
+
+            else -> absoluteCursorPosition
+        }
 
         screenRect.bounds = Rectangle(x, y, width, height)
         screen.set(screenRect)
@@ -58,6 +74,6 @@ class WaylandEnvironment : Environment() {
     override fun dispose() {}
 
     companion object {
-        var cursorPosition: Point? = null
+        var absoluteCursorPosition: Point? = null
     }
 }

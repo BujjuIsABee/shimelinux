@@ -1,0 +1,172 @@
+/*
+ * Copyright (c) 2026, Bujju
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ *        following disclaimer.
+ *     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *        following disclaimer in the documentation and/or other materials provided with the distribution.
+ *     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *        products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.github.bujjuisabee.shimelinux.kde
+
+import com.group_finity.mascot.loadResource
+import org.freedesktop.dbus.annotations.DBusInterfaceName
+import org.freedesktop.dbus.connections.impl.DBusConnection
+import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
+import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.types.Variant
+import java.awt.Point
+import java.awt.Rectangle
+import java.io.File
+
+class KWinConnection {
+    private var dbus: DBusConnection
+    private var scripting: KWinScripting
+    private var script: KWinScript
+    private val client = KWinClientImpl()
+    private val shutdownThread = Thread { dispose() }
+
+    var activeWindow: Window? = null
+    var windowPosition: Point? = null
+    var restoreWindows: Boolean = false
+    var cursorPosition = Point(0, 0)
+
+    init {
+        try {
+            dbus = DBusConnectionBuilder.forSessionBus().build()
+            dbus.requestBusName("io.github.bujjuisabee.shimelinux")
+            dbus.exportObject(client)
+
+            val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
+            scriptFile.deleteOnExit()
+            loadResource("scripts/shimelinux-kwin-script.js")?.use { input ->
+                scriptFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            scripting = dbus.getRemoteObject(
+                "org.kde.KWin",
+                "/Scripting",
+                KWinScripting::class.java
+            )
+
+            val id = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
+
+            script = dbus.getRemoteObject(
+                "org.kde.KWin",
+                "/Scripting/Script$id",
+                KWinScript::class.java
+            )
+
+            script.run()
+        } finally {
+            Runtime.getRuntime().addShutdownHook(shutdownThread)
+        }
+    }
+
+    fun dispose() {
+        script.stop()
+        scripting.unloadScript("shimelinux-kwin-script")
+        dbus.disconnect()
+
+        Runtime.getRuntime().removeShutdownHook(shutdownThread)
+    }
+
+    @DBusInterfaceName("org.kde.kwin.Scripting")
+    interface KWinScripting : DBusInterface {
+        fun loadScript(path: String, name: String): Int
+
+        fun unloadScript(name: String)
+    }
+
+    @DBusInterfaceName("org.kde.kwin.Script")
+    interface KWinScript : DBusInterface {
+        fun run()
+
+        fun stop()
+    }
+
+    @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
+    interface KWinClient : DBusInterface {
+        fun setActiveWindow(
+            caption: String,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int
+        )
+
+        fun resetActiveWindow()
+
+        fun getWindowPosition(): Map<String, Variant<*>>
+
+        fun getRestoreWindows(): Boolean
+
+        fun setCursorPosition(position: Point)
+    }
+
+    inner class KWinClientImpl : KWinClient {
+        override fun setActiveWindow(
+            caption: String,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int
+        ) {
+            activeWindow = Window(
+                caption,
+                Rectangle(x, y, width, height)
+            )
+        }
+
+        override fun resetActiveWindow() {
+            activeWindow = null
+        }
+
+        override fun getWindowPosition(): Map<String, Variant<*>> {
+            val windowPosition = windowPosition.also { windowPosition = null }
+
+            return if (windowPosition == null) {
+                mapOf(
+                    "hasValue" to Variant(false),
+                    "x" to Variant(-1),
+                    "y" to Variant(-1)
+                )
+            } else {
+                mapOf(
+                    "hasValue" to Variant(true),
+                    "x" to Variant(windowPosition.x),
+                    "y" to Variant(windowPosition.y)
+                )
+            }
+        }
+
+        override fun getRestoreWindows(): Boolean {
+            return restoreWindows.also {
+                restoreWindows = false
+            }
+        }
+
+        override fun setCursorPosition(position: Point) {
+            cursorPosition = position
+        }
+
+        override fun getObjectPath() = "/KWinClient"
+    }
+
+    data class Window(val title: String, val bounds: Rectangle)
+}

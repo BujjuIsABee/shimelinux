@@ -20,9 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{
-    cmp, sync::mpsc, thread,
-};
+use std::{cmp, sync::mpsc, thread};
 
 use jni::{
     EnvUnowned,
@@ -63,7 +61,7 @@ pub struct Rect {
 
 enum Event {
     SetBounds(Rect),
-    SetImage(Vec<i32>),
+    SetImage(Vec<i32>, bool),
     SetCursor(bool),
     Dispose(),
 }
@@ -78,8 +76,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
         .with_env(|env| -> jni::errors::Result<_> {
             let (sender, receiver) = mpsc::channel::<Event>();
 
-            let connection = Connection::connect_to_env().expect("Failed to get compositor state");
-            let (globals, mut event_queue) = registry_queue_init(&connection).expect("Failed to initialize event queue");
+            let connection = Connection::connect_to_env().unwrap();
+            let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
             let qh = event_queue.handle();
 
             let compositor_state = CompositorState::bind(&globals, &qh)
@@ -105,8 +103,9 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
             layer.set_size(1, 1);
             layer.commit();
 
+            let object_ref = env.new_global_ref(object).unwrap();
             let mut layer_state = LayerState {
-                object: env.new_global_ref(object).expect("Failed to get global reference to object"),
+                object: object_ref,
 
                 compositor_state,
                 registry_state: RegistryState::new(&globals),
@@ -133,8 +132,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
                             Event::SetBounds(bounds) => {
                                 layer_state.set_bounds(bounds);
                             }
-                            Event::SetImage(rgb) => {
-                                layer_state.set_image(rgb);
+                            Event::SetImage(rgb, update_mask) => {
+                                layer_state.set_image(rgb, update_mask);
                             }
                             Event::SetCursor(use_hand) => {
                                 layer_state.set_cursor(&connection, &qh, use_hand);
@@ -184,6 +183,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     _class: JClass<'caller>,
     sender_ptr: jlong,
     rgb: JIntArray,
+    update_mask: jboolean,
 ) {
     unowned_env
         .with_env(|env| -> jni::errors::Result<_> {
@@ -192,7 +192,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
             };
 
             let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-            sender.send(Event::SetImage(rgb.to_vec())).expect("Failed to send SetImage event");
+            sender.send(Event::SetImage(rgb.to_vec(), update_mask)).expect("Failed to send SetImage event");
 
             Ok(())
         })

@@ -34,6 +34,7 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
+import java.awt.Color
 import java.awt.Point
 import java.io.File
 import java.util.Locale
@@ -178,10 +179,40 @@ object Main {
 
         // Set theme
         try {
-            if (getProperty("Environment", "linux") != "") {
-                val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
-                val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
-                System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+            val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
+            val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
+            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
+
+            if (getProperty("MatchGtkTheme", false)) {
+                val backgroundColor: Color
+                val textColor: Color
+                val accentColor: Color
+                UIManager.getLookAndFeel().let { previous ->
+                    UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+                    backgroundColor = UIManager.getColor("Panel.background")
+                    textColor = UIManager.getColor("Panel.foreground")
+                    accentColor = UIManager.getColor("textHighlight")
+                    UIManager.setLookAndFeel(previous)
+                }
+
+                val theme = Properties()
+                theme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
+                theme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
+                theme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
+
+                when (getProperty("Theme", "FlatDark")) {
+                    "FlatDark" -> {
+                        getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
+                            theme.store(it, "Flat Dark Theme")
+                        }
+                    }
+
+                    "FlatLight" -> {
+                        getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
+                            theme.store(it, "Flat Light Theme")
+                        }
+                    }
+                }
             }
 
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
@@ -255,7 +286,7 @@ object Main {
     }
 
     /**
-     * Loads a mascot from its configuration files
+     * Creates a [Configuration] for [imageSet]
      */
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
@@ -432,7 +463,7 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            if (NativeFactory.interactiveWindowsSupported) {
+            if (NativeFactory.usingKdeEnvironment) {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
@@ -656,7 +687,7 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            if (NativeFactory.interactiveWindowsSupported) {
+            if (NativeFactory.usingKdeEnvironment) {
                 icon.menu.add(restoreWindowsMenu)
             }
             icon.menu.add(JSeparator())

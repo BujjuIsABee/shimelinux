@@ -88,6 +88,15 @@ function tick() {
             }
         }
     );
+
+    // Set cursor position
+    callDBus(
+        busName, clientPath, interfaceName,
+        "setCursorPosition",
+        workspace.cursorPos.x,
+        workspace.cursorPos.y,
+        () => {}
+    );
 }
 
 function onWindowActivated(window) {

@@ -24,12 +24,13 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.loadResource
+import com.group_finity.mascot.localize
 import java.io.File
 import kotlin.io.outputStream
 import kotlin.system.exitProcess
 
 /**
- * A foreign function interface used to create and manage Wayland layers
+ * A foreign function interface used to create and manage Wayland layer surfaces
  *
  * @author Bujju
  */
@@ -46,24 +47,26 @@ object WaylandLib {
         try {
             System.load(libFile.absolutePath)
         } catch (e: Exception) {
-            Main.showError("Failed to load the Wayland library", e)
+            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
         }
     }
 
     /**
-     * Creates a Wayland layer, returning a pointer to the mpsc sender.
+     * Creates a Wayland layer, returning a pointer to the event sender.
      *
-     * [obj] must contain the following function so it can receive mouse events:
+     * [obj] must have the following function so it can receive mouse events:
      *
-     *      fun updateCursor(
-     *          leftPressed: Boolean,
-     *          rightPressed: Boolean,
-     *          leftReleased: Boolean,
-     *          rightReleased: Boolean,
-     *          positionX: Int,
-     *          positionY: Int
-     *      )
+     * ```kotlin
+     * fun updateCursor(
+     *     leftPressed: Boolean,
+     *     rightPressed: Boolean,
+     *     leftReleased: Boolean,
+     *     rightReleased: Boolean,
+     *     positionX: Int,
+     *     positionY: Int
+     * )
+     * ```
      */
     external fun createLayer(obj: Any?): Long
 
@@ -75,7 +78,7 @@ object WaylandLib {
     /**
      * Uses the [senderPtr] to send a SetImage event to a layer
      */
-    external fun setImage(senderPtr: Long, rgb: IntArray)
+    external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)
 
     /**
      * Uses the [senderPtr] to send a SetCursor event to a layer

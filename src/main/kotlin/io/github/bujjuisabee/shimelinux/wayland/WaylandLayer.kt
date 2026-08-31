@@ -23,22 +23,30 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.localize
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Point
 import java.awt.event.MouseEvent
 import kotlin.system.exitProcess
 
-class WaylandLayer(obj: Any?) : Component() {
+/**
+ * Creates a Wayland layer surface via [WaylandLib]
+ *
+ * @see WaylandLib.createLayer
+ */
+class WaylandLayer(obj: Any?, private val useMask: Boolean) : Component() {
     private val senderPtr: Long
     private var isDisposed = false
     private var previousCursorPosition = Point(0, 0)
+    private var absoluteLocation = location
+    private var isDragging = false
 
     init {
         try {
             senderPtr = WaylandLib.createLayer(obj)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
+        } catch (e: Exception) {
+            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
         }
     }
@@ -49,7 +57,7 @@ class WaylandLayer(obj: Any?) : Component() {
 
     override fun isShowing() = true
 
-    override fun getLocationOnScreen(): Point = location
+    override fun getLocationOnScreen(): Point = absoluteLocation
 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
         if (isDisposed) return
@@ -58,8 +66,8 @@ class WaylandLayer(obj: Any?) : Component() {
 
         try {
             WaylandLib.setBounds(senderPtr, x, y, width, height)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
+        } catch (e: Exception) {
+            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
         }
     }
@@ -69,34 +77,44 @@ class WaylandLayer(obj: Any?) : Component() {
 
         try {
             WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
+        } catch (e: Exception) {
+            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
         }
     }
 
+    /**
+     * Displays an image on the layer
+     *
+     * @see WaylandLib.setImage
+     */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
 
         try {
-            WaylandLib.setImage(senderPtr, rgb)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
+            WaylandLib.setImage(senderPtr, rgb, useMask)
+        } catch (e: Exception) {
+            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
         }
     }
 
+    /**
+     * Destroys the layer surface
+     *
+     * The event sender will be freed and any function that uses it will not execute
+     */
     fun dispose() {
         if (isDisposed) return
 
         try {
             WaylandLib.dispose(senderPtr)
-        } catch (_: Exception) {
-            Main.showError("An error occurred in the Wayland library")
+        } catch (e: Exception) {
+            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
         }
 
-        isDisposed = true
+        isDisposed = true // prevents segmentation fault
     }
 
     @Suppress("KotlinConstantConditions")
@@ -118,6 +136,16 @@ class WaylandLayer(obj: Any?) : Component() {
         if (rightPressed || rightReleased) {
             modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
             button = button or MouseEvent.BUTTON3
+        }
+
+        if (leftPressed) {
+            isDragging = true
+        } else if (leftReleased) {
+            isDragging = false
+        }
+
+        if (!isDragging) {
+            absoluteLocation = location
         }
 
         if (leftPressed || rightPressed) {
@@ -152,8 +180,10 @@ class WaylandLayer(obj: Any?) : Component() {
             )
         }
 
-        if (previousCursorPosition.x != positionX || previousCursorPosition.y != positionY) {
-            previousCursorPosition = Point(positionX, positionY)
+        val newCursorPosition = Point(positionX + absoluteLocation.x, positionY + absoluteLocation.y)
+        if (previousCursorPosition != newCursorPosition) {
+            previousCursorPosition = newCursorPosition
+            WaylandEnvironment.absoluteCursorPosition = newCursorPosition
 
             component.dispatchEvent(
                 MouseEvent(

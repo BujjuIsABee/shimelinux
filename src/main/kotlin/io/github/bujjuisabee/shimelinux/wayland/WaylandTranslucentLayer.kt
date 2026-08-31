@@ -22,23 +22,19 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.execute
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
-import java.awt.Point
 
 /**
- * A window that displays a mascot with the Wayland library
+ * Displays a mascot on a [WaylandLayer]
  *
  * @author Bujju
  */
 class WaylandTranslucentLayer : TranslucentWindow {
-    private val layer = WaylandLayer(this)
+    private val layer = WaylandLayer(this, true)
     private var image: GenericNativeImage? = null
     private var imageChanged = false
-    private var previousCursorPosition = Point(0, 0)
-    private var grabStart = Point(0, 0)
 
     override fun asComponent() = layer
 
@@ -71,37 +67,6 @@ class WaylandTranslucentLayer : TranslucentWindow {
         positionX: Int,
         positionY: Int
     ) {
-        if (leftPressed) {
-            grabStart = layer.location
-        }
-
-        val newCursorPosition = Point(positionX + grabStart.x, positionY + grabStart.y)
-        if (previousCursorPosition != newCursorPosition) {
-            previousCursorPosition = newCursorPosition
-
-            when (System.getenv("XDG_CURRENT_DESKTOP")) {
-                "Hyprland" -> {
-                    WaylandEnvironment.cursorPosition = runCatching {
-                        val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
-                        return@runCatching Point(x, y)
-                    }.getOrNull()
-                }
-
-                "KDE" -> {
-                    WaylandEnvironment.cursorPosition = runCatching {
-                        val result = execute("kdotool", "getmouselocation")
-                        val x = result.substringAfter("x:").substringBefore(" ").toIntOrNull() ?: 0
-                        val y = result.substringAfter("y:").substringBefore(" ").toIntOrNull() ?: 0
-                        return@runCatching Point(x, y)
-                    }.getOrNull()
-                }
-
-                else -> {
-                    WaylandEnvironment.cursorPosition = newCursorPosition
-                }
-            }
-        }
-
         layer.dispatchEvents(
             layer,
             leftPressed,

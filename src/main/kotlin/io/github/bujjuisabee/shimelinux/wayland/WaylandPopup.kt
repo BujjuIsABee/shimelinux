@@ -37,7 +37,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
- * A popup menu that is displayed with the Wayland library
+ * Displays a popup with a [WaylandLayer]
  *
  * @author Bujju
  */
@@ -47,7 +47,7 @@ class WaylandPopup(
     private val x: Int,
     private val y: Int,
 ) : Popup(owner, contents, x, y) {
-    private val layer = WaylandLayer(this)
+    private val layer = WaylandLayer(this, false)
 
     private var previousTarget: Component? = null
     private var submenu: WaylandPopup? = null
@@ -79,25 +79,8 @@ class WaylandPopup(
         val targetPosition = SwingUtilities.convertPoint(contents, positionX, positionY, target)
 
         if (previousTarget != target) {
-            if (target is JMenu) {
-                if (target.getClientProperty("isShowing") != true) {
-                    val location = getSubmenuOrigin(x, y, target)
-                    val popup = WaylandPopupFactory.getPopup(contents, target.popupMenu, location.x, location.y)
-                    popup.parent = target
-                    popup.show()
-                    submenu = popup
-                    target.putClientProperty("isShowing", true)
-                }
-            } else {
-                closeSubmenu()
-            }
-
-            val path = listOfNotNull(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
-            MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
-
+            updateTarget(target)
             updateImage()
-
-            previousTarget = target
         }
 
         layer.dispatchEvents(
@@ -109,6 +92,26 @@ class WaylandPopup(
             targetPosition.x,
             targetPosition.y
         )
+    }
+
+    private fun updateTarget(target: Component) {
+        if (target is JMenu) {
+            if (target.getClientProperty("isShowing") != true) {
+                val location = getSubmenuOrigin(x, y, target)
+                val popup = WaylandPopupFactory.getPopup(contents, target.popupMenu, location.x, location.y)
+                popup.parent = target
+                popup.show()
+                submenu = popup
+                target.putClientProperty("isShowing", true)
+            }
+        } else {
+            closeSubmenu()
+        }
+
+        val path = listOfNotNull(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
+        MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
+
+        previousTarget = target
     }
 
     private fun updateImage() {

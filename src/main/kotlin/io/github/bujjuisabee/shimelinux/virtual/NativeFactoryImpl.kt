@@ -27,8 +27,6 @@ import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
- * A native factory used for windowed mode
- *
  * @author Kilkakon
  * @author Bujju
  */
