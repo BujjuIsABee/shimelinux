@@ -149,16 +149,10 @@ By default, the feature is disabled. You can enable it by adding windows to the 
 
 ShimeLinux should work on most AMD and NVIDIA graphics cards.
 
-On Intel integrated graphics and some older GPUs, you may experience some visual issues. If you are using a Wayland compositor that supports the `wlr_layer_shell` protocol (i.e., KDE Plasma), you can try using the Wayland environment by adding this to your config file (`~/.config/shimelinux/conf/settings.properties`):
+On Intel integrated graphics and some older GPUs, you may experience some visual issues. If you are using a Wayland compositor that supports the `wlr_layer_shell` protocol (i.e., KDE Plasma), you can try using the Wayland environment by going to the "Window Mode" tab in the settings menu, selecting "Environment Settings," and choosing "Wayland."
 
-```properties
-Environment=wayland
-```
-
-This should fix most visual issues, but it will disable interactive windows, restrict Shimeji to a single monitor, and may break features that rely on the cursor position on some desktop environments.
-
-> [!IMPORTANT]
-> If you are using KDE Plasma, you will need to install `kdotool` for the Wayland environment to work properly.
+> [!NOTE]
+> On certain desktop environments, this may cause issues with behaviors that rely on the position of the mouse. It will also disable interactive windows on KDE Plasma.
 
 ## Licenses
 
