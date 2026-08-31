@@ -32,12 +32,12 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
 
-class KWinConnection {
+object KWin {
     private var dbus: DBusConnection
     private var scripting: KWinScripting
     private var script: KWinScript
     private val client = KWinClientImpl()
-    private val shutdownThread = Thread { dispose() }
+    private val shutdownThread = Thread { disconnect() }
 
     var activeWindow: Window? = null
     var windowPosition: Point? = null
@@ -79,11 +79,14 @@ class KWinConnection {
     }
 
     fun dispose() {
+        disconnect()
+        Runtime.getRuntime().removeShutdownHook(shutdownThread)
+    }
+
+    private fun disconnect() {
         script.stop()
         scripting.unloadScript("shimelinux-kwin-script")
         dbus.disconnect()
-
-        Runtime.getRuntime().removeShutdownHook(shutdownThread)
     }
 
     @DBusInterfaceName("org.kde.kwin.Scripting")
@@ -116,10 +119,10 @@ class KWinConnection {
 
         fun getRestoreWindows(): Boolean
 
-        fun setCursorPosition(position: Point)
+        fun setCursorPosition(x: Int, y: Int)
     }
 
-    inner class KWinClientImpl : KWinClient {
+    class KWinClientImpl : KWinClient {
         override fun setActiveWindow(
             caption: String,
             x: Int,
@@ -161,8 +164,8 @@ class KWinConnection {
             }
         }
 
-        override fun setCursorPosition(position: Point) {
-            cursorPosition = position
+        override fun setCursorPosition(x: Int, y: Int) {
+            cursorPosition = Point(x, y)
         }
 
         override fun getObjectPath() = "/KWinClient"

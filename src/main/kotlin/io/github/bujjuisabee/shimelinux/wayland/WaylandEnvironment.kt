@@ -26,7 +26,7 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
-import io.github.bujjuisabee.shimelinux.kde.KWinConnection
+import io.github.bujjuisabee.shimelinux.kde.KWin
 import java.awt.Point
 import java.awt.Rectangle
 
@@ -42,8 +42,6 @@ class WaylandEnvironment : Environment() {
     override val activeIE = Area()
     override val activeIETitle = ""
 
-    private val kwin = if (NativeFactory.desktopType == "KDE") KWinConnection() else null
-
     override fun tick() {
         val (x, y, width, height) = WaylandLib.getScreenRect()
 
@@ -53,7 +51,7 @@ class WaylandEnvironment : Environment() {
                 return@runCatching Point(x, y)
             }.getOrNull()
 
-            "KDE" -> kwin?.cursorPosition
+            "KDE" -> KWin.cursorPosition
 
             else -> absoluteCursorPosition
         }

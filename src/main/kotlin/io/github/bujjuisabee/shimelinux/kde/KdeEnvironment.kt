@@ -40,13 +40,12 @@ class KdeEnvironment : Environment() {
     override val activeIE = Area()
     override var activeIETitle = ""
 
-    private val kwin = KWinConnection()
     private val windowCache = mutableMapOf<String, Boolean>()
 
     override fun tick() {
         super.tick()
 
-        val activeWindow = kwin.activeWindow
+        val activeWindow = KWin.activeWindow
         if (activeWindow != null && isIE(activeWindow.title)) {
             activeIE.set(activeWindow.bounds)
             activeIETitle = activeWindow.title
@@ -59,11 +58,11 @@ class KdeEnvironment : Environment() {
     }
 
     override fun moveActiveIE(point: Point) {
-        kwin.windowPosition = point
+        KWin.windowPosition = point
     }
 
     override fun restoreIE() {
-        kwin.restoreWindows = true
+        KWin.restoreWindows = true
     }
 
     override fun refreshCache() {
@@ -72,7 +71,7 @@ class KdeEnvironment : Environment() {
 
     override fun dispose() {
         try {
-            kwin.dispose()
+            KWin.dispose()
         } catch (e: Exception) {
             e.printStackTrace()
         }
