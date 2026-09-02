@@ -26,8 +26,6 @@ import java.awt.Component
 import javax.swing.PopupFactory
 
 /**
- * A popup factory that creates popups with [WaylandPopup]
- *
  * @author Bujju
  */
 object WaylandPopupFactory : PopupFactory() {

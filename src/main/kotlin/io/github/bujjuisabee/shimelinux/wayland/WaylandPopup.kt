@@ -25,7 +25,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 import com.group_finity.mascot.NativeFactory
 import java.awt.Component
 import java.awt.Point
-import java.awt.Rectangle
 import java.awt.image.BufferedImage
 import javax.swing.JMenu
 import javax.swing.JMenuItem
@@ -37,7 +36,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
- * Displays a popup with a [WaylandLayer]
+ * A popup that is displayed on a [WaylandLayer]
  *
  * @author Bujju
  */
@@ -46,9 +45,8 @@ class WaylandPopup(
     private val contents: Component,
     private val x: Int,
     private val y: Int,
-) : Popup(owner, contents, x, y) {
+) : Popup(owner, contents, x, y), WaylandLib.MouseEventReceiver {
     private val layer = WaylandLayer(this, false)
-
     private var previousTarget: Component? = null
     private var submenu: WaylandPopup? = null
     private var parent: JMenu? = null
@@ -67,7 +65,7 @@ class WaylandPopup(
     }
 
     @Suppress("unused")
-    fun updateCursor(
+    override fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,
         leftReleased: Boolean,
@@ -108,6 +106,7 @@ class WaylandPopup(
             closeSubmenu()
         }
 
+        // Update the menu selection
         val path = listOfNotNull(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
         MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
 
@@ -118,13 +117,14 @@ class WaylandPopup(
         val width = contents.width
         val height = contents.height
 
+        // Draw the popup to an image
         val buffer = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val g2d = buffer.createGraphics()
         contents.paint(g2d)
         g2d.dispose()
 
+        // Display the image on the layer surface
         val rgb = buffer.getRGB(0, 0, width, height, null, 0, width)
-
         layer.setImage(rgb)
     }
 
@@ -138,10 +138,9 @@ class WaylandPopup(
 
     private fun adjustPopupLocationToFitScreen(x: Int, y: Int, popup: JPopupMenu): Point {
         val screenBounds = NativeFactory.instance.environment.workArea.toRectangle()
-        val popupBounds = Rectangle(Point(x, y), popup.preferredSize)
         return Point(
-            popupBounds.x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - popupBounds.width),
-            popupBounds.y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - popupBounds.height)
+            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - popup.preferredSize.width),
+            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - popup.preferredSize.height)
         )
     }
 

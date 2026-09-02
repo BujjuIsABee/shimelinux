@@ -358,7 +358,7 @@ class Mascot(var imageSet: String) {
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
-        if (NativeFactory.usingKdeEnvironment) {
+        if (usingKdeEnvironment) {
             popup.add(restoreWindowsMenu)
         }
         popup.add(debugMenu)
@@ -442,13 +442,13 @@ class Mascot(var imageSet: String) {
      * Resets the mascot's position
      */
     fun resetAnchor() {
-        anchor = if (getProperty("Multiscreen", true)) {
-            Point(
+        if (getProperty("Multiscreen", true)) {
+            anchor.setLocation(
                 (Math.random() * environment.screen.width).toInt() + environment.screen.left,
                 environment.screen.top - 256
             )
         } else {
-            Point(
+            anchor.setLocation(
                 (Math.random() * environment.workArea.width).toInt() + environment.workArea.left,
                 environment.workArea.top - 256
             )

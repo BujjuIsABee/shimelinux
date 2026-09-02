@@ -22,13 +22,14 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.desktopType
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
 import io.github.bujjuisabee.shimelinux.kde.KWin
+import java.awt.GraphicsEnvironment
 import java.awt.Point
-import java.awt.Rectangle
+import java.awt.Toolkit
 
 /**
  * An environment that uses [WaylandLib] to get the cursor position and screen bounds
@@ -43,9 +44,19 @@ class WaylandEnvironment : Environment() {
     override val activeIETitle = ""
 
     override fun tick() {
-        val (x, y, width, height) = WaylandLib.getScreenRect()
+        // Get screen bounds
+        var (x, y, width, height) = WaylandLib.getScreenRect()
+        val insets = Toolkit.getDefaultToolkit().getScreenInsets(
+            GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+        )
 
-        val cursorPosition = when (NativeFactory.desktopType) {
+        x += insets.left
+        y += insets.top
+        width -= (insets.left + insets.right)
+        height -= (insets.top + insets.bottom)
+
+        // Get cursor
+        val cursorPosition = when (desktopType) {
             "Hyprland" -> runCatching {
                 val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
                 return@runCatching Point(x, y)
@@ -56,7 +67,7 @@ class WaylandEnvironment : Environment() {
             else -> absoluteCursorPosition
         }
 
-        screenRect.bounds = Rectangle(x, y, width, height)
+        screenRect.setBounds(x, y, width, height)
         screen.set(screenRect)
         cursor.set(cursorPosition ?: Point(0, 0))
 

@@ -53,28 +53,6 @@ abstract class NativeFactory {
     companion object {
         lateinit var instance: NativeFactory
 
-        /**
-         * Gets the name of the current desktop environment
-         */
-        val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
-
-        /**
-         * Gets the name of the current display protocol
-         */
-        val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
-
-        /**
-         * Gets whether the [KdeNativeFactory] is being used
-         */
-        val usingKdeEnvironment: Boolean
-            get() = instance is KdeNativeFactory
-
-        /**
-         * Gets whether the [WaylandNativeFactory] is being used
-         */
-        val usingWaylandEnvironment: Boolean
-            get() = instance is WaylandNativeFactory
-
         init {
             resetInstance()
         }
@@ -82,7 +60,7 @@ abstract class NativeFactory {
         fun resetInstance() {
             val defaultEnvironment = when (desktopType) {
                 "KDE" -> KdeNativeFactory()
-                "Hyprland", "niri", "sway" -> WaylandNativeFactory()
+                else if (usingTilingWindowManager) -> WaylandNativeFactory()
                 else -> GenericNativeFactory()
             }
 
@@ -95,7 +73,10 @@ abstract class NativeFactory {
                 else -> GenericNativeFactory()
             }
 
-            // Reset the popup factory
+            resetPopupFactory()
+        }
+
+        fun resetPopupFactory() {
             if (usingWaylandEnvironment) {
                 PopupFactory.setSharedInstance(WaylandPopupFactory)
             } else if (UIManager.getLookAndFeel() is FlatLaf) {

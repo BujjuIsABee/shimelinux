@@ -25,7 +25,6 @@ package com.group_finity.mascot.animation
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.image.ImagePair
 import com.group_finity.mascot.image.ImagePairs
-import java.awt.Point
 import java.nio.file.Path
 
 /**
@@ -59,7 +58,7 @@ class Pose(
      * Applies the pose to [mascot]
      */
     fun next(mascot: Mascot) {
-        mascot.anchor = Point(mascot.anchor.x + if (mascot.isLookRight) -dx else dx, mascot.anchor.y + dy)
+        mascot.anchor.translate(if (mascot.isLookRight) -dx else dx, dy)
         mascot.image = ImagePairs.getImage(imageName, mascot.isLookRight)
         mascot.sound = soundName
     }

@@ -33,14 +33,13 @@ import org.w3c.dom.Element
  * @author Bujju
  */
 class Entry(private val element: Element) {
-    private val selected = hashMapOf<String, List<Entry>>()
-
     /**
      * The name of the node
      *
-     * ```text
+     * @return "Node" for the following XML node:
+     *
+     * ```xml
      * <Node>Text</Node>
-     *  ^~~~ this
      * ```
      */
     val name: String
@@ -49,9 +48,10 @@ class Entry(private val element: Element) {
     /**
      * The text inside the node
      *
-     * ```text
+     * @return "Text" for the following XML node:
+     *
+     * ```xml
      * <Node>Text</Node>
-     *       ^~~~ this
      * ```
      */
     val text: String
@@ -60,9 +60,10 @@ class Entry(private val element: Element) {
     /**
      * The attributes of the node
      *
-     * ```text
-     * <Node name="value" />
-     *       ^~~~~~~~~~~~ this
+     * @return A [Map] where the key "name" corresponds to the value "value" for the following XML node:
+     *
+     * ```xml
+     * <Node name="value"/>
      * ```
      */
     val attributes: Map<String, String> by lazy {
@@ -78,10 +79,11 @@ class Entry(private val element: Element) {
     /**
      * The child nodes inside the node
      *
-     * ```text
+     * @return A [List] with an [Entry] where [Entry.name] is "Child" for the following XML node:
+     *
+     * ```xml
      * <Node>
      *     <Child />
-     *     ^~~~~~~~~ this
      * </Node>
      * ```
      */
@@ -97,18 +99,20 @@ class Entry(private val element: Element) {
         return@lazy result
     }
 
+    private val childMap = children.groupBy { it.name }
+
     /**
      * Gets the value of an attribute from its name
      */
     fun getAttribute(name: String) = element.getAttributeNode(name)?.value
 
     /**
-     * Gets whether the node has a child with the [name]
+     * Gets whether [children] contains an [Entry] where [Entry.name] is equal to [name]
      */
     fun hasChild(name: String) = children.any { it.name == name }
 
     /**
-     * Gets all child nodes with the [name]
+     * Gets all [Entry] items in [children] where [Entry.name] is equal to [name]
      */
-    fun selectChildren(name: String) = selected.getOrPut(name) { children.filter { it.name == name } }
+    fun selectChildren(name: String) = childMap[name].orEmpty()
 }

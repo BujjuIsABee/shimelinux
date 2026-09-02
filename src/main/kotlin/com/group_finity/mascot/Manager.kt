@@ -42,65 +42,26 @@ private val logger = Logger.getLogger(Manager::class.java.name)
  * @author Bujju
  */
 class Manager {
-    /**
-     * The list of mascots
-     */
     private val mascots = mutableListOf<Mascot>()
-
-    /**
-     * A list of mascots that will be added on the next tick
-     */
     private val added = linkedSetOf<Mascot>()
-
-    /**
-     * A list of mascots that will be removed on the next tick
-     */
     private val removed = linkedSetOf<Mascot>()
-
-    /**
-     * Whether the program should close if [mascots] is empty
-     */
+    private var timer: Timer? = null
     var isExitOnLastRemoved = true
 
-    /**
-     * A timer that calls [tick] every 40 milliseconds
-     */
-    private var timer: Timer? = null
-
-    /**
-     * Whether all mascots are paused
-     */
     val isPaused: Boolean
-        get() {
-            var isPaused = true
-            synchronized(mascots) {
-                for (mascot in mascots) {
-                    if (!mascot.isPaused) {
-                        isPaused = false
-                        break
-                    }
-                }
-            }
-            return isPaused
-        }
-
-    /**
-     * Gets the number of mascots in the list
-     */
+        get() = synchronized(mascots) { mascots.none { !it.isPaused } }
     val count: Int
         get() = getCount(null)
 
     fun start() {
-        if (timer != null) return
-
-        timer = timer(daemon = false, period = 40) { tick() }
+        if (timer == null) {
+            timer = timer(daemon = false, period = 40L) { tick() }
+        }
     }
 
     fun stop() {
-        timer?.let {
-            it.cancel()
-            timer = null
-        }
+        timer?.cancel()
+        timer = null
     }
 
     fun tick() {
@@ -248,51 +209,29 @@ class Manager {
 
     fun togglePauseAll() {
         synchronized(mascots) {
-            val isPaused = this.isPaused
+            val isPaused = isPaused
             for (mascot in mascots) {
                 mascot.isPaused = !isPaused
             }
         }
     }
 
-    fun getCount(imageSet: String?): Int {
-        synchronized(mascots) {
-            if (imageSet == null) return mascots.size
-
-            var result = 0
-            for (mascot in mascots) {
-                if (mascot.imageSet == imageSet) {
-                    result++
-                }
-            }
-            return result
+    fun getCount(imageSet: String?) = synchronized(mascots) {
+        if (imageSet != null) {
+            mascots.count { it.imageSet == imageSet }
+        } else {
+            mascots.size
         }
     }
 
-    fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? {
-        synchronized(mascots) {
-            for (mascot in mascots) {
-                if (mascot.affordances.contains(affordance)) {
-                    return WeakReference(mascot)
-                }
-            }
+    fun getMascotWithAffordance(affordance: String) = synchronized(mascots) {
+        mascots.firstOrNull { it.affordances.contains(affordance) }?.let {
+            WeakReference(it)
         }
-        return null
     }
 
-    fun hasOverlappingMascotsAtPoint(anchor: Point): Boolean {
-        synchronized(mascots) {
-            var count = 0
-            for (mascot in mascots) {
-                if (mascot.anchor == anchor) {
-                    count++
-                }
-                if (count > 1) {
-                    return true
-                }
-            }
-        }
-        return false
+    fun hasOverlappingMascotsAtPoint(anchor: Point) = synchronized(mascots) {
+        mascots.count { it.anchor == anchor } > 1
     }
 
     fun disposeAll() {

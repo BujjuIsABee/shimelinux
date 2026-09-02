@@ -22,18 +22,67 @@
 
 package com.group_finity.mascot
 
-import java.io.File
 import java.io.InputStream
+import java.nio.file.Path
 import kotlin.io.path.Path
 
-private val configDir = System.getProperty("XDG_CONFIG_HOME").orEmpty().ifBlank { System.getProperty("user.home") + File.separatorChar + ".config" }
+import io.github.bujjuisabee.shimelinux.kde.NativeFactoryImpl as KdeNativeFactory
+import io.github.bujjuisabee.shimelinux.wayland.NativeFactoryImpl as WaylandNativeFactory
+
+/**
+ * Gets the name of the current desktop environment
+ *
+ * @author Bujju
+ */
+val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
+
+/**
+ * Gets the name of the current display server
+ *
+ * @author Bujju
+ */
+val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
+
+/**
+ * Gets whether [desktopType] is a compositor that uses the Wayland environment by default
+ *
+ * @author Bujju
+ */
+val usingTilingWindowManager = when (desktopType) {
+    "Hyprland", "niri", "sway" -> true
+    else -> false
+}
+
+/**
+ * Gets whether the KDE environment is being used
+ *
+ * @author Bujju
+ */
+val usingKdeEnvironment: Boolean
+    get() = NativeFactory.instance is KdeNativeFactory
+
+/**
+ * Gets whether the Wayland environment is being used
+ *
+ * @author Bujju
+ */
+val usingWaylandEnvironment: Boolean
+    get() = NativeFactory.instance is WaylandNativeFactory
 
 /**
  * Gets a path within the config directory
  *
  * @author Bujju
  */
-fun getPath(vararg paths: String) = Path(configDir, "shimelinux", *paths)
+fun getPath(vararg subpaths: String): Path {
+    val base = if (System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
+        Path(System.getProperty("user.home"), ".config", "shimelinux")
+    } else {
+        Path(System.getProperty("XDG_CONFIG_HOME"), "shimelinux")
+    }
+
+    return Path(base.toString(), *subpaths)
+}
 
 /**
  * Loads a resource and returns an input stream, or null if the resource does not exist

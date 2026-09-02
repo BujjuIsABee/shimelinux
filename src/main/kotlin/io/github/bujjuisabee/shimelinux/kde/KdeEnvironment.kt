@@ -45,6 +45,8 @@ class KdeEnvironment : Environment() {
     override fun tick() {
         super.tick()
 
+        cursor.set(KWin.cursorPosition)
+
         val activeWindow = KWin.activeWindow
         if (activeWindow != null && isIE(activeWindow.title)) {
             activeIE.set(activeWindow.bounds)

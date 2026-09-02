@@ -30,7 +30,6 @@ import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
@@ -191,13 +190,13 @@ class ComplexMove(
 
         if (targetX != DEFAULT_TARGETX || isScanEnabled) {
             if (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX) {
-                mascot.anchor = Point(targetX, mascot.anchor.y)
+                mascot.anchor.x = targetX
             }
         }
 
         if (targetY != DEFAULT_TARGETY || isScanEnabled) {
             if (down && mascot.anchor.y >= targetY || !down && mascot.anchor.y <= targetY) {
-                mascot.anchor = Point(mascot.anchor.x, targetY)
+                mascot.anchor.y = targetY
             }
         }
 

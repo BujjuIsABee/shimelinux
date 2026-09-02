@@ -23,7 +23,6 @@
 package com.group_finity.mascot.action
 
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.ResourceBundle
 
 /**
@@ -50,7 +49,7 @@ class Offset(
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
 
     override fun apply() {
-        mascot.anchor = Point(mascot.anchor.x + offsetX, mascot.anchor.y + offsetY)
+        mascot.anchor.translate(offsetX, offsetY)
     }
 
     companion object {

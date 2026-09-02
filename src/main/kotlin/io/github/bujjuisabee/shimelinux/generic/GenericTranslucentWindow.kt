@@ -57,7 +57,7 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
         System.setProperty("sun.awt.noerasebackground", "true") // Reduces flickering
 
         background = Color(0, 0, 0, 0)
-        rootPane.background = Color(0, 0, 0, 0)
+        rootPane.background = background
     }
 
     override fun paint(g: Graphics) {
@@ -77,7 +77,7 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
         val newBounds = screenBounds.intersection(windowBounds)
 
         // Allow mascots to go partially offscreen by offsetting the image and resizing the window
-        offset = Point(windowBounds.x - newBounds.x, windowBounds.y - newBounds.y)
+        offset.setLocation(windowBounds.x - newBounds.x, windowBounds.y - newBounds.y)
 
         super.setBounds(
             newBounds.x,

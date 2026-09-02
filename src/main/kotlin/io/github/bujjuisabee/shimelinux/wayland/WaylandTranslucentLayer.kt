@@ -27,11 +27,11 @@ import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 
 /**
- * Displays a mascot on a [WaylandLayer]
+ * A translucent window that displays a mascot on a [WaylandLayer]
  *
  * @author Bujju
  */
-class WaylandTranslucentLayer : TranslucentWindow {
+class WaylandTranslucentLayer : TranslucentWindow, WaylandLib.MouseEventReceiver {
     private val layer = WaylandLayer(this, true)
     private var image: GenericNativeImage? = null
     private var imageChanged = false
@@ -46,8 +46,9 @@ class WaylandTranslucentLayer : TranslucentWindow {
     }
 
     override fun updateImage() {
-        image?.let {
-            layer.setImage(it.rgb)
+        val image = image
+        if (imageChanged && image != null) {
+            layer.setImage(image.rgb)
             imageChanged = false
         }
     }
@@ -59,7 +60,7 @@ class WaylandTranslucentLayer : TranslucentWindow {
     }
 
     @Suppress("unused")
-    fun updateCursor(
+    override fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,
         leftReleased: Boolean,

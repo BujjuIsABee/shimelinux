@@ -54,21 +54,8 @@ object WaylandLib {
 
     /**
      * Creates a Wayland layer, returning a pointer to the event sender.
-     *
-     * [obj] must have the following function so it can receive mouse events:
-     *
-     * ```kotlin
-     * fun updateCursor(
-     *     leftPressed: Boolean,
-     *     rightPressed: Boolean,
-     *     leftReleased: Boolean,
-     *     rightReleased: Boolean,
-     *     positionX: Int,
-     *     positionY: Int
-     * )
-     * ```
      */
-    external fun createLayer(obj: Any?): Long
+    external fun createLayer(receiver: MouseEventReceiver): Long
 
     /**
      * Uses the [senderPtr] to send a SetBounds event to a layer
@@ -94,4 +81,15 @@ object WaylandLib {
      * Gets the bounds of the primary monitor
      */
     external fun getScreenRect(): IntArray
+
+    interface MouseEventReceiver {
+        fun updateCursor(
+            leftPressed: Boolean,
+            rightPressed: Boolean,
+            leftReleased: Boolean,
+            rightReleased: Boolean,
+            positionX: Int,
+            positionY: Int
+        )
+    }
 }

@@ -41,7 +41,7 @@ object KWin {
 
     var activeWindow: Window? = null
     var windowPosition: Point? = null
-    var restoreWindows: Boolean = false
+    var restoreWindows = false
     var cursorPosition = Point(0, 0)
 
     init {

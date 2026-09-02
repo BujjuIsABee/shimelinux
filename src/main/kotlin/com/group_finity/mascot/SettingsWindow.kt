@@ -24,7 +24,6 @@ package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
 import dorkbox.desktop.Desktop
-import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -65,11 +64,9 @@ import javax.swing.JSpinner
 import javax.swing.JTabbedPane
 import javax.swing.JTextArea
 import javax.swing.JTextField
-import javax.swing.PopupFactory
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
-import javax.swing.UnsupportedLookAndFeelException
 import javax.swing.border.BevelBorder
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
@@ -129,7 +126,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val flatThemeAccentColorPreview: JPanel
     private val flatThemeAccentColorButton: JButton
     private val flatThemeFooterPanel: JPanel
-    private val matchGtkThemeCheckBox: JCheckBox
+    private val matchGtkThemeButton: JButton
     private val resetFlatThemeButton: JButton
     private val gtkThemeCard: JPanel
     private val windowModeTab: JPanel
@@ -168,37 +165,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val doneButton: JButton
     private val cancelButton: JButton
 
-    private var alwaysShowShimejiChooser = getProperty("AlwaysShowShimejiChooser", false)
-    private var alwaysShowInformationScreen = getProperty("AlwaysShowInformationScreen", false)
-    private var scaling = getProperty("Scaling", 1.0)
-    private var opacity = getProperty("Opacity", 1.0)
-    private var filter = getProperty("Filter", "Nearest")
-    private var menuScaling = getProperty("MenuScaling", 1)
-    private var theme = getProperty("Theme", "FlatDark")
-    private var matchGtkTheme = getProperty("MatchGtkTheme", false)
-    private var environment = getProperty("Environment", "linux")
-    private var windowSize = getProperty("WindowSize", "600x500")
-    private var windowBackgroundColor = getProperty("Background", "#00FF00")
-    private var windowBackgroundImage = getProperty("BackgroundImage", "")
-    private var windowBackgroundMode = getProperty("BackgroundMode", "Center")
-
-    private val initialTheme = theme
-    private val initialDarkTheme = Properties()
-    private val initialLightTheme = Properties()
-    private val darkTheme = Properties().apply {
-        try {
-            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { load(it) }
-            initialDarkTheme.putAll(this)
-        } catch (_: Exception) {
-        }
-    }
-    private val lightTheme = Properties().apply {
-        try {
-            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { load(it) }
-            initialLightTheme.putAll(this)
-        } catch (_: Exception) {
-        }
-    }
     private val interactiveWindowsWhitelistModel = DefaultListModel<String>().apply {
         addAll(
             getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
@@ -210,12 +176,40 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         )
     }
 
+    private var alwaysShowShimejiChooser = getProperty("AlwaysShowShimejiChooser", false)
+    private var alwaysShowInformationScreen = getProperty("AlwaysShowInformationScreen", false)
+    private var scaling = getProperty("Scaling", 1.0)
+    private var opacity = getProperty("Opacity", 1.0)
+    private var filter = getProperty("Filter", "Nearest")
+    private var menuScaling = getProperty("MenuScaling", 1)
+    private var theme = getProperty("Theme", "FlatDark")
+    private var environment = getProperty("Environment", "linux")
+    private var windowSize = getProperty("WindowSize", "600x500")
+    private var windowBackgroundColor = getProperty("Background", "#00FF00")
+    private var windowBackgroundImage = getProperty("BackgroundImage", "")
+    private var windowBackgroundMode = getProperty("BackgroundMode", "Center")
+
+    private val initialTheme = theme
+    private val darkTheme = Properties()
+    private val lightTheme = Properties()
+    private val initialDarkTheme = Properties()
+    private val initialLightTheme = Properties()
+
     var isRestartRequired = false
     var isEnvironmentReloadRequired = false
     var isImageReloadRequired = false
     var isInteractiveWindowReloadRequired = false
 
     init {
+        try {
+            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { darkTheme.load(it) }
+            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { lightTheme.load(it) }
+        } catch(_: Exception) {
+        } finally {
+            initialDarkTheme.putAll(darkTheme)
+            initialLightTheme.putAll(lightTheme)
+        }
+
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("Settings")
@@ -371,6 +365,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         menuScalingPanel = JPanel()
+        menuScalingPanel.isVisible = !usingTilingWindowManager
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
         menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
 
@@ -404,7 +399,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         themeCardsPanel = JPanel(themeCardLayout)
 
         themeComboBox = JComboBox()
-        themeComboBox.isEnabled = !matchGtkTheme
         themeComboBox.addItem(localize("FlatDark"))
         themeComboBox.addItem(localize("FlatLight"))
         themeComboBox.addItem(localize("Gtk"))
@@ -417,14 +411,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
             refreshTheme()
 
-            when (themeComboBox.selectedIndex) {
-                0, 1 -> {
-                    themeCardLayout.show(themeCardsPanel, "Flat")
-                }
-
-                2 -> {
-                    themeCardLayout.show(themeCardsPanel, "Gtk")
-                }
+            if (themeComboBox.selectedIndex == 2) {
+                themeCardLayout.show(themeCardsPanel, "Gtk")
+            } else {
+                themeCardLayout.show(themeCardsPanel, "Flat")
             }
         }
 
@@ -439,9 +429,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeBackgroundColorRightPanel.layout = BoxLayout(flatThemeBackgroundColorRightPanel, BoxLayout.X_AXIS)
 
         flatThemeBackgroundColorTextField = object : JTextField() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
         }
-        flatThemeBackgroundColorTextField.isEnabled = !matchGtkTheme
         flatThemeBackgroundColorTextField.addActionListener {
             val color = runCatching { Color.decode(flatThemeBackgroundColorTextField.text) }.getOrNull()
 
@@ -476,7 +465,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         flatThemeBackgroundColorButton = JButton(localize("Change"))
-        flatThemeBackgroundColorButton.isEnabled = !matchGtkTheme
         flatThemeBackgroundColorButton.addActionListener {
             val color = JColorChooser.showDialog(
                 this,
@@ -517,9 +505,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeTextColorRightPanel.layout = BoxLayout(flatThemeTextColorRightPanel, BoxLayout.X_AXIS)
 
         flatThemeTextColorTextField = object : JTextField() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
         }
-        flatThemeTextColorTextField.isEnabled = !matchGtkTheme
         flatThemeTextColorTextField.addActionListener {
             val color = runCatching { Color.decode(flatThemeTextColorTextField.text) }.getOrNull()
 
@@ -554,7 +541,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         flatThemeTextColorButton = JButton(localize("Change"))
-        flatThemeTextColorButton.isEnabled = !matchGtkTheme
         flatThemeTextColorButton.addActionListener {
             val color = JColorChooser.showDialog(
                 this,
@@ -595,9 +581,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeAccentColorRightPanel.layout = BoxLayout(flatThemeAccentColorRightPanel, BoxLayout.X_AXIS)
 
         flatThemeAccentColorTextField = object : JTextField() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
         }
-        flatThemeAccentColorTextField.isEnabled = !matchGtkTheme
         flatThemeAccentColorTextField.addActionListener {
             val color = runCatching { Color.decode(flatThemeAccentColorTextField.text) }.getOrNull()
 
@@ -632,7 +617,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         flatThemeAccentColorButton = JButton(localize("Change"))
-        flatThemeAccentColorButton.isEnabled = !matchGtkTheme
         flatThemeAccentColorButton.addActionListener {
             val color = JColorChooser.showDialog(
                 this,
@@ -676,19 +660,29 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         flatThemeFooterPanel = JPanel(FlowLayout())
 
-        matchGtkThemeCheckBox = JCheckBox(localize("MatchGtkTheme"))
-        matchGtkThemeCheckBox.isSelected = matchGtkTheme
-        matchGtkThemeCheckBox.addActionListener {
-            matchGtkTheme = matchGtkThemeCheckBox.isSelected
-            refreshTheme()
+        matchGtkThemeButton = JButton(localize("MatchGtkTheme"))
+        matchGtkThemeButton.addActionListener {
+            val backgroundColor: Color
+            val textColor: Color
+            val accentColor: Color
+            UIManager.getLookAndFeel().let { previous ->
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+                backgroundColor = UIManager.getColor("Panel.background")
+                textColor = UIManager.getColor("Panel.foreground")
+                accentColor = UIManager.getColor("textHighlight")
+                UIManager.setLookAndFeel(previous)
+            }
 
-            themeComboBox.isEnabled = !matchGtkThemeCheckBox.isSelected
-            flatThemeBackgroundColorTextField.isEnabled = !matchGtkThemeCheckBox.isSelected
-            flatThemeTextColorTextField.isEnabled = !matchGtkThemeCheckBox.isSelected
-            flatThemeAccentColorTextField.isEnabled = !matchGtkThemeCheckBox.isSelected
-            flatThemeBackgroundColorButton.isEnabled = !matchGtkThemeCheckBox.isSelected
-            flatThemeTextColorButton.isEnabled = !matchGtkThemeCheckBox.isSelected
-            flatThemeAccentColorButton.isEnabled = !matchGtkThemeCheckBox.isSelected
+            if (themeComboBox.selectedIndex == 0) {
+                darkTheme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
+                darkTheme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
+                darkTheme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
+            } else {
+                lightTheme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
+                lightTheme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
+                lightTheme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
+            }
+            refreshTheme()
         }
 
         resetFlatThemeButton = JButton(localize("Reset"))
@@ -706,7 +700,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         flatThemeFooterPanel.add(resetFlatThemeButton)
-        flatThemeFooterPanel.add(matchGtkThemeCheckBox)
+        flatThemeFooterPanel.add(matchGtkThemeButton)
 
         flatThemeCard.add(flatThemeColorsPanel, BorderLayout.NORTH)
         flatThemeCard.add(flatThemeFooterPanel, BorderLayout.SOUTH)
@@ -796,7 +790,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundColorRightPanel.layout = BoxLayout(windowBackgroundColorRightPanel, BoxLayout.X_AXIS)
 
         windowBackgroundColorTextField = object : JTextField(windowBackgroundColor) {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
         }
         windowBackgroundColorTextField.isEnabled = environment == "virtual"
         windowBackgroundColorTextField.addActionListener {
@@ -1006,7 +1000,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab.add(Box.createVerticalGlue())
 
         tabbedPane.addTab(localize("General"), generalTab)
-        if (NativeFactory.usingKdeEnvironment) {
+        if (usingKdeEnvironment) {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
         tabbedPane.addTab(localize("Menu"), menuTab)
@@ -1089,10 +1083,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             Main.properties.setProperty("Theme", theme)
         }
 
-        if (getProperty("MatchGtkTheme", false) != matchGtkTheme) {
-            Main.properties.setProperty("MatchGtkTheme", matchGtkTheme.toString())
-        }
-
         if (getProperty("Environment", "linux") != environment) {
             Main.properties.setProperty("Environment", environment)
             isEnvironmentReloadRequired = true
@@ -1133,29 +1123,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             if (theme != "Gtk") {
                 FlatLaf.setGlobalExtraDefaults(mapOf())
 
-                if (matchGtkTheme) {
-                    val backgroundColor: Color
-                    val textColor: Color
-                    val accentColor: Color
-                    UIManager.getLookAndFeel().let { previous ->
-                        UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
-                        backgroundColor = UIManager.getColor("Panel.background")
-                        textColor = UIManager.getColor("Panel.foreground")
-                        accentColor = UIManager.getColor("textHighlight")
-                        UIManager.setLookAndFeel(previous)
-                    }
-
-                    if (themeComboBox.selectedIndex == 0) {
-                        darkTheme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
-                        darkTheme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
-                        darkTheme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
-                    } else {
-                        lightTheme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
-                        lightTheme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
-                        lightTheme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
-                    }
-                }
-
                 if (themeComboBox.selectedIndex == 0) {
                     flatThemeBackgroundColorTextField.text = darkTheme.getProperty("@background", DEFAULT_DARK_BACKGROUND_COLOR)
                     flatThemeTextColorTextField.text = darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
@@ -1187,14 +1154,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 SwingUtilities.updateComponentTreeUI(window)
             }
 
-            if (NativeFactory.usingWaylandEnvironment) {
-                PopupFactory.setSharedInstance(WaylandPopupFactory)
-            } else {
-                PopupFactory.setSharedInstance(PopupFactory())
-            }
-
             pack()
-        } catch (_: UnsupportedLookAndFeelException) {
+        } catch (_: Exception) {
         }
     }
 
@@ -1223,7 +1184,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     inner class EnvironmentSettingsWindow(parent: Dialog?, modal: Boolean) : JDialog(parent, modal) {
         private val environmentSettingsPanel: JPanel
-        private val environmentRadioButtonsPanel: JPanel
+        private val environmentOptionsPanel: JPanel
         private val environmentButtonGroup: ButtonGroup
         private val genericEnvironmentRadioButton: JRadioButton
         private val kdeEnvironmentRadioButton: JRadioButton
@@ -1242,9 +1203,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             environmentSettingsPanel = JPanel(GridLayout(0, 2))
 
-            environmentRadioButtonsPanel = JPanel()
-            environmentRadioButtonsPanel.border = BorderFactory.createTitledBorder(localize("Options"))
-            environmentRadioButtonsPanel.layout = BoxLayout(environmentRadioButtonsPanel, BoxLayout.Y_AXIS)
+            environmentOptionsPanel = JPanel()
+            environmentOptionsPanel.border = BorderFactory.createTitledBorder(localize("Options"))
+            environmentOptionsPanel.layout = BoxLayout(environmentOptionsPanel, BoxLayout.Y_AXIS)
 
             environmentButtonGroup = ButtonGroup()
 
@@ -1289,14 +1250,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             environmentButtonGroup.add(waylandEnvironmentRadioButton)
             environmentButtonGroup.add(automaticEnvironmentRadioButton)
 
-            environmentRadioButtonsPanel.add(genericEnvironmentRadioButton)
-            if (NativeFactory.desktopType == "KDE") {
-                environmentRadioButtonsPanel.add(kdeEnvironmentRadioButton)
+            environmentOptionsPanel.add(genericEnvironmentRadioButton)
+            if (desktopType == "KDE") {
+                environmentOptionsPanel.add(kdeEnvironmentRadioButton)
             }
-            if (NativeFactory.sessionType == "wayland") {
-                environmentRadioButtonsPanel.add(waylandEnvironmentRadioButton)
+            if (sessionType == "wayland") {
+                environmentOptionsPanel.add(waylandEnvironmentRadioButton)
             }
-            environmentRadioButtonsPanel.add(automaticEnvironmentRadioButton)
+            environmentOptionsPanel.add(automaticEnvironmentRadioButton)
 
             environmentDescriptionTextArea = JTextArea()
             environmentDescriptionTextArea.preferredSize = Dimension(200, 200)
@@ -1314,7 +1275,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             environmentDescriptionScrollPane = JScrollPane(environmentDescriptionTextArea)
             environmentDescriptionScrollPane.border = BorderFactory.createTitledBorder(localize("Description"))
 
-            environmentSettingsPanel.add(environmentRadioButtonsPanel)
+            environmentSettingsPanel.add(environmentOptionsPanel)
             environmentSettingsPanel.add(environmentDescriptionScrollPane)
 
             environmentSettingsFooterPanel = JPanel(FlowLayout())

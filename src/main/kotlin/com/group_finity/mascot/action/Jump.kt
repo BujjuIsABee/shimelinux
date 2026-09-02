@@ -24,7 +24,6 @@ package com.group_finity.mascot.action
 
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.ResourceBundle
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -86,13 +85,13 @@ open class Jump(
             putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
             putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
 
-            mascot.anchor = Point(mascot.anchor.x + velocityX, mascot.anchor.y + velocityY)
+            mascot.anchor.translate(velocityX, velocityY)
 
             checkNotNull(animation).next(mascot, time)
         }
 
         if (distance <= velocity) {
-            mascot.anchor = Point(targetX, targetY)
+            mascot.anchor.setLocation(targetX, targetY)
         }
     }
 

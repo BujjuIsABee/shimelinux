@@ -23,6 +23,7 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.exception.BehaviorInstantiationException
@@ -34,7 +35,6 @@ import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import org.xml.sax.SAXParseException
-import java.awt.Color
 import java.awt.Point
 import java.io.File
 import java.util.Locale
@@ -160,11 +160,10 @@ object Main {
         }
 
         // Load properties
-        properties = Properties().apply {
-            try {
-                getPath("conf", "settings.properties").inputStream().use { load(it) }
-            } catch (_: Exception) {
-            }
+        try {
+            properties = Properties()
+            getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
+        } catch (_: Exception) {
         }
 
         // Load languages
@@ -179,40 +178,10 @@ object Main {
 
         // Set theme
         try {
-            val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
-            val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
-            System.setProperty("sun.java2d.uiScale", menuScaling.toString())
-
-            if (getProperty("MatchGtkTheme", false)) {
-                val backgroundColor: Color
-                val textColor: Color
-                val accentColor: Color
-                UIManager.getLookAndFeel().let { previous ->
-                    UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
-                    backgroundColor = UIManager.getColor("Panel.background")
-                    textColor = UIManager.getColor("Panel.foreground")
-                    accentColor = UIManager.getColor("textHighlight")
-                    UIManager.setLookAndFeel(previous)
-                }
-
-                val theme = Properties()
-                theme.setProperty("@background", String.format("#%06X", backgroundColor.rgb and 0xFFFFFF))
-                theme.setProperty("@foreground", String.format("#%06X", textColor.rgb and 0xFFFFFF))
-                theme.setProperty("@accentColor", String.format("#%06X", accentColor.rgb and 0xFFFFFF))
-
-                when (getProperty("Theme", "FlatDark")) {
-                    "FlatDark" -> {
-                        getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
-                            theme.store(it, "Flat Dark Theme")
-                        }
-                    }
-
-                    "FlatLight" -> {
-                        getPath("conf", "theme", "FlatLightLaf.properties").outputStream().use {
-                            theme.store(it, "Flat Light Theme")
-                        }
-                    }
-                }
+            if (!usingTilingWindowManager) {
+                val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
+                val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
+                System.setProperty("sun.java2d.uiScale", menuScaling.toString())
             }
 
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
@@ -223,46 +192,30 @@ object Main {
                 "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
                 else -> "com.formdev.flatlaf.FlatDarkLaf"
             })
-        } catch (_: Exception) {
-            try {
-                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
-            } catch (_: Exception) {
-                logger.warning { "Failed to set theme." }
-                exit()
-            }
+        } catch (e: Exception) {
+            logger.log(Level.WARNING, e) { "Failed to set theme." }
         }
 
         // Get the image sets to use
         if (!getProperty("AlwaysShowShimejiChooser", false)) {
-            for (set in getProperty("ActiveShimeji", "").split("/")) {
-                if (set.trim().isNotEmpty()) {
-                    imageSets.add(set.trim())
-                }
-            }
+            imageSets.addAll(getProperty("ActiveShimeji", "").split("/").map { it.trim() }.filter { it.isNotEmpty() })
         }
-        do {
-            // If no image sets are selected, show the image set chooser
-            if (imageSets.isEmpty()) {
-                val selectedImageSets = ImageSetChooser(null, true).display()
-                if (selectedImageSets != null) {
-                    imageSets = selectedImageSets
-                } else {
-                    exit()
-                }
-            }
 
-            // Load mascots
-            var index = 0
-            while (index < imageSets.size) {
-                if (!loadConfiguration(imageSets[index])) {
-                    // Failed to load
-                    configurations.remove(imageSets[index])
-                    imageSets.remove(imageSets[index])
-                    index--
-                }
-                index++
+        // If no image sets are selected, show the image set chooser
+        while (imageSets.isEmpty()) {
+            imageSets = ImageSetChooser(null, true).display() ?: exit()
+        }
+
+        // Load mascots
+        var index = 0
+        while (index < imageSets.size) {
+            if (!loadConfiguration(imageSets[index])) {
+                configurations.remove(imageSets[index])
+                imageSets.remove(imageSets[index])
+                index--
             }
-        } while (imageSets.isEmpty())
+            index++
+        }
 
         // Create the tray icon
         createTrayIcon()
@@ -463,7 +416,7 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            if (NativeFactory.usingKdeEnvironment) {
+            if (usingKdeEnvironment) {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
@@ -487,10 +440,12 @@ object Main {
                     manager.togglePauseAll()
                 }
 
-                PopupFactory.setSharedInstance(PopupFactory())
+                PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
 
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
+
+                NativeFactory.resetPopupFactory()
 
                 if (settings.isRestartRequired) {
                     val response = JOptionPane.showConfirmDialog(
@@ -687,7 +642,7 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            if (NativeFactory.usingKdeEnvironment) {
+            if (usingKdeEnvironment) {
                 icon.menu.add(restoreWindowsMenu)
             }
             icon.menu.add(JSeparator())
@@ -962,7 +917,7 @@ object Main {
     /**
      * Dismisses all mascots and closes the program
      */
-    fun exit() {
+    fun exit(): Nothing {
         manager.disposeAll()
         manager.stop()
         exitProcess(0)

@@ -75,14 +75,14 @@ class VirtualEnvironment : Environment() {
             override fun windowDeactivated(e: WindowEvent) {}
         })
 
-        val windowArray = getProperty("WindowSize", "600x500").split("x")
+        val (width, height) = getProperty("WindowSize", "600x500").split("x").map { it.toInt() }
 
         val image = runCatching {
             ImageIO.read(File(getProperty("BackgroundImage", "")))
         }.getOrNull()
 
         display.contentPane = VirtualContentPanel(
-            Dimension(windowArray[0].toInt(), windowArray[1].toInt()),
+            Dimension(width, height),
             Color.decode(getProperty("Background", "#00FF00")),
             image
         )

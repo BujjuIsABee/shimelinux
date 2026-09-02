@@ -25,7 +25,6 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.LostGroundException
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
@@ -104,13 +103,13 @@ open class Move(
 
         if (targetX != DEFAULT_TARGETX) {
             if (mascot.isLookRight && mascot.anchor.x >= targetX || !mascot.isLookRight && mascot.anchor.x <= targetX) {
-                mascot.anchor = Point(targetX, mascot.anchor.y)
+                mascot.anchor.x = targetX
             }
         }
 
         if (targetY != DEFAULT_TARGETY) {
             if (isDown && mascot.anchor.y >= targetY || !isDown && mascot.anchor.y <= targetY) {
-                mascot.anchor = Point(mascot.anchor.x, targetY)
+                mascot.anchor.y = targetY
             }
         }
     }

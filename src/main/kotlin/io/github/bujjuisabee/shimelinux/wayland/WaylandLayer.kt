@@ -35,7 +35,7 @@ import kotlin.system.exitProcess
  *
  * @see WaylandLib.createLayer
  */
-class WaylandLayer(obj: Any?, private val useMask: Boolean) : Component() {
+class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long
     private var isDisposed = false
     private var previousCursorPosition = Point(0, 0)
@@ -44,7 +44,7 @@ class WaylandLayer(obj: Any?, private val useMask: Boolean) : Component() {
 
     init {
         try {
-            senderPtr = WaylandLib.createLayer(obj)
+            senderPtr = WaylandLib.createLayer(receiver)
         } catch (e: Exception) {
             Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
             exitProcess(0)
@@ -117,6 +117,9 @@ class WaylandLayer(obj: Any?, private val useMask: Boolean) : Component() {
         isDisposed = true // prevents segmentation fault
     }
 
+    /**
+     * Sends `MOUSE_PRESSED`, `MOUSE_RELEASED`, `MOUSE_MOVED`, and `MOUSE_DRAGGED` events to the event listeners of the [component]
+     */
     @Suppress("KotlinConstantConditions")
     fun dispatchEvents(
         component: Component,

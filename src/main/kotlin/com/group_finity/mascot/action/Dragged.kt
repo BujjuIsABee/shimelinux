@@ -26,7 +26,6 @@ import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.ResourceBundle
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -107,7 +106,7 @@ class Dragged(
 
         checkNotNull(animation).next(mascot, time)
 
-        mascot.anchor = Point(cursor.x + offsetX, cursor.y + offsetY)
+        mascot.anchor.setLocation(cursor.x + offsetX, cursor.y + offsetY)
 
         if (time == timeToRegist - 1 && Math.random() >= 0.1) {
             timeToRegist++

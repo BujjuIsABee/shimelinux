@@ -114,16 +114,16 @@ open class Fall(
 
         val dev = 1.coerceAtLeast(abs(dx).coerceAtLeast(abs(dy)))
 
-        val start = mascot.anchor
+        val start = Point(mascot.anchor)
 
         outer@ for (i in 0 until dev) {
             val x = start.x + dx * i / dev
             val y = start.y + dy * i / dev
 
-            mascot.anchor = Point(x, y)
+            mascot.anchor.setLocation(x, y)
             if (dy > 0) {
                 for (j in -80 until 0) {
-                    mascot.anchor = Point(x, y + j)
+                    mascot.anchor.setLocation(x, y + j)
                     if (environment.getFloor(true).isOn(mascot.anchor)) {
                         break@outer
                     }

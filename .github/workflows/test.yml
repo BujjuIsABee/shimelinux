@@ -3,16 +3,16 @@ name: Run Tests
 on:
   push:
     paths:
-      - "src/**"
-      - "shimelinux_wayland/src/**"
-      - "shimelinux_wayland/Cargo.toml"
-      - "build.gradle.kts"
+      - src/**
+      - shimelinux_wayland/src/**
+      - shimelinux_wayland/Cargo.toml
+      - build.gradle.kts
   pull_request:
     paths:
-      - "src/**"
-      - "shimelinux_wayland/src/**"
-      - "shimelinux_wayland/Cargo.toml"
-      - "build.gradle.kts"
+      - src/**
+      - shimelinux_wayland/src/**
+      - shimelinux_wayland/Cargo.toml
+      - build.gradle.kts
 
 jobs:
   build:
@@ -30,5 +30,4 @@ jobs:
       - name: Install Build Dependencies
         run: sudo apt-get install -y libxkbcommon-dev
       - name: Run Tests
-        run: |
-          ./gradlew test
+        run: ./gradlew test

@@ -123,7 +123,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
             };
 
             thread::spawn(move || {
-                loop {
+                'outer: loop {
                     let _ = event_queue.blocking_dispatch(&mut layer_state);
 
                     // Handle events
@@ -140,7 +140,8 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
                             }
                             Event::Dispose() => {
                                 layer_state.dispose();
-                                break;
+                                layer_state.object.into_raw();
+                                break 'outer;
                             }
                         }
                     }

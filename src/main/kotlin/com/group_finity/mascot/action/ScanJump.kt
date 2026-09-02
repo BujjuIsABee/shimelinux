@@ -29,7 +29,6 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.lang.ref.WeakReference
 import java.util.ResourceBundle
 import java.util.logging.Level
@@ -127,13 +126,13 @@ class ScanJump(
             putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
             putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
 
-            mascot.anchor = Point(mascot.anchor.x + velocityX, mascot.anchor.y + velocityY)
+            mascot.anchor.translate(velocityX, velocityY)
 
             checkNotNull(animation).next(mascot, time)
         }
 
         if (distance <= velocity) {
-            mascot.anchor = Point(targetX, targetY)
+            mascot.anchor.setLocation(targetX, targetY)
 
             try {
                 mascot.behavior = Main.getConfiguration(mascot.imageSet).buildBehavior(behavior, mascot)

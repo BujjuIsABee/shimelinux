@@ -113,8 +113,8 @@ class AnimationBuilder(
         }
 
         if (leftImagePath != null) {
-            val anchorCoordinates = anchorText.split(",")
-            val anchor = Point(anchorCoordinates[0].toInt(), anchorCoordinates[1].toInt())
+            val (anchorX, anchorY) = anchorText.split(",").map { it.toInt() }
+            val anchor = Point(anchorX, anchorY)
 
             try {
                 ImagePairLoader.load(leftImagePath, rightImagePath, anchor, scaling, filter, opacity)
@@ -124,10 +124,7 @@ class AnimationBuilder(
             }
         }
 
-        val moveCoordinates = moveText.split(",")
-        var moveX = moveCoordinates[0].toInt()
-        var moveY = moveCoordinates[1].toInt()
-
+        var (moveX, moveY) = moveText.split(",").map { it.toInt() }
         moveX = if (abs(moveX) > 0 && abs(moveX * scaling) < 1) (if (moveX > 0) 1 else -1) else (moveX * scaling).roundToInt()
         moveY = if (abs(moveY) > 0 && abs(moveY * scaling) < 1) (if (moveY > 0) 1 else -1) else (moveY * scaling).roundToInt()
 
@@ -160,17 +157,11 @@ class AnimationBuilder(
 
         val scaling = getProperty("Scaling", 1.0)
 
-        val originCoordinates = originText.split(",")
-        val origin = Point(
-            (originCoordinates[0].toInt() * scaling).roundToInt(),
-            (originCoordinates[1].toInt() * scaling).roundToInt()
-        )
+        val (originX, originY) = originText.split(",").map { it.toInt() }
+        val origin = Point((originX * scaling).roundToInt(), (originY * scaling).roundToInt())
 
-        val sizeCoordinates = sizeText.split(",")
-        val size = Dimension(
-            (sizeCoordinates[0].toInt() * scaling).roundToInt(),
-            (sizeCoordinates[1].toInt() * scaling).roundToInt()
-        )
+        val (width, height) = sizeText.split(",").map { it.toInt() }
+        val size = Dimension((width * scaling).roundToInt(), (height * scaling).roundToInt())
 
         val shape = when {
             shapeText.equals("Rectangle", true) -> Rectangle(origin, size)
