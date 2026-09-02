@@ -365,7 +365,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         menuScalingPanel = JPanel()
-        menuScalingPanel.isVisible = !usingTilingWindowManager
+        menuScalingPanel.isVisible = !usingTilingWindowManager && environment != "wayland"
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
         menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
 
@@ -1086,6 +1086,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         if (getProperty("Environment", "linux") != environment) {
             Main.properties.setProperty("Environment", environment)
             isEnvironmentReloadRequired = true
+
+            if (environment == "wayland" && menuScaling != 1) {
+                Main.properties.setProperty("MenuScaling", "1")
+                isRestartRequired = true
+            }
         }
 
         if (getProperty("WindowSize", "600x500") != windowSize) {
@@ -1282,6 +1287,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             environmentDoneButton = JButton(localize("Done"))
             environmentDoneButton.addActionListener {
+                menuScalingPanel.isVisible = !usingTilingWindowManager && environment != "wayland"
                 dispose()
             }
 
