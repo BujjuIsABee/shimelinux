@@ -97,6 +97,7 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 | Linux Mint   | Cinnamon        | Works out of the box                                               |
 | NixOS        | KDE Plasma      | Works out of the box                                               |
 | NixOS        | niri            | See [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
+| PopOS        | COSMIC          | Works out of the box                                               |
 | Ubuntu       | GNOME           | Works out of the box                                               |
 
 ### Tiling Window Managers

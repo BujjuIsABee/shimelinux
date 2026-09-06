@@ -49,7 +49,7 @@ val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
  * @author Bujju
  */
 val usingTilingWindowManager = when (desktopType) {
-    "Hyprland", "niri", "sway" -> true
+    "COSMIC", "Hyprland", "niri", "sway" -> true
     else -> false
 }
 
