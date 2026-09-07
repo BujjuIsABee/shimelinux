@@ -1,8 +1,14 @@
-# ShimeLinux
+<h1 align="center">ShimeLinux</h1>
+
+<p align="center">An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the latest version of Shimeji-ee should work. Several Linux distributions, desktop environments, and tiling window managers are supported.</p>
+
+<p align="center">
+    <a href="https://github.com/BujjuIsABee/shimelinux/releases"><img alt="Release" src="https://img.shields.io/github/v/release/BujjuIsABee/shimelinux?style=for-the-badge&logo=github" /></a>
+    <a href="https://github.com/BujjuIsABee/shimelinux/issues"><img alt="Issues" src="https://img.shields.io/github/issues/BujjuIsABee/ShimeLinux?style=for-the-badge&logo=github" /></a>
+    <a href="https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/BujjuIsABee/shimelinux?style=for-the-badge" /></a>
+</p>
 
 ![Image](.github/readme_image.png)
-
-An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the latest version of Shimeji-ee should work. Some tiling window managers are also supported (see [Compatibility](https://github.com/BujjuIsABee/shimelinux#compatibility)).
 
 ## Installation
 
@@ -102,17 +108,16 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 
 ### Tiling Window Managers
 
-ShimeLinux supports some tiling Wayland compositors, but they require additional steps to set up.
+ShimeLinux supports some tiling Wayland compositors, but they require additional steps to set up. Follow the steps listed below for your compositor.
 
 > [!NOTE]
-> If Shimeji are still not displaying properly after following the steps listed for your compositor, or you are using a compositor that is not supported, you will need to manually enable the Wayland environment:
+> If Shimeji are still not displaying properly, or you are using a compositor that is not supported, you will need to manually enable the Wayland environment:
 >
-> - Right-click on the system tray icon and select "Settings"
-> - Select the "Window Mode" tab
-> - Press the "Environment Settings" button
-> - Choose "Wayland"
+> - Right-click the system tray icon and select "Settings"
+> - Select the "Window Mode" tab and click on the "Environment Settings" button
+> - Choose "Wayland" (if it's not there, make sure `XDG_SESSION_TYPE` is set to `wayland`)
 >
-> You may encounter some issues when using the Wayland environment on an unsupported compositor. The only compositors that are supported are Hyprland, niri, sway, and KWin (KDE Plasma).
+> You may encounter some issues when using the Wayland environment on an unsupported compositor. The only compositors/DEs that are supported are Hyprland, niri, sway, KDE Plasma, and COSMIC.
 
 #### Hyprland
 
@@ -146,12 +151,6 @@ for_window [class="com-group_finity-mascot"] floating enable
 ```
 
 Ensure that the `_JAVA_AWT_WM_NONREPARENTING` environment variable is set to `1` before launching the program.
-
-### Interactive windows
-
-Actions that involve a Shimeji standing/climbing on, picking up, and throwing windows are only supported on KDE Plasma (version 6 or later).
-
-By default, the feature is disabled. You can enable it by adding windows to the whitelist or blacklist in settings.
 
 ### GPU compatibility / Graphical issues
 
