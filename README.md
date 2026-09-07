@@ -1,11 +1,11 @@
 <h1 align="center">ShimeLinux</h1>
 
-<p align="center">An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the latest version of Shimeji-ee should work. Several Linux distributions, desktop environments, and tiling window managers are supported.</p>
+<p align="center">An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the latest version of Shimeji-ee should work. See the supported Linux distributions, desktop environments, and tiling window managers <a href="https://github.com/BujjuIsABee/shimelinux#compatibility">here</a>.</p>
 
 <p align="center">
-    <a href="https://github.com/BujjuIsABee/shimelinux/releases"><img alt="Release" src="https://img.shields.io/github/v/release/BujjuIsABee/shimelinux?style=for-the-badge&logo=github" /></a>
-    <a href="https://github.com/BujjuIsABee/shimelinux/issues"><img alt="Issues" src="https://img.shields.io/github/issues/BujjuIsABee/ShimeLinux?style=for-the-badge&logo=github" /></a>
-    <a href="https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/BujjuIsABee/shimelinux?style=for-the-badge" /></a>
+    <a href="https://github.com/BujjuIsABee/shimelinux/releases"><img alt="Release" src="https://img.shields.io/github/v/release/BujjuIsABee/shimelinux?style=for-the-badge&logo=github&color=b7bdf8&labelColor=363a4f" /></a>
+    <a href="https://github.com/BujjuIsABee/shimelinux/issues"><img alt="Issues" src="https://img.shields.io/github/issues/BujjuIsABee/ShimeLinux?style=for-the-badge&logo=github&color=f5c2e7&labelColor=363a4f" /></a>
+    <a href="https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/BujjuIsABee/shimelinux?style=for-the-badge&color=a6da95&labelColor=363a4f" /></a>
 </p>
 
 ![Image](.github/readme_image.png)
@@ -83,7 +83,7 @@ If none of these options work for you, you can download the `.jar` file [here](h
 
 When you open ShimeLinux, a Shimeji will appear. You can right-click on a Shimeji to open a menu with options for that Shimeji, or right-click on the system tray icon for general options. To close the program, open one of these menus and select "Dismiss All."
 
-To add more Shimeji, click the system tray icon and select "Choose Shimeji...." Then, click the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to use.
+To add more Shimeji, click on the system tray icon and select "Choose Shimeji...." Then, click on the "More..." button to open the `img` folder. Once you've added Shimeji to this folder, you can reopen the Shimeji chooser and select the Shimeji you want to use.
 
 > [!WARNING]
 > Make sure not to select too many Shimeji at once, as ShimeLinux can use a lot of your computer's memory. You can disable Shimeji in the Shimeji chooser or move some that are not in use to the `img/unused` folder.
@@ -103,7 +103,7 @@ ShimeLinux has been tested on the following Linux distributions and desktop envi
 | Linux Mint   | Cinnamon        | Works out of the box                                               |
 | NixOS        | KDE Plasma      | Works out of the box                                               |
 | NixOS        | niri            | See [niri](https://github.com/BujjuIsABee/shimelinux#niri)         |
-| PopOS        | COSMIC          | Works out of the box                                               |
+| Pop!_OS      | COSMIC          | Works out of the box                                               |
 | Ubuntu       | GNOME           | Works out of the box                                               |
 
 ### Tiling Window Managers
@@ -113,7 +113,7 @@ ShimeLinux supports some tiling Wayland compositors, but they require additional
 > [!NOTE]
 > If Shimeji are still not displaying properly, or you are using a compositor that is not supported, you will need to manually enable the Wayland environment:
 >
-> - Right-click the system tray icon and select "Settings"
+> - Right-click on the system tray icon and select "Settings"
 > - Select the "Window Mode" tab and click on the "Environment Settings" button
 > - Choose "Wayland" (if it's not there, make sure `XDG_SESSION_TYPE` is set to `wayland`)
 >
