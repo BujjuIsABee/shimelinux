@@ -27,6 +27,8 @@ import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
+ * A native factory used on some Wayland compositors
+ *
  * @author Bujju
  */
 @Suppress("unused")

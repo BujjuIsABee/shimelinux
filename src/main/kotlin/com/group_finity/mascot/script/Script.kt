@@ -34,7 +34,6 @@ private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
 /**
  * A variable whose value is evaluated from JavaScript code
  *
- * @property source The script to evaluate
  * @property isClearAtInitFrame Whether the variable's value should be cleared when [initFrame] is called
  *
  * @author Yuki Yamada

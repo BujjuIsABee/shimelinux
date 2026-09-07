@@ -97,7 +97,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val hqxRadioButton: JRadioButton
     private val interactiveWindowsTab: JPanel
     private val interactiveWindowsTabbedPane: JTabbedPane
+    private val interactiveWindowsWhitelistModel: DefaultListModel<String>
     private val interactiveWindowsWhitelist: JList<String>
+    private val interactiveWindowsBlacklistModel: DefaultListModel<String>
     private val interactiveWindowsBlacklist: JList<String>
     private val interactiveWindowsFooterPanel: JPanel
     private val addInteractiveWindowButton: JButton
@@ -165,17 +167,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val doneButton: JButton
     private val cancelButton: JButton
 
-    private val interactiveWindowsWhitelistModel = DefaultListModel<String>().apply {
-        addAll(
-            getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
-        )
-    }
-    private val interactiveWindowsBlacklistModel = DefaultListModel<String>().apply {
-        addAll(
-            getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
-        )
-    }
-
     private var alwaysShowShimejiChooser = getProperty("AlwaysShowShimejiChooser", false)
     private var alwaysShowInformationScreen = getProperty("AlwaysShowInformationScreen", false)
     private var scaling = getProperty("Scaling", 1.0)
@@ -205,10 +196,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { darkTheme.load(it) }
             getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { lightTheme.load(it) }
         } catch(_: Exception) {
-        } finally {
-            initialDarkTheme.putAll(darkTheme)
-            initialLightTheme.putAll(lightTheme)
         }
+
+        initialDarkTheme.putAll(darkTheme)
+        initialLightTheme.putAll(lightTheme)
 
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
@@ -311,8 +302,16 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         interactiveWindowsTabbedPane = JTabbedPane()
 
+        interactiveWindowsWhitelistModel = DefaultListModel()
+        interactiveWindowsWhitelistModel.addAll(
+            getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
+        )
         interactiveWindowsWhitelist = JList(interactiveWindowsWhitelistModel)
 
+        interactiveWindowsBlacklistModel = DefaultListModel()
+        interactiveWindowsBlacklistModel.addAll(
+            getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
+        )
         interactiveWindowsBlacklist = JList(interactiveWindowsBlacklistModel)
 
         interactiveWindowsTabbedPane.addTab(localize("Whitelist"), JScrollPane(interactiveWindowsWhitelist))
@@ -365,7 +364,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         menuScalingPanel = JPanel()
-        menuScalingPanel.isVisible = !usingTilingWindowManager && environment != "wayland"
+        menuScalingPanel.isVisible = !usingWaylandEnvironment
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
         menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
 
@@ -741,6 +740,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             changeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected
             windowBackgroundModeComboBox.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
             removeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
+
+            if (windowModeEnabledCheckBox.isSelected) {
+                tabbedPane.remove(interactiveWindowsTab)
+            } else if (desktopType == "KDE" && !tabbedPane.components.contains(interactiveWindowsTab)) {
+                tabbedPane.add(interactiveWindowsTab)
+            }
+
+            menuScalingPanel.isVisible = windowModeEnabledCheckBox.isSelected
         }
 
         windowModeSettingsPanel = JPanel()
@@ -1171,9 +1178,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         if (windowBackgroundMode == "Stretch") {
             image = image.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH)
         } else if (windowBackgroundMode != "Center") {
-            val factor = when (windowBackgroundMode) {
-                "Fit" -> (size.width / image.getWidth(null).toDouble()).coerceAtMost(size.height / image.getHeight(null).toDouble())
-                else -> (size.width / image.getWidth(null).toDouble()).coerceAtLeast(size.height / image.getHeight(null).toDouble())
+            val widthRatio = (size.width / image.getWidth(null)).toDouble()
+            val heightRatio = (size.height / image.getHeight(null)).toDouble()
+            val factor = if (windowBackgroundMode == "Fit") {
+                widthRatio.coerceAtMost(heightRatio)
+            } else {
+                widthRatio.coerceAtLeast(heightRatio)
             }
 
             image = image.getScaledInstance(
@@ -1287,7 +1297,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             environmentDoneButton = JButton(localize("Done"))
             environmentDoneButton.addActionListener {
-                menuScalingPanel.isVisible = !usingTilingWindowManager && environment != "wayland"
+                if (environment != "kde" && !(environment == "linux" && desktopType == "KDE")) {
+                    tabbedPane.remove(interactiveWindowsTab)
+                } else if (!tabbedPane.components.contains(interactiveWindowsTab)) {
+                    tabbedPane.add(interactiveWindowsTab)
+                }
+
+                menuScalingPanel.isVisible = environment != "wayland" && !(environment == "linux" && isWaylandEnvironmentDefault)
+
                 dispose()
             }
 

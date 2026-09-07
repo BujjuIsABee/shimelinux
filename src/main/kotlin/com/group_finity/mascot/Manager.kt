@@ -60,8 +60,10 @@ class Manager {
     }
 
     fun stop() {
-        timer?.cancel()
-        timer = null
+        timer?.let {
+            it.cancel()
+            timer = null
+        }
     }
 
     fun tick() {

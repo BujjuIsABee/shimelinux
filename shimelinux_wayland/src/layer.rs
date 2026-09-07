@@ -25,7 +25,7 @@ use std::{
     sync::{LazyLock, Mutex, OnceLock},
 };
 
-use jni::{JValue, errors::Error, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
+use jni::{JValue, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
     delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
@@ -263,7 +263,7 @@ impl PointerHandler for LayerState {
         }
 
         if let Ok(jvm) = JavaVM::singleton() {
-            let _ = jvm.attach_current_thread(|env| -> Result<(), Error> {
+            let _ = jvm.attach_current_thread(|env| -> jni::errors::Result<_> {
                 env.call_method(
                     &self.object,
                     jni_str!("updateCursor"),
@@ -321,11 +321,13 @@ impl LayerState {
     }
 
     pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
-        let Ok(mut theme) = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24) else { return; };
-        let name = if use_hand { "pointer" } else { "left_ptr" };
-        if let Some(cursor) = theme.get_cursor(name)
+        if let Ok(mut theme) = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24)
+            && let Some(cursor) = theme.get_cursor(if use_hand { "pointer" } else { "left_ptr" })
         {
-            let surface = self.cursor_state.surface.get_or_insert(self.compositor_state.create_surface(qh));
+            let surface = self
+                .cursor_state
+                .surface
+                .get_or_insert(self.compositor_state.create_surface(qh));
 
             // Attach None to clear the previous buffer
             surface.attach(None, 0, 0);

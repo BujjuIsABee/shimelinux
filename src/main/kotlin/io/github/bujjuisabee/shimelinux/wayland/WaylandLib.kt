@@ -30,7 +30,7 @@ import kotlin.io.outputStream
 import kotlin.system.exitProcess
 
 /**
- * A foreign function interface used to create and manage Wayland layer surfaces
+ * A foreign function interface to create and manage Wayland layer surfaces
  *
  * @author Bujju
  */
@@ -53,27 +53,27 @@ object WaylandLib {
     }
 
     /**
-     * Creates a Wayland layer, returning a pointer to the event sender.
+     * Creates a Wayland layer surface, returning a pointer to the event sender.
      */
     external fun createLayer(receiver: MouseEventReceiver): Long
 
     /**
-     * Uses the [senderPtr] to send a SetBounds event to a layer
+     * Uses the [senderPtr] to send a SetBounds event to a layer surface
      */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
     /**
-     * Uses the [senderPtr] to send a SetImage event to a layer
+     * Uses the [senderPtr] to send a SetImage event to a layer surface
      */
     external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)
 
     /**
-     * Uses the [senderPtr] to send a SetCursor event to a layer
+     * Uses the [senderPtr] to send a SetCursor event to a layer surface
      */
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
     /**
-     * Uses the [senderPtr] to send a Dispose event to a layer
+     * Uses the [senderPtr] to send a Dispose event to a layer surface
      */
     external fun dispose(senderPtr: Long)
 
@@ -82,6 +82,9 @@ object WaylandLib {
      */
     external fun getScreenRect(): IntArray
 
+    /**
+     * Defines an object that can receive mouse events from a Wayland layer surface
+     */
     interface MouseEventReceiver {
         fun updateCursor(
             leftPressed: Boolean,

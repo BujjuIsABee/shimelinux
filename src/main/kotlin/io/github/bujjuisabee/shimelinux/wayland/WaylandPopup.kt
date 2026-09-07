@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
- * A popup that is displayed on a [WaylandLayer]
+ * A popup menu that is displayed on a Wayland layer surface
  *
  * @author Bujju
  */
@@ -64,7 +64,6 @@ class WaylandPopup(
         layer.dispose()
     }
 
-    @Suppress("unused")
     override fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,

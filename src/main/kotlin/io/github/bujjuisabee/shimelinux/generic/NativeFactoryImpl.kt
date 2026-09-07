@@ -26,6 +26,8 @@ import com.group_finity.mascot.NativeFactory
 import java.awt.image.BufferedImage
 
 /**
+ * A cross-platform native factory
+ *
  * @author Bujju
  */
 @Suppress("unused")

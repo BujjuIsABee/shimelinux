@@ -35,7 +35,7 @@ import kotlin.io.path.inputStream
 import kotlin.math.roundToInt
 
 /**
- * An object that loads image pairs
+ * Loads image pairs
  *
  * @author Yuki Yamada
  * @author Kilkakon

@@ -32,12 +32,16 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
 
+/**
+ * Manages the KWin script
+ *
+ * @author Bujju
+ */
 object KWin {
     private var dbus: DBusConnection
     private var scripting: KWinScripting
     private var script: KWinScript
     private val client = KWinClientImpl()
-    private val shutdownThread = Thread { disconnect() }
 
     var activeWindow: Window? = null
     var windowPosition: Point? = null
@@ -74,19 +78,12 @@ object KWin {
 
             script.run()
         } finally {
-            Runtime.getRuntime().addShutdownHook(shutdownThread)
+            Runtime.getRuntime().addShutdownHook(Thread {
+                script.stop()
+                scripting.unloadScript("shimelinux-kwin-script")
+                dbus.disconnect()
+            })
         }
-    }
-
-    fun dispose() {
-        disconnect()
-        Runtime.getRuntime().removeShutdownHook(shutdownThread)
-    }
-
-    private fun disconnect() {
-        script.stop()
-        scripting.unloadScript("shimelinux-kwin-script")
-        dbus.disconnect()
     }
 
     @DBusInterfaceName("org.kde.kwin.Scripting")

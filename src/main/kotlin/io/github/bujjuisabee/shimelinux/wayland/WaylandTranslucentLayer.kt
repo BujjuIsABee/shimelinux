@@ -27,7 +27,7 @@ import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 
 /**
- * A translucent window that displays a mascot on a [WaylandLayer]
+ * Displays a mascot on a Wayland layer surface
  *
  * @author Bujju
  */
@@ -59,7 +59,6 @@ class WaylandTranslucentLayer : TranslucentWindow, WaylandLib.MouseEventReceiver
         layer.dispose()
     }
 
-    @Suppress("unused")
     override fun updateCursor(
         leftPressed: Boolean,
         rightPressed: Boolean,

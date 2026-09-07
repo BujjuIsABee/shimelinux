@@ -28,7 +28,7 @@ import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
 
 /**
- * An object that loads sounds
+ * Loads sounds
  *
  * @author Kilkakon
  * @author Bujju

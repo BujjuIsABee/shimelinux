@@ -54,7 +54,7 @@ class VariableMap : Bindings {
     }
 
     /**
-     * Calls initFrame on every variable
+     * Calls [Variable.initFrame] on every variable
      */
     fun initFrame() {
         for (variable in rawMap.values) {

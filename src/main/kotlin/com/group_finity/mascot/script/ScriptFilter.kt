@@ -25,7 +25,7 @@ package com.group_finity.mascot.script
 import org.openjdk.nashorn.api.scripting.ClassFilter
 
 /**
- * Restricts which classes [Script] variables can access
+ * Restricts which classes a [Script] can access
  *
  * @author Kilkakon
  * @author Bujju

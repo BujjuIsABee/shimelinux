@@ -59,8 +59,15 @@ private val lastId = AtomicInteger()
 class Mascot(var imageSet: String) {
     private val id = lastId.incrementAndGet()
 
+    /**
+     * The number of ticks that have elapsed while the mascot is animating
+     */
     var time = 0
         private set
+
+    /**
+     * Whether the mascot is being animated
+     */
     private var isAnimating = true
         get() = field && !isPaused
 
@@ -160,16 +167,9 @@ class Mascot(var imageSet: String) {
      * The bounds of the mascot
      */
     val bounds: Rectangle
-        get() {
-            val image = image
-            if (image != null) {
-                val top = anchor.y - image.center.y
-                val left = anchor.x - image.center.x
-                return Rectangle(left, top, image.size.width, image.size.height)
-            } else {
-                return window.asComponent().bounds
-            }
-        }
+        get() = image?.let {
+            Rectangle(anchor.x - it.center.x, anchor.y - it.center.y, it.size.width, it.size.height)
+        } ?: window.asComponent().bounds
 
     /**
      * The number of mascots with the same image set
@@ -475,8 +475,9 @@ class Mascot(var imageSet: String) {
     private fun refreshCursor(position: Point) {
         var useHand = false
         for (hotspot in hotspots) {
-            val isEnabled = Main.getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)
-            if (hotspot.contains(this, position) && isEnabled) {
+            if (hotspot.contains(this, position) && Main.getConfiguration(imageSet)
+                    .isBehaviorEnabled(hotspot.behavior, this)
+            ) {
                 useHand = true
                 break
             }

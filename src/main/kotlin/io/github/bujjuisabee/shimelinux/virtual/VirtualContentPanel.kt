@@ -32,7 +32,7 @@ import java.awt.event.ComponentListener
 import javax.swing.JPanel
 
 /**
- * Displays the background of the virtual environment
+ * A panel that displays the background of the [VirtualEnvironment]
  *
  * @author Kilkakon
  * @author Bujju
@@ -63,9 +63,12 @@ class VirtualContentPanel(
                     if (mode == Mode.STRETCH) {
                         resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
                     } else if (mode != Mode.CENTER) {
-                        val factor = when (mode) {
-                            Mode.FIT -> (width / image.getWidth(null).toDouble()).coerceAtMost(height / image.getHeight(null).toDouble())
-                            else -> (width / image.getWidth(null).toDouble()).coerceAtLeast(height / image.getHeight(null).toDouble())
+                        val widthRatio = (width / image.getWidth(null)).toDouble()
+                        val heightRatio = (height / image.getHeight(null)).toDouble()
+                        val factor = if (mode == Mode.FIT) {
+                            widthRatio.coerceAtMost(heightRatio)
+                        } else {
+                            widthRatio.coerceAtLeast(heightRatio)
                         }
 
                         resizedImage = image.getScaledInstance(

@@ -24,6 +24,8 @@ package io.github.bujjuisabee.shimelinux.generic
 
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.getProperty
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 
 /**
@@ -40,6 +42,11 @@ class GenericEnvironment : Environment() {
 
     override fun tick() {
         super.tick()
+
+        if (!getProperty("Multiscreen", true)) {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screen.set(gc.bounds)
+        }
 
         activeIE.isVisible = false
     }

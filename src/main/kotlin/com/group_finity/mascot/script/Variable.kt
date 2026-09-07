@@ -52,19 +52,19 @@ abstract class Variable {
          * @param source
          * A [Script] whose value is **not** cleared when [initFrame] is called:
          *
-         * ```javascript
+         * ```js
          * ${1 + 2}
          * ```
          *
          * A [Script] whose value **is** cleared when [initFrame] is called:
          *
-         * ```javascript
+         * ```js
          * #{1 + 2}
          * ```
          *
          * A [Constant]:
          *
-         * ```javascript
+         * ```js
          * 3
          * ```
          */

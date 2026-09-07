@@ -26,6 +26,8 @@ import java.awt.Component
 import javax.swing.PopupFactory
 
 /**
+ * A popup factory that displays popup menus on Wayland layer surfaces
+ *
  * @author Bujju
  */
 object WaylandPopupFactory : PopupFactory() {

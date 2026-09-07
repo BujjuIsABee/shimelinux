@@ -28,6 +28,8 @@ import io.github.bujjuisabee.shimelinux.generic.GenericTranslucentWindow
 import java.awt.image.BufferedImage
 
 /**
+ * A native factory used on KDE Plasma
+ *
  * @author Bujju
  */
 @Suppress("unused")

@@ -166,12 +166,14 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
     unowned_env
         .with_env(|_env| -> jni::errors::Result<_> {
             let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-            sender.send(Event::SetBounds(Rect {
-                x: cmp::max(-width + 1, x),
-                y: cmp::max(-height + 1, y),
-                width: cmp::max(1, width),
-                height: cmp::max(1, height),
-            })).expect("Failed to send SetBounds event");
+            sender
+                .send(Event::SetBounds(Rect {
+                    x: cmp::max(-width + 1, x),
+                    y: cmp::max(-height + 1, y),
+                    width: cmp::max(1, width),
+                    height: cmp::max(1, height),
+                }))
+                .expect("Failed to send SetBounds event");
 
             Ok(())
         })

@@ -63,23 +63,20 @@ class Entry(private val element: Element) {
      * @return A [Map] where the key "name" corresponds to the value "value" for the following XML node:
      *
      * ```xml
-     * <Node name="value"/>
+     * <Node name="value" />
      * ```
      */
-    val attributes: Map<String, String> by lazy {
-        val result = linkedMapOf<String, String>()
-        val attrs = element.attributes
-        for (i in 0 until attrs.length) {
-            val attr = attrs.item(i) as Attr
-            result[attr.name] = attr.value
+    val attributes = buildMap {
+        val attributes = element.attributes
+        for (i in 0 until attributes.length) {
+            (attributes.item(i) as Attr).let { put(it.name, it.value) }
         }
-        return@lazy result
     }
 
     /**
      * The child nodes inside the node
      *
-     * @return A [List] with an [Entry] where [Entry.name] is "Child" for the following XML node:
+     * @return A [List] with an [Entry] for the "Child" node:
      *
      * ```xml
      * <Node>
@@ -87,32 +84,18 @@ class Entry(private val element: Element) {
      * </Node>
      * ```
      */
-    val children: List<Entry> by lazy {
-        val result = mutableListOf<Entry>()
-        val childNodes = element.childNodes
-        for (i in 0 until childNodes.length) {
-            val childNode = childNodes.item(i)
-            if (childNode is Element) {
-                result.add(Entry(childNode))
-            }
+    val children = buildList {
+        val children = element.childNodes
+        for (i in 0 until children.length) {
+            (children.item(i) as? Element)?.let { add(Entry(it)) }
         }
-        return@lazy result
     }
 
     private val childMap = children.groupBy { it.name }
 
-    /**
-     * Gets the value of an attribute from its name
-     */
     fun getAttribute(name: String) = element.getAttributeNode(name)?.value
 
-    /**
-     * Gets whether [children] contains an [Entry] where [Entry.name] is equal to [name]
-     */
     fun hasChild(name: String) = children.any { it.name == name }
 
-    /**
-     * Gets all [Entry] items in [children] where [Entry.name] is equal to [name]
-     */
     fun selectChildren(name: String) = childMap[name].orEmpty()
 }

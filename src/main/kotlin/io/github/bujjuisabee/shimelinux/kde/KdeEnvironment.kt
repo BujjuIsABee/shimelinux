@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.kde
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 
@@ -44,6 +45,11 @@ class KdeEnvironment : Environment() {
 
     override fun tick() {
         super.tick()
+
+        if (!getProperty("Multiscreen", true)) {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screen.set(gc.bounds)
+        }
 
         cursor.set(KWin.cursorPosition)
 
@@ -71,21 +77,15 @@ class KdeEnvironment : Environment() {
         windowCache.clear()
     }
 
-    override fun dispose() {
-        try {
-            KWin.dispose()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    override fun dispose() {}
 
     private fun isIE(title: String) = windowCache.getOrPut(title) {
         val blacklist = getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
         val whitelist = getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
 
-        val blacklisted = blacklist.any { it.contains(title, true) }
-        val whitelisted = whitelist.any { it.contains(title, true) }
+        val blacklisted = blacklist.any { title.contains(it, true) }
+        val whitelisted = whitelist.any { title.contains(it, true) }
 
-        return@getOrPut !blacklisted && (whitelisted || blacklist.isNotEmpty() && whitelist.isEmpty())
+        !blacklisted && (whitelisted || blacklist.isNotEmpty() && whitelist.isEmpty())
     }
 }

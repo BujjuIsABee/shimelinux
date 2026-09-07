@@ -60,7 +60,7 @@ abstract class NativeFactory {
         fun resetInstance() {
             val defaultEnvironment = when (desktopType) {
                 "KDE" -> KdeNativeFactory()
-                else if (usingTilingWindowManager) -> WaylandNativeFactory()
+                else if (isWaylandEnvironmentDefault) -> WaylandNativeFactory()
                 else -> GenericNativeFactory()
             }
 

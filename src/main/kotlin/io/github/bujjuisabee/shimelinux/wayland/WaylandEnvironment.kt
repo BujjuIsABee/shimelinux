@@ -46,9 +46,8 @@ class WaylandEnvironment : Environment() {
     override fun tick() {
         // Get screen bounds
         var (x, y, width, height) = WaylandLib.getScreenRect()
-        val insets = Toolkit.getDefaultToolkit().getScreenInsets(
-            GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-        )
+        val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+        val insets = Toolkit.getDefaultToolkit().getScreenInsets(gc)
 
         x += insets.left
         y += insets.top
@@ -59,7 +58,7 @@ class WaylandEnvironment : Environment() {
         val cursorPosition = when (desktopType) {
             "Hyprland" -> runCatching {
                 val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
-                return@runCatching Point(x, y)
+                Point(x, y)
             }.getOrNull()
 
             "KDE" -> KWin.cursorPosition

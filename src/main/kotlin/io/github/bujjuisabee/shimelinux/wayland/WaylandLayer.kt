@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.desktopType
 import com.group_finity.mascot.localize
 import java.awt.Component
 import java.awt.Cursor
@@ -33,7 +34,7 @@ import kotlin.system.exitProcess
 /**
  * Creates a Wayland layer surface via [WaylandLib]
  *
- * @see WaylandLib.createLayer
+ * @author Bujju
  */
 class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long
@@ -85,8 +86,6 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
 
     /**
      * Displays an image on the layer
-     *
-     * @see WaylandLib.setImage
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
@@ -118,9 +117,8 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
     }
 
     /**
-     * Sends `MOUSE_PRESSED`, `MOUSE_RELEASED`, `MOUSE_MOVED`, and `MOUSE_DRAGGED` events to the event listeners of the [component]
+     * Sends `MOUSE_PRESSED`, `MOUSE_RELEASED`, `MOUSE_MOVED`, and `MOUSE_DRAGGED` events to the event listeners attached to [component]
      */
-    @Suppress("KotlinConstantConditions")
     fun dispatchEvents(
         component: Component,
         leftPressed: Boolean,
@@ -133,8 +131,8 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
         var modifiers = MouseEvent.NOBUTTON
         var button = MouseEvent.NOBUTTON
         if (leftPressed || leftReleased) {
-            modifiers = modifiers or MouseEvent.BUTTON1_DOWN_MASK
-            button = button or MouseEvent.BUTTON1
+            modifiers = MouseEvent.BUTTON1_DOWN_MASK
+            button = MouseEvent.BUTTON1
         }
         if (rightPressed || rightReleased) {
             modifiers = modifiers or MouseEvent.BUTTON3_DOWN_MASK
@@ -147,7 +145,7 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
             isDragging = false
         }
 
-        if (!isDragging) {
+        if (!isDragging || desktopType == "KDE" || desktopType == "Hyprland") {
             absoluteLocation = location
         }
 

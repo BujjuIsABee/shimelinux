@@ -44,16 +44,6 @@ val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
 val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
 
 /**
- * Gets whether [desktopType] is a compositor that uses the Wayland environment by default
- *
- * @author Bujju
- */
-val usingTilingWindowManager = when (desktopType) {
-    "COSMIC", "Hyprland", "niri", "sway" -> true
-    else -> false
-}
-
-/**
  * Gets whether the KDE environment is being used
  *
  * @author Bujju
@@ -70,15 +60,25 @@ val usingWaylandEnvironment: Boolean
     get() = NativeFactory.instance is WaylandNativeFactory
 
 /**
+ * Gets whether [desktopType] is a compositor that uses the Wayland environment by default
+ *
+ * @author Bujju
+ */
+val isWaylandEnvironmentDefault = when (desktopType) {
+    "COSMIC", "Hyprland", "niri", "sway" -> true
+    else -> false
+}
+
+/**
  * Gets a path within the config directory
  *
  * @author Bujju
  */
 fun getPath(vararg subpaths: String): Path {
-    val base = if (System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
-        Path(System.getProperty("user.home"), ".config", "shimelinux")
-    } else {
+    val base = if (!System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
         Path(System.getProperty("XDG_CONFIG_HOME"), "shimelinux")
+    } else {
+        Path(System.getProperty("user.home"), ".config", "shimelinux")
     }
 
     return Path(base.toString(), *subpaths)

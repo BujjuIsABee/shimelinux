@@ -178,7 +178,7 @@ object Main {
 
         // Set theme
         try {
-            if (!usingTilingWindowManager) {
+            if (!isWaylandEnvironmentDefault) {
                 val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
                 val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
                 System.setProperty("sun.java2d.uiScale", menuScaling.toString())
@@ -420,7 +420,9 @@ object Main {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
-            allowedBehaviorsSubmenu.add(multiscreenMenu)
+            if (!usingWaylandEnvironment) {
+                allowedBehaviorsSubmenu.add(multiscreenMenu)
+            }
 
             val chooseShimejiMenu = MenuItem(localize("ChooseShimeji")) {
                 if (!manager.isPaused) {
@@ -466,6 +468,18 @@ object Main {
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()
                     NativeFactory.resetInstance()
+
+                    if (usingKdeEnvironment && !allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
+                        allowedBehaviorsSubmenu.add(throwingMenu)
+                    } else if (!usingKdeEnvironment && allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
+                        allowedBehaviorsSubmenu.remove(throwingMenu)
+                    }
+
+                    if (!usingWaylandEnvironment && !allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
+                        allowedBehaviorsSubmenu.add(multiscreenMenu)
+                    } else if (usingWaylandEnvironment && allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
+                        allowedBehaviorsSubmenu.remove(multiscreenMenu)
+                    }
                 }
                 if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
                     val isExitOnLastRemoved = manager.isExitOnLastRemoved
