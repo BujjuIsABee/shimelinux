@@ -740,14 +740,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             changeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected
             windowBackgroundModeComboBox.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
             removeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
-
-            if (windowModeEnabledCheckBox.isSelected) {
-                tabbedPane.remove(interactiveWindowsTab)
-            } else if (desktopType == "KDE" && !tabbedPane.components.contains(interactiveWindowsTab)) {
-                tabbedPane.add(interactiveWindowsTab)
-            }
-
-            menuScalingPanel.isVisible = windowModeEnabledCheckBox.isSelected
         }
 
         windowModeSettingsPanel = JPanel()
@@ -1297,14 +1289,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             environmentDoneButton = JButton(localize("Done"))
             environmentDoneButton.addActionListener {
-                if (environment != "kde" && !(environment == "linux" && desktopType == "KDE")) {
-                    tabbedPane.remove(interactiveWindowsTab)
-                } else if (!tabbedPane.components.contains(interactiveWindowsTab)) {
-                    tabbedPane.add(interactiveWindowsTab)
-                }
-
-                menuScalingPanel.isVisible = environment != "wayland" && !(environment == "linux" && isWaylandEnvironmentDefault)
-
                 dispose()
             }
 

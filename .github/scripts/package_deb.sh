@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 PACKAGE='shimelinux'
 VERSION='1.3.0'
 DEPENDS='openjdk-21-jre, libayatana-appindicator3-1'
