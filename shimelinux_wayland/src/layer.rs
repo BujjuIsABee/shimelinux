@@ -20,10 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{
-    cmp,
-    sync::{LazyLock, Mutex, OnceLock},
-};
+use std::sync::Mutex;
 
 use jni::{JValue, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
@@ -77,6 +74,7 @@ pub struct LayerState {
     pub compositor_state: CompositorState,
     pub registry_state: RegistryState,
     pub output_state: OutputState,
+    pub output_id: Option<u32>,
     pub seat_state: SeatState,
     pub cursor_state: CursorState,
     pub shm: Shm,
@@ -126,7 +124,9 @@ impl CompositorHandler for LayerState {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        set_screen_rect(&self.output_state, output);
+        if let Some(info) = self.output_state.info(output) {
+            self.output_id = Some(info.id);
+        }
     }
 
     fn surface_leave(
@@ -145,15 +145,17 @@ impl OutputHandler for LayerState {
         &mut self.output_state
     }
 
-    fn new_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, output: WlOutput) {
-        set_screen_rect(&self.output_state, &output);
+    fn new_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
+        update_screen_rect(&self.output_state);
     }
 
-    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, output: WlOutput) {
-        set_screen_rect(&self.output_state, &output);
+    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
+        update_screen_rect(&self.output_state);
     }
 
-    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
+    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
+        update_screen_rect(&self.output_state);
+    }
 }
 
 delegate_layer!(LayerState);
@@ -309,7 +311,20 @@ delegate_noop!(LayerState: ignore WlRegion);
 impl LayerState {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
-        self.layer.set_margin(bounds.y, 0, 0, bounds.x);
+
+        let (offset_x, offset_y) = self.output_state
+            .outputs()
+            .find_map(|output| {
+                let info = self.output_state.info(&output)?;
+                if self.output_id.is_some_and(|id| info.id == id) {
+                    info.logical_position
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_default();
+
+        self.layer.set_margin(bounds.y - offset_y, 0, 0, bounds.x - offset_x);
     }
 
     pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
@@ -346,8 +361,8 @@ impl LayerState {
     }
 
     fn draw(&mut self, qh: &QueueHandle<Self>) {
-        let width = cmp::max(1, self.image_bounds.width);
-        let height = cmp::max(1, self.image_bounds.height);
+        let width = self.image_bounds.width.max(1);
+        let height = self.image_bounds.height.max(1);
         let stride = width * 4;
 
         self.layer.set_size(width as u32, height as u32);
@@ -361,8 +376,8 @@ impl LayerState {
             // Draw the image to the canvas
             for y in 0..height {
                 for x in 0..width {
-                    let canvas_index = cmp::min(((y * width + x) * 4) as usize, canvas.len() - 1);
-                    let image_index = cmp::min((y * width + x) as usize, self.image_rgb.len() - 1);
+                    let canvas_index = (((y * width + x) * 4) as usize).min(canvas.len() - 1);
+                    let image_index = ((y * width + x) as usize).min(self.image_rgb.len() - 1);
                     canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
                 }
             }
@@ -392,7 +407,7 @@ impl LayerState {
         for y in 0..height as u32 {
             let mut start: Option<u32> = None;
             for x in 0..width as u32 {
-                let index = cmp::min((y * width as u32 + x) as usize, self.image_rgb.len() - 1);
+                let index = ((y * width as u32 + x) as usize).min(self.image_rgb.len() - 1);
                 let alpha = (self.image_rgb[index] >> 24) & 0xFF;
                 if alpha > 0 && start.is_none() {
                     start = Some(x);
@@ -412,25 +427,35 @@ impl LayerState {
     }
 }
 
-static OUTPUT_ID: OnceLock<u32> = OnceLock::new();
-static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
+pub static SCREEN_RECT: Mutex<Rect> = Mutex::new(Rect { x: 0, y: 0, width: 0, height: 0 });
 
-pub fn get_screen_rect() -> Rect {
-    let screen_rect = SCREEN_RECT.lock().unwrap();
-    screen_rect.clone()
-}
+fn update_screen_rect(output_state: &OutputState) {
+    let mut screen_rect = SCREEN_RECT.lock().unwrap();
+    let mut screen_rects: Vec<Rect> = Vec::new();
 
-fn set_screen_rect(output_state: &OutputState, output: &WlOutput) {
-    if let Some(info) = output_state.info(output) {
-        if *OUTPUT_ID.get_or_init(|| info.id) == info.id {
+    for output in output_state.outputs() {
+        if let Some(info) = output_state.info(&output) {
+            let (x, y) = info.logical_position.unwrap_or_default();
             let (width, height) = info.logical_size.unwrap_or_default();
-            let mut screen_rect = SCREEN_RECT.lock().unwrap();
-            *screen_rect = Rect {
-                x: 0,
-                y: 0,
+
+            screen_rects.push(Rect {
+                x,
+                y,
                 width,
                 height,
-            };
+            });
         }
+    }
+
+    let left = screen_rects.iter().map(|rect| rect.x).min().unwrap_or_default();
+    let top = screen_rects.iter().map(|rect| rect.y).min().unwrap_or_default();
+    let right = screen_rects.iter().map(|rect| rect.x + rect.width).max().unwrap_or_default();
+    let bottom = screen_rects.iter().map(|rect| rect.y + rect.height).max().unwrap_or_default();
+
+    *screen_rect = Rect {
+        x: left,
+        y: top,
+        width: right - left,
+        height: bottom - top,
     }
 }

@@ -22,14 +22,17 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.desktopType
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
+import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.kde.KWin
-import java.awt.GraphicsEnvironment
 import java.awt.Point
-import java.awt.Toolkit
+import java.awt.Rectangle
+import kotlin.system.exitProcess
 
 /**
  * An environment that uses [WaylandLib] to get the cursor position and screen bounds
@@ -45,14 +48,26 @@ class WaylandEnvironment : Environment() {
 
     override fun tick() {
         // Get screen bounds
-        var (x, y, width, height) = WaylandLib.getScreenRect()
-        val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-        val insets = Toolkit.getDefaultToolkit().getScreenInsets(gc)
+        if (!getProperty("OverrideScreenDimensions", false)) {
+            val (x, y, width, height) = try {
+                WaylandLib.getScreenRect()
+            } catch (e: Exception) {
+                Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+                exitProcess(0)
+            }
 
-        x += insets.left
-        y += insets.top
-        width -= (insets.left + insets.right)
-        height -= (insets.top + insets.bottom)
+            screenRect = Rectangle(x, y, width, height)
+            screen.set(screenRect)
+        } else {
+            screenRect = Rectangle(
+                getProperty("ScreenX", screen.left),
+                getProperty("ScreenY", screen.top),
+                getProperty("ScreenWidth", screen.width),
+                getProperty("ScreenHeight", screen.height)
+            )
+
+            screen.set(screenRect)
+        }
 
         // Get cursor
         val cursorPosition = when (desktopType) {
@@ -66,8 +81,6 @@ class WaylandEnvironment : Environment() {
             else -> absoluteCursorPosition
         }
 
-        screenRect.setBounds(x, y, width, height)
-        screen.set(screenRect)
         cursor.set(cursorPosition ?: Point(0, 0))
 
         activeIE.isVisible = false

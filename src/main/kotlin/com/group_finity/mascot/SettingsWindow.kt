@@ -27,14 +27,12 @@ import dorkbox.desktop.Desktop
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
-import java.awt.Dialog
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.Frame
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.awt.GridLayout
 import java.awt.Image
 import java.awt.Insets
 import java.net.URI
@@ -62,7 +60,6 @@ import javax.swing.JScrollPane
 import javax.swing.JSlider
 import javax.swing.JSpinner
 import javax.swing.JTabbedPane
-import javax.swing.JTextArea
 import javax.swing.JTextField
 import javax.swing.SwingConstants
 import javax.swing.SwingUtilities
@@ -131,10 +128,23 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val matchGtkThemeButton: JButton
     private val resetFlatThemeButton: JButton
     private val gtkThemeCard: JPanel
-    private val windowModeTab: JPanel
-    private val windowModePanel: JPanel
-    private val windowModeEnabledCheckBox: JCheckBox
-    private val windowModeSettingsPanel: JPanel
+    private val environmentTab: JPanel
+    private val environmentComboBox: JComboBox<String>
+    private val environmentCardsPanel: JPanel
+    private val regularEnvironmentCard: JPanel
+    private val regularEnvironmentSettingsPanel: JPanel
+    private val overrideScreenDimensionsCheckBox: JCheckBox
+    private val screenDimensionsPanel: JPanel
+    private val screenPositionPanel: JPanel
+    private val screenPositionRightPanel: JPanel
+    private val screenXSpinner: JSpinner
+    private val screenYSpinner: JSpinner
+    private val screenSizePanel: JPanel
+    private val screenSizeRightPanel: JPanel
+    private val screenWidthSpinner: JSpinner
+    private val screenHeightSpinner: JSpinner
+    private val virtualEnvironmentCard: JPanel
+    private val virtualEnvironmentSettingsPanel: JPanel
     private val windowDimensionsPanel: JPanel
     private val windowDimensionsRightPanel: JPanel
     private val widthSpinner: JSpinner
@@ -153,8 +163,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val changeWindowBackgroundImageButton: JButton
     private val windowBackgroundModeComboBox: JComboBox<String>
     private val removeWindowBackgroundImageButton: JButton
-    private val windowModeFooterPanel: JPanel
-    private val environmentSettingsButton: JButton
     private val aboutTab: JPanel
     private val aboutIcon: JLabel
     private val titleLabel: JLabel
@@ -175,6 +183,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var menuScaling = getProperty("MenuScaling", 1)
     private var theme = getProperty("Theme", "FlatDark")
     private var environment = getProperty("Environment", "linux")
+    private var overrideScreenDimensions = getProperty("OverrideScreenDimensions", false)
+    private var screenX = getProperty("ScreenX", NativeFactory.instance.environment.screen.left)
+    private var screenY = getProperty("ScreenY", NativeFactory.instance.environment.screen.top)
+    private var screenWidth = getProperty("ScreenWidth", NativeFactory.instance.environment.screen.width)
+    private var screenHeight = getProperty("ScreenHeight", NativeFactory.instance.environment.screen.height)
     private var windowSize = getProperty("WindowSize", "600x500")
     private var windowBackgroundColor = getProperty("Background", "#00FF00")
     private var windowBackgroundImage = getProperty("BackgroundImage", "")
@@ -205,6 +218,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setIconImage(icon)
         title = localize("Settings")
         layout = BorderLayout()
+
+        if (isWaylandEnvironmentDefault) {
+            isResizable = false
+        }
 
         tabbedPane = object : JTabbedPane() {
             override fun getPreferredSize() = super.preferredSize.apply { width = 450 }
@@ -723,27 +740,134 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.add(menuScalingPanel, BorderLayout.NORTH)
         menuTab.add(themePanel, BorderLayout.CENTER)
 
-        windowModeTab = JPanel(BorderLayout())
-        windowModeTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        environmentTab = JPanel()
+        environmentTab.layout = BoxLayout(environmentTab, BoxLayout.Y_AXIS)
+        environmentTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
-        windowModePanel = JPanel()
-        windowModePanel.layout = BoxLayout(windowModePanel, BoxLayout.Y_AXIS)
+        val environmentCardLayout = CardLayout()
 
-        windowModeEnabledCheckBox = JCheckBox(localize("WindowedModeEnabled"))
-        windowModeEnabledCheckBox.isSelected = environment == "virtual"
-        windowModeEnabledCheckBox.addActionListener {
-            environment = if (windowModeEnabledCheckBox.isSelected) "virtual" else "linux"
-            widthSpinner.isEnabled = windowModeEnabledCheckBox.isSelected
-            heightSpinner.isEnabled = windowModeEnabledCheckBox.isSelected
-            windowBackgroundColorTextField.isEnabled = windowModeEnabledCheckBox.isSelected
-            windowBackgroundColorButton.isEnabled = windowModeEnabledCheckBox.isSelected
-            changeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected
-            windowBackgroundModeComboBox.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
-            removeWindowBackgroundImageButton.isEnabled = windowModeEnabledCheckBox.isSelected && windowBackgroundImage != ""
+        environmentCardsPanel = JPanel(environmentCardLayout)
+
+        environmentComboBox = JComboBox()
+        environmentComboBox.addItem(localize("AutomaticEnvironment"))
+        if (desktopType == "KDE") {
+            environmentComboBox.addItem(localize("KdeEnvironment"))
+        }
+        if (sessionType == "wayland") {
+            environmentComboBox.addItem(localize("WaylandEnvironment"))
+        }
+        environmentComboBox.addItem(localize("GenericEnvironment"))
+        environmentComboBox.addItem(localize("VirtualEnvironment"))
+        environmentComboBox.addActionListener {
+            environment = when (environmentComboBox.selectedItem as String) {
+                localize("AutomaticEnvironment") -> "linux"
+                localize("KdeEnvironment") -> "kde"
+                localize("WaylandEnvironment") -> "wayland"
+                localize("GenericEnvironment") -> "generic"
+                localize("VirtualEnvironment") -> "virtual"
+                else -> "generic"
+            }
+
+            if (environment == "virtual") {
+                environmentCardLayout.show(environmentCardsPanel, "virtual")
+            } else {
+                environmentCardLayout.show(environmentCardsPanel, "regular")
+            }
         }
 
-        windowModeSettingsPanel = JPanel()
-        windowModeSettingsPanel.layout = BoxLayout(windowModeSettingsPanel, BoxLayout.Y_AXIS)
+        regularEnvironmentCard = JPanel(BorderLayout())
+
+        regularEnvironmentSettingsPanel = JPanel()
+        regularEnvironmentSettingsPanel.layout = BoxLayout(regularEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
+
+        overrideScreenDimensionsCheckBox = JCheckBox(localize("OverrideScreenDimensions"))
+        overrideScreenDimensionsCheckBox.isSelected = overrideScreenDimensions
+        overrideScreenDimensionsCheckBox.horizontalAlignment = SwingConstants.LEFT
+        overrideScreenDimensionsCheckBox.addActionListener {
+            overrideScreenDimensions = overrideScreenDimensionsCheckBox.isSelected
+            screenDimensionsPanel.isVisible = overrideScreenDimensions
+        }
+
+        screenDimensionsPanel = JPanel()
+        screenDimensionsPanel.layout = BoxLayout(screenDimensionsPanel, BoxLayout.Y_AXIS)
+        screenDimensionsPanel.alignmentX = LEFT_ALIGNMENT
+        screenDimensionsPanel.isVisible = overrideScreenDimensions
+
+        screenPositionPanel = JPanel(BorderLayout())
+        screenPositionPanel.alignmentX = LEFT_ALIGNMENT
+
+        screenPositionRightPanel = JPanel()
+        screenPositionRightPanel.layout = BoxLayout(screenPositionRightPanel, BoxLayout.X_AXIS)
+
+        screenXSpinner = object : JSpinner() {
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+        }
+        screenXSpinner.value = screenX
+        screenXSpinner.addChangeListener {
+            screenX = screenXSpinner.value as Int
+        }
+
+        screenYSpinner = object : JSpinner() {
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+        }
+        screenYSpinner.value = screenY
+        screenYSpinner.addChangeListener {
+            screenY = screenYSpinner.value as Int
+        }
+
+        screenPositionRightPanel.add(screenXSpinner)
+        screenPositionRightPanel.add(Box.createHorizontalStrut(3))
+        screenPositionRightPanel.add(JLabel("x"))
+        screenPositionRightPanel.add(Box.createHorizontalStrut(3))
+        screenPositionRightPanel.add(screenYSpinner)
+
+        screenPositionPanel.add(JLabel(localize("Position")), BorderLayout.WEST)
+        screenPositionPanel.add(screenPositionRightPanel, BorderLayout.EAST)
+
+        screenSizePanel = JPanel(BorderLayout())
+        screenSizePanel.alignmentX = LEFT_ALIGNMENT
+
+        screenSizeRightPanel = JPanel()
+        screenSizeRightPanel.layout = BoxLayout(screenSizeRightPanel, BoxLayout.X_AXIS)
+
+        screenWidthSpinner = object : JSpinner() {
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+        }
+        screenWidthSpinner.value = screenWidth
+        screenWidthSpinner.addChangeListener {
+            screenWidth = screenWidthSpinner.value as Int
+        }
+
+        screenHeightSpinner = object : JSpinner() {
+            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+        }
+        screenHeightSpinner.value = screenHeight
+        screenHeightSpinner.addChangeListener {
+            screenHeight = screenHeightSpinner.value as Int
+        }
+
+        screenSizeRightPanel.add(screenWidthSpinner)
+        screenSizeRightPanel.add(Box.createHorizontalStrut(3))
+        screenSizeRightPanel.add(JLabel("x"))
+        screenSizeRightPanel.add(Box.createHorizontalStrut(3))
+        screenSizeRightPanel.add(screenHeightSpinner)
+
+        screenSizePanel.add(JLabel(localize("Size")), BorderLayout.WEST)
+        screenSizePanel.add(screenSizeRightPanel, BorderLayout.EAST)
+
+        screenDimensionsPanel.add(screenPositionPanel)
+        screenDimensionsPanel.add(Box.createVerticalStrut(3))
+        screenDimensionsPanel.add(screenSizePanel)
+
+        regularEnvironmentSettingsPanel.add(overrideScreenDimensionsCheckBox)
+        regularEnvironmentSettingsPanel.add(screenDimensionsPanel)
+
+        regularEnvironmentCard.add(regularEnvironmentSettingsPanel, BorderLayout.NORTH)
+
+        virtualEnvironmentCard = JPanel(BorderLayout())
+
+        virtualEnvironmentSettingsPanel = JPanel()
+        virtualEnvironmentSettingsPanel.layout = BoxLayout(virtualEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
 
         windowDimensionsPanel = JPanel(BorderLayout())
         windowDimensionsPanel.alignmentX = LEFT_ALIGNMENT
@@ -754,7 +878,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val (windowWidth, windowHeight) = windowSize.split("x").map { it.toIntOrNull() ?: 0 }
 
         widthSpinner = JSpinner()
-        widthSpinner.isEnabled = environment == "virtual"
         widthSpinner.value = windowWidth
         widthSpinner.addChangeListener {
             val (_, windowHeight) = windowSize.split("x")
@@ -762,7 +885,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         heightSpinner = JSpinner()
-        heightSpinner.isEnabled = environment == "virtual"
         heightSpinner.value = windowHeight
         heightSpinner.addChangeListener {
             val (windowWidth, _) = windowSize.split("x")
@@ -791,7 +913,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundColorTextField = object : JTextField(windowBackgroundColor) {
             override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
         }
-        windowBackgroundColorTextField.isEnabled = environment == "virtual"
         windowBackgroundColorTextField.addActionListener {
             val color = runCatching { Color.decode(windowBackgroundColorTextField.text) }.getOrNull()
 
@@ -815,7 +936,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         windowBackgroundColorButton = JButton(localize("Change"))
-        windowBackgroundColorButton.isEnabled = environment == "virtual"
         windowBackgroundColorButton.preferredSize = removeInteractiveWindowButton.preferredSize
         windowBackgroundColorButton.addActionListener {
             val color = JColorChooser.showDialog(
@@ -861,7 +981,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundImagePreviewPanel.add(windowBackgroundImagePreview)
 
         changeWindowBackgroundImageButton = JButton(localize("Change"))
-        changeWindowBackgroundImageButton.isEnabled = environment == "virtual"
         changeWindowBackgroundImageButton.addActionListener {
             val dialog = JFileChooser()
             dialog.dialogTitle = localize("ChooseBackgroundImage")
@@ -875,7 +994,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         windowBackgroundModeComboBox = JComboBox()
-        windowBackgroundModeComboBox.isEnabled = environment == "virtual" && windowBackgroundImage != ""
+        windowBackgroundModeComboBox.isEnabled = windowBackgroundImage != ""
         windowBackgroundModeComboBox.addItem(localize("BackgroundModeCenter"))
         windowBackgroundModeComboBox.addItem(localize("BackgroundModeFit"))
         windowBackgroundModeComboBox.addItem(localize("BackgroundModeStretch"))
@@ -899,7 +1018,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         removeWindowBackgroundImageButton = JButton(localize("Remove"))
-        removeWindowBackgroundImageButton.isEnabled = environment == "virtual" && windowBackgroundImage != ""
+        removeWindowBackgroundImageButton.isEnabled = windowBackgroundImage != ""
         removeWindowBackgroundImageButton.addActionListener {
             windowBackgroundImage = ""
             refreshBackgroundImagePreview()
@@ -933,26 +1052,27 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundPanel.add(Box.createVerticalStrut(3))
         windowBackgroundPanel.add(windowBackgroundImagePanel)
 
-        windowModeSettingsPanel.add(windowDimensionsPanel)
-        windowModeSettingsPanel.add(JLabel(localize("Background")))
-        windowModeSettingsPanel.add(windowBackgroundPanel)
+        virtualEnvironmentSettingsPanel.add(windowDimensionsPanel)
+        virtualEnvironmentSettingsPanel.add(JLabel(localize("Background")))
+        virtualEnvironmentSettingsPanel.add(windowBackgroundPanel)
 
-        windowModePanel.add(windowModeEnabledCheckBox)
-        windowModePanel.add(windowModeSettingsPanel)
+        virtualEnvironmentCard.add(virtualEnvironmentSettingsPanel, BorderLayout.NORTH)
 
-        windowModeFooterPanel = JPanel(FlowLayout())
+        environmentCardsPanel.add(regularEnvironmentCard, "regular")
+        environmentCardsPanel.add(virtualEnvironmentCard, "virtual")
 
-        environmentSettingsButton = JButton(localize("EnvironmentSettings"))
-        environmentSettingsButton.addActionListener {
-            val dialog = EnvironmentSettingsWindow(this, true)
-            dialog.isVisible = true
-            windowModeEnabledCheckBox.isSelected = environment == "virtual"
+        environmentComboBox.selectedItem = when (environment) {
+            "linux" -> localize("AutomaticEnvironment")
+            "kde" if (desktopType == "KDE") -> localize("KdeEnvironment")
+            "wayland" if (sessionType == "wayland") -> localize("WaylandEnvironment")
+            "generic" -> localize("GenericEnvironment")
+            "virtual" -> localize("VirtualEnvironment")
+            else -> localize("GenericEnvironment")
         }
 
-        windowModeFooterPanel.add(environmentSettingsButton)
-
-        windowModeTab.add(windowModePanel, BorderLayout.NORTH)
-        windowModeTab.add(windowModeFooterPanel, BorderLayout.SOUTH)
+        environmentTab.add(environmentComboBox)
+        environmentTab.add(Box.createVerticalStrut(3))
+        environmentTab.add(environmentCardsPanel)
 
         aboutTab = JPanel()
         aboutTab.layout = BoxLayout(aboutTab, BoxLayout.Y_AXIS)
@@ -1003,7 +1123,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
         tabbedPane.addTab(localize("Menu"), menuTab)
-        tabbedPane.addTab(localize("WindowMode"), windowModeTab)
+        tabbedPane.addTab(localize("Environment"), environmentTab)
         tabbedPane.addTab(localize("About"), aboutTab)
 
         footerPanel = JPanel(FlowLayout())
@@ -1090,6 +1210,26 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 Main.properties.setProperty("MenuScaling", "1")
                 isRestartRequired = true
             }
+        }
+
+        if (getProperty("OverrideScreenDimensions", false) != overrideScreenDimensions) {
+            Main.properties.setProperty("OverrideScreenDimensions", overrideScreenDimensions.toString())
+        }
+
+        if (getProperty("ScreenX", NativeFactory.instance.environment.screen.left) != screenX) {
+            Main.properties.setProperty("ScreenX", screenX.toString())
+        }
+
+        if (getProperty("ScreenY", NativeFactory.instance.environment.screen.top) != screenY) {
+            Main.properties.setProperty("ScreenY", screenY.toString())
+        }
+
+        if (getProperty("ScreenWidth", NativeFactory.instance.environment.screen.width) != screenWidth) {
+            Main.properties.setProperty("ScreenWidth", screenWidth.toString())
+        }
+
+        if (getProperty("ScreenHeight", NativeFactory.instance.environment.screen.height) != screenHeight) {
+            Main.properties.setProperty("ScreenHeight", screenHeight.toString())
         }
 
         if (getProperty("WindowSize", "600x500") != windowSize) {
@@ -1187,124 +1327,5 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowBackgroundImagePreview.icon = ImageIcon(image)
         windowBackgroundImagePreview.preferredSize = Dimension(image.getWidth(null), image.getHeight(null))
-    }
-
-    inner class EnvironmentSettingsWindow(parent: Dialog?, modal: Boolean) : JDialog(parent, modal) {
-        private val environmentSettingsPanel: JPanel
-        private val environmentOptionsPanel: JPanel
-        private val environmentButtonGroup: ButtonGroup
-        private val genericEnvironmentRadioButton: JRadioButton
-        private val kdeEnvironmentRadioButton: JRadioButton
-        private val waylandEnvironmentRadioButton: JRadioButton
-        private val automaticEnvironmentRadioButton: JRadioButton
-        private val environmentDescriptionTextArea: JTextArea
-        private val environmentDescriptionScrollPane: JScrollPane
-        private val environmentSettingsFooterPanel: JPanel
-        private val environmentDoneButton: JButton
-        private val environmentCancelButton: JButton
-
-        private val initialEnvironment = environment
-
-        init {
-            title = localize("EnvironmentSettings")
-
-            environmentSettingsPanel = JPanel(GridLayout(0, 2))
-
-            environmentOptionsPanel = JPanel()
-            environmentOptionsPanel.border = BorderFactory.createTitledBorder(localize("Options"))
-            environmentOptionsPanel.layout = BoxLayout(environmentOptionsPanel, BoxLayout.Y_AXIS)
-
-            environmentButtonGroup = ButtonGroup()
-
-            genericEnvironmentRadioButton = JRadioButton(localize("GenericEnvironment"))
-            genericEnvironmentRadioButton.isSelected = environment == "generic"
-            genericEnvironmentRadioButton.addActionListener {
-                if (genericEnvironmentRadioButton.isSelected) {
-                    environment = "generic"
-                    environmentDescriptionTextArea.text = localize("GenericEnvironmentDescription")
-                }
-            }
-
-            kdeEnvironmentRadioButton = JRadioButton(localize("KdeEnvironment"))
-            kdeEnvironmentRadioButton.isSelected = environment == "kde"
-            kdeEnvironmentRadioButton.addActionListener {
-                if (kdeEnvironmentRadioButton.isSelected) {
-                    environment = "kde"
-                    environmentDescriptionTextArea.text = localize("KdeEnvironmentDescription")
-                }
-            }
-
-            waylandEnvironmentRadioButton = JRadioButton(localize("WaylandEnvironment"))
-            waylandEnvironmentRadioButton.isSelected = environment == "wayland"
-            waylandEnvironmentRadioButton.addActionListener {
-                if (waylandEnvironmentRadioButton.isSelected) {
-                    environment = "wayland"
-                    environmentDescriptionTextArea.text = localize("WaylandEnvironmentDescription")
-                }
-            }
-
-            automaticEnvironmentRadioButton = JRadioButton(localize("AutomaticEnvironment"))
-            automaticEnvironmentRadioButton.isSelected = environment == "linux" || environment == "virtual"
-            automaticEnvironmentRadioButton.addActionListener {
-                if (automaticEnvironmentRadioButton.isSelected) {
-                    environment = "linux"
-                    environmentDescriptionTextArea.text = localize("AutomaticEnvironmentDescription")
-                }
-            }
-
-            environmentButtonGroup.add(genericEnvironmentRadioButton)
-            environmentButtonGroup.add(kdeEnvironmentRadioButton)
-            environmentButtonGroup.add(waylandEnvironmentRadioButton)
-            environmentButtonGroup.add(automaticEnvironmentRadioButton)
-
-            environmentOptionsPanel.add(genericEnvironmentRadioButton)
-            if (desktopType == "KDE") {
-                environmentOptionsPanel.add(kdeEnvironmentRadioButton)
-            }
-            if (sessionType == "wayland") {
-                environmentOptionsPanel.add(waylandEnvironmentRadioButton)
-            }
-            environmentOptionsPanel.add(automaticEnvironmentRadioButton)
-
-            environmentDescriptionTextArea = JTextArea()
-            environmentDescriptionTextArea.preferredSize = Dimension(200, 200)
-            environmentDescriptionTextArea.lineWrap = true
-            environmentDescriptionTextArea.wrapStyleWord = true
-            environmentDescriptionTextArea.isEditable = false
-            environmentDescriptionTextArea.text = when (environment) {
-                "generic" -> localize("GenericEnvironmentDescription")
-                "kde" -> localize("KdeEnvironmentDescription")
-                "wayland" -> localize("WaylandEnvironmentDescription")
-                "linux" -> localize("AutomaticEnvironmentDescription")
-                else -> localize("AutomaticEnvironmentDescription")
-            }
-
-            environmentDescriptionScrollPane = JScrollPane(environmentDescriptionTextArea)
-            environmentDescriptionScrollPane.border = BorderFactory.createTitledBorder(localize("Description"))
-
-            environmentSettingsPanel.add(environmentOptionsPanel)
-            environmentSettingsPanel.add(environmentDescriptionScrollPane)
-
-            environmentSettingsFooterPanel = JPanel(FlowLayout())
-
-            environmentDoneButton = JButton(localize("Done"))
-            environmentDoneButton.addActionListener {
-                dispose()
-            }
-
-            environmentCancelButton = JButton(localize("Cancel"))
-            environmentCancelButton.addActionListener {
-                environment = initialEnvironment
-                dispose()
-            }
-
-            environmentSettingsFooterPanel.add(environmentDoneButton)
-            environmentSettingsFooterPanel.add(environmentCancelButton)
-
-            add(environmentSettingsPanel, BorderLayout.NORTH)
-            add(environmentSettingsFooterPanel, BorderLayout.SOUTH)
-            pack()
-            setLocationRelativeTo(null)
-        }
     }
 }

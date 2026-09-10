@@ -27,6 +27,7 @@ import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.isWaylandEnvironmentDefault
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import dorkbox.desktop.Desktop
@@ -94,6 +95,10 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BorderLayout()
         rootPane.border = BorderFactory.createEmptyBorder(10, 10, 0, 10)
+
+        if (isWaylandEnvironmentDefault) {
+            isResizable = false
+        }
 
         listPanel = JPanel(GridLayout(1, 2, 0, 0))
 

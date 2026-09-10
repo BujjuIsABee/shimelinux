@@ -114,9 +114,8 @@ abstract class Environment {
         fun updateScreenRect() {
             var screenRect = Rectangle()
             val screenRects = hashMapOf<String, Rectangle>()
-            val devices = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
 
-            for (device in devices) {
+            for (device in GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices) {
                 screenRects[device.iDstring] = device.defaultConfiguration.bounds
                 screenRect = screenRect.union(device.defaultConfiguration.bounds)
             }

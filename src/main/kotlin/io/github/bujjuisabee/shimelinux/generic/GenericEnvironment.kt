@@ -27,6 +27,7 @@ import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
 import java.awt.GraphicsEnvironment
 import java.awt.Point
+import java.awt.Rectangle
 
 /**
  * A cross-platform environment
@@ -43,9 +44,20 @@ class GenericEnvironment : Environment() {
     override fun tick() {
         super.tick()
 
-        if (!getProperty("Multiscreen", true)) {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screen.set(gc.bounds)
+        if (getProperty("OverrideScreenDimensions", false)) {
+            screenRect = Rectangle(
+                getProperty("ScreenX", screen.left),
+                getProperty("ScreenY", screen.top),
+                getProperty("ScreenWidth", screen.width),
+                getProperty("ScreenHeight", screen.height)
+            )
+
+            screen.set(screenRect)
+        } else {
+            if (!getProperty("Multiscreen", true)) {
+                val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+                screen.set(gc.bounds)
+            }
         }
 
         activeIE.isVisible = false

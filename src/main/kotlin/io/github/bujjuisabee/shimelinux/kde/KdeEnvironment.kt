@@ -46,7 +46,16 @@ class KdeEnvironment : Environment() {
     override fun tick() {
         super.tick()
 
-        if (!getProperty("Multiscreen", true)) {
+        if (getProperty("OverrideScreenDimensions", false)) {
+            screenRect = Rectangle(
+                getProperty("ScreenX", screen.left),
+                getProperty("ScreenY", screen.top),
+                getProperty("ScreenWidth", screen.width),
+                getProperty("ScreenHeight", screen.height)
+            )
+
+            screen.set(screenRect)
+        } else if (!getProperty("Multiscreen", true)) {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
             screen.set(gc.bounds)
         }

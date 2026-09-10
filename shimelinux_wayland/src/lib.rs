@@ -20,7 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::{cmp, sync::mpsc, thread};
+use std::{sync::mpsc, thread};
 
 use jni::{
     EnvUnowned,
@@ -41,7 +41,7 @@ use smithay_client_toolkit::{
 };
 use wayland_client::{Connection, globals::registry_queue_init};
 
-use crate::layer::{CursorState, LayerState, get_screen_rect};
+use crate::layer::{CursorState, LayerState, SCREEN_RECT};
 
 mod layer;
 
@@ -86,7 +86,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
                 .expect("Failed to get layer shell");
             let shm = Shm::bind(&globals, &qh)
                 .expect("Failed to get shm");
-            let pool = SlotPool::new(256 * 256 * 4, &shm)
+            let pool = SlotPool::new(128 * 128 * 4, &shm)
                 .expect("Failed to create pool");
 
             let surface = compositor_state.create_surface(&qh);
@@ -110,6 +110,7 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
                 compositor_state,
                 registry_state: RegistryState::new(&globals),
                 output_state: OutputState::new(&globals, &qh),
+                output_id: None,
                 seat_state: SeatState::new(&globals, &qh),
                 cursor_state: CursorState::default(),
                 shm,
@@ -168,10 +169,10 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
             let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
             sender
                 .send(Event::SetBounds(Rect {
-                    x: cmp::max(-width + 1, x),
-                    y: cmp::max(-height + 1, y),
-                    width: cmp::max(1, width),
-                    height: cmp::max(1, height),
+                    x: x.max(-width + 1),
+                    y: y.max(-height + 1),
+                    width: width.max(1),
+                    height: height.max(1),
                 }))
                 .expect("Failed to send SetBounds event");
 
@@ -245,9 +246,9 @@ pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_
 ) -> JIntArray<'caller> {
     unowned_env
         .with_env(|env| -> jni::errors::Result<_> {
-            let screen_rect = get_screen_rect();
-
+            let screen_rect = SCREEN_RECT.lock().unwrap();
             let array = JIntArray::new(env, 4).expect("Failed to create array");
+
             array
                 .set_region(
                     env,
