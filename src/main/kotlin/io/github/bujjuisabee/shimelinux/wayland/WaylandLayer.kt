@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.desktopType
-import com.group_finity.mascot.localize
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Point
@@ -36,7 +35,7 @@ import kotlin.system.exitProcess
  *
  * @author Bujju
  */
-class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
+class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long
     private var isDisposed = false
     private var previousCursorPosition = Point(0, 0)
@@ -45,9 +44,9 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
 
     init {
         try {
-            senderPtr = WaylandLib.createLayer(receiver)
-        } catch (e: Exception) {
-            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+            senderPtr = WaylandLib.createLayer(mouseEventReceiver)
+        } catch (e: Throwable) {
+            Main.showError("Rust panic", e)
             exitProcess(0)
         }
     }
@@ -67,8 +66,8 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
 
         try {
             WaylandLib.setBounds(senderPtr, x, y, width, height)
-        } catch (e: Exception) {
-            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+        } catch (_: Throwable) {
+            Main.showError("Rust panic")
             exitProcess(0)
         }
     }
@@ -78,8 +77,8 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
 
         try {
             WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
-        } catch (e: Exception) {
-            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+        } catch (_: Throwable) {
+            Main.showError("Rust panic")
             exitProcess(0)
         }
     }
@@ -92,8 +91,8 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
 
         try {
             WaylandLib.setImage(senderPtr, rgb, useMask)
-        } catch (e: Exception) {
-            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+        } catch (_: Throwable) {
+            Main.showError("Rust panic")
             exitProcess(0)
         }
     }
@@ -108,8 +107,8 @@ class WaylandLayer(receiver: WaylandLib.MouseEventReceiver, private val useMask:
 
         try {
             WaylandLib.dispose(senderPtr)
-        } catch (e: Exception) {
-            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+        } catch (_: Throwable) {
+            Main.showError("Rust panic")
             exitProcess(0)
         }
 

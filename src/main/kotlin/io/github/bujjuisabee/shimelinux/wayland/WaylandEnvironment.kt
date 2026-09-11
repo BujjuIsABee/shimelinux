@@ -28,7 +28,6 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
 import com.group_finity.mascot.getProperty
-import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.kde.KWin
 import java.awt.Point
 import java.awt.Rectangle
@@ -51,8 +50,8 @@ class WaylandEnvironment : Environment() {
         if (!getProperty("OverrideScreenDimensions", false)) {
             val (x, y, width, height) = try {
                 WaylandLib.getScreenRect()
-            } catch (e: Exception) {
-                Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+            } catch (e: Throwable) {
+                Main.showError("Rust panic", e)
                 exitProcess(0)
             }
 

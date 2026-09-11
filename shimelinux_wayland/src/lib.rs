@@ -23,9 +23,9 @@
 use std::{sync::mpsc, thread};
 
 use jni::{
-    EnvUnowned,
+    Env, bind_java_type,
     elements::ReleaseMode,
-    objects::{JClass, JIntArray, JObject},
+    objects::JIntArray,
     sys::{jboolean, jint, jlong},
 };
 use smithay_client_toolkit::{
@@ -66,203 +66,207 @@ enum Event {
     Dispose(),
 }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_createLayer<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    object: JObject<'caller>,
-) -> jlong {
-    unowned_env
-        .with_env(|env| -> jni::errors::Result<_> {
-            let (sender, receiver) = mpsc::channel::<Event>();
+bind_java_type! {
+    WaylandLib => io.github.bujjuisabee.shimelinux.wayland.WaylandLib,
+    type_map {
+        MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
+    },
+    native_methods {
+        extern fn create_layer(mouse_receiver: MouseEventReceiver) -> jlong,
+        extern fn set_bounds(sender_ptr: jlong, x: jint, y: jint, width: jint, height: jint),
+        extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
+        extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
+        extern fn dispose(sender_ptr: jlong),
+        extern fn get_screen_rect() -> [jint],
+    },
+}
 
-            let connection = Connection::connect_to_env().unwrap();
-            let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
-            let qh = event_queue.handle();
+bind_java_type! {
+    MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
+    methods {
+        fn update_cursor(
+            left_pressed: jboolean,
+            right_pressed: jboolean,
+            left_released: jboolean,
+            right_released: jboolean,
+            position_x: jint,
+            position_y: jint,
+        )
+    },
+}
 
-            let compositor_state = CompositorState::bind(&globals, &qh)
-                .expect("Failed to get compositor state");
-            let layer_shell: LayerShell = LayerShell::bind(&globals, &qh)
-                .expect("Failed to get layer shell");
-            let shm = Shm::bind(&globals, &qh)
-                .expect("Failed to get shm");
-            let pool = SlotPool::new(128 * 128 * 4, &shm)
-                .expect("Failed to create pool");
+impl WaylandLibNativeInterface for WaylandLibAPI {
+    type Error = jni::errors::Error;
 
-            let surface = compositor_state.create_surface(&qh);
-            let layer = layer_shell.create_layer_surface(
-                &qh,
-                surface,
-                Layer::Overlay,
-                Some("shimelinux"),
-                None,
-            );
+    fn create_layer<'local>(
+        env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+        mouse_receiver: MouseEventReceiver<'local>,
+    ) -> jni::errors::Result<jlong> {
+        let (sender, receiver) = mpsc::channel::<Event>();
 
-            layer.set_exclusive_zone(-1);
-            layer.set_anchor(Anchor::TOP | Anchor::LEFT);
-            layer.set_size(1, 1);
-            layer.commit();
+        let connection = Connection::connect_to_env().unwrap();
+        let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
+        let qh = event_queue.handle();
 
-            let object_ref = env.new_global_ref(object).unwrap();
-            let mut layer_state = LayerState {
-                object: object_ref,
+        let compositor = CompositorState::bind(&globals, &qh).unwrap();
+        let surface = compositor.create_surface(&qh);
+        let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
+        let layer = layer_shell.create_layer_surface(
+            &qh,
+            surface,
+            Layer::Overlay,
+            Some("shimelinux"),
+            None,
+        );
 
-                compositor_state,
-                registry_state: RegistryState::new(&globals),
-                output_state: OutputState::new(&globals, &qh),
-                output_id: None,
-                seat_state: SeatState::new(&globals, &qh),
-                cursor_state: CursorState::default(),
-                shm,
-                pool,
+        layer.set_exclusive_zone(-1);
+        layer.set_anchor(Anchor::TOP | Anchor::LEFT);
+        layer.set_size(1, 1);
+        layer.commit();
 
-                layer,
-                layer_mask: Vec::new(),
-                configured: false,
-                image_rgb: Vec::new(),
-                image_bounds: Rect::default(),
-            };
+        let shm = Shm::bind(&globals, &qh).expect("Failed to get shm");
+        let pool = SlotPool::new(128 * 128 * 4, &shm).expect("Failed to create pool");
+        let mut layer_state = LayerState {
+            mouse_receiver: env.new_global_ref(mouse_receiver).unwrap(),
 
-            thread::spawn(move || {
-                'outer: loop {
-                    let _ = event_queue.blocking_dispatch(&mut layer_state);
+            compositor_state: compositor,
+            registry_state: RegistryState::new(&globals),
+            output_state: OutputState::new(&globals, &qh),
+            output_id: None,
+            seat_state: SeatState::new(&globals, &qh),
+            cursor_state: CursorState::default(),
+            shm,
+            pool,
 
-                    // Handle events
-                    while let Ok(event) = receiver.try_recv() {
-                        match event {
-                            Event::SetBounds(bounds) => {
-                                layer_state.set_bounds(bounds);
-                            }
-                            Event::SetImage(rgb, update_mask) => {
-                                layer_state.set_image(rgb, update_mask);
-                            }
-                            Event::SetCursor(use_hand) => {
-                                layer_state.set_cursor(&connection, &qh, use_hand);
-                            }
-                            Event::Dispose() => {
-                                layer_state.dispose();
-                                layer_state.object.into_raw();
-                                break 'outer;
-                            }
+            layer,
+            layer_mask: Vec::new(),
+            configured: false,
+            image_rgb: Vec::new(),
+            image_bounds: Rect::default(),
+        };
+
+        thread::spawn(move || {
+            'outer: loop {
+                let _ = event_queue.blocking_dispatch(&mut layer_state);
+
+                // Handle events
+                while let Ok(event) = receiver.try_recv() {
+                    match event {
+                        Event::SetBounds(bounds) => {
+                            layer_state.set_bounds(bounds);
+                        }
+                        Event::SetImage(rgb, update_mask) => {
+                            layer_state.set_image(rgb, update_mask);
+                        }
+                        Event::SetCursor(use_hand) => {
+                            layer_state.set_cursor(&connection, &qh, use_hand);
+                        }
+                        Event::Dispose() => {
+                            layer_state.dispose();
+                            layer_state.mouse_receiver.into_raw();
+                            break 'outer;
                         }
                     }
                 }
-            });
+            }
+        });
 
-            Ok(Box::into_raw(Box::new(sender)) as jlong) // Return a raw pointer to the sender
-        })
-        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
-}
+        Ok(Box::into_raw(Box::new(sender)) as jlong)
+    }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_setBounds<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    sender_ptr: jlong,
-    x: jint,
-    y: jint,
-    width: jint,
-    height: jint,
-) {
-    unowned_env
-        .with_env(|_env| -> jni::errors::Result<_> {
-            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-            sender
-                .send(Event::SetBounds(Rect {
-                    x: x.max(-width + 1),
-                    y: y.max(-height + 1),
-                    width: width.max(1),
-                    height: height.max(1),
-                }))
-                .expect("Failed to send SetBounds event");
+    fn set_bounds<'local>(
+        _env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+        sender_ptr: jlong,
+        x: jint,
+        y: jint,
+        width: jint,
+        height: jint,
+    ) -> jni::errors::Result<()> {
+        let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
+        sender
+            .send(Event::SetBounds(Rect {
+                x: x.max(-width + 1),
+                y: y.max(-height + 1),
+                width: width.max(1),
+                height: height.max(1),
+            }))
+            .expect("Failed to send SetBounds event");
 
-            Ok(())
-        })
-        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
-}
+        Ok(())
+    }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_setImage<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    sender_ptr: jlong,
-    rgb: JIntArray,
-    update_mask: jboolean,
-) {
-    unowned_env
-        .with_env(|env| -> jni::errors::Result<_> {
-            let rgb = unsafe {
-                rgb.get_elements(env, ReleaseMode::NoCopyBack).expect("Failed to get array elements")
-            };
+    fn set_image<'local>(
+        env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+        sender_ptr: jlong,
+        rgb: JIntArray,
+        update_mask: jboolean,
+    ) -> jni::errors::Result<()> {
+        let rgb = unsafe {
+            rgb.get_elements(env, ReleaseMode::NoCopyBack)
+                .expect("Failed to get array elements")
+        };
 
-            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-            sender.send(Event::SetImage(rgb.to_vec(), update_mask)).expect("Failed to send SetImage event");
+        let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
+        sender
+            .send(Event::SetImage(rgb.to_vec(), update_mask))
+            .expect("Failed to send SetImage event");
 
-            Ok(())
-        })
-        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
-}
+        Ok(())
+    }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_setCursor<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    sender_ptr: jlong,
-    use_hand: jboolean,
-) {
-    unowned_env
-        .with_env(|_env| -> jni::errors::Result<_> {
-            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-            sender.send(Event::SetCursor(use_hand)).expect("Failed to send SetCursor event");
+    fn set_cursor<'local>(
+        _env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+        sender_ptr: jlong,
+        use_hand: jboolean,
+    ) -> jni::errors::Result<()> {
+        let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
+        sender
+            .send(Event::SetCursor(use_hand))
+            .expect("Failed to send SetCursor event");
 
-            Ok(())
-        })
-        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
-}
+        Ok(())
+    }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_dispose<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-    sender_ptr: jlong,
-) {
-    unowned_env
-        .with_env(|_env| -> jni::errors::Result<_> {
-            let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-            sender.send(Event::Dispose()).expect("Failed to send dispose event");
+    fn dispose<'local>(
+        _env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+        sender_ptr: jlong,
+    ) -> jni::errors::Result<()> {
+        let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
+        sender
+            .send(Event::Dispose())
+            .expect("Failed to send dispose event");
 
-            // Free sender
-            let _ = unsafe { Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>) };
+        // Free sender
+        let _ = unsafe { Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>) };
 
-            Ok(())
-        })
-        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
-}
+        Ok(())
+    }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_io_github_bujjuisabee_shimelinux_wayland_WaylandLib_getScreenRect<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    _class: JClass<'caller>,
-) -> JIntArray<'caller> {
-    unowned_env
-        .with_env(|env| -> jni::errors::Result<_> {
-            let screen_rect = SCREEN_RECT.lock().unwrap();
-            let array = JIntArray::new(env, 4).expect("Failed to create array");
+    fn get_screen_rect<'local>(
+        env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+    ) -> jni::errors::Result<JIntArray<'local>> {
+        let screen_rect = SCREEN_RECT.lock().unwrap();
+        let array = JIntArray::new(env, 4).expect("Failed to create array");
 
-            array
-                .set_region(
-                    env,
-                    0,
-                    &[
-                        screen_rect.x,
-                        screen_rect.y,
-                        screen_rect.width,
-                        screen_rect.height,
-                    ],
-                )
-                .expect("Failed to set array");
+        array
+            .set_region(
+                env,
+                0,
+                &[
+                    screen_rect.x,
+                    screen_rect.y,
+                    screen_rect.width,
+                    screen_rect.height,
+                ],
+            )
+            .expect("Failed to set array");
 
-            Ok(array)
-        })
-        .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
+        Ok(array)
+    }
 }

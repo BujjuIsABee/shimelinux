@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.loadResource
-import com.group_finity.mascot.localize
 import java.io.File
 import kotlin.io.outputStream
 import kotlin.system.exitProcess
@@ -46,8 +45,8 @@ object WaylandLib {
 
         try {
             System.load(libFile.absolutePath)
-        } catch (e: Exception) {
-            Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
+        } catch (_: Throwable) {
+            Main.showError("libshimelinux_wayland is missing")
             exitProcess(0)
         }
     }
@@ -55,7 +54,7 @@ object WaylandLib {
     /**
      * Creates a Wayland layer surface, returning a pointer to the event sender.
      */
-    external fun createLayer(receiver: MouseEventReceiver): Long
+    external fun createLayer(mouseEventReceiver: MouseEventReceiver): Long
 
     /**
      * Uses the [senderPtr] to send a SetBounds event to a layer surface
@@ -83,7 +82,7 @@ object WaylandLib {
     external fun getScreenRect(): IntArray
 
     /**
-     * Defines an object that can receive mouse events from a Wayland layer surface
+     * Receives mouse events from a Wayland layer surface
      */
     interface MouseEventReceiver {
         fun updateCursor(

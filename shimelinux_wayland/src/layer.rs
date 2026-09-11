@@ -22,7 +22,7 @@
 
 use std::sync::Mutex;
 
-use jni::{JValue, jni_sig, jni_str, objects::JObject, refs::Global, vm::JavaVM};
+use jni::{refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
     delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
@@ -53,7 +53,7 @@ use wayland_client::{
 };
 use wayland_cursor::CursorTheme;
 
-use crate::{Point, Rect};
+use crate::{MouseEventReceiver, Point, Rect};
 
 #[derive(Default)]
 pub struct CursorState {
@@ -69,7 +69,7 @@ pub struct CursorState {
 }
 
 pub struct LayerState {
-    pub object: Global<JObject<'static>>,
+    pub mouse_receiver: Global<MouseEventReceiver<'static>>,
 
     pub compositor_state: CompositorState,
     pub registry_state: RegistryState,
@@ -124,8 +124,8 @@ impl CompositorHandler for LayerState {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        if let Some(info) = self.output_state.info(output) {
-            self.output_id = Some(info.id);
+        if self.output_id.is_none() {
+            self.output_id = self.output_state.info(output).map(|info| info.id);
         }
     }
 
@@ -266,21 +266,15 @@ impl PointerHandler for LayerState {
 
         if let Ok(jvm) = JavaVM::singleton() {
             let _ = jvm.attach_current_thread(|env| -> jni::errors::Result<_> {
-                env.call_method(
-                    &self.object,
-                    jni_str!("updateCursor"),
-                    jni_sig!((bool, bool, bool, bool, i32, i32)),
-                    &[
-                        JValue::from(self.cursor_state.left_pressed),
-                        JValue::from(self.cursor_state.right_pressed),
-                        JValue::from(self.cursor_state.left_released),
-                        JValue::from(self.cursor_state.right_released),
-                        JValue::from(self.cursor_state.position.x),
-                        JValue::from(self.cursor_state.position.y),
-                    ],
-                )?;
-
-                Ok(())
+                self.mouse_receiver.update_cursor(
+                    env,
+                    self.cursor_state.left_pressed,
+                    self.cursor_state.right_pressed,
+                    self.cursor_state.left_released,
+                    self.cursor_state.right_released,
+                    self.cursor_state.position.x,
+                    self.cursor_state.position.y,
+                )
             });
         }
 
@@ -312,7 +306,8 @@ impl LayerState {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
 
-        let (offset_x, offset_y) = self.output_state
+        let (offset_x, offset_y) = self
+            .output_state
             .outputs()
             .find_map(|output| {
                 let info = self.output_state.info(&output)?;
@@ -395,7 +390,7 @@ impl LayerState {
         // Update the layer
         self.layer.wl_surface().damage_buffer(0, 0, width, height);
         self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
-        buffer.attach_to(self.layer.wl_surface()).expect("Failed to attach buffer");
+        let _ = buffer.attach_to(self.layer.wl_surface());
         self.layer.commit();
     }
 
@@ -427,7 +422,12 @@ impl LayerState {
     }
 }
 
-pub static SCREEN_RECT: Mutex<Rect> = Mutex::new(Rect { x: 0, y: 0, width: 0, height: 0 });
+pub static SCREEN_RECT: Mutex<Rect> = Mutex::new(Rect {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+});
 
 fn update_screen_rect(output_state: &OutputState) {
     let mut screen_rect = SCREEN_RECT.lock().unwrap();
