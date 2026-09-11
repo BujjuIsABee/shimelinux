@@ -56,7 +56,8 @@ class GenericEnvironment : Environment() {
         } else {
             if (!getProperty("Multiscreen", true)) {
                 val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-                screen.set(gc.bounds)
+                screenRect.bounds = gc.bounds
+                screen.set(screenRect)
             }
         }
 

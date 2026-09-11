@@ -41,7 +41,7 @@ use smithay_client_toolkit::{
 };
 use wayland_client::{Connection, globals::registry_queue_init};
 
-use crate::layer::{CursorState, LayerState, SCREEN_RECT};
+use crate::layer::{CursorState, LayerState};
 
 mod layer;
 
@@ -77,7 +77,6 @@ bind_java_type! {
         extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
         extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
         extern fn dispose(sender_ptr: jlong),
-        extern fn get_screen_rect() -> [jint],
     },
 }
 
@@ -133,7 +132,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
             compositor_state: compositor,
             registry_state: RegistryState::new(&globals),
             output_state: OutputState::new(&globals, &qh),
-            output_id: None,
             seat_state: SeatState::new(&globals, &qh),
             cursor_state: CursorState::default(),
             shm,
@@ -245,28 +243,5 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let _ = unsafe { Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>) };
 
         Ok(())
-    }
-
-    fn get_screen_rect<'local>(
-        env: &mut Env<'local>,
-        _this: WaylandLib<'local>,
-    ) -> jni::errors::Result<JIntArray<'local>> {
-        let screen_rect = SCREEN_RECT.lock().unwrap();
-        let array = JIntArray::new(env, 4).expect("Failed to create array");
-
-        array
-            .set_region(
-                env,
-                0,
-                &[
-                    screen_rect.x,
-                    screen_rect.y,
-                    screen_rect.width,
-                    screen_rect.height,
-                ],
-            )
-            .expect("Failed to set array");
-
-        Ok(array)
     }
 }

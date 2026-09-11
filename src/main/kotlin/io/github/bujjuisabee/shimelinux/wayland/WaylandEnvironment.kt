@@ -22,16 +22,15 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.Main
 import com.group_finity.mascot.desktopType
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
 import com.group_finity.mascot.getProperty
 import io.github.bujjuisabee.shimelinux.kde.KWin
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
-import kotlin.system.exitProcess
 
 /**
  * An environment that uses [WaylandLib] to get the cursor position and screen bounds
@@ -48,14 +47,8 @@ class WaylandEnvironment : Environment() {
     override fun tick() {
         // Get screen bounds
         if (!getProperty("OverrideScreenDimensions", false)) {
-            val (x, y, width, height) = try {
-                WaylandLib.getScreenRect()
-            } catch (e: Throwable) {
-                Main.showError("Rust panic", e)
-                exitProcess(0)
-            }
-
-            screenRect = Rectangle(x, y, width, height)
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screenRect = Rectangle(gc.bounds.size)
             screen.set(screenRect)
         } else {
             screenRect = Rectangle(

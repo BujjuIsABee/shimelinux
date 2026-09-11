@@ -77,11 +77,6 @@ object WaylandLib {
     external fun dispose(senderPtr: Long)
 
     /**
-     * Gets the bounds of the primary monitor
-     */
-    external fun getScreenRect(): IntArray
-
-    /**
      * Receives mouse events from a Wayland layer surface
      */
     interface MouseEventReceiver {

@@ -20,8 +20,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::sync::Mutex;
-
 use jni::{refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState},
@@ -74,7 +72,6 @@ pub struct LayerState {
     pub compositor_state: CompositorState,
     pub registry_state: RegistryState,
     pub output_state: OutputState,
-    pub output_id: Option<u32>,
     pub seat_state: SeatState,
     pub cursor_state: CursorState,
     pub shm: Shm,
@@ -122,11 +119,8 @@ impl CompositorHandler for LayerState {
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
         _surface: &WlSurface,
-        output: &WlOutput,
+        _output: &WlOutput,
     ) {
-        if self.output_id.is_none() {
-            self.output_id = self.output_state.info(output).map(|info| info.id);
-        }
     }
 
     fn surface_leave(
@@ -145,17 +139,11 @@ impl OutputHandler for LayerState {
         &mut self.output_state
     }
 
-    fn new_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
-        update_screen_rect(&self.output_state);
-    }
+    fn new_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 
-    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
-        update_screen_rect(&self.output_state);
-    }
+    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 
-    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
-        update_screen_rect(&self.output_state);
-    }
+    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 }
 
 delegate_layer!(LayerState);
@@ -305,21 +293,7 @@ delegate_noop!(LayerState: ignore WlRegion);
 impl LayerState {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
-
-        let (offset_x, offset_y) = self
-            .output_state
-            .outputs()
-            .find_map(|output| {
-                let info = self.output_state.info(&output)?;
-                if self.output_id.is_some_and(|id| info.id == id) {
-                    info.logical_position
-                } else {
-                    None
-                }
-            })
-            .unwrap_or_default();
-
-        self.layer.set_margin(bounds.y - offset_y, 0, 0, bounds.x - offset_x);
+        self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
     pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
@@ -419,43 +393,5 @@ impl LayerState {
         }
 
         self.layer_mask = rects;
-    }
-}
-
-pub static SCREEN_RECT: Mutex<Rect> = Mutex::new(Rect {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-});
-
-fn update_screen_rect(output_state: &OutputState) {
-    let mut screen_rect = SCREEN_RECT.lock().unwrap();
-    let mut screen_rects: Vec<Rect> = Vec::new();
-
-    for output in output_state.outputs() {
-        if let Some(info) = output_state.info(&output) {
-            let (x, y) = info.logical_position.unwrap_or_default();
-            let (width, height) = info.logical_size.unwrap_or_default();
-
-            screen_rects.push(Rect {
-                x,
-                y,
-                width,
-                height,
-            });
-        }
-    }
-
-    let left = screen_rects.iter().map(|rect| rect.x).min().unwrap_or_default();
-    let top = screen_rects.iter().map(|rect| rect.y).min().unwrap_or_default();
-    let right = screen_rects.iter().map(|rect| rect.x + rect.width).max().unwrap_or_default();
-    let bottom = screen_rects.iter().map(|rect| rect.y + rect.height).max().unwrap_or_default();
-
-    *screen_rect = Rect {
-        x: left,
-        y: top,
-        width: right - left,
-        height: bottom - top,
     }
 }

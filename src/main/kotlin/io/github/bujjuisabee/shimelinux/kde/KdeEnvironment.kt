@@ -57,7 +57,8 @@ class KdeEnvironment : Environment() {
             screen.set(screenRect)
         } else if (!getProperty("Multiscreen", true)) {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screen.set(gc.bounds)
+            screenRect.bounds = gc.bounds
+            screen.set(screenRect)
         }
 
         cursor.set(KWin.cursorPosition)
