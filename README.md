@@ -85,21 +85,21 @@ If none of these options work for you, you can download the `.jar` file [here](h
 
 ShimeLinux has been tested on the following operating systems and desktop environments:
 
-| Operating system | Desktop environment | Installation                                                                                                                                                                                                                        |
-|------------------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Arch Linux       | GNOME               | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                                           |
-| Arch Linux       | Hyprland            | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                                           |
-| Arch Linux       | KDE Plasma          | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                                           |
-| Arch Linux       | niri                | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                                           |
-| Arch Linux       | sway                | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                                           |
-| Fedora Linux     | KDE Plasma          | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=redhat&logoColor=red"> RPM](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                                 |
-| FreeBSD          | KDE Plasma          | [<img width="32" align="top" src="https://custom-icon-badges.demolab.com/badge/-rgba(0,0,0,0)?style=flat-square&logo=java&logoColor=red"> JAR](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
-| FreeBSD          | Xfce                | [<img width="32" align="top" src="https://custom-icon-badges.demolab.com/badge/-rgba(0,0,0,0)?style=flat-square&logo=java&logoColor=red"> JAR](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
-| Linux Mint       | Cinnamon            | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red"> DEB](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                              |
-| NixOS            | KDE Plasma          | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos"> NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                                          |
-| NixOS            | niri                | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos"> NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                                          |
-| Pop!_OS          | COSMIC              | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red"> DEB](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                              |
-| Ubuntu           | GNOME               | [<img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red"> DEB](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                              |
+| Operating system                                                                                                                    | Desktop environment | Installation                                                                                                |
+|-------------------------------------------------------------------------------------------------------------------------------------|---------------------|-------------------------------------------------------------------------------------------------------------|
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> Arch Linux          | GNOME               | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> Arch Linux          | Hyprland            | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> Arch Linux          | KDE Plasma          | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> Arch Linux          | niri                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archLinux"> Arch Linux          | sway                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=fedora"> Fedora Linux           | KDE Plasma          | [Download `.rpm` file](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                   |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=freebsd&logoColor=red"> FreeBSD | KDE Plasma          | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=freebsd&logoColor=red"> FreeBSD | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=linuxmint"> Linux Mint          | Cinnamon            | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos"> NixOS                   | KDE Plasma          | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos"> NixOS                   | niri                | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=popos"> Pop!_OS                 | COSMIC              | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=ubuntu"> Ubuntu                 | GNOME               | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
 
 ### Graphical issues on Wayland
 
@@ -110,7 +110,7 @@ On certain desktop environments/compositors, Shimeji will be displayed using XWa
 3. Choose "Wayland" from the dropdown
 
 > [!NOTE]
-> This will not work on GNOME or any other desktop environment/compositor that does not implement the `wlr_layer_shell` protocol.
+> This will not work on GNOME, Cinnamon's Wayland session, or any other desktop environment/compositor that does not implement the `wlr_layer_shell` protocol.
 
 ## Usage
 
