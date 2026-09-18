@@ -25,7 +25,7 @@ package com.group_finity.mascot.environment
 import java.awt.Rectangle
 
 /**
- * A movable rectangle
+ * A movable rectangle.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -53,7 +53,7 @@ class Area {
         get() = bottom - top
 
     /**
-     * Moves/resizes the area
+     * Moves/resizes the rectangle.
      */
     fun set(value: Rectangle) {
         dleft = value.x - left
@@ -68,12 +68,12 @@ class Area {
     }
 
     /**
-     * Gets whether a point at ([x], [y]) is inside the area
+     * Gets whether a point at ([x], [y]) is inside the area.
      */
-    fun contains(x: Int, y: Int) = x in left..right && y in top..bottom
+    fun contains(x: Int, y: Int): Boolean = x in left..right && y in top..bottom
 
     /**
-     * Gets the area as a [Rectangle]
+     * Gets the area as a [Rectangle].
      */
     fun toRectangle() = Rectangle(left, top, width, height)
 

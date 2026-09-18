@@ -26,9 +26,11 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that triggers the first effective action in [actions]
+ * An action that triggers the first effective action in [actions].
  *
- * @param actions The list of actions to select from
+ * @param schema The schema used for the mascot's configuration.
+ * @param params A list of the mascot's variables.
+ * @property actions The list of actions to select from.
  *
  * @author Yuki Yamada
  * @author Kilkakon

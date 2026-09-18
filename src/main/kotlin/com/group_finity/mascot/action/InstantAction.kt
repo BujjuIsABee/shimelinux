@@ -27,7 +27,10 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that is applied when it is initialized, then immediately ends
+ * An action that is applied when it is initialized, then immediately ends.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param params A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon

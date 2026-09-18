@@ -23,18 +23,20 @@
 package io.github.bujjuisabee.shimelinux.generic
 
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.image.NativeImage
+import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
 /**
- * A cross-platform native factory
+ * A cross-platform native factory.
  *
  * @author Bujju
  */
-@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = GenericEnvironment()
+    override val environment: Environment = GenericEnvironment()
 
-    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
+    override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
 
-    override fun newTranslucentWindow() = GenericTranslucentWindow()
+    override fun newTranslucentWindow(): TranslucentWindow = GenericTranslucentWindow()
 }

@@ -26,7 +26,7 @@ import java.awt.Point
 import kotlin.math.abs
 
 /**
- * A horizontal border
+ * A horizontal border.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -51,8 +51,7 @@ class Wall(val area: Area, val isRight: Boolean) : Border {
     val height: Int
         get() = area.height
 
-    override fun isOn(location: Point) =
-        area.isVisible && x == location.x && top <= location.y && location.y <= bottom
+    override fun isOn(location: Point): Boolean = area.isVisible && x == location.x && location.y in top..bottom
 
     override fun move(location: Point): Point {
         if (!area.isVisible) {

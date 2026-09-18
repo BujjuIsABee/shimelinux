@@ -26,7 +26,7 @@ import com.group_finity.mascot.Mascot
 import java.awt.event.MouseEvent
 
 /**
- * Defines a behavior, which triggers actions for a mascot
+ * Defines a behavior, which triggers actions for a mascot.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -34,22 +34,22 @@ import java.awt.event.MouseEvent
  */
 interface Behavior {
     /**
-     * Initializes the behavior for the [mascot]
+     * Initializes the behavior for the [mascot].
      */
     fun init(mascot: Mascot)
 
     /**
-     * Triggers the next frame of the behavior
+     * Triggers the next frame of the behavior.
      */
     fun next()
 
     /**
-     * Called when a mouse button is pressed while inside the bounds of the mascot
+     * Called when a mouse button is pressed while inside the bounds of the mascot.
      */
     fun mousePressed(e: MouseEvent)
 
     /**
-     * Called when a mouse button is released after being pressed inside the bounds of the mascot
+     * Called when a mouse button is released after being pressed inside the bounds of the mascot.
      */
     fun mouseReleased(e: MouseEvent)
 }

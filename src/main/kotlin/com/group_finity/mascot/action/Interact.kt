@@ -35,7 +35,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(Interact::class.java.name)
 
 /**
- * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found
+ * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -48,12 +52,12 @@ class Interact(
     context: VariableMap
 ) : Animate(schema, animations, context) {
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 
-    override fun hasNext() = super.hasNext() && mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
+    override fun hasNext(): Boolean = super.hasNext() && mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
 
     override fun tick() {
         super.tick()

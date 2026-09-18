@@ -40,7 +40,7 @@ import javax.swing.SwingUtilities
 private val logger = Logger.getLogger(UserBehavior::class.java.name)
 
 /**
- * The base implementation of a behavior
+ * The base implementation of a behavior.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -52,6 +52,10 @@ class UserBehavior(
     private val configuration: Configuration
 ) : Behavior {
     private lateinit var mascot: Mascot
+
+    /**
+     * The environment that the behavior takes place within.
+     */
     internal val environment: MascotEnvironment
         get() = mascot.environment
 

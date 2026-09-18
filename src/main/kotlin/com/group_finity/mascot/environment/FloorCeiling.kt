@@ -26,7 +26,7 @@ import java.awt.Point
 import kotlin.math.abs
 
 /**
- * A vertical border
+ * A vertical border.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -51,8 +51,7 @@ class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
     val width: Int
         get() = area.width
 
-    override fun isOn(location: Point) =
-        area.isVisible && y == location.y && location.x in left..right
+    override fun isOn(location: Point): Boolean = area.isVisible && y == location.y && location.x in left..right
 
     override fun move(location: Point): Point {
         if (!area.isVisible) {

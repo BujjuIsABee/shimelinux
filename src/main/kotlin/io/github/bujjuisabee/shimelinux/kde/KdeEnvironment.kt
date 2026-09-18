@@ -30,7 +30,7 @@ import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * An environment that supports interactive windows via KWin scripting
+ * An environment that supports interactive windows via KWin scripting.
  *
  * @author Bujju
  */
@@ -46,6 +46,7 @@ class KdeEnvironment : Environment() {
     override fun tick() {
         super.tick()
 
+        // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect = Rectangle(
                 getProperty("ScreenX", screen.left),
@@ -56,17 +57,18 @@ class KdeEnvironment : Environment() {
 
             screen.set(screenRect)
         } else if (!getProperty("Multiscreen", true)) {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect.bounds = gc.bounds
+            screenRect = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration.bounds
             screen.set(screenRect)
         }
 
-        cursor.set(KWin.cursorPosition)
+        // Update cursor position
+        cursor.set(KWin.cursorPosition ?: Point(0, 0))
 
+        // Update active window
         val activeWindow = KWin.activeWindow
-        if (activeWindow != null && isIE(activeWindow.title)) {
+        if (activeWindow != null && isIE(activeWindow.caption)) {
             activeIE.set(activeWindow.bounds)
-            activeIETitle = activeWindow.title
+            activeIETitle = activeWindow.caption
             activeIE.isVisible = true
         } else {
             activeIE.isVisible = false
@@ -89,12 +91,12 @@ class KdeEnvironment : Environment() {
 
     override fun dispose() {}
 
-    private fun isIE(title: String) = windowCache.getOrPut(title) {
+    private fun isIE(caption: String) = windowCache.getOrPut(caption) {
         val blacklist = getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
         val whitelist = getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
 
-        val blacklisted = blacklist.any { title.contains(it, true) }
-        val whitelisted = whitelist.any { title.contains(it, true) }
+        val blacklisted = blacklist.any { caption.contains(it, true) }
+        val whitelisted = whitelist.any { caption.contains(it, true) }
 
         !blacklisted && (whitelisted || blacklist.isNotEmpty() && whitelist.isEmpty())
     }

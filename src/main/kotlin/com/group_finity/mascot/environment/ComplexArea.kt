@@ -26,7 +26,7 @@ import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * An area made of multiple areas
+ * An area made of multiple areas.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -38,7 +38,7 @@ class ComplexArea {
         get() = areaMap.values
 
     /**
-     * Sets the areas that make up the complex area
+     * Sets the areas that make up the complex area.
      */
     fun set(rectangles: Map<String, Rectangle>) {
         retain(rectangles.keys)
@@ -46,7 +46,7 @@ class ComplexArea {
     }
 
     /**
-     * Sets the bounds of the area with the [name]
+     * Sets the bounds of the area with the [name].
      */
     fun set(name: String, value: Rectangle) {
         if (areaMap.values.any { it.toRectangle() == value }) return
@@ -56,29 +56,29 @@ class ComplexArea {
     }
 
     /**
-     * Removes all areas whose name is not in [deviceNames]
+     * Removes all areas whose name is not in [deviceNames].
      */
     fun retain(deviceNames: Collection<String>) {
         areaMap.entries.removeIf { !deviceNames.contains(it.key) }
     }
 
     @Suppress("unused")
-    fun getBottomBorder(location: Point) = areaMap.values.lastOrNull { it.bottomBorder.isOn(location) }
+    fun getBottomBorder(location: Point): FloorCeiling? = areaMap.values.lastOrNull { it.bottomBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.topBorder.isOn(location) } }
         ?.bottomBorder
 
     @Suppress("unused")
-    fun getTopBorder(location: Point) = areaMap.values.lastOrNull { it.topBorder.isOn(location) }
+    fun getTopBorder(location: Point): FloorCeiling? = areaMap.values.lastOrNull { it.topBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.bottomBorder.isOn(location) } }
         ?.topBorder
 
     @Suppress("unused")
-    fun getLeftBorder(location: Point) = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
+    fun getLeftBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.rightBorder.isOn(location) } }
         ?.rightBorder
 
     @Suppress("unused")
-    fun getRightBorder(location: Point) = areaMap.values.lastOrNull { it.rightBorder.isOn(location) }
+    fun getRightBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.rightBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.leftBorder.isOn(location) } }
         ?.rightBorder
 }

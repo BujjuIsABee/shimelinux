@@ -38,16 +38,57 @@ import io.github.bujjuisabee.shimelinux.wayland.NativeFactoryImpl as WaylandNati
 import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
 /**
- * A factory for platform-specific objects
+ * Gets the name of the current desktop environment.
+ */
+val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
+
+/**
+ * Gets the name of the current display server protocol (i.e., Wayland or X11).
+ */
+val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
+
+/**
+ * Gets the name of the environment chosen automatically based on the [desktopType].
+ */
+val defaultEnvironment: String = when (desktopType) {
+    "KDE" -> "kde"
+    "COSMIC", "Hyprland", "niri", "sway" -> "wayland"
+    else -> "generic"
+}
+
+/**
+ * Gets the name of the current environment.
+ */
+val activeEnvironment: String by lazy {
+    when (getProperty("Environment", "")) {
+        "kde" if (desktopType == "KDE") -> "kde"
+        "wayland" if (sessionType == "wayland") -> "wayland"
+        "generic" -> "generic"
+        "virtual" -> "virtual"
+        else -> defaultEnvironment
+    }
+}
+
+/**
+ * A factory for platform-specific objects.
  *
  * @author Kilkakon
  * @author Bujju
  */
 abstract class NativeFactory {
+    /**
+     * Gets a platform-specific [Environment].
+     */
     abstract val environment: Environment
 
+    /**
+     * Gets a platform-specific [TranslucentWindow].
+     */
     abstract fun newTranslucentWindow(): TranslucentWindow
 
+    /**
+     * Gets a platform-specific [NativeImage].
+     */
     abstract fun newNativeImage(src: BufferedImage): NativeImage
 
     companion object {
@@ -57,18 +98,14 @@ abstract class NativeFactory {
             resetInstance()
         }
 
+        /**
+         * Resets [instance] based on [activeEnvironment].
+         */
         fun resetInstance() {
-            val defaultEnvironment = when (desktopType) {
-                "KDE" -> KdeNativeFactory()
-                else if (isWaylandEnvironmentDefault) -> WaylandNativeFactory()
-                else -> GenericNativeFactory()
-            }
-
-            instance = when (getProperty("Environment", "linux")) {
-                "linux" -> defaultEnvironment
+            instance = when (activeEnvironment) {
+                "kde" -> KdeNativeFactory()
+                "wayland" -> WaylandNativeFactory()
                 "generic" -> GenericNativeFactory()
-                "kde" if (desktopType == "KDE") -> KdeNativeFactory()
-                "wayland" if (sessionType == "wayland") -> WaylandNativeFactory()
                 "virtual" -> VirtualNativeFactory()
                 else -> GenericNativeFactory()
             }
@@ -76,8 +113,11 @@ abstract class NativeFactory {
             resetPopupFactory()
         }
 
+        /**
+         * Resets the shared popup factory instance based on [activeEnvironment] and the active theme.
+         */
         fun resetPopupFactory() {
-            if (usingWaylandEnvironment) {
+            if (activeEnvironment == "wayland") {
                 PopupFactory.setSharedInstance(WaylandPopupFactory)
             } else if (UIManager.getLookAndFeel() is FlatLaf) {
                 PopupFactory.setSharedInstance(FlatPopupFactory())

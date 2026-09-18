@@ -29,7 +29,11 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
- * An action that causes the mascot to jump
+ * An action that causes the mascot to jump.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -41,19 +45,19 @@ open class Jump(
     context: VariableMap
 ) : ActionBase(schema, animations, context) {
     /**
-     * The velocity of the mascot as it jumps
+     * The velocity of the mascot as it jumps.
      */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
 
     /**
-     * The X-position that the mascot jumps towards
+     * The X-position that the mascot jumps towards.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y-position that the mascot jumps towards
+     * The Y-position that the mascot jumps towards.
      */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()

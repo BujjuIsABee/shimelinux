@@ -39,7 +39,11 @@ import kotlin.math.sqrt
 private val logger = Logger.getLogger(ComplexJump::class.java.name)
 
 /**
- * An action that creates a new mascot and/or scans for an affordance while [mascot] jumps
+ * An action that creates a new mascot and/or scans for an affordance while [mascot] jumps.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param params A list of the mascot's variables.
  *
  * @author Kilkakon
  * @author Bujju
@@ -56,7 +60,7 @@ class ComplexJump(
     private var isScanEnabled = false
 
     /**
-     * The characteristics of the action, separated by '/'. There are two options:
+     * The characteristics of the action, separated by '/'.
      * - Breed
      * - Scan
      */
@@ -64,25 +68,25 @@ class ComplexJump(
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
 
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 
     /**
-     * The behavior to set for the other mascot
+     * The behavior to set for the other mascot.
      */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
 
     /**
-     * Whether the mascots should face each other
+     * Whether the mascots should face each other.
      */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
-     * The velocity of the mascot as it jumps towards the target position
+     * The velocity of the mascot as it jumps towards the target position.
      */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()

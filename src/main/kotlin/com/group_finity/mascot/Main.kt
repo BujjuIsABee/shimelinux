@@ -59,7 +59,7 @@ import kotlin.system.exitProcess
 private val logger = Logger.getLogger(Main::class.java.name)
 
 /**
- * The entry point of the program
+ * The entry point of the program.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -75,8 +75,15 @@ object Main {
     private val configurations = ConcurrentHashMap<String, Configuration>()
     private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
 
+    /**
+     * Stores the user's settings.
+     */
     lateinit var properties: Properties
         private set
+
+    /**
+     * Stores localized text.
+     */
     lateinit var languageBundle: ResourceBundle
         private set
 
@@ -90,11 +97,17 @@ object Main {
         }
     }
 
+    /**
+     * Shows an error message with the [message].
+     */
     @JvmStatic
     fun showError(message: String) {
         JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE)
     }
 
+    /**
+     * Shows an error message with the [message], and the message of the [exception].
+     */
     @JvmStatic
     fun showError(message: String, exception: Throwable) {
         val message = message + if (exception is SAXParseException) {
@@ -178,7 +191,7 @@ object Main {
 
         // Set theme
         try {
-            if (!isWaylandEnvironmentDefault) {
+            if (activeEnvironment != "wayland") {
                 val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
                 val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
                 System.setProperty("sun.java2d.uiScale", menuScaling.toString())
@@ -239,7 +252,7 @@ object Main {
     }
 
     /**
-     * Creates a [Configuration] for [imageSet]
+     * Creates a [Configuration] for [imageSet].
      */
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
@@ -350,7 +363,7 @@ object Main {
     }
 
     /**
-     * Creates a tray icon
+     * Creates a tray icon.
      */
     private fun createTrayIcon() {
         logger.info { "Creating the tray icon" }
@@ -416,11 +429,11 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            if (usingKdeEnvironment) {
+            if (activeEnvironment == "kde") {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
-            if (!usingWaylandEnvironment) {
+            if (activeEnvironment != "wayland") {
                 allowedBehaviorsSubmenu.add(multiscreenMenu)
             }
 
@@ -469,15 +482,15 @@ object Main {
                     NativeFactory.instance.environment.dispose()
                     NativeFactory.resetInstance()
 
-                    if (usingKdeEnvironment && !allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
+                    if (activeEnvironment == "kde" && !allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
                         allowedBehaviorsSubmenu.add(throwingMenu)
-                    } else if (!usingKdeEnvironment && allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
+                    } else if (activeEnvironment != "kde" && allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
                         allowedBehaviorsSubmenu.remove(throwingMenu)
                     }
 
-                    if (!usingWaylandEnvironment && !allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
+                    if (activeEnvironment != "wayland" && !allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
                         allowedBehaviorsSubmenu.add(multiscreenMenu)
-                    } else if (usingWaylandEnvironment && allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
+                    } else if (activeEnvironment == "wayland" && allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
                         allowedBehaviorsSubmenu.remove(multiscreenMenu)
                     }
                 }
@@ -656,7 +669,7 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            if (usingKdeEnvironment) {
+            if (activeEnvironment == "kde") {
                 icon.menu.add(restoreWindowsMenu)
             }
             icon.menu.add(JSeparator())
@@ -674,7 +687,7 @@ object Main {
     }
 
     /**
-     * Creates a random mascot
+     * Creates a random mascot.
      */
     private fun createMascot() {
         val length = imageSets.size
@@ -683,7 +696,7 @@ object Main {
     }
 
     /**
-     * Creates a specific mascot
+     * Creates a specific mascot.
      */
     fun createMascot(imageSet: String) {
         logger.info { "Creating a mascot ($imageSet)" }
@@ -826,7 +839,9 @@ object Main {
     }
 
     /**
-     * Updates the active image sets without affecting mascots that are already active
+     * Updates the active image sets without affecting mascots that are already active.
+     *
+     * @param newImageSets The new list of image sets.
      *
      * @author LavenderSnek
      * @author Kilkakon
@@ -929,7 +944,7 @@ object Main {
     fun getConfiguration(imageSet: String) = checkNotNull(configurations[imageSet])
 
     /**
-     * Dismisses all mascots and closes the program
+     * Dismisses all mascots and closes the program.
      */
     fun exit(): Nothing {
         manager.disposeAll()

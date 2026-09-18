@@ -33,7 +33,7 @@ import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * An environment that uses [WaylandLib] to get the cursor position and screen bounds
+ * An environment that works properly when mascots are not displayed by AWT/Swing.
  *
  * @author Bujju
  */
@@ -45,24 +45,22 @@ class WaylandEnvironment : Environment() {
     override val activeIETitle = ""
 
     override fun tick() {
-        // Get screen bounds
-        if (!getProperty("OverrideScreenDimensions", false)) {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect = Rectangle(gc.bounds.size)
-            screen.set(screenRect)
+        // Update screen bounds
+        screenRect = if (!getProperty("OverrideScreenDimensions", false)) {
+            Rectangle(GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration.bounds.size)
         } else {
-            screenRect = Rectangle(
+            Rectangle(
                 getProperty("ScreenX", screen.left),
                 getProperty("ScreenY", screen.top),
                 getProperty("ScreenWidth", screen.width),
                 getProperty("ScreenHeight", screen.height)
             )
-
-            screen.set(screenRect)
         }
 
-        // Get cursor
-        val cursorPosition = when (desktopType) {
+        screen.set(screenRect)
+
+        // Update cursor position
+        val cursorPos = when (desktopType) {
             "Hyprland" -> runCatching {
                 val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
                 Point(x, y)
@@ -73,7 +71,7 @@ class WaylandEnvironment : Environment() {
             else -> absoluteCursorPosition
         }
 
-        cursor.set(cursorPosition ?: Point(0, 0))
+        cursor.set(cursorPos ?: Point(0, 0))
 
         activeIE.isVisible = false
     }
@@ -87,6 +85,9 @@ class WaylandEnvironment : Environment() {
     override fun dispose() {}
 
     companion object {
+        /**
+         * An approximation of the absolute cursor position based on the values reported by Wayland. Accuracy varies by compositor.
+         */
         var absoluteCursorPosition: Point? = null
     }
 }

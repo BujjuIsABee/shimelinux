@@ -23,7 +23,7 @@
 package com.group_finity.mascot.exception
 
 /**
- * An exception thrown when a behavior cannot be instantiated
+ * An exception thrown when a behavior cannot be instantiated.
  *
  * @author Yuki Yamada
  * @author Kilkakon

@@ -27,6 +27,7 @@ import com.group_finity.mascot.environment.MascotEnvironment
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.image.MascotImage
+import com.group_finity.mascot.image.TranslucentWindow
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
 import java.awt.Cursor
@@ -50,7 +51,7 @@ private val logger = Logger.getLogger(Mascot::class.java.name)
 private val lastId = AtomicInteger()
 
 /**
- * A mascot object
+ * A mascot object.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -60,19 +61,19 @@ class Mascot(var imageSet: String) {
     private val id = lastId.incrementAndGet()
 
     /**
-     * The number of ticks that have elapsed while the mascot is animating
+     * The number of ticks that have elapsed while the mascot is animating.
      */
     var time = 0
         private set
 
     /**
-     * Whether the mascot is being animated
+     * Whether the mascot is being animated.
      */
     private var isAnimating = true
         get() = field && !isPaused
 
     /**
-     * Manages the behavior of a mascot by triggering actions
+     * Manages the behavior of a mascot by triggering actions.
      */
     var behavior: Behavior? = null
         set(value) {
@@ -80,57 +81,57 @@ class Mascot(var imageSet: String) {
         }
 
     /**
-     * A window to display the mascot
+     * A window to display the mascot.
      */
-    private val window = NativeFactory.instance.newTranslucentWindow()
+    private val window: TranslucentWindow = NativeFactory.instance.newTranslucentWindow()
 
     /**
-     * A menu to display statistics about the mascot
+     * A menu to display statistics about the mascot.
      */
     private var debugWindow: DebugWindow? = null
 
     /**
-     * The manager managing the mascot
+     * The manager managing the mascot.
      */
     var manager: Manager? = null
 
     /**
-     * The mascot's position
+     * The mascot's position.
      */
     var anchor = Point(0, 0)
 
     /**
-     * The image to display on [window]
+     * The image to display on [window].
      */
     var image: MascotImage? = null
 
     /**
-     * Whether the mascot is facing right
+     * Whether the mascot is facing right.
      */
     var isLookRight = false
 
     /**
-     * Whether the mascot is currently being dragged with the cursor
+     * Whether the mascot is currently being dragged with the cursor.
      */
     var isDragging = false
 
     /**
-     * Whether the mascot is paused
+     * Whether the mascot is paused.
      */
     var isPaused = false
 
     /**
-     * The sound being played by the mascot, or null if no sound is playing
+     * The sound being played by the mascot, or null if no sound is playing.
      */
     var sound: String? = null
 
     /**
-     * Contains information about the bounds of the screen, the location of the cursor, and the active interactive window
+     * Contains information about the bounds of the screen, the location of the cursor, and the active interactive window.
      */
     val environment = MascotEnvironment(this)
 
     /**
-     * A list of variables that can be accessed by scripts
+     * A list of variables that can be accessed by scripts.
      */
     val variables = VariableMap()
 
@@ -145,9 +146,9 @@ class Mascot(var imageSet: String) {
     val hotspots = mutableListOf<Hotspot>()
 
     /**
-     * Whether a hotspot is currently clicked
+     * Whether a hotspot is currently clicked.
      */
-    val isHotspotClicked
+    val isHotspotClicked: Boolean
         get() = cursorPosition != null
 
     /**
@@ -164,7 +165,7 @@ class Mascot(var imageSet: String) {
         }
 
     /**
-     * The bounds of the mascot
+     * The bounds of the mascot.
      */
     val bounds: Rectangle
         get() = image?.let {
@@ -172,14 +173,14 @@ class Mascot(var imageSet: String) {
         } ?: window.asComponent().bounds
 
     /**
-     * The number of mascots with the same image set
+     * The number of mascots with the same image set managed by this mascot's manager.
      */
     @Suppress("unused")
     val count: Int
         get() = manager?.getCount(imageSet) ?: 0
 
     /**
-     * The number of all mascots
+     * The total number of mascots managed by this mascot's manager.
      */
     @Suppress("unused")
     val totalCount: Int
@@ -358,7 +359,7 @@ class Mascot(var imageSet: String) {
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
-        if (usingKdeEnvironment) {
+        if (activeEnvironment == "kde") {
             popup.add(restoreWindowsMenu)
         }
         popup.add(debugMenu)
@@ -439,7 +440,7 @@ class Mascot(var imageSet: String) {
     }
 
     /**
-     * Resets the mascot's position
+     * Resets the mascot's position.
      */
     fun resetAnchor() {
         if (getProperty("Multiscreen", true)) {
@@ -456,7 +457,7 @@ class Mascot(var imageSet: String) {
     }
 
     /**
-     * Dismisses the mascot
+     * Dismisses the mascot.
      */
     fun dispose() {
         logger.info { "Destroying mascot: $this" }
@@ -475,9 +476,7 @@ class Mascot(var imageSet: String) {
     private fun refreshCursor(position: Point) {
         var useHand = false
         for (hotspot in hotspots) {
-            if (hotspot.contains(this, position) && Main.getConfiguration(imageSet)
-                    .isBehaviorEnabled(hotspot.behavior, this)
-            ) {
+            if (hotspot.contains(this, position) && Main.getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)) {
                 useHand = true
                 break
             }

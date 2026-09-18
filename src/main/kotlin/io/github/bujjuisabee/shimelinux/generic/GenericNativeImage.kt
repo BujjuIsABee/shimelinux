@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage
 import java.util.Objects
 
 /**
- * A cross-platform image
+ * A cross-platform image.
  *
  * @author Bujju
  */
@@ -36,7 +36,7 @@ class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
     val height = managedImage.height
     val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 
-    override fun hashCode() = Objects.hash(rgb)
+    override fun hashCode(): Int = Objects.hash(rgb)
 
-    override fun equals(other: Any?) = other === this || other is GenericNativeImage && rgb.contentEquals(other.rgb)
+    override fun equals(other: Any?): Boolean = other === this || other is GenericNativeImage && rgb.contentEquals(other.rgb)
 }

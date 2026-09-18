@@ -28,7 +28,12 @@ import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
 
 /**
- * An animation for a mascot that can be played by an action
+ * An animation for a mascot that can be played by an action.
+ *
+ * @param condition The condition that must be met for the animation to be played.
+ * @param poses The frames of the animation.
+ * @param hotspots The hotspots that can be interacted with during the animation.
+ * @param isTurn Whether the animation is a turning animation.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -40,6 +45,9 @@ class Animation(
     val hotspots: Array<Hotspot>,
     val isTurn: Boolean
 ) {
+    /**
+     * The total duration of all the animation's poses.
+     */
     val duration = poses.sumOf { it.duration }
 
     init {
@@ -47,33 +55,33 @@ class Animation(
     }
 
     /**
-     * Whether the conditions for the animation to play are currently met
+     * Whether the conditions for the animation to play are currently met.
      */
     fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
 
     /**
-     * Initializes the animation
+     * Initializes the animation.
      */
     fun init() {
         condition.init()
     }
 
     /**
-     * Initializes the first frame of the animation
+     * Initializes the first frame of the animation.
      */
     fun initFrame() {
         condition.initFrame()
     }
 
     /**
-     * Progresses the animation
+     * Progresses the animation.
      */
     fun next(mascot: Mascot, time: Int) {
         checkNotNull(getPoseAt(time)).next(mascot)
     }
 
     /**
-     * Gets which pose should be displayed at [time]
+     * Gets which pose should be displayed at [time].
      */
     fun getPoseAt(time: Int): Pose? {
         var t = time % duration

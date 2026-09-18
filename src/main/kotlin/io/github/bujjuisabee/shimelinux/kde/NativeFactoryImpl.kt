@@ -23,20 +23,22 @@
 package io.github.bujjuisabee.shimelinux.kde
 
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.image.NativeImage
+import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import io.github.bujjuisabee.shimelinux.generic.GenericTranslucentWindow
 import java.awt.image.BufferedImage
 
 /**
- * A native factory used on KDE Plasma
+ * A native factory for KDE Plasma that supports interactive windows.
  *
  * @author Bujju
  */
-@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = KdeEnvironment()
+    override val environment: Environment = KdeEnvironment()
 
-    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
+    override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
 
-    override fun newTranslucentWindow() = GenericTranslucentWindow()
+    override fun newTranslucentWindow(): TranslucentWindow = GenericTranslucentWindow()
 }

@@ -23,7 +23,7 @@
 package com.group_finity.mascot.exception
 
 /**
- * An exception thrown when a variable cannot be evaluated
+ * An exception thrown when a variable cannot be evaluated.
  *
  * @author Yuki Yamada
  * @author Kilkakon

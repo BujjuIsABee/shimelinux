@@ -76,7 +76,7 @@ private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
 private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
 
 /**
- * The settings menu
+ * The settings menu.
  *
  * @author Kilkakon
  * @author Bujju
@@ -199,16 +199,31 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val initialDarkTheme = Properties()
     private val initialLightTheme = Properties()
 
+    /**
+     * Whether the program needs to be restarted to apply changes.
+     */
     var isRestartRequired = false
+
+    /**
+     * Whether the environment needs to be reloaded to apply changes.
+     */
     var isEnvironmentReloadRequired = false
+
+    /**
+     * Whether all mascots need to be reloaded to apply changes.
+     */
     var isImageReloadRequired = false
+
+    /**
+     * Whether the window cache needs to be refreshed to apply changes.
+     */
     var isInteractiveWindowReloadRequired = false
 
     init {
         try {
             getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { darkTheme.load(it) }
             getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { lightTheme.load(it) }
-        } catch(_: Exception) {
+        } catch (_: Exception) {
         }
 
         initialDarkTheme.putAll(darkTheme)
@@ -219,7 +234,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         title = localize("Settings")
         layout = BorderLayout()
 
-        if (isWaylandEnvironmentDefault) {
+        if (defaultEnvironment == "wayland") {
             isResizable = false
         }
 
@@ -381,7 +396,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         menuScalingPanel = JPanel()
-        menuScalingPanel.isVisible = !usingWaylandEnvironment
+        menuScalingPanel.isVisible = activeEnvironment != "wayland"
         menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
         menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
 
@@ -748,24 +763,36 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         environmentCardsPanel = JPanel(environmentCardLayout)
 
+        val kdeEnvironmentName = localize("KdeEnvironment")
+        val waylandEnvironmentName = localize("WaylandEnvironment")
+        val genericEnvironmentName = localize("GenericEnvironment")
+        val virtualEnvironmentName = localize("VirtualEnvironment")
+
+        val defaultEnvironmentName = when (defaultEnvironment) {
+            "kde" -> kdeEnvironmentName
+            "wayland" -> waylandEnvironmentName
+            else -> genericEnvironmentName
+        }
+
+        val automaticEnvironmentName = localize("AutomaticEnvironment") + " ($defaultEnvironmentName)"
+
         environmentComboBox = JComboBox()
-        environmentComboBox.addItem(localize("AutomaticEnvironment"))
+        environmentComboBox.addItem(automaticEnvironmentName)
         if (desktopType == "KDE") {
-            environmentComboBox.addItem(localize("KdeEnvironment"))
+            environmentComboBox.addItem(kdeEnvironmentName)
         }
         if (sessionType == "wayland") {
-            environmentComboBox.addItem(localize("WaylandEnvironment"))
+            environmentComboBox.addItem(waylandEnvironmentName)
         }
-        environmentComboBox.addItem(localize("GenericEnvironment"))
-        environmentComboBox.addItem(localize("VirtualEnvironment"))
+        environmentComboBox.addItem(genericEnvironmentName)
+        environmentComboBox.addItem(virtualEnvironmentName)
         environmentComboBox.addActionListener {
             environment = when (environmentComboBox.selectedItem as String) {
-                localize("AutomaticEnvironment") -> "linux"
-                localize("KdeEnvironment") -> "kde"
-                localize("WaylandEnvironment") -> "wayland"
-                localize("GenericEnvironment") -> "generic"
-                localize("VirtualEnvironment") -> "virtual"
-                else -> "generic"
+                kdeEnvironmentName -> "kde"
+                waylandEnvironmentName -> "wayland"
+                genericEnvironmentName -> "generic"
+                virtualEnvironmentName -> "virtual"
+                else -> "automatic"
             }
 
             if (environment == "virtual") {
@@ -1062,12 +1089,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         environmentCardsPanel.add(virtualEnvironmentCard, "virtual")
 
         environmentComboBox.selectedItem = when (environment) {
-            "linux" -> localize("AutomaticEnvironment")
-            "kde" if (desktopType == "KDE") -> localize("KdeEnvironment")
-            "wayland" if (sessionType == "wayland") -> localize("WaylandEnvironment")
-            "generic" -> localize("GenericEnvironment")
-            "virtual" -> localize("VirtualEnvironment")
-            else -> localize("GenericEnvironment")
+            "kde" if (desktopType == "KDE") -> kdeEnvironmentName
+            "wayland" if (sessionType == "wayland") -> waylandEnvironmentName
+            "generic" -> genericEnvironmentName
+            "virtual" -> virtualEnvironmentName
+            else -> automaticEnvironmentName
         }
 
         environmentTab.add(environmentComboBox)
@@ -1119,7 +1145,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab.add(Box.createVerticalGlue())
 
         tabbedPane.addTab(localize("General"), generalTab)
-        if (usingKdeEnvironment) {
+        if (activeEnvironment == "kde") {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
         tabbedPane.addTab(localize("Menu"), menuTab)

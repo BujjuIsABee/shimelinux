@@ -37,7 +37,7 @@ import javax.swing.JPanel
 import javax.swing.UIManager
 
 /**
- * Displays information about an image set
+ * Displays information about an image set.
  *
  * @author Kilkakon
  * @author Bujju
@@ -89,6 +89,9 @@ class ImageSetChooserPanel(
         add(textPanel)
     }
 
+    /**
+     * Selects or deselects the image set.
+     */
     fun setCheckbox(value: Boolean) {
         checkbox.isSelected = value
 

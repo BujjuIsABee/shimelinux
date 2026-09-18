@@ -26,7 +26,7 @@ import java.util.AbstractMap
 import javax.script.Bindings
 
 /**
- * Stores a collection of variables
+ * Stores a collection of variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -68,7 +68,7 @@ class VariableMap : Bindings {
 
     override fun containsKey(key: String) = true
 
-    override fun get(key: String) = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() } //
+    override fun get(key: String) = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() }
 
     override fun remove(key: String) = rawMap.remove(key)
 

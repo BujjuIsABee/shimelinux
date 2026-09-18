@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
- * A popup menu that is displayed on a Wayland layer surface
+ * A popup menu that is displayed on a Wayland layer surface.
  *
  * @author Bujju
  */
@@ -95,10 +95,17 @@ class WaylandPopup(
         if (target is JMenu) {
             if (target.getClientProperty("isShowing") != true) {
                 val location = getSubmenuOrigin(x, y, target)
-                val popup = WaylandPopupFactory.getPopup(contents, target.popupMenu, location.x, location.y)
+                val popup = WaylandPopupFactory.getPopup(
+                    contents,
+                    target.popupMenu,
+                    location.x,
+                    location.y
+                ) as WaylandPopup
+
                 popup.parent = target
                 popup.show()
                 submenu = popup
+
                 target.putClientProperty("isShowing", true)
             }
         } else {
@@ -136,7 +143,7 @@ class WaylandPopup(
     }
 
     private fun adjustPopupLocationToFitScreen(x: Int, y: Int, popup: JPopupMenu): Point {
-        val screenBounds = NativeFactory.instance.environment.workArea.toRectangle()
+        val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
         return Point(
             x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - popup.preferredSize.width),
             y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - popup.preferredSize.height)

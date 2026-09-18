@@ -27,7 +27,7 @@ import javax.swing.JList
 import javax.swing.ListCellRenderer
 
 /**
- * A list of [ImageSetChooserPanel] components
+ * A list of [ImageSetChooserPanel] components.
  *
  * @author Kilkakon
  * @author Bujju
@@ -37,6 +37,9 @@ class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) : J
         cellRenderer = CellRenderer()
     }
 
+    /**
+     * Adds an image set to the list.
+     */
     fun addShimeji(
         imageSet: String,
         actions: String,
@@ -55,7 +58,7 @@ class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) : J
         )
     }
 
-    class CellRenderer : ListCellRenderer<ImageSetChooserPanel> {
+    private class CellRenderer : ListCellRenderer<ImageSetChooserPanel> {
         override fun getListCellRendererComponent(
             list: JList<out ImageSetChooserPanel>,
             component: ImageSetChooserPanel,

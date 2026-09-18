@@ -26,7 +26,7 @@ import com.group_finity.mascot.getProperty
 import javax.sound.sampled.Clip
 
 /**
- * Stores sounds
+ * Stores sounds.
  *
  * @author Kilkakon
  * @author Bujju
@@ -34,6 +34,9 @@ import javax.sound.sampled.Clip
 object Sounds {
     private val sounds = mutableMapOf<String, Sound>()
 
+    /**
+     * Whether all sounds are muted.
+     */
     @JvmStatic
     var isMuted: Boolean
         get() = !getProperty("Sounds", true)
@@ -46,37 +49,44 @@ object Sounds {
         }
 
     /**
-     * Adds a sound to [sounds]
+     * Adds a sound to [sounds].
+     *
+     * @param name The name of the sound to load, combined with its volume.
      */
     @JvmStatic
     fun load(name: String, sound: Sound) {
-        if (!sounds.containsKey(name)) {
-            sounds[name] = sound
-        }
+        sounds.putIfAbsent(name, sound)
     }
 
     /**
-     * Gets whether [sounds] contains a sound with [name] as its key
+     * Gets whether [sounds] contains a sound with [name] as its key.
+     *
+     * @param name The filename of the clip combined with its volume.
      */
     @JvmStatic
     fun contains(name: String) = sounds.containsKey(name)
 
     /**
      * Gets a sound from [sounds]. The sound is closed when the sound is done playing.
+     *
+     * @param name The filename of the clip combined with its volume.
      */
     @JvmStatic
     fun getSound(name: String) = sounds[name]?.also { it.open() }?.clip
 
     /**
-     * Gets all sounds from with the [name], regardless of their volume
+     * Gets all sounds from with the [name], regardless of their volume.
+     *
+     * @param name The filename of the clip, without the volume.
      */
     @JvmStatic
     fun getSoundsIgnoringVolume(name: String) = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
 
     /**
-     * Contains a sound clip and a function to open it
+     * Contains a sound clip and a function to open it.
      *
-     * @param open Opens the clip
+     * @property clip The clip.
+     * @property open A function that opens the clip.
      */
     data class Sound(val clip: Clip, val open: () -> Unit)
 }

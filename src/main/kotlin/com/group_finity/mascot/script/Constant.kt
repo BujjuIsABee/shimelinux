@@ -23,7 +23,7 @@
 package com.group_finity.mascot.script
 
 /**
- * A variable that stores a constant value
+ * A variable that stores a constant value.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -34,7 +34,7 @@ class Constant(private val value: Any?) : Variable() {
 
     override fun initFrame() {}
 
-    override fun get(variables: VariableMap) = value
+    override fun get(variables: VariableMap): Any? = value
 
-    override fun toString() = value?.toString() ?: "null"
+    override fun toString(): String = value?.toString() ?: "null"
 }

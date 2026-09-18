@@ -27,8 +27,10 @@ import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.AlphaComposite
 import java.awt.Color
+import java.awt.Component
 import java.awt.Graphics
 import java.awt.Graphics2D
+import java.awt.GraphicsConfiguration
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
@@ -38,14 +40,14 @@ import java.awt.geom.Path2D
 import javax.swing.JWindow
 
 private val maskCache = mutableMapOf<GenericNativeImage, Area>()
-private val gc = GraphicsEnvironment
+private val gc: GraphicsConfiguration? = GraphicsEnvironment
     .getLocalGraphicsEnvironment()
     .defaultScreenDevice
     .configurations
     .firstOrNull { it.isTranslucencyCapable }
 
 /**
- * A cross-platform window that displays a mascot
+ * Displays a mascot on a cross-platform [JWindow].
  *
  * @author Bujju
  */
@@ -78,7 +80,7 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
         super.setBounds(newBounds)
     }
 
-    override fun asComponent() = this
+    override fun asComponent(): Component = this
 
     override fun setImage(image: NativeImage) {
         this.image = image as GenericNativeImage

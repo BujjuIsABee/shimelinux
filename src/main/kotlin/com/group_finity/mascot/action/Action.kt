@@ -25,7 +25,7 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.Mascot
 
 /**
- * Defines an action
+ * An action that behaviors can trigger for a mascot.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -33,17 +33,19 @@ import com.group_finity.mascot.Mascot
  */
 interface Action {
     /**
-     * Initializes the action for [mascot]; called when the behavior is initialized
+     * Initializes the action for [mascot]; called once when the behavior is initialized.
+     *
+     * @param mascot The mascot that will be affected by the action.
      */
     fun init(mascot: Mascot)
 
     /**
-     * Returns whether the action should continue
+     * Returns whether the action should continue.
      */
     fun hasNext(): Boolean
 
     /**
-     * Triggers the next frame of the action and progresses its animation
+     * Triggers the next frame of the action and progresses its animation.
      */
     fun next()
 }

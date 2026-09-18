@@ -31,7 +31,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(Animate::class.java.name)
 
 /**
- * An action that plays an animation
+ * An action that plays an animation.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -53,5 +57,5 @@ open class Animate(
         checkNotNull(animation).next(mascot, time)
     }
 
-    override fun hasNext() = super.hasNext() && time < checkNotNull(animation).duration
+    override fun hasNext(): Boolean = super.hasNext() && time < checkNotNull(animation).duration
 }

@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Debug" type="JetRunConfigurationType">
+    <envs>
+      <env name="_JAVA_AWT_WM_NONREPARENTING" value="1" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="com.group_finity.mascot.Main" />
     <module name="shimelinux.main" />
     <shortenClasspath name="NONE" />

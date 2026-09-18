@@ -23,7 +23,7 @@
 package com.group_finity.mascot.image
 
 /**
- * A left and right image
+ * Stores a pair of left and right images.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -31,7 +31,7 @@ package com.group_finity.mascot.image
  */
 class ImagePair(val leftImage: MascotImage, val rightImage: MascotImage) {
     /**
-     * Returns [rightImage] if is [isLookRight] is true or [leftImage] if it is false
+     * Returns [rightImage] if [isLookRight] is true or [leftImage] if it is false.
      */
-    fun getImage(isLookRight: Boolean) = if (isLookRight) rightImage else leftImage
+    fun getImage(isLookRight: Boolean): MascotImage = if (isLookRight) rightImage else leftImage
 }

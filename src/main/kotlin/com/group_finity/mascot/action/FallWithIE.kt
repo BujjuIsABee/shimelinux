@@ -33,7 +33,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(FallWithIE::class.java.name)
 
 /**
- * An action that causes the mascot to fall while holding a window
+ * An action that causes the mascot to fall while holding a window.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -45,18 +49,18 @@ class FallWithIE(
     context: VariableMap
 ) : Fall(schema, animations, context) {
     /**
-     * The horizontal distance between the mascot and the window
+     * The horizontal distance between the mascot and the window.
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETX), DEFAULT_IEOFFSETX).toInt()
 
     /**
-     * The vertical distance between the mascot and the window
+     * The vertical distance between the mascot and the window.
      */
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETY), DEFAULT_IEOFFSETY).toInt()
 
-    override fun hasNext() = super.hasNext() && getProperty("Throwing", true)
+    override fun hasNext(): Boolean = super.hasNext() && getProperty("Throwing", true)
 
     override fun tick() {
         val activeIE = environment.activeIE

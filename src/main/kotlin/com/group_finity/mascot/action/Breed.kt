@@ -40,7 +40,11 @@ import kotlin.math.roundToInt
 private val logger = Logger.getLogger(Breed.Delegate::class.java.name)
 
 /**
- * An action that creates a new mascot
+ * An action that creates a new mascot.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -68,61 +72,75 @@ class Breed(
     }
 
     /**
-     * Handles the shared functionality of breeding actions
+     * Handles the shared functionality of breeding actions.
      *
      * @author LavenderSnek
      * @author Bujju
      */
     class Delegate(private val action: ActionBase) {
+        /**
+         * Whether breeding/transient behaviors are allowed.
+         */
         val isEnabled: Boolean
             get() = getProperty(if (bornTransient) "Transients" else "Breeding", true)
+
+        /**
+         * Whether a new mascot can be spawned on this frame, based on [bornInterval].
+         */
         val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
+
+        /**
+         * Whether it is the frame before the last frame of the current animation.
+         */
         val isPenultimateFrame: Boolean
             get() = action.time == checkNotNull(action.animation).duration - 1
 
         /**
-         * The X-position of the new mascot relative to [mascot]
+         * The X-position of the new mascot(s) relative to [mascot].
          */
         private val bornX: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNX), DEFAULT_BORNX).toInt()
 
         /**
-         * The Y-position of the new mascot relative to [mascot]
+         * The Y-position of the new mascot(s) relative to [mascot].
          */
         private val bornY: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNY), DEFAULT_BORNY).toInt()
 
         /**
-         * The initial behavior of the new mascot
+         * The initial behavior of the new mascot(s).
          */
         private val bornBehavior: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOR), DEFAULT_BORNBEHAVIOR)
 
         /**
-         * The image set that will be used for the new mascot. The same image set as [mascot] will be used if a valid image set is not provided.
+         * The image set that will be used for the new mascot(s). The same image set as [mascot] will be used if a valid image set is not provided.
          */
         private val bornMascot: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
 
         /**
-         * Whether the new mascot will be temporary
+         * Whether the new mascot(s) will be temporary, like a projectile.
          */
         private val bornTransient: Boolean
             get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
 
         /**
-         * A number which [time] must be divisible by for the new mascot to be created
+         * The number of ticks that must pass before a new mascot will be spawned.
          */
         private val bornInterval: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNINTERVAL), DEFAULT_BORNINTERVAL).toInt()
 
         /**
-         * The number of mascots to spawn
+         * The number of mascots to spawn.
          */
         private val bornCount: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNCOUNT), DEFAULT_BORNCOUNT).toInt()
 
+        /**
+         * Spawns the new mascot.
+         */
         fun breed() {
             val scaling = getProperty("Scaling", 1.0)
             val childType = bornMascot.takeIf { Main.hasConfiguration(it) } ?: action.mascot.imageSet
@@ -166,7 +184,7 @@ class Breed(
         }
 
         /**
-         * Ensures that [bornCount] is greater than zero
+         * Throws a [VariableException] if [bornCount] is not greater than zero.
          */
         fun validateBornCount() {
             if (bornCount < 1) {
@@ -175,7 +193,7 @@ class Breed(
         }
 
         /**
-         * Ensures that [bornInterval] is greater than zero
+         * Throws a [VariableException] if [bornInterval] is not greater than zero.
          */
         fun validateBornInterval() {
             if (bornInterval < 1) {

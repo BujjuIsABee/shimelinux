@@ -23,7 +23,7 @@
 package com.group_finity.mascot.exception
 
 /**
- * An exception thrown when a mascot configuration file cannot be parsed
+ * An exception thrown when a mascot configuration file cannot be parsed.
  *
  * @author Yuki Yamada
  * @author Kilkakon

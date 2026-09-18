@@ -28,13 +28,21 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 
 /**
- * An image that can be displayed in an animation
+ * An image that can be displayed in an animation.
+ *
+ * @property image A platform-specific image.
+ * @property center The center of the image.
+ * @property size The size of the image.
  *
  * @author Yuki Yamada
  * @author Kilkakon
  * @author Bujju
  */
 class MascotImage(val image: NativeImage, val center: Point, val size: Dimension) {
+    /**
+     * @param image The raw image.
+     * @param center The center of the image.
+     */
     constructor(image: BufferedImage, center: Point) : this(
         NativeFactory.instance.newNativeImage(image),
         center,

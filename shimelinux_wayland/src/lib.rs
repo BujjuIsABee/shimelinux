@@ -67,20 +67,7 @@ enum Event {
 }
 
 bind_java_type! {
-    WaylandLib => io.github.bujjuisabee.shimelinux.wayland.WaylandLib,
-    type_map {
-        MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
-    },
-    native_methods {
-        extern fn create_layer(mouse_receiver: MouseEventReceiver) -> jlong,
-        extern fn set_bounds(sender_ptr: jlong, x: jint, y: jint, width: jint, height: jint),
-        extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
-        extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
-        extern fn dispose(sender_ptr: jlong),
-    },
-}
-
-bind_java_type! {
+    /// Receives mouse events from a Wayland layer surface.
     MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
     methods {
         fn update_cursor(
@@ -94,13 +81,31 @@ bind_java_type! {
     },
 }
 
+bind_java_type! {
+    /// The foreign function interface accessed by Kotlin via JNI.
+    WaylandLib => io.github.bujjuisabee.shimelinux.wayland.WaylandLib,
+    type_map {
+        MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
+    },
+    native_methods {
+        extern fn create_layer(mouse_receiver: MouseEventReceiver) -> jlong,
+        extern fn set_bounds(sender_ptr: jlong, x: jint, y: jint, width: jint, height: jint),
+        extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
+        extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
+        extern fn dispose(sender_ptr: jlong),
+    },
+}
+
 impl WaylandLibNativeInterface for WaylandLibAPI {
     type Error = jni::errors::Error;
 
+    /// Creates a Wayland layer surface. Mouse events are sent to `mouse_event_receiver`.
+    ///
+    /// Returns a pointer to the event sender and starts a daemon thread for the event loop.
     fn create_layer<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
-        mouse_receiver: MouseEventReceiver<'local>,
+        mouse_event_receiver: MouseEventReceiver<'local>,
     ) -> jni::errors::Result<jlong> {
         let (sender, receiver) = mpsc::channel::<Event>();
 
@@ -127,8 +132,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let shm = Shm::bind(&globals, &qh).expect("Failed to get shm");
         let pool = SlotPool::new(128 * 128 * 4, &shm).expect("Failed to create pool");
         let mut layer_state = LayerState {
-            mouse_receiver: env.new_global_ref(mouse_receiver).unwrap(),
-
             compositor_state: compositor,
             registry_state: RegistryState::new(&globals),
             output_state: OutputState::new(&globals, &qh),
@@ -137,6 +140,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
             shm,
             pool,
 
+            mouse_event_receiver: env.new_global_ref(mouse_event_receiver).unwrap(),
             layer,
             layer_mask: Vec::new(),
             configured: false,
@@ -162,7 +166,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
                         }
                         Event::Dispose() => {
                             layer_state.dispose();
-                            layer_state.mouse_receiver.into_raw();
+                            layer_state.mouse_event_receiver.into_raw();
                             break 'outer;
                         }
                     }
@@ -173,6 +177,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(Box::into_raw(Box::new(sender)) as jlong)
     }
 
+    /// Sends a SetBounds event using the `sender_ptr`.
     fn set_bounds<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -195,6 +200,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
+    /// Sends a SetImage event using the `sender_ptr`.
     fn set_image<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -203,18 +209,16 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         update_mask: jboolean,
     ) -> jni::errors::Result<()> {
         let rgb = unsafe {
-            rgb.get_elements(env, ReleaseMode::NoCopyBack)
-                .expect("Failed to get array elements")
+            rgb.get_elements(env, ReleaseMode::NoCopyBack).expect("Failed to get array elements")
         };
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender
-            .send(Event::SetImage(rgb.to_vec(), update_mask))
-            .expect("Failed to send SetImage event");
+        sender.send(Event::SetImage(rgb.to_vec(), update_mask)).expect("Failed to send SetImage event");
 
         Ok(())
     }
 
+    /// Sends a SetCursor event using the `sender_ptr`.
     fn set_cursor<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -222,22 +226,19 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         use_hand: jboolean,
     ) -> jni::errors::Result<()> {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender
-            .send(Event::SetCursor(use_hand))
-            .expect("Failed to send SetCursor event");
+        sender.send(Event::SetCursor(use_hand)).expect("Failed to send SetCursor event");
 
         Ok(())
     }
 
+    /// Sends a Dispose event using the `sender_ptr`.
     fn dispose<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
         sender_ptr: jlong,
     ) -> jni::errors::Result<()> {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender
-            .send(Event::Dispose())
-            .expect("Failed to send dispose event");
+        sender.send(Event::Dispose()).expect("Failed to send dispose event");
 
         // Free sender
         let _ = unsafe { Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>) };

@@ -31,7 +31,11 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * An action that occurs while the mascot is being dragged with the cursor
+ * An action that occurs while the mascot is being dragged with the cursor.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -45,22 +49,26 @@ class Dragged(
     private var footX = 0.0
     private var footDx = 0.0
     private var scaling = 0.0
+
+    /**
+     * The minimum amount of time until the [Regist] action is triggered.
+     */
     var timeToRegist = 0
 
     /**
-     * The horizontal distance between the mascot and the cursor
+     * The horizontal distance between the mascot and the cursor.
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
 
     /**
-     * The vertical distance between the mascot and the cursor
+     * The vertical distance between the mascot and the cursor.
      */
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
 
     /**
-     * Defines how the offset will be calculated. There are two options:
+     * Defines how the offset will be calculated.
      * - ImageAnchor (the top-left corner of the mascot)
      * - Origin (the center of the mascot)
      */
@@ -75,7 +83,7 @@ class Dragged(
         timeToRegist = 250
     }
 
-    override fun hasNext() = super.hasNext() && time < timeToRegist
+    override fun hasNext(): Boolean = super.hasNext() && time < timeToRegist
 
     override fun tick() {
         mascot.isLookRight = false

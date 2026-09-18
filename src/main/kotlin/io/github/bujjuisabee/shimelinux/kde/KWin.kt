@@ -33,7 +33,7 @@ import java.awt.Rectangle
 import java.io.File
 
 /**
- * Manages the KWin script
+ * Manages the KWin script.
  *
  * @author Bujju
  */
@@ -43,10 +43,27 @@ object KWin {
     private var script: KWinScript
     private val client = KWinClientImpl()
 
+    /**
+     * The window that is currently focused.
+     */
     var activeWindow: Window? = null
+        private set
+
+    /**
+     * The absolute position of the cursor.
+     */
+    var cursorPosition: Point? = null
+        private set
+
+    /**
+     * If not null, the active window will be moved to this position.
+     */
     var windowPosition: Point? = null
+
+    /**
+     * If true, all windows that are offscreen will be moved to the center of the screen.
+     */
     var restoreWindows = false
-    var cursorPosition = Point(0, 0)
 
     init {
         try {
@@ -54,6 +71,7 @@ object KWin {
             dbus.requestBusName("io.github.bujjuisabee.shimelinux")
             dbus.exportObject(client)
 
+            // Copy the script to temp file
             val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
             scriptFile.deleteOnExit()
             loadResource("scripts/shimelinux-kwin-script.js")?.use { input ->
@@ -86,22 +104,52 @@ object KWin {
         }
     }
 
+    /**
+     * Represents the `org.kde.kwin.Scripting` interface.
+     */
     @DBusInterfaceName("org.kde.kwin.Scripting")
     interface KWinScripting : DBusInterface {
+        /**
+         * Loads a KWin script at [path].
+         *
+         * @param name Used to identify the script when calling [unloadScript].
+         */
         fun loadScript(path: String, name: String): Int
 
+        /**
+         * Unloads a KWin script.
+         *
+         * @param name The name provided for the script when [loadScript] was called.
+         */
         fun unloadScript(name: String)
     }
 
+    /**
+     * Represents the `org.kde.kwin.Script` interface.
+     */
     @DBusInterfaceName("org.kde.kwin.Script")
     interface KWinScript : DBusInterface {
+        /**
+         * Runs the script.
+         */
         fun run()
 
+        /**
+         * Stops the script.
+         */
         fun stop()
     }
 
+    /**
+     * An interface containing methods called by the KWin script.
+     */
     @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
     interface KWinClient : DBusInterface {
+        /**
+         * Called whenever a window becomes active.
+         *
+         * @param caption The window's title.
+         */
         fun setActiveWindow(
             caption: String,
             x: Int,
@@ -110,15 +158,30 @@ object KWin {
             height: Int
         )
 
+        /**
+         * Called whenever the active window loses focus.
+         */
         fun resetActiveWindow()
 
+        /**
+         * Reports the absolute position of the cursor.
+         */
+        fun setCursorPosition(x: Int, y: Int)
+
+        /**
+         * Requests [windowPosition].
+         */
         fun getWindowPosition(): Map<String, Variant<*>>
 
+        /**
+         * Requests [restoreWindows].
+         */
         fun getRestoreWindows(): Boolean
-
-        fun setCursorPosition(x: Int, y: Int)
     }
 
+    /**
+     * An implementation of [KWinClient].
+     */
     class KWinClientImpl : KWinClient {
         override fun setActiveWindow(
             caption: String,
@@ -135,6 +198,10 @@ object KWin {
 
         override fun resetActiveWindow() {
             activeWindow = null
+        }
+
+        override fun setCursorPosition(x: Int, y: Int) {
+            cursorPosition = Point(x, y)
         }
 
         override fun getWindowPosition(): Map<String, Variant<*>> {
@@ -161,12 +228,14 @@ object KWin {
             }
         }
 
-        override fun setCursorPosition(x: Int, y: Int) {
-            cursorPosition = Point(x, y)
-        }
-
         override fun getObjectPath() = "/KWinClient"
     }
 
-    data class Window(val title: String, val bounds: Rectangle)
+    /**
+     * Contains information about a window from the KWin script.
+     *
+     * @property caption The window's title.
+     * @property bounds The window's frame geometry.
+     */
+    data class Window(val caption: String, val bounds: Rectangle)
 }

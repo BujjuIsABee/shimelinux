@@ -28,7 +28,7 @@ import com.group_finity.mascot.getProperty
 import java.awt.Point
 
 /**
- * Exposes the [Environment] instance to mascots and variables
+ * Exposes the [Environment] instance to mascots and variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -39,19 +39,19 @@ class MascotEnvironment(private val mascot: Mascot) {
     private var currentWorkArea: Area? = null
 
     /**
-     * An [Area] representing the bounds of the screen; used when Multiscreen is disabled
+     * An [Area] representing the bounds of the screen; used when Multiscreen is disabled.
      */
     val workArea: Area
         get() = getWorkArea(false)
 
     /**
-     * An [Area] representing the bounds of the screen; used when Multiscreen is enabled
+     * An [Area] representing the bounds of the screen; used when Multiscreen is enabled.
      */
     val screen: Area
         get() = impl.screen
 
     /**
-     * An [Area] representing the bounds of the active interactive window
+     * An [Area] representing the bounds of the active interactive window.
      */
     val activeIE: Area
         get() = if (!getProperty("Multiscreen", true) && currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false) {
@@ -61,7 +61,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         }
 
     /**
-     * The title of the active interactive window
+     * The title of the active interactive window.
      */
     val activeIETitle: String
         get() = impl.activeIETitle
@@ -148,14 +148,14 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Moves the active interactive window to [point]
+     * Moves the active interactive window to [point].
      */
     fun moveActiveIE(point: Point) {
         impl.moveActiveIE(point)
     }
 
     /**
-     * Restores all interactive windows that have been thrown offscreen
+     * Restores all interactive windows that have been thrown offscreen.
      */
     @Suppress("unused")
     fun restoreIE() {
@@ -163,7 +163,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Refreshes which screen is used for the work area
+     * Refreshes which screen is used for the work area.
      */
     fun refreshWorkArea() {
         getWorkArea(true)

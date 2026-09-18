@@ -25,7 +25,7 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 
 /**
- * A border that a mascot can stand/climb on
+ * A border that a mascot can stand/climb on.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -33,12 +33,12 @@ import java.awt.Point
  */
 interface Border {
     /**
-     * Returns whether the [location] is on the border
+     * Returns whether the [location] is on the border.
      */
     fun isOn(location: Point): Boolean
 
     /**
-     * Moves [location] to the border and returns it
+     * Moves [location] to the border and returns it.
      */
     fun move(location: Point): Point
 }

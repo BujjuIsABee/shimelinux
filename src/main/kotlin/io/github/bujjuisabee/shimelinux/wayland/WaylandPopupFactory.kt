@@ -23,13 +23,14 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import java.awt.Component
+import javax.swing.Popup
 import javax.swing.PopupFactory
 
 /**
- * A popup factory that displays popup menus on Wayland layer surfaces
+ * A popup factory that displays popup menus on Wayland layer surfaces.
  *
  * @author Bujju
  */
 object WaylandPopupFactory : PopupFactory() {
-    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int) = WaylandPopup(owner, contents, x, y)
+    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int): Popup = WaylandPopup(owner, contents, x, y)
 }

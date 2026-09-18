@@ -30,7 +30,11 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * The base implementation of an action
+ * The base implementation of an action.
+ *
+ * @property schema The schema used for the mascot's configuration.
+ * @property animations The animations that are played by the action.
+ * @property variables A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -41,46 +45,61 @@ abstract class ActionBase(
     internal val animations: List<Animation>,
     internal val variables: VariableMap
 ) : Action {
+    /**
+     * The mascot affected by the action.
+     */
     internal lateinit var mascot: Mascot
         private set
+
+    /**
+     * The environment that the action takes place within.
+     */
     internal val environment: MascotEnvironment
         get() = mascot.environment
+
+    /**
+     * The animation that is currently being played by the action.
+     */
     internal open val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) }
 
-    private var startTime = 0
-    internal var time: Int
-        get() = mascot.time - startTime
+    /**
+     * The amount of ticks that have passed since the action began.
+     */
+    internal var time = 0
+        get() = mascot.time - field
         set(value) {
-            startTime = mascot.time - value
+            field = mascot.time - value
         }
 
     /**
-     * Whether the mascot can be dragged with the cursor
+     * Whether the mascot can be dragged with the cursor.
      */
     open val isDraggable: Boolean
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), DEFAULT_DRAGGABLE)
 
     /**
-     * Whether the conditions for the action to continue are currently met
+     * Whether the conditions for the action to continue are currently met.
      */
     private val isEffective: Boolean
         get() = eval(schema.getString(PARAMETER_CONDITION), DEFAULT_CONDITION)
 
     /**
-     * The duration of the action in 40 millisecond ticks
+     * The duration of the action in 40 millisecond ticks.
      */
     private val duration: Int
         get() = eval<Number>(schema.getString(PARAMETER_DURATION), DEFAULT_DURATION).toInt()
 
     /**
-     * An affordance that will be added to the mascot on the next frame
+     * An affordance that will be added to the mascot on the next frame.
+     *
+     * @see Mascot.affordances
      */
     internal val affordance: String
         get() = eval(schema.getString(PARAMETER_AFFORDANCE), DEFAULT_AFFORDANCE)
 
     /**
-     * The name of the action
+     * The name of the action.
      */
     private val name: String?
         get() = eval(schema.getString(PARAMETER_NAME), DEFAULT_NAME)
@@ -98,7 +117,7 @@ abstract class ActionBase(
         }
     }
 
-    override fun hasNext() = isEffective && time < duration
+    override fun hasNext(): Boolean = isEffective && time < duration
 
     override fun next() {
         initFrame()
@@ -135,7 +154,7 @@ abstract class ActionBase(
     internal abstract fun tick()
 
     /**
-     * Puts a variable in [variables]
+     * Puts a variable in [variables].
      */
     internal fun putVariable(key: String, value: Any?) {
         synchronized(variables) {
@@ -144,12 +163,14 @@ abstract class ActionBase(
     }
 
     /**
-     * Returns the value of a variable in [variables], or [defaultValue] if the variable does not exist
+     * Returns the value of a variable in [variables], or [defaultValue] if the variable does not exist.
+     *
+     * @param T The type that the variable's value will be cast to.
+     * @param name The key/name of the variable to evaluate.
+     * @param defaultValue The value to return if the variable does not exist.
      */
-    internal inline fun <reified T> eval(name: String, defaultValue: T): T {
-        synchronized(variables) {
-            return variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue
-        }
+    internal inline fun <reified T> eval(name: String, defaultValue: T): T = synchronized(variables) {
+        variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue
     }
 
     override fun toString() = try {

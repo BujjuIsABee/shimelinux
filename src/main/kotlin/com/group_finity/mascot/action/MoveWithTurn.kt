@@ -27,6 +27,12 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
+ * Deprecated in Shimeji-ee.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param params A list of the mascot's variables.
+ *
  * @author Yuki Yamada
  * @author Kilkakon
  * @author Bujju

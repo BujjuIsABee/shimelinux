@@ -53,10 +53,16 @@ use wayland_cursor::CursorTheme;
 
 use crate::{MouseEventReceiver, Point, Rect};
 
+/// Stores the state of the cursor.
 #[derive(Default)]
 pub struct CursorState {
+    /// A wl_pointer provided to a layer surface.
     pub pointer: Option<WlPointer>,
+
+    /// The wl_surface to attach when setting the cursor.
     pub surface: Option<WlSurface>,
+
+    /// The serial provided when the pointer enters a layer surface. Required to set the cursor.
     pub serial: Option<u32>,
 
     pub left_pressed: bool,
@@ -66,9 +72,8 @@ pub struct CursorState {
     pub position: Point,
 }
 
+/// Represents Wayland layer surface.
 pub struct LayerState {
-    pub mouse_receiver: Global<MouseEventReceiver<'static>>,
-
     pub compositor_state: CompositorState,
     pub registry_state: RegistryState,
     pub output_state: OutputState,
@@ -77,10 +82,22 @@ pub struct LayerState {
     pub shm: Shm,
     pub pool: SlotPool,
 
+    /// The object that mouse events will be sent to.
+    pub mouse_event_receiver: Global<MouseEventReceiver<'static>>,
+
+    /// The layer surface.
     pub layer: LayerSurface,
+
+    /// Stores rectangles covering the non-transparent pixels of the layer surface. Used for the input region.
     pub layer_mask: Vec<Rect>,
+
+    /// Whether the first configure event has been sent.
     pub configured: bool,
+
+    /// The image data displayed on the surface, in ARGB8888 format.
     pub image_rgb: Vec<i32>,
+
+    /// Stores the bounds requested by the last SetBounds event.
     pub image_bounds: Rect,
 }
 
@@ -254,7 +271,7 @@ impl PointerHandler for LayerState {
 
         if let Ok(jvm) = JavaVM::singleton() {
             let _ = jvm.attach_current_thread(|env| -> jni::errors::Result<_> {
-                self.mouse_receiver.update_cursor(
+                self.mouse_event_receiver.update_cursor(
                     env,
                     self.cursor_state.left_pressed,
                     self.cursor_state.right_pressed,
@@ -291,11 +308,17 @@ impl ProvidesRegistryState for LayerState {
 
 delegate_noop!(LayerState: ignore WlRegion);
 impl LayerState {
+    /// Sets the size and position of the layer surface.
+    ///
+    /// The position is set immediately; the size is set the next time `draw()` is called.
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
         self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
+    /// Sets the image displayed by the layer surface.
+    ///
+    /// If `update_mask` is true, `layer_mask` will be updated.
     pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
         self.image_rgb = rgb;
 
@@ -304,6 +327,9 @@ impl LayerState {
         }
     }
 
+    /// Sets the cursor displayed by the pointer's `surface`.
+    ///
+    /// If `use_hand` is true, the cursor will be set to a hand. Otherwise, it will be set to the regular cursor.
     pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
         if let Ok(mut theme) = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24)
             && let Some(cursor) = theme.get_cursor(if use_hand { "pointer" } else { "left_ptr" })
@@ -325,10 +351,18 @@ impl LayerState {
         }
     }
 
+    /// Destroys the layer surface.
     pub fn dispose(&mut self) {
         self.layer.wl_surface().destroy();
     }
 
+    /// Redraws the layer surface.
+    ///
+    /// If `layer_mask` is not empty, the input region will also be updated.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the buffer cannot be created.
     fn draw(&mut self, qh: &QueueHandle<Self>) {
         let width = self.image_bounds.width.max(1);
         let height = self.image_bounds.height.max(1);
@@ -368,6 +402,7 @@ impl LayerState {
         self.layer.commit();
     }
 
+    /// Updates `layer_mask` based on `image_rgb`.
     fn update_layer_mask(&mut self) {
         let mut rects: Vec<Rect> = Vec::new();
         let width = self.image_bounds.width;

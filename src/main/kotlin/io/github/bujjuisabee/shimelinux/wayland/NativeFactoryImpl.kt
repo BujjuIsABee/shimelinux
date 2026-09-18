@@ -23,19 +23,21 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.image.NativeImage
+import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
- * A native factory used on some Wayland compositors
+ * A native factory that displays mascots on native Wayland surfaces.
  *
  * @author Bujju
  */
-@Suppress("unused")
 class NativeFactoryImpl : NativeFactory() {
-    override val environment = WaylandEnvironment()
+    override val environment: Environment = WaylandEnvironment()
 
-    override fun newNativeImage(src: BufferedImage) = GenericNativeImage(src)
+    override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
 
-    override fun newTranslucentWindow() = WaylandTranslucentLayer()
+    override fun newTranslucentWindow(): TranslucentWindow = WaylandTranslucentLayer()
 }

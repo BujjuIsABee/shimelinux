@@ -26,7 +26,10 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that causes the mascot to look in a specific direction
+ * An action that causes the mascot to look in a specific direction.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param params A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon

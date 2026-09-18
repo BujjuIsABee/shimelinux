@@ -38,7 +38,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(ScanInteract::class.java.name)
 
 /**
- * An action that scans for a mascot with the [affordance], then sets [mascot]'s behavior if one is found
+ * An action that scans for a mascot with the [affordance], then sets [mascot]'s behavior if one is found.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Kilkakon
  * @author Bujju
@@ -50,7 +54,15 @@ class ScanInteract(
     context: VariableMap
 ) : BorderedAction(schema, animations, context) {
     private var target: WeakReference<Mascot>? = null
+
+    /**
+     * Whether there are any turning animations in [animations].
+     */
     internal val hasTurningAnimation = animations.any { it.isTurn }
+
+    /**
+     * Whether the mascot is currently turning.
+     */
     internal var isTurning = false
         private set
 
@@ -58,19 +70,19 @@ class ScanInteract(
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
 
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found
+     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 
     /**
-     * The behavior to set for the other mascot
+     * The behavior to set for the other mascot.
      */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
 
     /**
-     * Whether the mascots should face each other
+     * Whether the mascots should face each other.
      */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
@@ -85,7 +97,7 @@ class ScanInteract(
         putVariable(schema.getString(VARIABLE_TARGETY), null)
     }
 
-    override fun hasNext() = super.hasNext() && isTurning || time < checkNotNull(animation).duration
+    override fun hasNext(): Boolean = super.hasNext() && isTurning || time < checkNotNull(animation).duration
 
     override fun tick() {
         super.tick()

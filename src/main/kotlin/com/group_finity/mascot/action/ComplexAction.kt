@@ -27,9 +27,11 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that triggers other actions
+ * An action that triggers other actions.
  *
- * @param actions An array of actions that can be triggered by the complex action
+ * @param schema The schema used for the mascot's configuration.
+ * @param params A list of the mascot's variables.
+ * @property actions An array of actions that can be triggered by the complex action.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -40,6 +42,9 @@ abstract class ComplexAction(
     params: VariableMap,
     internal vararg val actions: Action
 ) : ActionBase(schema, listOf(), params) {
+    /**
+     * The index of the current action in [actions].
+     */
     internal open var currentAction = 0
         set(value) {
             field = value
@@ -47,6 +52,10 @@ abstract class ComplexAction(
                 action.init(mascot)
             }
         }
+
+    /**
+     * The current action.
+     */
     internal val action: Action
         get() = actions[currentAction]
 
@@ -66,7 +75,7 @@ abstract class ComplexAction(
         }
     }
 
-    override fun hasNext() = super.hasNext() && currentAction < actions.size && action.hasNext()
+    override fun hasNext(): Boolean = super.hasNext() && currentAction < actions.size && action.hasNext()
 
     override fun tick() {
         if (action.hasNext()) {
@@ -75,7 +84,7 @@ abstract class ComplexAction(
     }
 
     /**
-     * Sets [action] to the next effective action in [actions]
+     * Sets [action] to the next effective action in [actions].
      */
     internal fun seek() {
         if (super.hasNext()) {

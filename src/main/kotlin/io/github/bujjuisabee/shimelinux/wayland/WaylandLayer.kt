@@ -31,25 +31,25 @@ import java.awt.event.MouseEvent
 import kotlin.system.exitProcess
 
 /**
- * Creates a Wayland layer surface via [WaylandLib]
+ * Creates a Wayland layer surface via [WaylandLib].
+ *
+ * @param mouseEventReceiver The object that will receive mouse events from the layer surface.
+ * @param useMask Whether the layer surface's input region should be updated whenever [setImage] is called.
  *
  * @author Bujju
  */
 class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
-    private val senderPtr: Long
-    private var isDisposed = false
-    private var previousCursorPosition = Point(0, 0)
-    private var absoluteLocation = location
-    private var isDragging = false
-
-    init {
-        try {
-            senderPtr = WaylandLib.createLayer(mouseEventReceiver)
-        } catch (e: Throwable) {
-            Main.showError("Rust panic", e)
-            exitProcess(0)
-        }
+    private val senderPtr: Long = try {
+        WaylandLib.createLayer(mouseEventReceiver)
+    } catch (e: Throwable) {
+        Main.showError("Fatal error in libshimelinux_wayland", e)
+        exitProcess(0)
     }
+
+    private var previousCursorPosition = Point(0, 0)
+    private var absoluteLocation: Point = location
+    private var isDragging = false
+    private var isDisposed = false
 
     override fun isVisible() = true
 
@@ -67,7 +67,7 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
         try {
             WaylandLib.setBounds(senderPtr, x, y, width, height)
         } catch (_: Throwable) {
-            Main.showError("Rust panic")
+            Main.showError("Fatal error in libshimelinux_wayland")
             exitProcess(0)
         }
     }
@@ -78,13 +78,15 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
         try {
             WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
         } catch (_: Throwable) {
-            Main.showError("Rust panic")
+            Main.showError("Fatal error in libshimelinux_wayland")
             exitProcess(0)
         }
     }
 
     /**
-     * Displays an image on the layer
+     * Displays an image on the layer surface, and updates its input region if [useMask] is true.
+     *
+     * @param rgb The image to display in ARGB8888 format.
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
@@ -92,15 +94,13 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
         try {
             WaylandLib.setImage(senderPtr, rgb, useMask)
         } catch (_: Throwable) {
-            Main.showError("Rust panic")
+            Main.showError("Fatal error in libshimelinux_wayland")
             exitProcess(0)
         }
     }
 
     /**
-     * Destroys the layer surface
-     *
-     * The event sender will be freed and any function that uses it will not execute
+     * Destroys the layer surface.
      */
     fun dispose() {
         if (isDisposed) return
@@ -108,7 +108,7 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
         try {
             WaylandLib.dispose(senderPtr)
         } catch (_: Throwable) {
-            Main.showError("Rust panic")
+            Main.showError("Fatal error in libshimelinux_wayland")
             exitProcess(0)
         }
 
@@ -116,7 +116,10 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     }
 
     /**
-     * Sends `MOUSE_PRESSED`, `MOUSE_RELEASED`, `MOUSE_MOVED`, and `MOUSE_DRAGGED` events to the event listeners attached to [component]
+     * Sends `MOUSE_PRESSED`, `MOUSE_RELEASED`, `MOUSE_MOVED`, and `MOUSE_DRAGGED` events to the event listeners attached to [component].
+     *
+     * @param component The AWT component that the events will be dispatched to.
+     * @see WaylandLib.MouseEventReceiver.updateCursor
      */
     fun dispatchEvents(
         component: Component,

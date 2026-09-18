@@ -30,7 +30,7 @@ import java.awt.Toolkit
 import kotlin.concurrent.timer
 
 /**
- * Defines a platform specific environment, which tracks the screens, cursor, and windows that mascots can interact with
+ * Defines a platform specific environment, which tracks the screens, cursor, and windows that mascots can interact with.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -38,17 +38,17 @@ import kotlin.concurrent.timer
  */
 abstract class Environment {
     /**
-     * An [Area] representing the bounds of the screen
+     * An [Area] representing the bounds of the screen.
      */
     internal abstract val workArea: Area
 
     /**
-     * An [Area] representing the bounds of the active interactive window
+     * An [Area] representing the bounds of the active interactive window.
      */
     abstract val activeIE: Area
 
     /**
-     * The title of the active interactive window
+     * The title of the active interactive window.
      */
     abstract val activeIETitle: String
 
@@ -59,7 +59,7 @@ abstract class Environment {
         get() = complexScreen.areas
 
     /**
-     * Initializes the environment
+     * Initializes the environment.
      */
     fun init() {
         timer(daemon = true, period = 5000) { updateScreenRect() }
@@ -67,7 +67,7 @@ abstract class Environment {
     }
 
     /**
-     * Updates the environment
+     * Updates the environment.
      */
     open fun tick() {
         screen.set(screenRect)
@@ -86,22 +86,22 @@ abstract class Environment {
     }
 
     /**
-     * Moves the active interactive window to [point]
+     * Moves the active interactive window to [point].
      */
     abstract fun moveActiveIE(point: Point)
 
     /**
-     * Restores all interactive windows that have been thrown offscreen
+     * Restores all interactive windows that have been thrown offscreen.
      */
     abstract fun restoreIE()
 
     /**
-     * Resets the cache of whitelisted/blacklisted window titles
+     * Resets the cache of whitelisted/blacklisted window titles.
      */
     abstract fun refreshCache()
 
     /**
-     * Disposes of the environment
+     * Disposes of the environment.
      */
     abstract fun dispose()
 

@@ -32,25 +32,23 @@ import javax.script.ScriptException
 private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
 
 /**
- * A variable whose value is evaluated from JavaScript code
+ * A variable whose value is evaluated from JavaScript.
  *
- * @property isClearAtInitFrame Whether the variable's value should be cleared when [initFrame] is called
+ * @param source See [Variable.parse].
+ * @param isClearAtInitFrame Whether the variable's value should be cleared when [initFrame] is called.
  *
  * @author Yuki Yamada
  * @author Kilkakon
  * @author Bujju
  */
 class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
-    private val compiled: CompiledScript
-    private var value: Any? = null
-
-    init {
-        try {
-            compiled = (engine as Compilable).compile(source)
-        } catch (e: ScriptException) {
-            throw VariableException(localize("ScriptCompilationErrorMessage") + ": $source", e)
-        }
+    private val compiled: CompiledScript = try {
+        (engine as Compilable).compile(source)
+    } catch (e: ScriptException) {
+        throw VariableException(localize("ScriptCompilationErrorMessage") + ": $source", e)
     }
+
+    private var value: Any? = null
 
     override fun init() {
         value = null
@@ -62,13 +60,11 @@ class Script(private val source: String?, private val isClearAtInitFrame: Boolea
         }
     }
 
-    override fun get(variables: VariableMap): Any? {
-        return value ?: try {
-            compiled.eval(variables).also { value = it }
-        } catch (e: ScriptException) {
-            throw VariableException(localize("ScriptEvaluationErrorMessage") + ": $source", e)
-        }
+    override fun get(variables: VariableMap): Any? = value ?: try {
+        compiled.eval(variables).also { value = it }
+    } catch (e: ScriptException) {
+        throw VariableException(localize("ScriptEvaluationErrorMessage") + ": $source", e)
     }
 
-    override fun toString() = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
+    override fun toString(): String = if (isClearAtInitFrame) "#{$source}" else $$"${$$source}"
 }

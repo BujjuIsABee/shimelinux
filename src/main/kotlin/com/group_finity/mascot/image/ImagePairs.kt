@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
 
 /**
- * Stores image pairs
+ * Stores image pairs.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -36,7 +36,7 @@ object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
 
     /**
-     * Adds [imagePair] to [imagePairs] with [fileName] as its key
+     * Adds [imagePair] to [imagePairs] with [fileName] as its key.
      */
     @JvmStatic
     fun load(fileName: String, imagePair: ImagePair) {
@@ -44,25 +44,25 @@ object ImagePairs {
     }
 
     /**
-     * Gets an image pair from [imagePairs]
+     * Gets an image pair from [imagePairs].
      */
     @JvmStatic
     fun getImagePair(fileName: String) = imagePairs[fileName]
 
     /**
-     * Gets whether [imagePairs] contains an image pair with [fileName] as its key
+     * Gets whether [imagePairs] contains an image pair with [fileName] as its key.
      */
     @JvmStatic
     fun contains(fileName: String) = imagePairs.containsKey(fileName)
 
     /**
-     * Returns the right image from an image pair in [imagePairs] if [isLookRight] is true, or the left image if it is false
+     * Returns the right image from an image pair in [imagePairs] if [isLookRight] is true, or the left image if it is false.
      */
     @JvmStatic
     fun getImage(fileName: String, isLookRight: Boolean) = imagePairs[fileName]?.getImage(isLookRight)
 
     /**
-     * Removes all image pairs from [imagePairs]
+     * Removes all image pairs from [imagePairs].
      */
     @JvmStatic
     fun clear() {
@@ -70,7 +70,7 @@ object ImagePairs {
     }
 
     /**
-     * Removes all image pairs from the image set called [searchTerm]
+     * Removes all image pairs from the image set called [searchTerm].
      */
     @JvmStatic
     fun removeAll(searchTerm: String) {

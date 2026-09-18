@@ -35,7 +35,11 @@ import kotlin.math.roundToInt
 private val logger = Logger.getLogger(Regist::class.java.name)
 
 /**
- * An action that occurs after a random amount of time while the mascot is being dragged with the cursor
+ * An action that occurs after a random amount of time while the mascot is being dragged with the cursor.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param context A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -49,7 +53,7 @@ class Regist(
     private var scaling = 0.0
 
     /**
-     * The horizontal offset used when calculating the distance between the mascot and the cursor
+     * The horizontal offset used when calculating the distance between the mascot and the cursor.
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()

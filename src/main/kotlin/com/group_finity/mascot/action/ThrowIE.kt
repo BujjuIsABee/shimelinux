@@ -29,7 +29,11 @@ import java.awt.Point
 import java.util.ResourceBundle
 
 /**
- * An action that causes the mascot to throw a window
+ * An action that causes the mascot to throw a window.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param params A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -41,24 +45,24 @@ class ThrowIE(
     params: VariableMap
 ) : Animate(schema, animations, params) {
     /**
-     * The initial horizontal velocity of the window
+     * The initial horizontal velocity of the window.
      */
     private val initialVx: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
 
     /**
-     * The initial vertical velocity of the window
+     * The initial vertical velocity of the window.
      */
     private val initialVy: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()
 
     /**
-     * The strength of gravity to apply to the window
+     * The strength of gravity to apply to the window.
      */
     private val gravity: Double
         get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 
-    override fun hasNext() = super.hasNext() && environment.activeIE.isVisible && getProperty("Throwing", true)
+    override fun hasNext(): Boolean = super.hasNext() && environment.activeIE.isVisible && getProperty("Throwing", true)
 
     override fun tick() {
         super.tick()

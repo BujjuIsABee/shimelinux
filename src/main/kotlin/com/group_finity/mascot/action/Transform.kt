@@ -36,7 +36,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(Transform::class.java.name)
 
 /**
- * An action that causes the mascot to transform into another mascot
+ * An action that causes the mascot to transform into another mascot.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param params A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -49,7 +53,7 @@ class Transform(
     params: VariableMap
 ) : Animate(schema, animations, params) {
     /**
-     * The behavior to set for the mascot after it transforms
+     * The behavior to set for the mascot after it transforms.
      */
     private val transformBehavior: String
         get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOR), DEFAULT_TRANSFORMBEHAVIOR)

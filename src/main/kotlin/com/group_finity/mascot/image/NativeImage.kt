@@ -23,7 +23,7 @@
 package com.group_finity.mascot.image
 
 /**
- * Defines a platform-specific image object
+ * A platform-specific image.
  *
  * @author Yuki Yamada
  * @author Kilkakon

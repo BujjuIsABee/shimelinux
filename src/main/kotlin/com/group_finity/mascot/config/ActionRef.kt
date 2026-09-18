@@ -30,7 +30,10 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(ActionRef::class.java.name)
 
 /**
- * Creates an action from an ActionRef node
+ * Creates an action from an ActionRef node.
+ *
+ * @param configuration The configuration defining the action reference.
+ * @param refNode The node defining the action reference in the configuration.
  *
  * @author Yuki Yamada
  * @author Kilkakon

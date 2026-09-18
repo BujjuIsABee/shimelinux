@@ -41,7 +41,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(ActionBuilder::class.java.name)
 
 /**
- * Builds an action from an Action node
+ * Builds an action from an Action node.
+ *
+ * @param configuration The configuration defining the action.
+ * @param actionNode The node defining the action within the configuration.
+ * @param imageSet The image set that the action is defined for.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -49,6 +53,7 @@ private val logger = Logger.getLogger(ActionBuilder::class.java.name)
  */
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema
+
     val type = requireNotNull(actionNode.getAttribute(schema.getString("Type"))) { "Action requires Type attribute." }
     val name = actionNode.getAttribute(schema.getString("Name"))
     private val className = actionNode.getAttribute(schema.getString("Class"))

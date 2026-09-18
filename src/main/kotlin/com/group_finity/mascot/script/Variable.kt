@@ -23,7 +23,7 @@
 package com.group_finity.mascot.script
 
 /**
- * Defines a variable that provides a value
+ * Defines a variable that provides a value.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -31,23 +31,23 @@ package com.group_finity.mascot.script
  */
 abstract class Variable {
     /**
-     * Initializes the variable
+     * Initializes the variable.
      */
     abstract fun init()
 
     /**
-     * Called when the first frame of the animation associated with the variable is initialized
+     * Called when the first frame of the animation associated with the variable is initialized.
      */
     abstract fun initFrame()
 
     /**
-     * Gets the value of the variable
+     * Gets the value of the variable.
      */
     abstract fun get(variables: VariableMap): Any?
 
     companion object {
         /**
-         * Gets a variable from [source]
+         * Gets a variable from [source].
          *
          * @param source
          * A [Script] whose value is **not** cleared when [initFrame] is called:
@@ -68,7 +68,7 @@ abstract class Variable {
          * 3
          * ```
          */
-        fun parse(source: String?) = if (source == null) {
+        fun parse(source: String?): Variable? = if (source == null) {
             null
         } else if (source.startsWith($$"${") && source.endsWith("}")) {
             Script(source.substring(2, source.length - 1), false)
@@ -78,7 +78,7 @@ abstract class Variable {
             Constant(parseConstant(source))
         }
 
-        private fun parseConstant(source: String?) = when (source) {
+        private fun parseConstant(source: String?): Any? = when (source) {
             null, "null" -> null
             "true" -> true
             "false" -> false

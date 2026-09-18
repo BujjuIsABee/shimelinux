@@ -32,7 +32,11 @@ import java.awt.event.ComponentListener
 import javax.swing.JPanel
 
 /**
- * A panel that displays the background of the [VirtualEnvironment]
+ * A panel that displays the background of the [VirtualEnvironment].
+ *
+ * @param preferredSize The default size of the panel.
+ * @param background The background color of the panel.
+ * @param image The background image of the panel.
  *
  * @author Kilkakon
  * @author Bujju
@@ -122,5 +126,5 @@ class VirtualContentPanel(
         }
     }
 
-    enum class Mode { CENTER, FIT, STRETCH, FILL }
+    private enum class Mode { CENTER, FIT, STRETCH, FILL }
 }

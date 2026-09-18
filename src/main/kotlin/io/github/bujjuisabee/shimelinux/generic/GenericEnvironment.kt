@@ -30,7 +30,7 @@ import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * A cross-platform environment
+ * A cross-platform environment.
  *
  * @author Bujju
  */
@@ -44,6 +44,7 @@ class GenericEnvironment : Environment() {
     override fun tick() {
         super.tick()
 
+        // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect = Rectangle(
                 getProperty("ScreenX", screen.left),
@@ -53,12 +54,9 @@ class GenericEnvironment : Environment() {
             )
 
             screen.set(screenRect)
-        } else {
-            if (!getProperty("Multiscreen", true)) {
-                val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-                screenRect.bounds = gc.bounds
-                screen.set(screenRect)
-            }
+        } else if (!getProperty("Multiscreen", true)) {
+            screenRect = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration.bounds
+            screen.set(screenRect)
         }
 
         activeIE.isVisible = false

@@ -35,7 +35,7 @@ import kotlin.io.path.inputStream
 import kotlin.math.roundToInt
 
 /**
- * Loads image pairs
+ * Loads image pairs.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -44,6 +44,13 @@ import kotlin.math.roundToInt
 object ImagePairLoader {
     /**
      * Loads an image pair. If [rightPath] is null, the right image will be the left image flipped.
+     *
+     * @param leftPath The path to the left image.
+     * @param rightPath The path to the right image. If null, the left image will be flipped for the right image.
+     * @param center The center of the image.
+     * @param scaling The scaling factor that should be applied to the image.
+     * @param filter The type of filter that should be used when scaling the image.
+     * @param opacity The opacity of the image.
      */
     @JvmStatic
     fun load(leftPath: Path, rightPath: Path?, center: Point, scaling: Double, filter: Filter, opacity: Double) {

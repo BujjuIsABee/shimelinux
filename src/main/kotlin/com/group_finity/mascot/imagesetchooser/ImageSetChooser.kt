@@ -25,9 +25,9 @@ package com.group_finity.mascot.imagesetchooser
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
+import com.group_finity.mascot.defaultEnvironment
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.getProperty
-import com.group_finity.mascot.isWaylandEnvironmentDefault
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import dorkbox.desktop.Desktop
@@ -61,7 +61,7 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
 /**
- * A menu to choose which image sets to use
+ * A menu to choose which image sets to use.
  *
  * @author Kilkakon
  * @author Bujju
@@ -96,7 +96,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         layout = BorderLayout()
         rootPane.border = BorderFactory.createEmptyBorder(10, 10, 0, 10)
 
-        if (isWaylandEnvironmentDefault) {
+        if (defaultEnvironment == "wayland") {
             isResizable = false
         }
 

@@ -26,7 +26,9 @@ import org.w3c.dom.Attr
 import org.w3c.dom.Element
 
 /**
- * An XML node
+ * An XML node.
+ *
+ * @param element The XML element for the node.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -34,7 +36,7 @@ import org.w3c.dom.Element
  */
 class Entry(private val element: Element) {
     /**
-     * The name of the node
+     * The name of the node.
      *
      * @return "Node" for the following XML node:
      *
@@ -46,7 +48,7 @@ class Entry(private val element: Element) {
         get() = element.tagName
 
     /**
-     * The text inside the node
+     * The text inside the node.
      *
      * @return "Text" for the following XML node:
      *
@@ -58,7 +60,7 @@ class Entry(private val element: Element) {
         get() = element.textContent
 
     /**
-     * The attributes of the node
+     * The attributes of the node.
      *
      * @return A [Map] where the key "name" corresponds to the value "value" for the following XML node:
      *
@@ -74,7 +76,7 @@ class Entry(private val element: Element) {
     }
 
     /**
-     * The child nodes inside the node
+     * The child nodes inside the node.
      *
      * @return A [List] with an [Entry] for the "Child" node:
      *
@@ -91,11 +93,20 @@ class Entry(private val element: Element) {
         }
     }
 
-    private val childMap = children.groupBy { it.name }
+    private val childMap: Map<String, List<Entry>> = children.groupBy { it.name }
 
-    fun getAttribute(name: String) = element.getAttributeNode(name)?.value
+    /**
+     * Gets the value of an attribute with the given name, or null if it does not exist.
+     */
+    fun getAttribute(name: String): String? = element.getAttributeNode(name)?.value
 
-    fun hasChild(name: String) = children.any { it.name == name }
+    /**
+     * Returns whether there is a node in [children] with the given name.
+     */
+    fun hasChild(name: String): Boolean = childMap[name].isNullOrEmpty()
 
-    fun selectChildren(name: String) = childMap[name].orEmpty()
+    /**
+     * Gets all nodes in [children] with the given name.
+     */
+    fun selectChildren(name: String): List<Entry> = childMap[name].orEmpty()
 }

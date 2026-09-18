@@ -26,9 +26,11 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that triggers a sequence of actions
+ * An action that triggers a sequence of actions.
  *
- * @param actions The actions to trigger
+ * @param schema The schema used for the mascot's configuration.
+ * @param params A list of the mascot's variables.
+ * @property actions The actions to trigger.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -40,7 +42,7 @@ class Sequence(
     vararg actions: Action
 ) : ComplexAction(schema, params, *actions) {
     /**
-     * Whether the sequence should start over after the final action in [actions] is triggered
+     * Whether the sequence should start over after the final action in [actions] is triggered.
      */
     private val isLoop: Boolean
         get() = eval(schema.getString(PARAMETER_LOOP), DEFAULT_LOOP)

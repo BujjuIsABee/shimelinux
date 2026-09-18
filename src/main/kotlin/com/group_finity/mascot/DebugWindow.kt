@@ -32,7 +32,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 /**
- * A menu that shows statistics about a mascot for debugging purposes
+ * A menu that shows statistics about a mascot for debugging purposes.
  *
  * @author Kilkakon
  * @author Bujju
@@ -163,6 +163,9 @@ class DebugWindow(imageSet: String) : JFrame() {
         setLocationRelativeTo(null)
     }
 
+    /**
+     * Updates the statistics.
+     */
     fun set(
         behavior: Behavior?,
         shimejiX: Int,

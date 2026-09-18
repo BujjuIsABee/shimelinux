@@ -38,7 +38,7 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 
 /**
- * An environment that displays mascots within a single window
+ * An environment that displays mascots within a single window.
  *
  * @author Kilkakon
  * @author Bujju
@@ -76,10 +76,7 @@ class VirtualEnvironment : Environment() {
         })
 
         val (width, height) = getProperty("WindowSize", "600x500").split("x").map { it.toInt() }
-
-        val image = runCatching {
-            ImageIO.read(File(getProperty("BackgroundImage", "")))
-        }.getOrNull()
+        val image = runCatching { ImageIO.read(File(getProperty("BackgroundImage", ""))) }.getOrNull()
 
         display.contentPane = VirtualContentPanel(
             Dimension(width, height),
@@ -110,8 +107,13 @@ class VirtualEnvironment : Environment() {
         display.dispose()
     }
 
-    fun addShimeji(shimeji: JPanel) {
-        shimeji.isOpaque = false
-        display.add(shimeji)
+    /**
+     * Adds a mascot to the window.
+     *
+     * @param mascot The [VirtualTranslucentPanel] to add.
+     */
+    fun addShimeji(mascot: JPanel) {
+        mascot.isOpaque = false
+        display.add(mascot)
     }
 }

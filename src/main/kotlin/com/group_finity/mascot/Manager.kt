@@ -35,7 +35,7 @@ import kotlin.concurrent.timer
 private val logger = Logger.getLogger(Manager::class.java.name)
 
 /**
- * Manages a list of mascots
+ * Manages a list of mascots.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -46,19 +46,36 @@ class Manager {
     private val added = linkedSetOf<Mascot>()
     private val removed = linkedSetOf<Mascot>()
     private var timer: Timer? = null
+
+    /**
+     * Whether the program should be closed if the list is empty.
+     */
     var isExitOnLastRemoved = true
 
+    /**
+     * Whether all mascots are paused.
+     */
     val isPaused: Boolean
         get() = synchronized(mascots) { mascots.none { !it.isPaused } }
+
+    /**
+     * The total number of mascots in the list.
+     */
     val count: Int
         get() = getCount(null)
 
+    /**
+     * Starts dispatching ticks to the mascots in the list.
+     */
     fun start() {
         if (timer == null) {
             timer = timer(daemon = false, period = 40L) { tick() }
         }
     }
 
+    /**
+     * Stops ticks from being dispatched to the mascots in the list.
+     */
     fun stop() {
         timer?.let {
             it.cancel()
@@ -66,6 +83,9 @@ class Manager {
         }
     }
 
+    /**
+     * Dispatches a tick to the mascots in the list.
+     */
     fun tick() {
         NativeFactory.instance.environment.tick()
 
@@ -98,6 +118,9 @@ class Manager {
         }
     }
 
+    /**
+     * Adds [mascot] to the list on the next [tick].
+     */
     fun add(mascot: Mascot) {
         synchronized(added) {
             added.add(mascot)
@@ -106,6 +129,9 @@ class Manager {
         mascot.manager = this
     }
 
+    /**
+     * Removes [mascot] from the list on the next [tick].
+     */
     fun remove(mascot: Mascot) {
         synchronized(added) {
             added.remove(mascot)
@@ -114,6 +140,9 @@ class Manager {
         mascot.manager = null
     }
 
+    /**
+     * Sets the behavior to [name] for all mascots.
+     */
     fun setBehaviorAll(name: String) {
         synchronized(mascots) {
             for (mascot in mascots) {
@@ -136,6 +165,9 @@ class Manager {
         }
     }
 
+    /**
+     * Sets the behavior to [name] for all mascots with the [imageSet].
+     */
     fun setBehaviorAll(configuration: Configuration, name: String, imageSet: String) {
         synchronized(mascots) {
             for (mascot in mascots) {
@@ -160,6 +192,9 @@ class Manager {
         }
     }
 
+    /**
+     * Dismisses all mascots but one.
+     */
     fun remainOne() {
         synchronized(mascots) {
             val totalMascots = mascots.size
@@ -169,6 +204,9 @@ class Manager {
         }
     }
 
+    /**
+     * Dismisses all mascots except [mascot].
+     */
     fun remainOne(mascot: Mascot) {
         synchronized(mascots) {
             val totalMascots = mascots.size
@@ -180,6 +218,9 @@ class Manager {
         }
     }
 
+    /**
+     * Dismisses all mascots except one with the [imageSet].
+     */
     fun remainOne(imageSet: String) {
         synchronized(mascots) {
             var isFirst = true
@@ -197,6 +238,9 @@ class Manager {
         }
     }
 
+    /**
+     * Dismisses all mascots with the [imageSet].
+     */
     fun remainNone(imageSet: String) {
         synchronized(mascots) {
             val totalMascots = mascots.size
@@ -209,6 +253,9 @@ class Manager {
         }
     }
 
+    /**
+     * Sets all [Mascot.isPaused] to [isPaused] for all mascots.
+     */
     fun togglePauseAll() {
         synchronized(mascots) {
             val isPaused = isPaused
@@ -218,6 +265,9 @@ class Manager {
         }
     }
 
+    /**
+     * Gets the number of mascots with the [imageSet].
+     */
     fun getCount(imageSet: String?) = synchronized(mascots) {
         if (imageSet != null) {
             mascots.count { it.imageSet == imageSet }
@@ -226,16 +276,25 @@ class Manager {
         }
     }
 
+    /**
+     * Gets the first mascot with the [affordance].
+     */
     fun getMascotWithAffordance(affordance: String) = synchronized(mascots) {
         mascots.firstOrNull { it.affordances.contains(affordance) }?.let {
             WeakReference(it)
         }
     }
 
+    /**
+     * Whether there is more than one mascot at [anchor].
+     */
     fun hasOverlappingMascotsAtPoint(anchor: Point) = synchronized(mascots) {
         mascots.count { it.anchor == anchor } > 1
     }
 
+    /**
+     * Dismisses all mascots.
+     */
     fun disposeAll() {
         synchronized(mascots) {
             val totalMascots = mascots.size

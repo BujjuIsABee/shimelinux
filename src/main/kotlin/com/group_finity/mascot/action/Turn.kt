@@ -31,7 +31,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(Turn::class.java.name)
 
 /**
- * An action that causes the mascot to turn
+ * An action that causes the mascot to turn.
+ *
+ * @param schema The schema used for the mascot's configuration.
+ * @param animations The animations that are played by the action.
+ * @param params A list of the mascot's variables.
  *
  * @author Yuki Yamada
  * @author Kilkakon

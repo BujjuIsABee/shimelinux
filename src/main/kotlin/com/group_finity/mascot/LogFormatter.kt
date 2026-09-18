@@ -30,7 +30,7 @@ import java.util.logging.LogRecord
 import java.util.logging.SimpleFormatter
 
 /**
- * Formats the logs
+ * Formats the logs.
  *
  * @author Kilkakon
  * @author Bujju

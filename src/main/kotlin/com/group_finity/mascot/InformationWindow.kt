@@ -44,7 +44,7 @@ import javax.swing.UIManager
 import javax.swing.event.HyperlinkEvent
 
 /**
- * A menu that displays information about a mascot
+ * A menu that displays information about a mascot.
  *
  * @author Kilkakon
  * @author Bujju

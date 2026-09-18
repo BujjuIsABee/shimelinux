@@ -23,7 +23,7 @@
 package com.group_finity.mascot.exception
 
 /**
- * An exception thrown when a mascot needs to be dismissed
+ * An exception thrown when a mascot needs to be dismissed.
  *
  * @author Yuki Yamada
  * @author Kilkakon

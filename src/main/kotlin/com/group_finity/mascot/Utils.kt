@@ -26,53 +26,8 @@ import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-import io.github.bujjuisabee.shimelinux.kde.NativeFactoryImpl as KdeNativeFactory
-import io.github.bujjuisabee.shimelinux.wayland.NativeFactoryImpl as WaylandNativeFactory
-
 /**
- * Gets the name of the current desktop environment
- *
- * @author Bujju
- */
-val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
-
-/**
- * Gets the name of the current display server
- *
- * @author Bujju
- */
-val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
-
-/**
- * Gets whether the KDE environment is being used
- *
- * @author Bujju
- */
-val usingKdeEnvironment: Boolean
-    get() = NativeFactory.instance is KdeNativeFactory
-
-/**
- * Gets whether the Wayland environment is being used
- *
- * @author Bujju
- */
-val usingWaylandEnvironment: Boolean
-    get() = NativeFactory.instance is WaylandNativeFactory
-
-/**
- * Gets whether [desktopType] is a compositor that uses the Wayland environment by default
- *
- * @author Bujju
- */
-val isWaylandEnvironmentDefault = when (desktopType) {
-    "COSMIC", "Hyprland", "niri", "sway" -> true
-    else -> false
-}
-
-/**
- * Gets a path within the config directory
- *
- * @author Bujju
+ * Gets a path within the config directory.
  */
 fun getPath(vararg subpaths: String): Path {
     val base = if (!System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
@@ -85,16 +40,12 @@ fun getPath(vararg subpaths: String): Path {
 }
 
 /**
- * Loads a resource and returns an input stream, or null if the resource does not exist
- *
- * @author Bujju
+ * Loads the resource at [path] and returns an input stream, or null if the resource does not exist.
  */
 fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 
 /**
- * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails
- *
- * @author Bujju
+ * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails.
  */
 inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     Main.properties.getProperty(key, defaultValue.toString()).let { value ->
@@ -107,16 +58,15 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     }
 
 /**
- * Translates a string to the current language
- *
- * @author Bujju
+ * Translates a string to the current language.
  */
 fun localize(key: String): String = Main.languageBundle.getString(key)
 
 /**
- * Executes a command and returns the output
+ * Executes a command and returns the output.
  *
- * @author Bujju
+ * @param command The command to run.
+ * @param args The command line arguments to pass to the command.
  */
 fun execute(command: String, vararg args: String): String {
     val process = ProcessBuilder(command, *args).start()

@@ -36,7 +36,11 @@ import java.util.logging.Logger
 private val logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 
 /**
- * Builds a behavior from a Behavior node
+ * Builds a behavior from a Behavior node.
+ *
+ * @param configuration The configuration defining the behavior.
+ * @param behaviorNode The node defining the behavior within the configuration.
+ * @param conditions The conditions that must be met for the behavior to be triggered.
  *
  * @author Yuki Yamada
  * @author Kilkakon
@@ -107,7 +111,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Validates that the action builder associated with the behavior builder exists
+     * Validates that the action builder associated with the behavior builder exists.
      */
     fun validate() {
         if (!configuration.hasAction(actionName)) {
@@ -117,7 +121,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Builds the behavior and the associated action and returns it
+     * Builds the behavior and the associated action and returns it.
      */
     fun buildBehavior(): Behavior {
         try {
@@ -129,7 +133,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Checks if the conditions for the behavior are currently met
+     * Checks if the conditions for the behavior are currently met.
      */
     fun isEffective(context: VariableMap): Boolean {
         return frequency != 0 && conditions.filterNotNull().none {
