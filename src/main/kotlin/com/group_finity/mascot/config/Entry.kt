@@ -103,7 +103,7 @@ class Entry(private val element: Element) {
     /**
      * Returns whether there is a node in [children] with the given name.
      */
-    fun hasChild(name: String): Boolean = childMap[name].isNullOrEmpty()
+    fun hasChild(name: String): Boolean = children.any { it.name == name }
 
     /**
      * Gets all nodes in [children] with the given name.
