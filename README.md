@@ -8,6 +8,8 @@ An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the lat
 [![Issues]](https://github.com/BujjuIsABee/shimelinux/issues)
 [![License]](https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE)
 
+[![Arch]![Fedora]![FreeBSD]![Mint]![NixOS]![Pop!_OS]![Ubuntu]![Cinnamon]![GNOME]![Hyprland]![Plasma]![niri]](https://github.com/BujjuIsABee/shimelinux#compatibility)
+
 ![Screenshot]
 
 </div>
@@ -85,21 +87,21 @@ If none of these options work for you, you can download the `.jar` file [here](h
 
 ShimeLinux has been tested on the following operating systems and desktop environments:
 
-| Operating system                                                                                                                    | Desktop environment | Installation                                                                                                |
-|-------------------------------------------------------------------------------------------------------------------------------------|---------------------|-------------------------------------------------------------------------------------------------------------|
-| Arch Linux <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux">          | GNOME               | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux">          | Hyprland            | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux">          | KDE Plasma          | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux">          | niri                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux">          | sway                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Fedora Linux <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=fedora">           | KDE Plasma          | [Download `.rpm` file](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                   |
-| FreeBSD <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=freebsd&logoColor=red"> | KDE Plasma          | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
-| FreeBSD <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=freebsd&logoColor=red"> | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
-| Linux Mint <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=linuxmint">          | Cinnamon            | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| NixOS <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos">                   | KDE Plasma          | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
-| NixOS <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos">                   | niri                | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
-| Pop!_OS <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=popos">                 | COSMIC              | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| Ubuntu <img width="32" align="top" src="https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=ubuntu">                 | GNOME               | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| Operating system | Desktop environment | Installation                                                                                                |
+|------------------|---------------------|-------------------------------------------------------------------------------------------------------------|
+| Arch Linux       | GNOME               | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| Arch Linux       | Hyprland            | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| Arch Linux       | KDE Plasma          | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| Arch Linux       | niri                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| Arch Linux       | sway                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| Fedora Linux     | KDE Plasma          | [Download `.rpm` file](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                   |
+| FreeBSD          | KDE Plasma          | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| FreeBSD          | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| Linux Mint       | Cinnamon            | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| NixOS            | KDE Plasma          | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
+| NixOS            | niri                | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
+| Pop!_OS          | COSMIC              | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| Ubuntu           | GNOME               | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
 
 ### Graphical issues on Wayland
 
@@ -126,3 +128,15 @@ This project incorporates work from [Shimeji-ee by Kilkakon](https://kilkakon.co
 [Release]: https://img.shields.io/github/v/release/BujjuIsABee/shimelinux?style=for-the-badge&logo=github&color=b7bdf8&labelColor=363a4f
 [Issues]: https://img.shields.io/github/issues/BujjuIsABee/ShimeLinux?style=for-the-badge&logo=github&color=f5c2e7&labelColor=363a4f
 [License]: https://img.shields.io/github/license/BujjuIsABee/shimelinux?style=for-the-badge&color=a6da95&labelColor=363a4f
+[Arch]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux
+[Fedora]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=fedora
+[FreeBSD]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=freebsd&logoColor=red
+[Mint]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=linuxmint
+[NixOS]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos
+[Pop!_OS]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=popos
+[Ubuntu]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=ubuntu
+[Cinnamon]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=cinnamon
+[GNOME]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=gnome
+[Hyprland]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=hyprland
+[Plasma]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=kdeplasma&logoColor=white
+[niri]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=niri
