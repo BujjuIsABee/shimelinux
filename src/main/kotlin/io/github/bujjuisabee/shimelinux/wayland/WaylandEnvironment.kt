@@ -57,7 +57,9 @@ class WaylandEnvironment : Environment() {
             )
         } else {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+
             screenRect = Rectangle(gc.bounds.size)
+
             screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
         }
 
@@ -90,7 +92,7 @@ class WaylandEnvironment : Environment() {
 
     companion object {
         /**
-         * An approximation of the absolute cursor position based on the values reported by Wayland. Accuracy varies by compositor.
+         * An approximation of the absolute cursor position based on the values reported by the compositor.
          */
         var absoluteCursorPosition: Point? = null
     }

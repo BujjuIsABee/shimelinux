@@ -22,6 +22,7 @@
 
 package com.group_finity.mascot.environment
 
+import com.group_finity.mascot.applyInsets
 import java.awt.GraphicsEnvironment
 import java.awt.MouseInfo
 import java.awt.Point
@@ -116,8 +117,11 @@ abstract class Environment {
             val screenRects = hashMapOf<String, Rectangle>()
 
             for (device in GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices) {
-                screenRects[device.iDstring] = device.defaultConfiguration.bounds
-                screenRect = screenRect.union(device.defaultConfiguration.bounds)
+                val rect = device.defaultConfiguration.bounds
+                rect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(device.defaultConfiguration))
+
+                screenRects[device.iDstring] = rect
+                screenRect = screenRect.union(rect)
             }
 
             this.screenRects = screenRects

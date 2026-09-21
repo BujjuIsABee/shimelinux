@@ -70,9 +70,9 @@ abstract class Variable {
          */
         fun parse(source: String?): Variable? = if (source == null) {
             null
-        } else if (source.startsWith($$"${") && source.endsWith("}")) {
+        } else if (source.startsWith($$"${") && source.endsWith('}')) {
             Script(source.substring(2, source.length - 1), false)
-        } else if (source.startsWith("#{") && source.endsWith("}")) {
+        } else if (source.startsWith("#{") && source.endsWith('}')) {
             Script(source.substring(2, source.length - 1), true)
         } else {
             Constant(parseConstant(source))

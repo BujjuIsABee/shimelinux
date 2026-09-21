@@ -270,7 +270,7 @@ class Configuration {
     /**
      * Returns whether the behavior builder is enabled for [mascot].
      */
-    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean = !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split("/").none { it == builder.name }
+    fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean = !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split('/').none { it == builder.name }
 
     /**
      * Returns whether a behavior builder with the [name] exists and is enabled for [mascot].

@@ -66,14 +66,12 @@ private val logger = Logger.getLogger(Main::class.java.name)
  * @author Bujju
  */
 object Main {
+    /**
+     * Deprecated; Kept for Shimeji-ee compatibility.
+     */
     @JvmStatic
-    @Suppress("unused")
+    @Deprecated("Replace with Main", ReplaceWith("Main"))
     val instance = this
-
-    private val manager = Manager()
-    private var imageSets = mutableListOf<String>()
-    private val configurations = ConcurrentHashMap<String, Configuration>()
-    private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
 
     /**
      * Stores the user's settings.
@@ -87,11 +85,14 @@ object Main {
     lateinit var languageBundle: ResourceBundle
         private set
 
+    private val manager = Manager()
+    private var imageSets = mutableListOf<String>()
+    private val configurations = ConcurrentHashMap<String, Configuration>()
+    private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
+
     init {
         try {
-            loadResource("conf/logging.properties").use {
-                LogManager.getLogManager().readConfiguration(it)
-            }
+            loadResource("conf/logging.properties").use { LogManager.getLogManager().readConfiguration(it) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -156,7 +157,7 @@ object Main {
             for (resource in resources) {
                 val destination = getPath().resolve(resource)
 
-                if (resource.endsWith("/")) {
+                if (resource.endsWith('/')) {
                     destination.createDirectories()
                 } else if (!destination.exists()) {
                     destination.createParentDirectories()
@@ -199,19 +200,21 @@ object Main {
 
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
-            UIManager.setLookAndFeel(when (getProperty("Theme", "FlatDark")) {
-                "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                else -> "com.formdev.flatlaf.FlatDarkLaf"
-            })
+            UIManager.setLookAndFeel(
+                when (getProperty("Theme", "FlatDark")) {
+                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
+                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                    else -> "com.formdev.flatlaf.FlatDarkLaf"
+                }
+            )
         } catch (e: Exception) {
             logger.log(Level.WARNING, e) { "Failed to set theme." }
         }
 
         // Get the image sets to use
         if (!getProperty("AlwaysShowShimejiChooser", false)) {
-            imageSets.addAll(getProperty("ActiveShimeji", "").split("/").map { it.trim() }.filter { it.isNotEmpty() })
+            imageSets.addAll(getProperty("ActiveShimeji", "").split('/').map { it.trim() }.filter { it.isNotEmpty() })
         }
 
         // If no image sets are selected, show the image set chooser
@@ -773,7 +776,7 @@ object Main {
 
     private fun setMascotInformationDismissed(imageSet: String) {
         val list = mutableListOf<String>()
-        val data = getProperty("InformationDismissed", "").split("/")
+        val data = getProperty("InformationDismissed", "").split('/')
 
         if (data.isNotEmpty() && data[0].isNotEmpty()) {
             list.addAll(data.toList())
@@ -782,18 +785,12 @@ object Main {
             list.add(imageSet)
         }
 
-        properties.setProperty(
-            "InformationDismissed",
-            list.toString()
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", "/")
-        )
+        properties.setProperty("InformationDismissed", list.joinToString("/"))
     }
 
     fun setMascotBehaviorEnabled(name: String, mascot: Mascot, enabled: Boolean) {
         val list = mutableListOf<String>()
-        val data = getProperty("DisabledBehaviors.${mascot.imageSet}", "").split("/")
+        val data = getProperty("DisabledBehaviors.${mascot.imageSet}", "").split('/')
 
         if (data.isNotEmpty() && data[0] != "") {
             list.addAll(data)
@@ -806,13 +803,7 @@ object Main {
         }
 
         if (list.isNotEmpty()) {
-            properties.setProperty(
-                "DisabledBehaviors.${mascot.imageSet}",
-                list.toString()
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(", ", "/")
-            )
+            properties.setProperty("DisabledBehaviors.${mascot.imageSet}", list.joinToString("/"))
         } else {
             properties.remove("DisabledBehaviors.${mascot.imageSet}")
         }

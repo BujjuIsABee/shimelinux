@@ -112,17 +112,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val flatThemeBackgroundColorPanel: JPanel
     private val flatThemeBackgroundColorRightPanel: JPanel
     private val flatThemeBackgroundColorTextField: JTextField
-    private val flatThemeBackgroundColorPreview: JPanel
     private val flatThemeBackgroundColorButton: JButton
     private val flatThemeTextColorPanel: JPanel
     private val flatThemeTextColorRightPanel: JPanel
     private val flatThemeTextColorTextField: JTextField
-    private val flatThemeTextColorPreview: JPanel
     private val flatThemeTextColorButton: JButton
     private val flatThemeAccentColorPanel: JPanel
     private val flatThemeAccentColorRightPanel: JPanel
     private val flatThemeAccentColorTextField: JTextField
-    private val flatThemeAccentColorPreview: JPanel
     private val flatThemeAccentColorButton: JButton
     private val flatThemeFooterPanel: JPanel
     private val matchGtkThemeButton: JButton
@@ -153,7 +150,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val windowBackgroundColorPanel: JPanel
     private val windowBackgroundColorRightPanel: JPanel
     private val windowBackgroundColorTextField: JTextField
-    private val windowBackgroundColorPreview: JPanel
     private val windowBackgroundColorButton: JButton
     private val windowBackgroundImagePanel: JPanel
     private val windowBackgroundImageLabel: JLabel
@@ -234,6 +230,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         title = localize("Settings")
         layout = BorderLayout()
 
+        // Ensure window is floating by default on tiling window managers
         if (defaultEnvironment == "wayland") {
             isResizable = false
         }
@@ -336,13 +333,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         interactiveWindowsWhitelistModel = DefaultListModel()
         interactiveWindowsWhitelistModel.addAll(
-            getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
+            getProperty("InteractiveWindows", "").split('/').filter { it.isNotBlank() }
         )
         interactiveWindowsWhitelist = JList(interactiveWindowsWhitelistModel)
 
         interactiveWindowsBlacklistModel = DefaultListModel()
         interactiveWindowsBlacklistModel.addAll(
-            getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
+            getProperty("InteractiveWindowsBlacklist", "").split('/').filter { it.isNotBlank() }
         )
         interactiveWindowsBlacklist = JList(interactiveWindowsBlacklistModel)
 
@@ -364,7 +361,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 JOptionPane.QUESTION_MESSAGE
             )
 
-            if (!input.isNullOrEmpty() && !input.contains("/")) {
+            if (!input.isNullOrEmpty() && !input.contains('/')) {
                 if (interactiveWindowsTabbedPane.selectedIndex == 0) {
                     interactiveWindowsWhitelistModel.addElement(input.trim())
                 } else {
@@ -460,7 +457,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeBackgroundColorRightPanel.layout = BoxLayout(flatThemeBackgroundColorRightPanel, BoxLayout.X_AXIS)
 
         flatThemeBackgroundColorTextField = object : JTextField() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         flatThemeBackgroundColorTextField.addActionListener {
             val color = runCatching { Color.decode(flatThemeBackgroundColorTextField.text) }.getOrNull()
@@ -476,7 +473,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        flatThemeBackgroundColorPreview = object : JPanel() {
+        val flatThemeBackgroundColorPreview = object : JPanel() {
             init {
                 border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
             }
@@ -536,7 +533,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeTextColorRightPanel.layout = BoxLayout(flatThemeTextColorRightPanel, BoxLayout.X_AXIS)
 
         flatThemeTextColorTextField = object : JTextField() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         flatThemeTextColorTextField.addActionListener {
             val color = runCatching { Color.decode(flatThemeTextColorTextField.text) }.getOrNull()
@@ -552,7 +549,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        flatThemeTextColorPreview = object : JPanel() {
+        val flatThemeTextColorPreview = object : JPanel() {
             init {
                 border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
             }
@@ -564,9 +561,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             override fun getBackground() = Color.decode(
                 if (themeComboBox.selectedIndex == 0) {
-                    darkTheme.getProperty("@foreground", DEFAULT_DARK_TEXT_COLOR)
+                    darkTheme.getProperty("@foreground", "#ffffff")
                 } else {
-                    lightTheme.getProperty("@foreground", DEFAULT_LIGHT_TEXT_COLOR)
+                    lightTheme.getProperty("@foreground", "#000000")
                 }
             )
         }
@@ -612,7 +609,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeAccentColorRightPanel.layout = BoxLayout(flatThemeAccentColorRightPanel, BoxLayout.X_AXIS)
 
         flatThemeAccentColorTextField = object : JTextField() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         flatThemeAccentColorTextField.addActionListener {
             val color = runCatching { Color.decode(flatThemeAccentColorTextField.text) }.getOrNull()
@@ -628,7 +625,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        flatThemeAccentColorPreview = object : JPanel() {
+        val flatThemeAccentColorPreview = object : JPanel() {
             init {
                 border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
             }
@@ -803,9 +800,17 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             // Toggle the interactive windows tab
             val index = tabbedPane.indexOfComponent(interactiveWindowsTab)
-            if (environment == "kde" && index == -1) {
+            val isKde = when (environment) {
+                "kde" -> true
+                "wayland" -> false
+                "generic" -> false
+                "virtual" -> false
+                else if (defaultEnvironment == "kde") -> true
+                else -> false
+            }
+            if (isKde && index == -1) {
                 tabbedPane.add(interactiveWindowsTab, localize("InteractiveWindows"), 1)
-            } else if (environment != "kde" && index != -1) {
+            } else if (!isKde && index != -1) {
                 tabbedPane.removeTabAt(index)
             }
         }
@@ -835,7 +840,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         screenPositionRightPanel.layout = BoxLayout(screenPositionRightPanel, BoxLayout.X_AXIS)
 
         screenXSpinner = object : JSpinner() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         screenXSpinner.value = screenX
         screenXSpinner.addChangeListener {
@@ -843,7 +848,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         screenYSpinner = object : JSpinner() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         screenYSpinner.value = screenY
         screenYSpinner.addChangeListener {
@@ -866,7 +871,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         screenSizeRightPanel.layout = BoxLayout(screenSizeRightPanel, BoxLayout.X_AXIS)
 
         screenWidthSpinner = object : JSpinner() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         screenWidthSpinner.value = screenWidth
         screenWidthSpinner.addChangeListener {
@@ -874,7 +879,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         screenHeightSpinner = object : JSpinner() {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         screenHeightSpinner.value = screenHeight
         screenHeightSpinner.addChangeListener {
@@ -910,19 +915,19 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowDimensionsRightPanel = JPanel()
         windowDimensionsRightPanel.layout = BoxLayout(windowDimensionsRightPanel, BoxLayout.X_AXIS)
 
-        val (windowWidth, windowHeight) = windowSize.split("x").map { it.toIntOrNull() ?: 0 }
+        val (windowWidth, windowHeight) = windowSize.split('x').map { it.toIntOrNull() ?: 0 }
 
         widthSpinner = JSpinner()
         widthSpinner.value = windowWidth
         widthSpinner.addChangeListener {
-            val (_, windowHeight) = windowSize.split("x")
+            val (_, windowHeight) = windowSize.split('x')
             windowSize = "${widthSpinner.value}x${windowHeight}"
         }
 
         heightSpinner = JSpinner()
         heightSpinner.value = windowHeight
         heightSpinner.addChangeListener {
-            val (windowWidth, _) = windowSize.split("x")
+            val (windowWidth, _) = windowSize.split('x')
             windowSize = "${windowWidth}x${heightSpinner.value}"
         }
 
@@ -946,7 +951,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         windowBackgroundColorRightPanel.layout = BoxLayout(windowBackgroundColorRightPanel, BoxLayout.X_AXIS)
 
         windowBackgroundColorTextField = object : JTextField(windowBackgroundColor) {
-            override fun getPreferredSize() = Dimension(69, super.preferredSize.height)
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
         }
         windowBackgroundColorTextField.addActionListener {
             val color = runCatching { Color.decode(windowBackgroundColorTextField.text) }.getOrNull()
@@ -957,7 +962,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        windowBackgroundColorPreview = object : JPanel() {
+        val windowBackgroundColorPreview = object : JPanel() {
             init {
                 border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
             }
@@ -1184,15 +1189,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     }
 
     private fun applyChanges() {
-        val whitelist = interactiveWindowsWhitelistModel.elements().toList().toString()
-            .replace("[", "")
-            .replace("]", "")
-            .replace(", ", "/")
-
-        val blacklist = interactiveWindowsBlacklistModel.elements().toList().toString()
-            .replace("[", "")
-            .replace("]", "")
-            .replace(", ", "/")
+        val whitelist = interactiveWindowsWhitelistModel.elements().toList().joinToString("/")
+        val blacklist = interactiveWindowsBlacklistModel.elements().toList().joinToString("/")
 
         if (getProperty("AlwaysShowShimejiChooser", false) != alwaysShowShimejiChooser) {
             Main.properties.setProperty("AlwaysShowShimejiChooser", alwaysShowShimejiChooser.toString())
@@ -1240,7 +1238,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             Main.properties.setProperty("Environment", environment)
             isEnvironmentReloadRequired = true
 
-            if (environment == "wayland" && menuScaling != 1) {
+            if (activeEnvironment == "wayland" && menuScaling != 1) {
                 Main.properties.setProperty("MenuScaling", "1")
                 isRestartRequired = true
             }

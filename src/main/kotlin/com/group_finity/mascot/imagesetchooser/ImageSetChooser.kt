@@ -333,20 +333,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private fun readConfigFile(): MutableList<String> {
         val activeImageSets = mutableListOf<String>()
-        activeImageSets.addAll(getProperty("ActiveShimeji", "").split("/"))
+        activeImageSets.addAll(getProperty("ActiveShimeji", "").split('/'))
         selectAllSets = activeImageSets[0].trim().isEmpty()
         return activeImageSets
     }
 
     private fun updateConfigFile() {
-        Main.properties.setProperty(
-            "ActiveShimeji",
-            imageSets
-                .toString()
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", "/")
-        )
+        Main.properties.setProperty("ActiveShimeji", imageSets.joinToString("/"))
 
         try {
             confPath.outputStream().use { Main.properties.store(it, "Configuration Options") }

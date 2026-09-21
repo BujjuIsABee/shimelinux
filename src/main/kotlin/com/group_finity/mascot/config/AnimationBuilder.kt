@@ -117,7 +117,7 @@ class AnimationBuilder(
         }
 
         if (leftImagePath != null) {
-            val (anchorX, anchorY) = anchorText.split(",").map { it.toInt() }
+            val (anchorX, anchorY) = anchorText.split(',').map { it.toInt() }
             val anchor = Point(anchorX, anchorY)
 
             try {
@@ -128,7 +128,7 @@ class AnimationBuilder(
             }
         }
 
-        var (moveX, moveY) = moveText.split(",").map { it.toInt() }
+        var (moveX, moveY) = moveText.split(',').map { it.toInt() }
         moveX = if (abs(moveX) > 0 && abs(moveX * scaling) < 1) (if (moveX > 0) 1 else -1) else (moveX * scaling).roundToInt()
         moveY = if (abs(moveY) > 0 && abs(moveY * scaling) < 1) (if (moveY > 0) 1 else -1) else (moveY * scaling).roundToInt()
 
@@ -161,10 +161,10 @@ class AnimationBuilder(
 
         val scaling = getProperty("Scaling", 1.0)
 
-        val (originX, originY) = originText.split(",").map { it.toInt() }
+        val (originX, originY) = originText.split(',').map { it.toInt() }
         val origin = Point((originX * scaling).roundToInt(), (originY * scaling).roundToInt())
 
-        val (width, height) = sizeText.split(",").map { it.toInt() }
+        val (width, height) = sizeText.split(',').map { it.toInt() }
         val size = Dimension((width * scaling).roundToInt(), (height * scaling).roundToInt())
 
         val shape = when {

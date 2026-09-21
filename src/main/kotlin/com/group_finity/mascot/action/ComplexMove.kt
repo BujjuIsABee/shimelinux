@@ -113,7 +113,7 @@ class ComplexMove(
     override fun init(mascot: Mascot) {
         super.init(mascot)
 
-        for (characteristic in characteristics.split(",")) {
+        for (characteristic in characteristics.split(',')) {
             if (characteristic == schema.getString("Breed")) {
                 isBreedEnabled = true
             }

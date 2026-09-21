@@ -38,5 +38,5 @@ class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
 
     override fun hashCode(): Int = Objects.hash(rgb)
 
-    override fun equals(other: Any?): Boolean = other === this || other is GenericNativeImage && rgb.contentEquals(other.rgb)
+    override fun equals(other: Any?): Boolean = other === this || rgb.contentEquals((other as? GenericNativeImage)?.rgb)
 }

@@ -63,7 +63,7 @@ class VirtualEnvironment : Environment() {
             }
         })
 
-        val (width, height) = getProperty("WindowSize", "600x500").split("x").map { it.toInt() }
+        val (width, height) = getProperty("WindowSize", "600x500").split('x').map { it.toInt() }
         val image = runCatching { ImageIO.read(File(getProperty("BackgroundImage", ""))) }.getOrNull()
 
         display.contentPane = VirtualContentPanel(
@@ -98,7 +98,8 @@ class VirtualEnvironment : Environment() {
     /**
      * Adds a mascot to the window.
      *
-     * @param mascot The [VirtualTranslucentPanel] to add.
+     * @param mascot The mascot to add.
+     * @see VirtualTranslucentPanel
      */
     fun addShimeji(mascot: JPanel) {
         mascot.isOpaque = false

@@ -22,7 +22,6 @@
 
 package com.group_finity.mascot
 
-import com.group_finity.mascot.behavior.Behavior
 import java.awt.Font
 import java.awt.GridLayout
 import javax.imageio.ImageIO
@@ -167,7 +166,7 @@ class DebugWindow(imageSet: String) : JFrame() {
      * Updates the statistics.
      */
     fun set(
-        behavior: Behavior?,
+        behavior: String,
         shimejiX: Int,
         shimejiY: Int,
         activeIE: String,
@@ -180,13 +179,7 @@ class DebugWindow(imageSet: String) : JFrame() {
         environmentWidth: Int,
         environmentHeight: Int
     ) {
-        behavior?.let {
-            behaviorValue.text = behavior.toString()
-                .substring(14, behavior.toString().length - 1)
-                .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
-                .replace("  ", " ")
-        }
-
+        behaviorValue.text = behavior
         shimejiXValue.text = shimejiX.toString()
         shimejiYValue.text = shimejiY.toString()
         activeIEValue.text = activeIE

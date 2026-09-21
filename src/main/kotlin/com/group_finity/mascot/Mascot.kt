@@ -46,6 +46,7 @@ import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
+import kotlin.text.replace
 
 private val logger = Logger.getLogger(Mascot::class.java.name)
 private val lastId = AtomicInteger()
@@ -58,7 +59,7 @@ private val lastId = AtomicInteger()
  * @author Bujju
  */
 class Mascot(var imageSet: String) {
-    private val id = lastId.incrementAndGet()
+    private val id: Int = lastId.incrementAndGet()
 
     /**
      * The number of ticks that have elapsed while the mascot is animating.
@@ -197,10 +198,9 @@ class Mascot(var imageSet: String) {
                         showPopup(e.x, e.y)
                     }
                 } else {
-                    val behavior = behavior
-                    if (!isPaused && behavior != null) {
+                    if (!isPaused) {
                         try {
-                            behavior.mousePressed(e)
+                            behavior?.mousePressed(e)
                         } catch (e: CantBeAliveException) {
                             logger.log(Level.SEVERE, e) { "Fatal Error" }
                             Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
@@ -216,10 +216,9 @@ class Mascot(var imageSet: String) {
                         showPopup(e.x, e.y)
                     }
                 } else {
-                    val behavior = behavior
-                    if (!isPaused && behavior != null) {
+                    if (!isPaused) {
                         try {
-                            behavior.mouseReleased(e)
+                            behavior?.mouseReleased(e)
                         } catch (e: CantBeAliveException) {
                             logger.log(Level.SEVERE, e) { "Fatal Error" }
                             Main.showError(localize("SevereShimejiErrorErrorMessage"), e)
@@ -233,24 +232,20 @@ class Mascot(var imageSet: String) {
             override fun mouseMoved(e: MouseEvent) {
                 if (isPaused) {
                     refreshCursor(false)
+                } else if (isHotspotClicked) {
+                    cursorPosition = e.point
                 } else {
-                    if (isHotspotClicked) {
-                        cursorPosition = e.point
-                    } else {
-                        refreshCursor(e.point)
-                    }
+                    refreshCursor(e.point)
                 }
             }
 
             override fun mouseDragged(e: MouseEvent) {
                 if (isPaused) {
                     refreshCursor(false)
+                } else if (isHotspotClicked) {
+                    cursorPosition = e.point
                 } else {
-                    if (isHotspotClicked) {
-                        cursorPosition = e.point
-                    } else {
-                        refreshCursor(e.point)
-                    }
+                    refreshCursor(e.point)
                 }
             }
         })
@@ -327,8 +322,11 @@ class Mascot(var imageSet: String) {
         for (behaviorName in config.behaviorNames) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
-                    val caption = behaviorName.replace("([a-z])(IE)?([A-Z])", "$1 $2 $3").replace("  ", " ")
-                    if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains("/")) {
+                    val caption = behaviorName
+                        .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+                        .replace("  ", " ")
+
+                    if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
                         val item = JMenuItem(if (Main.languageBundle.containsKey(behaviorName)) localize(behaviorName) else caption)
                         item.addActionListener {
                             try {
@@ -340,7 +338,7 @@ class Mascot(var imageSet: String) {
                         }
                         behaviorsSubmenu.add(item)
                     }
-                    if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains("/")) {
+                    if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains('/')) {
                         val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
                         toggleItem.addActionListener {
                             Main.setMascotBehaviorEnabled(
@@ -395,8 +393,12 @@ class Mascot(var imageSet: String) {
             time++
         }
 
+        val behaviorName = behavior.toString().substring(14, behavior.toString().length - 1)
+            .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+            .replace("  ", " ")
+
         debugWindow?.set(
-            behavior,
+            behaviorName,
             anchor.x,
             anchor.y,
             environment.activeIETitle,
@@ -426,6 +428,7 @@ class Mascot(var imageSet: String) {
                 window.asComponent().isVisible = false
             }
 
+            // Play the sound
             val sound = sound
             if (!Sounds.isMuted && sound != null && Sounds.contains(sound)) {
                 Sounds.getSound(sound)?.let { clip ->

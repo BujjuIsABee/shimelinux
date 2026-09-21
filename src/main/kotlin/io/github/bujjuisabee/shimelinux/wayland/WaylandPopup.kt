@@ -28,7 +28,6 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 import javax.swing.JMenu
 import javax.swing.JMenuItem
-import javax.swing.JPopupMenu
 import javax.swing.MenuElement
 import javax.swing.MenuSelectionManager
 import javax.swing.Popup
@@ -55,7 +54,7 @@ class WaylandPopup(
         contents.size = contents.preferredSize
         contents.doLayout()
         layer.setBounds(x, y, contents.width, contents.height)
-        updateImage()
+        redraw()
     }
 
     override fun hide() {
@@ -76,8 +75,19 @@ class WaylandPopup(
         val targetPosition = SwingUtilities.convertPoint(contents, positionX, positionY, target)
 
         if (previousTarget != target) {
-            updateTarget(target)
-            updateImage()
+            previousTarget = target
+
+            if (target is JMenu) {
+                openSubmenu(target)
+            } else {
+                closeSubmenu()
+            }
+
+            // Update the menu selection
+            val path = listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
+            MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
+
+            redraw()
         }
 
         layer.dispatchEvents(
@@ -91,36 +101,7 @@ class WaylandPopup(
         )
     }
 
-    private fun updateTarget(target: Component) {
-        if (target is JMenu) {
-            if (target.getClientProperty("isShowing") != true) {
-                val location = getSubmenuOrigin(x, y, target)
-                val popup = WaylandPopupFactory.getPopup(
-                    contents,
-                    target.popupMenu,
-                    location.x,
-                    location.y
-                ) as WaylandPopup
-
-                popup.parent = target
-                popup.show()
-                submenu = popup
-
-                target.putClientProperty("isShowing", true)
-            }
-        } else {
-            closeSubmenu()
-        }
-
-        // Update the menu selection
-        MenuSelectionManager.defaultManager().selectedPath = listOf(owner, contents, target.takeIf { it is JMenuItem })
-            .filterIsInstance<MenuElement>()
-            .toTypedArray()
-
-        previousTarget = target
-    }
-
-    private fun updateImage() {
+    private fun redraw() {
         val width = contents.width
         val height = contents.height
 
@@ -131,29 +112,37 @@ class WaylandPopup(
         g2d.dispose()
 
         // Display the image on the layer surface
-        val rgb = buffer.getRGB(0, 0, width, height, null, 0, width)
-        layer.setImage(rgb)
+        layer.setImage(buffer.getRGB(0, 0, width, height, null, 0, width))
+    }
+
+    private fun openSubmenu(menu: JMenu) {
+        // Check if the menu is already showing
+        if (menu.getClientProperty("isShowing") == true) return
+
+        menu.putClientProperty("isShowing", true)
+
+        val location = getSubmenuOrigin(x, y, menu)
+        val popup = WaylandPopupFactory.getPopup(contents, menu.popupMenu, location.x, location.y) as WaylandPopup
+        popup.parent = menu
+        popup.show()
+        submenu = popup
     }
 
     private fun closeSubmenu() {
         submenu?.let {
-            (it.parent as JMenu).putClientProperty("isShowing", false)
+            it.parent?.putClientProperty("isShowing", false)
             it.hide()
             submenu = null
         }
     }
 
-    private fun adjustPopupLocationToFitScreen(x: Int, y: Int, popup: JPopupMenu): Point {
-        val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
-        return Point(
-            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - popup.preferredSize.width),
-            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - popup.preferredSize.height)
-        )
-    }
-
     private fun getSubmenuOrigin(x: Int, y: Int, submenu: JMenu): Point {
         val x = x + contents.width + UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
         val y = y + submenu.y + UIManager.getInt("Menu.submenuPopupOffsetY")
-        return adjustPopupLocationToFitScreen(x, y, submenu.popupMenu)
+        val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
+        return Point(
+            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - submenu.popupMenu.preferredSize.width),
+            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - submenu.popupMenu.preferredSize.height)
+        )
     }
 }

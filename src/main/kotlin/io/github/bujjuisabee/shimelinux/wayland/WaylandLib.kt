@@ -61,23 +61,23 @@ object WaylandLib {
     external fun createLayer(mouseEventReceiver: MouseEventReceiver): Long
 
     /**
-     * Uses the [senderPtr] to send a SetBounds event to a layer surface.
+     * Sends a SetBounds event to a layer surface.
      *
      * @param senderPtr A pointer to the event sender.
      */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
     /**
-     * Uses the [senderPtr] to send a SetImage event to a layer surface.
+     * Sends a SetImage event to a layer surface.
      *
      * @param senderPtr A pointer to the event sender.
-     * @param rgb The image data to send, in ARGB8888 format.
-     * @param updateMask Whether to update the layer surface's input region.
+     * @param rgb The image data to send (in ARGB8888 format).
+     * @param updateMask Whether to update the surface's input region.
      */
     external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)
 
     /**
-     * Uses the [senderPtr] to send a SetCursor event to a layer surface.
+     * Sends a SetCursor event to a layer surface.
      *
      * @param senderPtr A pointer to the event sender.
      * @param useHand If true, the pointer will be set to a hand. Otherwise, it will be set to the regular pointer.
@@ -85,7 +85,7 @@ object WaylandLib {
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
     /**
-     * Uses the [senderPtr] to send a Dispose event to a layer surface.
+     * Sends a Dispose event to a layer surface.
      *
      * @param senderPtr A pointer to the event sender.
      */
@@ -96,9 +96,7 @@ object WaylandLib {
      */
     interface MouseEventReceiver {
         /**
-         * Called when the Wayland layer surface receives mouse events.
-         *
-         * @see WaylandLayer.dispatchEvents
+         * Called when the layer surface receives mouse events.
          */
         fun updateCursor(
             leftPressed: Boolean,

@@ -40,11 +40,8 @@ import java.awt.geom.Path2D
 import javax.swing.JWindow
 
 private val maskCache = mutableMapOf<GenericNativeImage, Area>()
-private val gc: GraphicsConfiguration? = GraphicsEnvironment
-    .getLocalGraphicsEnvironment()
-    .defaultScreenDevice
-    .configurations
-    .firstOrNull { it.isTranslucencyCapable }
+private val gc: GraphicsConfiguration? =
+    GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
 
 /**
  * Displays a mascot on a cross-platform [JWindow].
@@ -64,7 +61,7 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
 
     override fun paint(g: Graphics) {
         image?.let {
-            setWindowMask()
+            updateWindowMask()
 
             val g2d = g as Graphics2D
             g2d.composite = AlphaComposite.Src
@@ -90,7 +87,7 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
         repaint()
     }
 
-    private fun setWindowMask() {
+    private fun updateWindowMask() {
         val image = image ?: return
 
         val mask = maskCache.getOrPut(image) {

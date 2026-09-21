@@ -40,5 +40,6 @@ class NativeFactoryImpl : NativeFactory() {
 
     override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
 
-    override fun newTranslucentWindow(): TranslucentWindow = VirtualTranslucentPanel().also { (environment as VirtualEnvironment).addShimeji(it) }
+    override fun newTranslucentWindow(): TranslucentWindow =
+        VirtualTranslucentPanel().also { (environment as VirtualEnvironment).addShimeji(it) }
 }

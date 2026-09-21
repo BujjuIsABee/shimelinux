@@ -71,6 +71,12 @@ object KWin {
             dbus.requestBusName("io.github.bujjuisabee.shimelinux")
             dbus.exportObject(client)
 
+            scripting = dbus.getRemoteObject(
+                "org.kde.KWin",
+                "/Scripting",
+                KWinScripting::class.java
+            )
+
             // Copy the script to temp file
             val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
             scriptFile.deleteOnExit()
@@ -80,20 +86,13 @@ object KWin {
                 }
             }
 
-            scripting = dbus.getRemoteObject(
-                "org.kde.KWin",
-                "/Scripting",
-                KWinScripting::class.java
-            )
-
+            // Load the script
             val id = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
-
             script = dbus.getRemoteObject(
                 "org.kde.KWin",
                 "/Scripting/Script$id",
                 KWinScript::class.java
             )
-
             script.run()
         } finally {
             Runtime.getRuntime().addShutdownHook(Thread {
@@ -112,6 +111,7 @@ object KWin {
         /**
          * Loads a KWin script at [path].
          *
+         * @param path The absolute file path of the script.
          * @param name Used to identify the script when calling [unloadScript].
          */
         fun loadScript(path: String, name: String): Int
@@ -204,35 +204,21 @@ object KWin {
             cursorPosition = Point(x, y)
         }
 
-        override fun getWindowPosition(): Map<String, Variant<*>> {
-            val windowPosition = windowPosition.also { windowPosition = null }
+        override fun getWindowPosition(): Map<String, Variant<*>> = mapOf(
+            "hasValue" to Variant(windowPosition != null),
+            "x" to Variant(windowPosition?.x ?: -1),
+            "y" to Variant(windowPosition?.y ?: -1)
+        ).also { windowPosition = null }
 
-            return if (windowPosition == null) {
-                mapOf(
-                    "hasValue" to Variant(false),
-                    "x" to Variant(-1),
-                    "y" to Variant(-1)
-                )
-            } else {
-                mapOf(
-                    "hasValue" to Variant(true),
-                    "x" to Variant(windowPosition.x),
-                    "y" to Variant(windowPosition.y)
-                )
-            }
-        }
-
-        override fun getRestoreWindows(): Boolean {
-            return restoreWindows.also {
-                restoreWindows = false
-            }
+        override fun getRestoreWindows(): Boolean = restoreWindows.also {
+            restoreWindows = false
         }
 
         override fun getObjectPath() = "/KWinClient"
     }
 
     /**
-     * Contains information about a window from the KWin script.
+     * Represents a window from KWin.
      *
      * @property caption The window's title.
      * @property bounds The window's frame geometry.

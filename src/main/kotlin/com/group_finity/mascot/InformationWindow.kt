@@ -94,16 +94,16 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         editorPane.contentType = "text/html"
         editorPane.text = buildString {
             append("<center ")
-
             append("style=\"font:")
             when (splashImageLabel.font.style) {
                 Font.BOLD -> append("bold ")
                 Font.ITALIC -> append("italic ")
                 Font.BOLD + Font.ITALIC -> append("italic bold ")
             }
-
-            append(splashImageLabel.font.size).append("pt ")
-            append(splashImageLabel.font.fontName).append("; ")
+            append(splashImageLabel.font.size)
+            append("pt ")
+            append(splashImageLabel.font.fontName)
+            append("; ")
             append(
                 String.format(
                     "#%02X%02X%02X",
@@ -112,14 +112,15 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     textColor.blue
                 )
             )
-
             append("\">")
 
             if (config.containsInformationKey("ArtistName")) {
-                append(localize("ArtBy")).append(" ")
+                append(localize("ArtBy"))
+                append(' ')
                 if (config.containsInformationKey("ArtistURL")) {
-                    append("<a href=\"").append(config.getInformation("ArtistURL")).append("\" ")
-
+                    append("<a href=\"")
+                    append(config.getInformation("ArtistURL"))
+                    append("\" ")
                     append("style=\"color:")
                     append(
                         String.format(
@@ -129,10 +130,8 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                             linkColor.blue
                         )
                     )
-
                     append("\">")
                 }
-
                 append(config.getInformation("ArtistName"))
                 if (config.containsInformationKey("ArtistURL")) {
                     append("</a>")
@@ -143,11 +142,12 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 if (config.containsInformationKey("ArtistName")) {
                     append(" - ")
                 }
-
-                append(localize("ScriptedBy")).append(" ")
+                append(localize("ScriptedBy"))
+                append(' ')
                 if (config.containsInformationKey("ScripterURL")) {
-                    append("<a href=\"").append(config.getInformation("ScripterURL")).append("\" ")
-
+                    append("<a href=\"")
+                    append(config.getInformation("ScripterURL"))
+                    append("\" ")
                     append("style=\"color:")
                     append(
                         String.format(
@@ -157,10 +157,8 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                             linkColor.blue
                         )
                     )
-
                     append("\">")
                 }
-
                 append(config.getInformation("ScripterName"))
                 if (config.containsInformationKey("ScripterURL")) {
                     append("</a>")
@@ -173,11 +171,12 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 ) {
                     append(" - ")
                 }
-
-                append(localize("CommissionedBy")).append(" ")
+                append(localize("CommissionedBy"))
+                append(' ')
                 if (config.containsInformationKey("CommissionerURL")) {
-                    append("<a href=\"").append(config.getInformation("CommissionerURL")).append("\" ")
-
+                    append("<a href=\"")
+                    append(config.getInformation("CommissionerURL"))
+                    append("\" ")
                     append("style=\"color:")
                     append(
                         String.format(
@@ -187,10 +186,8 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                             linkColor.blue
                         )
                     )
-
                     append("\">")
                 }
-
                 append(config.getInformation("CommissionerName"))
                 if (config.containsInformationKey("CommissionerURL")) {
                     append("</a>")
@@ -204,11 +201,12 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                 ) {
                     append(" - ")
                 }
-
-                append(localize("SupportAt")).append(" ")
+                append(localize("SupportAt"))
+                append(' ')
                 if (config.containsInformationKey("SupportURL")) {
-                    append("<a href=\"").append(config.getInformation("SupportURL")).append("\" ")
-
+                    append("<a href=\"")
+                    append(config.getInformation("SupportURL"))
+                    append("\" ")
                     append("style=\"color:")
                     append(
                         String.format(
@@ -218,10 +216,8 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                             linkColor.blue
                         )
                     )
-
                     append("\">")
                 }
-
                 append(config.getInformation("SupportName"))
                 if (config.containsInformationKey("SupportURL")) {
                     append("</a>")
@@ -236,7 +232,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
                     val url = st.nextToken()
                     val response = JOptionPane.showConfirmDialog(
                         this@InformationWindow,
-                        localize("ConfirmVisitWebsiteMessage") + "\n" + localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
+                        localize("ConfirmVisitWebsiteMessage") + '\n' + localize("ExerciseCautionAndBewareSusLinksMessage") + "\n$url",
                         localize("VisitWebsite"),
                         JOptionPane.YES_NO_OPTION
                     )

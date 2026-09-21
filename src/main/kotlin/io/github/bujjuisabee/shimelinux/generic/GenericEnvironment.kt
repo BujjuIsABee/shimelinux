@@ -58,9 +58,6 @@ class GenericEnvironment : Environment() {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
             screenRect = gc.bounds
             screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
-        } else {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
         }
 
         screen.set(screenRect)

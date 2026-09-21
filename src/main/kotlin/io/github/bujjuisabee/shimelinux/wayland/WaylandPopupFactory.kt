@@ -32,5 +32,6 @@ import javax.swing.PopupFactory
  * @author Bujju
  */
 object WaylandPopupFactory : PopupFactory() {
-    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int): Popup = WaylandPopup(owner, contents, x, y)
+    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int): Popup =
+        WaylandPopup(owner, contents, x, y)
 }

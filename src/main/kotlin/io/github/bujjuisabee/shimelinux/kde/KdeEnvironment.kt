@@ -60,9 +60,6 @@ class KdeEnvironment : Environment() {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
             screenRect = gc.bounds
             screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
-        } else {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
         }
 
         screen.set(screenRect)
@@ -98,8 +95,8 @@ class KdeEnvironment : Environment() {
     override fun dispose() {}
 
     private fun isIE(caption: String) = windowCache.getOrPut(caption) {
-        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split("/").filter { it.isNotBlank() }
-        val whitelist = getProperty("InteractiveWindows", "").split("/").filter { it.isNotBlank() }
+        val blacklist = getProperty("InteractiveWindowsBlacklist", "").split('/').filter { it.isNotBlank() }
+        val whitelist = getProperty("InteractiveWindows", "").split('/').filter { it.isNotBlank() }
 
         val blacklisted = blacklist.any { caption.contains(it, true) }
         val whitelisted = whitelist.any { caption.contains(it, true) }

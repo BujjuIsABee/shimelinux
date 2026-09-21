@@ -42,13 +42,13 @@ class LogFormatter : SimpleFormatter() {
 
     override fun format(record: LogRecord) = buildString {
         append(dateFormatter.format(Instant.ofEpochMilli(record.millis)))
-        append(" ")
+        append(' ')
         append(record.level.localizedName)
         append(": ")
         append(record.sourceClassName ?: record.loggerName)
-        append(" ")
+        append(' ')
         append(record.sourceMethodName ?: "")
-        append(" ")
+        append(' ')
         append(formatMessage(record))
         append(System.lineSeparator())
         append(record.thrown?.stackTraceToString() ?: "")
