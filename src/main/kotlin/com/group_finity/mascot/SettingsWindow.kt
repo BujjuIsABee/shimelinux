@@ -783,6 +783,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
         environmentComboBox.addItem(genericEnvironmentName)
         environmentComboBox.addItem(virtualEnvironmentName)
+        environmentComboBox.selectedItem = when (environment) {
+            "kde" if (desktopType == "KDE") -> kdeEnvironmentName
+            "wayland" if (sessionType == "wayland") -> waylandEnvironmentName
+            "generic" -> genericEnvironmentName
+            "virtual" -> virtualEnvironmentName
+            else -> automaticEnvironmentName
+        }
         environmentComboBox.addActionListener {
             environment = when (environmentComboBox.selectedItem as String) {
                 kdeEnvironmentName -> "kde"
@@ -1101,12 +1108,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         environmentCardsPanel.add(regularEnvironmentCard, "regular")
         environmentCardsPanel.add(virtualEnvironmentCard, "virtual")
 
-        environmentComboBox.selectedItem = when (environment) {
-            "kde" if (desktopType == "KDE") -> kdeEnvironmentName
-            "wayland" if (sessionType == "wayland") -> waylandEnvironmentName
-            "generic" -> genericEnvironmentName
-            "virtual" -> virtualEnvironmentName
-            else -> automaticEnvironmentName
+        if (environment == "virtual") {
+            environmentCardLayout.show(environmentCardsPanel, "virtual")
+        } else {
+            environmentCardLayout.show(environmentCardsPanel, "regular")
         }
 
         environmentTab.add(environmentComboBox)
