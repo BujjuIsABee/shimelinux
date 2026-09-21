@@ -24,7 +24,6 @@ use std::{sync::mpsc, thread};
 
 use jni::{
     Env, bind_java_type,
-    elements::ReleaseMode,
     objects::JIntArray,
     sys::{jboolean, jint, jlong},
 };
@@ -208,12 +207,11 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         rgb: JIntArray,
         update_mask: jboolean,
     ) -> jni::errors::Result<()> {
-        let rgb = unsafe {
-            rgb.get_elements(env, ReleaseMode::NoCopyBack).expect("Failed to get array elements")
-        };
+        let mut rgb_raw = vec![0; rgb.len(env).unwrap_or_default()];
+        let _ = rgb.get_region(env, 0, &mut rgb_raw);
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender.send(Event::SetImage(rgb.to_vec(), update_mask)).expect("Failed to send SetImage event");
+        sender.send(Event::SetImage(rgb_raw, update_mask)).expect("Failed to send SetImage event");
 
         Ok(())
     }

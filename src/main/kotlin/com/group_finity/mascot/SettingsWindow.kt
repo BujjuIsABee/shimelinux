@@ -800,6 +800,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             } else {
                 environmentCardLayout.show(environmentCardsPanel, "regular")
             }
+
+            // Toggle the interactive windows tab
+            val index = tabbedPane.indexOfComponent(interactiveWindowsTab)
+            if (environment == "kde" && index == -1) {
+                tabbedPane.add(interactiveWindowsTab, localize("InteractiveWindows"), 1)
+            } else if (environment != "kde" && index != -1) {
+                tabbedPane.removeTabAt(index)
+            }
         }
 
         regularEnvironmentCard = JPanel(BorderLayout())

@@ -27,8 +27,8 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Image
+import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-import java.awt.event.ComponentListener
 import javax.swing.JPanel
 
 /**
@@ -61,7 +61,7 @@ class VirtualContentPanel(
         this.background = background
         resizedImage = image
 
-        addComponentListener(object : ComponentListener {
+        addComponentListener(object : ComponentAdapter() {
             override fun componentResized(e: ComponentEvent) {
                 if (image != null) {
                     if (mode == Mode.STRETCH) {
@@ -85,12 +85,6 @@ class VirtualContentPanel(
 
                 repaint()
             }
-
-            override fun componentMoved(e: ComponentEvent) {}
-
-            override fun componentShown(e: ComponentEvent) {}
-
-            override fun componentHidden(e: ComponentEvent?) {}
         })
     }
 

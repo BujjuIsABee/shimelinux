@@ -30,8 +30,8 @@ import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
+import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
 import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
@@ -57,22 +57,10 @@ class VirtualEnvironment : Environment() {
         display.iconImage = icon
         display.title = "ShimeLinux"
         display.isAutoRequestFocus = false
-        display.addWindowListener(object : WindowListener {
-            override fun windowOpened(e: WindowEvent) {}
-
+        display.addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent) {
                 Main.exit()
             }
-
-            override fun windowClosed(e: WindowEvent) {}
-
-            override fun windowIconified(e: WindowEvent) {}
-
-            override fun windowDeiconified(e: WindowEvent) {}
-
-            override fun windowActivated(e: WindowEvent) {}
-
-            override fun windowDeactivated(e: WindowEvent) {}
         })
 
         val (width, height) = getProperty("WindowSize", "600x500").split("x").map { it.toInt() }

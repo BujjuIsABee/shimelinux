@@ -113,8 +113,9 @@ class WaylandPopup(
         }
 
         // Update the menu selection
-        val path = listOfNotNull(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
-        MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
+        MenuSelectionManager.defaultManager().selectedPath = listOf(owner, contents, target.takeIf { it is JMenuItem })
+            .filterIsInstance<MenuElement>()
+            .toTypedArray()
 
         previousTarget = target
     }

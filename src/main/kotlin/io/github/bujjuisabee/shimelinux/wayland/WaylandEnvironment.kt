@@ -22,6 +22,7 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.applyInsets
 import com.group_finity.mascot.desktopType
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
@@ -31,6 +32,7 @@ import io.github.bujjuisabee.shimelinux.kde.KWin
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
+import java.awt.Toolkit
 
 /**
  * An environment that works properly when mascots are not displayed by AWT/Swing.
@@ -46,15 +48,17 @@ class WaylandEnvironment : Environment() {
 
     override fun tick() {
         // Update screen bounds
-        screenRect = if (!getProperty("OverrideScreenDimensions", false)) {
-            Rectangle(GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration.bounds.size)
-        } else {
-            Rectangle(
+        if (getProperty("OverrideScreenDimensions", false)) {
+            screenRect = Rectangle(
                 getProperty("ScreenX", screen.left),
                 getProperty("ScreenY", screen.top),
                 getProperty("ScreenWidth", screen.width),
                 getProperty("ScreenHeight", screen.height)
             )
+        } else {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screenRect = Rectangle(gc.bounds.size)
+            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
         }
 
         screen.set(screenRect)

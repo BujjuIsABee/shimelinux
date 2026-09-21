@@ -216,7 +216,10 @@ object Main {
 
         // If no image sets are selected, show the image set chooser
         while (imageSets.isEmpty()) {
-            imageSets = ImageSetChooser(null, true).display() ?: exit()
+            val chooser = ImageSetChooser(null, true)
+            chooser.isVisible = true
+
+            imageSets = chooser.imageSets.takeUnless { chooser.wasCancelled } ?: exit()
         }
 
         // Load mascots
@@ -438,23 +441,13 @@ object Main {
             }
 
             val chooseShimejiMenu = MenuItem(localize("ChooseShimeji")) {
-                if (!manager.isPaused) {
-                    manager.togglePauseAll()
-                }
-
                 val chooser = ImageSetChooser(null, true)
-                setActiveImageSets(chooser.display())
+                chooser.isVisible = true
 
-                if (manager.isPaused) {
-                    manager.togglePauseAll()
-                }
+                setActiveImageSets(chooser.imageSets.takeUnless { chooser.wasCancelled })
             }
 
             val settingsMenu = MenuItem(localize("Settings")) {
-                if (!manager.isPaused) {
-                    manager.togglePauseAll()
-                }
-
                 PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
 
                 val settings = SettingsWindow(null, true)
@@ -483,13 +476,15 @@ object Main {
                     NativeFactory.resetInstance()
 
                     if (activeEnvironment == "kde" && !allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
-                        allowedBehaviorsSubmenu.add(throwingMenu)
+                        allowedBehaviorsSubmenu.add(throwingMenu, 3)
+                        icon.menu.add(restoreWindowsMenu, 3)
                     } else if (activeEnvironment != "kde" && allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
                         allowedBehaviorsSubmenu.remove(throwingMenu)
+                        icon.menu.remove(restoreWindowsMenu)
                     }
 
                     if (activeEnvironment != "wayland" && !allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
-                        allowedBehaviorsSubmenu.add(multiscreenMenu)
+                        allowedBehaviorsSubmenu.add(multiscreenMenu, 4)
                     } else if (activeEnvironment == "wayland" && allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
                         allowedBehaviorsSubmenu.remove(multiscreenMenu)
                     }
@@ -513,10 +508,6 @@ object Main {
                 }
                 if (settings.isInteractiveWindowReloadRequired) {
                     NativeFactory.instance.environment.refreshCache()
-                }
-
-                if (manager.isPaused) {
-                    manager.togglePauseAll()
                 }
             }
 

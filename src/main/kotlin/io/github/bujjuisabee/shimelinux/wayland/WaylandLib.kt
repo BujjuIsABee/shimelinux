@@ -47,8 +47,8 @@ object WaylandLib {
         // Load the library
         try {
             System.load(libFile.absolutePath)
-        } catch (_: Throwable) {
-            Main.showError("libshimelinux_wayland is missing")
+        } catch (e: Throwable) {
+            Main.showError("Fatal error in libshimelinux_wayland.", e)
             exitProcess(0)
         }
     }
@@ -71,7 +71,7 @@ object WaylandLib {
      * Uses the [senderPtr] to send a SetImage event to a layer surface.
      *
      * @param senderPtr A pointer to the event sender.
-     * @param rgb The image data to send, in `ARGB8888` format.
+     * @param rgb The image data to send, in ARGB8888 format.
      * @param updateMask Whether to update the layer surface's input region.
      */
     external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)

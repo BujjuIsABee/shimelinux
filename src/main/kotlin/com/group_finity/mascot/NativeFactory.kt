@@ -59,15 +59,14 @@ val defaultEnvironment: String = when (desktopType) {
 /**
  * Gets the name of the current environment.
  */
-val activeEnvironment: String by lazy {
-    when (getProperty("Environment", "")) {
+val activeEnvironment: String
+    get() = when (getProperty("Environment", "")) {
         "kde" if (desktopType == "KDE") -> "kde"
         "wayland" if (sessionType == "wayland") -> "wayland"
         "generic" -> "generic"
         "virtual" -> "virtual"
         else -> defaultEnvironment
     }
-}
 
 /**
  * A factory for platform-specific objects.
@@ -114,7 +113,7 @@ abstract class NativeFactory {
         }
 
         /**
-         * Resets the shared popup factory instance based on [activeEnvironment] and the active theme.
+         * Resets the shared popup factory instance based on [activeEnvironment].
          */
         fun resetPopupFactory() {
             if (activeEnvironment == "wayland") {

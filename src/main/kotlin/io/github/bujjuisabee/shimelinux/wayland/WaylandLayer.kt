@@ -42,11 +42,10 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     private val senderPtr: Long = try {
         WaylandLib.createLayer(mouseEventReceiver)
     } catch (e: Throwable) {
-        Main.showError("Fatal error in libshimelinux_wayland", e)
+        Main.showError("Fatal error in libshimelinux_wayland.", e)
         exitProcess(0)
     }
 
-    private var previousCursorPosition = Point(0, 0)
     private var absoluteLocation: Point = location
     private var isDragging = false
     private var isDisposed = false
@@ -66,8 +65,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
 
         try {
             WaylandLib.setBounds(senderPtr, x, y, width, height)
-        } catch (_: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland")
+        } catch (e: Throwable) {
+            Main.showError("Fatal error in libshimelinux_wayland.", e)
             exitProcess(0)
         }
     }
@@ -77,8 +76,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
 
         try {
             WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
-        } catch (_: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland")
+        } catch (e: Throwable) {
+            Main.showError("Fatal error in libshimelinux_wayland.", e)
             exitProcess(0)
         }
     }
@@ -93,8 +92,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
 
         try {
             WaylandLib.setImage(senderPtr, rgb, useMask)
-        } catch (_: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland")
+        } catch (e: Throwable) {
+            Main.showError("Fatal error in libshimelinux_wayland.", e)
             exitProcess(0)
         }
     }
@@ -107,8 +106,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
 
         try {
             WaylandLib.dispose(senderPtr)
-        } catch (_: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland")
+        } catch (e: Throwable) {
+            Main.showError("Fatal error in libshimelinux_wayland.", e)
             exitProcess(0)
         }
 
@@ -141,12 +140,14 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
             button = button or MouseEvent.BUTTON3
         }
 
-        if (leftPressed) {
-            isDragging = true
-        } else if (leftReleased) {
-            isDragging = false
-        }
-
+        /*
+         * If absoluteLocation is being used to calculate the global cursor position, it should not be updated while the
+         * left mouse button is pressed so that mascots will not fly offscreen while being dragged with the cursor.
+         *
+         * When the global cursor position is provided directly by the compositor, like on KDE Plasma and Hyprland,
+         * absoluteLocation should always be updated so that popup menus will be displayed in the correct location.
+         */
+        isDragging = leftPressed || (isDragging && !leftReleased)
         if (!isDragging || desktopType == "KDE" || desktopType == "Hyprland") {
             absoluteLocation = location
         }
@@ -184,8 +185,7 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
         }
 
         val newCursorPosition = Point(positionX + absoluteLocation.x, positionY + absoluteLocation.y)
-        if (previousCursorPosition != newCursorPosition) {
-            previousCursorPosition = newCursorPosition
+        if (WaylandEnvironment.absoluteCursorPosition != newCursorPosition) {
             WaylandEnvironment.absoluteCursorPosition = newCursorPosition
 
             component.dispatchEvent(

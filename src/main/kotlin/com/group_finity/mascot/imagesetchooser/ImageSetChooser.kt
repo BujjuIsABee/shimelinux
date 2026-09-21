@@ -83,9 +83,10 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
     private val confPath = getPath("conf", "settings.properties")
     private val topDir = getPath("img")
-    private var imageSets = ArrayList<String>()
     private var selectAllSets = false
-    private var cancelled = true
+
+    var imageSets = mutableListOf<String>()
+    var wasCancelled = true
 
     init {
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
@@ -153,7 +154,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         moreButton.addActionListener {
             try {
                 Desktop.browseDirectory(getPath("img").toString())
-                cancelled = true
+                wasCancelled = true
                 dispose()
             } catch (_: IOException) {
                 JOptionPane.showMessageDialog(
@@ -182,13 +183,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
 
             updateConfigFile()
-            cancelled = false
+            wasCancelled = false
             dispose()
         }
 
         useAllButton = JButton(localize("UseAll"))
         useAllButton.addActionListener {
-            cancelled = false
+            wasCancelled = false
             dispose()
         }
 
@@ -328,11 +329,6 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         add(footerPanel, BorderLayout.SOUTH)
         pack()
         setLocationRelativeTo(null)
-    }
-
-    fun display(): MutableList<String>? {
-        isVisible = true
-        return if (cancelled) null else imageSets
     }
 
     private fun readConfigFile(): MutableList<String> {

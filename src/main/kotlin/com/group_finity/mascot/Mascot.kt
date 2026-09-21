@@ -35,7 +35,7 @@ import java.awt.Point
 import java.awt.Rectangle
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.event.MouseMotionListener
+import java.awt.event.MouseMotionAdapter
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -229,7 +229,7 @@ class Mascot(var imageSet: String) {
                 }
             }
         })
-        window.asComponent().addMouseMotionListener(object : MouseMotionListener {
+        window.asComponent().addMouseMotionListener(object : MouseMotionAdapter() {
             override fun mouseMoved(e: MouseEvent) {
                 if (isPaused) {
                     refreshCursor(false)
@@ -260,8 +260,6 @@ class Mascot(var imageSet: String) {
         val popup = JPopupMenu()
 
         popup.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuCanceled(e: PopupMenuEvent) {}
-
             override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
                 isAnimating = true
             }
@@ -269,6 +267,8 @@ class Mascot(var imageSet: String) {
             override fun popupMenuWillBecomeVisible(e: PopupMenuEvent) {
                 isAnimating = false
             }
+
+            override fun popupMenuCanceled(e: PopupMenuEvent) {}
         })
 
         val callAnotherMenu = JMenuItem(localize("CallAnother"))

@@ -22,12 +22,14 @@
 
 package io.github.bujjuisabee.shimelinux.kde
 
+import com.group_finity.mascot.applyInsets
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
+import java.awt.Toolkit
 
 /**
  * An environment that supports interactive windows via KWin scripting.
@@ -54,12 +56,16 @@ class KdeEnvironment : Environment() {
                 getProperty("ScreenWidth", screen.width),
                 getProperty("ScreenHeight", screen.height)
             )
-
-            screen.set(screenRect)
         } else if (!getProperty("Multiscreen", true)) {
-            screenRect = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration.bounds
-            screen.set(screenRect)
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screenRect = gc.bounds
+            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+        } else {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
         }
+
+        screen.set(screenRect)
 
         // Update cursor position
         cursor.set(KWin.cursorPosition ?: Point(0, 0))

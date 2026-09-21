@@ -22,6 +22,8 @@
 
 package com.group_finity.mascot
 
+import java.awt.Insets
+import java.awt.Rectangle
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -72,4 +74,16 @@ fun execute(command: String, vararg args: String): String {
     val process = ProcessBuilder(command, *args).start()
     process.waitFor()
     return process.inputStream.bufferedReader().use { it.readLines().joinToString("\n") }
+}
+
+/**
+ * Applies insets to the rectangle.
+ *
+ * @param insets The insets to apply.
+ */
+fun Rectangle.applyInsets(insets: Insets) {
+    x += insets.left
+    y += insets.top
+    width -= (insets.left + insets.right)
+    height -= (insets.top + insets.bottom)
 }
