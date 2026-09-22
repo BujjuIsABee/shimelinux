@@ -47,8 +47,6 @@ class WaylandEnvironment : Environment() {
     override val activeIETitle = ""
 
     override fun tick() {
-        super.tick()
-
         // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect = Rectangle(
