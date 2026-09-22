@@ -54,7 +54,9 @@ class MascotEnvironment(private val mascot: Mascot) {
      * An [Area] representing the bounds of the active interactive window.
      */
     val activeIE: Area
-        get() = if (!getProperty("Multiscreen", true) && currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false) {
+        get() = if (!getProperty("Multiscreen", true) &&
+            currentWorkArea?.toRectangle()?.intersects(impl.activeIE.toRectangle()) == false
+        ) {
             Area()
         } else {
             impl.activeIE
@@ -112,7 +114,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         }
     }
 
-    fun getCeiling(ignoreSeparator: Boolean) = if (activeIE.bottomBorder.isOn(mascot.anchor)) {
+    fun getCeiling(ignoreSeparator: Boolean): Border = if (activeIE.bottomBorder.isOn(mascot.anchor)) {
         activeIE.bottomBorder
     } else if (workArea.topBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
         workArea.topBorder
@@ -120,7 +122,7 @@ class MascotEnvironment(private val mascot: Mascot) {
         NotOnBorder
     }
 
-    fun getFloor(ignoreSeparator: Boolean) = if (activeIE.topBorder.isOn(mascot.anchor)) {
+    fun getFloor(ignoreSeparator: Boolean): Border = if (activeIE.topBorder.isOn(mascot.anchor)) {
         activeIE.topBorder
     } else if (workArea.bottomBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
         workArea.bottomBorder

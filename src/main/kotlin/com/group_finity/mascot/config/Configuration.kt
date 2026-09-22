@@ -38,7 +38,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(Configuration::class.java.name)
+private val logger: Logger = Logger.getLogger(Configuration::class.java.name)
 
 /**
  * Parses an XML configuration file for a mascot.

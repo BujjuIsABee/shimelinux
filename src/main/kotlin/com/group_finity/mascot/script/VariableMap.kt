@@ -62,21 +62,21 @@ class VariableMap : Bindings {
         }
     }
 
-    override fun isEmpty() = rawMap.isEmpty()
+    override fun isEmpty(): Boolean = rawMap.isEmpty()
 
-    override fun containsValue(value: Any?) = rawMap.containsValue(value)
+    override fun containsValue(value: Any?): Boolean = rawMap.containsValue(value)
 
     override fun containsKey(key: String) = true
 
-    override fun get(key: String) = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() }
+    override fun get(key: String): Any? = rawMap[key]?.get(this)?.takeUnless { it is Double && it.isNaN() }
 
-    override fun remove(key: String) = rawMap.remove(key)
+    override fun remove(key: String): Variable? = rawMap.remove(key)
 
     override fun clear() {
         rawMap.clear()
     }
 
-    override fun put(key: String, value: Any?) = if (value is Variable) {
+    override fun put(key: String, value: Any?): Variable? = if (value is Variable) {
         rawMap.put(key, value)
     } else {
         rawMap.put(key, Constant(value))

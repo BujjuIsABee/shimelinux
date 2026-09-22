@@ -28,6 +28,7 @@ import com.group_finity.mascot.action.Move
 import com.group_finity.mascot.action.Select
 import com.group_finity.mascot.action.Sequence
 import com.group_finity.mascot.action.Stay
+import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.AnimationInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
@@ -38,7 +39,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(ActionBuilder::class.java.name)
+private val logger: Logger = Logger.getLogger(ActionBuilder::class.java.name)
 
 /**
  * Builds an action from an Action node.
@@ -54,9 +55,9 @@ private val logger = Logger.getLogger(ActionBuilder::class.java.name)
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema
 
-    val type = requireNotNull(actionNode.getAttribute(schema.getString("Type"))) { "Action requires Type attribute." }
-    val name = actionNode.getAttribute(schema.getString("Name"))
-    private val className = actionNode.getAttribute(schema.getString("Class"))
+    val type: String = requireNotNull(actionNode.getAttribute(schema.getString("Type"))) { "Action requires Type attribute." }
+    val name: String? = actionNode.getAttribute(schema.getString("Name"))
+    private val className: String? = actionNode.getAttribute(schema.getString("Class"))
     private val params = linkedMapOf<String, String>()
     private val animationBuilders = mutableListOf<AnimationBuilder>()
     private val actionRefs = mutableListOf<IActionBuilder>()
@@ -133,11 +134,11 @@ class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: S
         }
     }
 
-    private fun createActions() = actionRefs.map { it.buildAction(hashMapOf()) }
+    private fun createActions(): List<Action> = actionRefs.map { it.buildAction(hashMapOf()) }
 
-    private fun createAnimations() = animationBuilders.map { it.buildAnimation() }
+    private fun createAnimations(): List<Animation> = animationBuilders.map { it.buildAnimation() }
 
-    private fun createVariables(params: Map<String, String>) = VariableMap().apply {
+    private fun createVariables(params: Map<String, String>): VariableMap = VariableMap().apply {
         putAll(this@ActionBuilder.params.mapValues { Variable.parse(it.value) })
         putAll(params.mapValues { Variable.parse(it.value) })
     }

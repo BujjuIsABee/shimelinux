@@ -37,7 +37,7 @@ import java.awt.event.MouseEvent
 import java.util.logging.Logger
 import javax.swing.SwingUtilities
 
-private val logger = Logger.getLogger(UserBehavior::class.java.name)
+private val logger: Logger = Logger.getLogger(UserBehavior::class.java.name)
 
 /**
  * The base implementation of a behavior.

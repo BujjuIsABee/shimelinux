@@ -36,7 +36,7 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-private val logger = Logger.getLogger(ScanJump::class.java.name)
+private val logger: Logger = Logger.getLogger(ScanJump::class.java.name)
 
 /**
  * An action that scans for a mascot with the [affordance] and causes [mascot] to jump towards it if one is found.

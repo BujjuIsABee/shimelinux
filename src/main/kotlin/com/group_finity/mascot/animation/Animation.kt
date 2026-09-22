@@ -48,7 +48,7 @@ class Animation(
     /**
      * The total duration of all the animation's poses.
      */
-    val duration = poses.sumOf { it.duration }
+    val duration: Int = poses.sumOf { it.duration }
 
     init {
         require(poses.isNotEmpty()) { "Animation requires at least one pose" }
@@ -57,7 +57,7 @@ class Animation(
     /**
      * Whether the conditions for the animation to play are currently met.
      */
-    fun isEffective(variables: VariableMap) = condition.get(variables) as Boolean
+    fun isEffective(variables: VariableMap): Boolean = condition.get(variables) as Boolean
 
     /**
      * Initializes the animation.

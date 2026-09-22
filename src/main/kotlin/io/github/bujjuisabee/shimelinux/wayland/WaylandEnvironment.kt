@@ -47,6 +47,8 @@ class WaylandEnvironment : Environment() {
     override val activeIETitle = ""
 
     override fun tick() {
+        super.tick()
+
         // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect = Rectangle(
@@ -57,9 +59,7 @@ class WaylandEnvironment : Environment() {
             )
         } else {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-
             screenRect = Rectangle(gc.bounds.size)
-
             screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
         }
 

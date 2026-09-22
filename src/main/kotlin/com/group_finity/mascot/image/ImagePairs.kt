@@ -47,19 +47,19 @@ object ImagePairs {
      * Gets an image pair from [imagePairs].
      */
     @JvmStatic
-    fun getImagePair(fileName: String) = imagePairs[fileName]
+    fun getImagePair(fileName: String): ImagePair? = imagePairs[fileName]
 
     /**
      * Gets whether [imagePairs] contains an image pair with [fileName] as its key.
      */
     @JvmStatic
-    fun contains(fileName: String) = imagePairs.containsKey(fileName)
+    fun contains(fileName: String): Boolean = imagePairs.containsKey(fileName)
 
     /**
      * Returns the right image from an image pair in [imagePairs] if [isLookRight] is true, or the left image if it is false.
      */
     @JvmStatic
-    fun getImage(fileName: String, isLookRight: Boolean) = imagePairs[fileName]?.getImage(isLookRight)
+    fun getImage(fileName: String, isLookRight: Boolean): MascotImage? = imagePairs[fileName]?.getImage(isLookRight)
 
     /**
      * Removes all image pairs from [imagePairs].

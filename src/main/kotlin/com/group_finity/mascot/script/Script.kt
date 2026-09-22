@@ -27,9 +27,10 @@ import com.group_finity.mascot.localize
 import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory
 import javax.script.Compilable
 import javax.script.CompiledScript
+import javax.script.ScriptEngine
 import javax.script.ScriptException
 
-private val engine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
+private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
 
 /**
  * A variable whose value is evaluated from JavaScript.

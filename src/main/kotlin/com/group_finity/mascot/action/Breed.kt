@@ -37,7 +37,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.math.roundToInt
 
-private val logger = Logger.getLogger(Breed.Delegate::class.java.name)
+private val logger: Logger = Logger.getLogger(Breed.Delegate::class.java.name)
 
 /**
  * An action that creates a new mascot.

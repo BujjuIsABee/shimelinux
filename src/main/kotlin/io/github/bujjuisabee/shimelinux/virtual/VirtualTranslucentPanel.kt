@@ -56,7 +56,7 @@ class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
         repaint()
     }
 
-    override fun setAlwaysOnTop(onTop: Boolean) {}
+    override fun setAlwaysOnTop(value: Boolean) {}
 
     override fun dispose() {
         parent?.let {

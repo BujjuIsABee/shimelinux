@@ -28,7 +28,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(Move::class.java.name)
+private val logger: Logger = Logger.getLogger(Move::class.java.name)
 
 /**
  * An action that causes the mascot to move.
@@ -49,7 +49,7 @@ open class Move(
     /**
      * Whether there are any turning animations in [animations].
      */
-    internal open val hasTurningAnimation = animations.any { it.isTurn }
+    internal open val hasTurningAnimation: Boolean = animations.any { it.isTurn }
 
     /**
      * Whether the mascot is currently turning.

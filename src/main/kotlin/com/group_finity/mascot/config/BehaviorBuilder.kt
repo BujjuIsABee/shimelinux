@@ -33,7 +33,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.logging.Level
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(BehaviorBuilder::class.java.name)
+private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 
 /**
  * Builds a behavior from a Behavior node.
@@ -51,10 +51,10 @@ class BehaviorBuilder(
     behaviorNode: Entry,
     private var conditions: MutableList<String?>
 ) {
-    val name = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name"))) { "Behavior requires Name attribute." }
-    private val actionName = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
-    val frequency = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))) { "Behavior requires Frequency attribute." }.toInt()
-    val isHidden = behaviorNode.getAttribute(configuration.schema.getString("Hidden")).toBoolean()
+    val name: String = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name"))) { "Behavior requires Name attribute." }
+    private val actionName: String = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
+    val frequency: Int = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))) { "Behavior requires Frequency attribute." }.toInt()
+    val isHidden: Boolean = behaviorNode.getAttribute(configuration.schema.getString("Hidden")).toBoolean()
     val isToggleable: Boolean
     val isNextAdditive: Boolean
     val nextBehaviorBuilders = mutableListOf<BehaviorBuilder>()

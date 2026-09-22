@@ -47,7 +47,7 @@ class VirtualContentPanel(
     private val image: Image?
 ) : JPanel() {
     private var resizedImage: Image? = null
-    private val mode = when (getProperty("BackgroundMode", "Center")) {
+    private val mode: Mode = when (getProperty("BackgroundMode", "Center")) {
         "Center" -> Mode.CENTER
         "Fit" -> Mode.FIT
         "Stretch" -> Mode.STRETCH

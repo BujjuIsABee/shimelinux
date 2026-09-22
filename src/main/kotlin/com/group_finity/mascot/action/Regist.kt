@@ -32,7 +32,7 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private val logger = Logger.getLogger(Regist::class.java.name)
+private val logger: Logger = Logger.getLogger(Regist::class.java.name)
 
 /**
  * An action that occurs after a random amount of time while the mascot is being dragged with the cursor.

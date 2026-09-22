@@ -32,8 +32,8 @@ import java.util.Objects
  * @author Bujju
  */
 class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
-    val width = managedImage.width
-    val height = managedImage.height
+    val width: Int = managedImage.width
+    val height: Int = managedImage.height
     val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 
     override fun hashCode(): Int = Objects.hash(rgb)

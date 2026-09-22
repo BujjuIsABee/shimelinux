@@ -35,7 +35,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(ScanInteract::class.java.name)
+private val logger: Logger = Logger.getLogger(ScanInteract::class.java.name)
 
 /**
  * An action that scans for a mascot with the [affordance], then sets [mascot]'s behavior if one is found.
@@ -58,7 +58,7 @@ class ScanInteract(
     /**
      * Whether there are any turning animations in [animations].
      */
-    internal val hasTurningAnimation = animations.any { it.isTurn }
+    internal val hasTurningAnimation: Boolean = animations.any { it.isTurn }
 
     /**
      * Whether the mascot is currently turning.

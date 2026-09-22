@@ -32,7 +32,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.concurrent.timer
 
-private val logger = Logger.getLogger(Manager::class.java.name)
+private val logger: Logger = Logger.getLogger(Manager::class.java.name)
 
 /**
  * Manages a list of mascots.
@@ -268,7 +268,7 @@ class Manager {
     /**
      * Gets the number of mascots with the [imageSet].
      */
-    fun getCount(imageSet: String?) = synchronized(mascots) {
+    fun getCount(imageSet: String?): Int = synchronized(mascots) {
         if (imageSet != null) {
             mascots.count { it.imageSet == imageSet }
         } else {
@@ -279,7 +279,7 @@ class Manager {
     /**
      * Gets the first mascot with the [affordance].
      */
-    fun getMascotWithAffordance(affordance: String) = synchronized(mascots) {
+    fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? = synchronized(mascots) {
         mascots.firstOrNull { it.affordances.contains(affordance) }?.let {
             WeakReference(it)
         }
@@ -288,7 +288,7 @@ class Manager {
     /**
      * Whether there is more than one mascot at [anchor].
      */
-    fun hasOverlappingMascotsAtPoint(anchor: Point) = synchronized(mascots) {
+    fun hasOverlappingMascotsAtPoint(anchor: Point): Boolean = synchronized(mascots) {
         mascots.count { it.anchor == anchor } > 1
     }
 

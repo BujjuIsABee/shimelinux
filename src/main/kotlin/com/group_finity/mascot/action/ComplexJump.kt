@@ -36,7 +36,7 @@ import java.util.logging.Logger
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-private val logger = Logger.getLogger(ComplexJump::class.java.name)
+private val logger: Logger = Logger.getLogger(ComplexJump::class.java.name)
 
 /**
  * An action that creates a new mascot and/or scans for an affordance while [mascot] jumps.

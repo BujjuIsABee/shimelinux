@@ -56,7 +56,7 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 import kotlin.system.exitProcess
 
-private val logger = Logger.getLogger(Main::class.java.name)
+private val logger: Logger = Logger.getLogger(Main::class.java.name)
 
 /**
  * The entry point of the program.
@@ -921,9 +921,9 @@ object Main {
         }
     }
 
-    fun hasConfiguration(imageSet: String) = configurations.containsKey(imageSet)
+    fun hasConfiguration(imageSet: String): Boolean = configurations.containsKey(imageSet)
 
-    fun getConfiguration(imageSet: String) = checkNotNull(configurations[imageSet])
+    fun getConfiguration(imageSet: String): Configuration = checkNotNull(configurations[imageSet])
 
     /**
      * Dismisses all mascots and closes the program.

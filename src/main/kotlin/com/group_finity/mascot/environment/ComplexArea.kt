@@ -34,6 +34,10 @@ import java.awt.Rectangle
  */
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
+
+    /**
+     * The areas that make up this complex area.
+     */
     val areas: Collection<Area>
         get() = areaMap.values
 

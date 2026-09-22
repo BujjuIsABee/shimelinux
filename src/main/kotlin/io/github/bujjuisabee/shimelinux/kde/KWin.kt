@@ -210,9 +210,7 @@ object KWin {
             "y" to Variant(windowPosition?.y ?: -1)
         ).also { windowPosition = null }
 
-        override fun getRestoreWindows(): Boolean = restoreWindows.also {
-            restoreWindows = false
-        }
+        override fun getRestoreWindows(): Boolean = restoreWindows.also { restoreWindows = false }
 
         override fun getObjectPath() = "/KWinClient"
     }

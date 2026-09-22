@@ -48,7 +48,7 @@ import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 import kotlin.text.replace
 
-private val logger = Logger.getLogger(Mascot::class.java.name)
+private val logger: Logger = Logger.getLogger(Mascot::class.java.name)
 private val lastId = AtomicInteger()
 
 /**
@@ -479,7 +479,9 @@ class Mascot(var imageSet: String) {
     private fun refreshCursor(position: Point) {
         var useHand = false
         for (hotspot in hotspots) {
-            if (hotspot.contains(this, position) && Main.getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)) {
+            if (hotspot.contains(this, position) &&
+                Main.getConfiguration(imageSet).isBehaviorEnabled(hotspot.behavior, this)
+            ) {
                 useHand = true
                 break
             }
@@ -488,7 +490,8 @@ class Mascot(var imageSet: String) {
     }
 
     private fun refreshCursor(useHand: Boolean) {
-        window.asComponent().cursor = Cursor.getPredefinedCursor(if (useHand) Cursor.HAND_CURSOR else Cursor.DEFAULT_CURSOR)
+        val cursor = if (useHand) Cursor.HAND_CURSOR else Cursor.DEFAULT_CURSOR
+        window.asComponent().cursor = Cursor.getPredefinedCursor(cursor)
     }
 
     override fun toString() = "Mascot[id=$id, imageSet=$imageSet]"

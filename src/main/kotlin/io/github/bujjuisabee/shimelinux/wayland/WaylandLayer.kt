@@ -61,7 +61,7 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
         if (isDisposed) return
 
-        super.setBounds(x, y, width, height) // updates super.bounds
+        super.setBounds(x, y, width, height) // update super.bounds
 
         try {
             WaylandLib.setBounds(senderPtr, x, y, width, height)

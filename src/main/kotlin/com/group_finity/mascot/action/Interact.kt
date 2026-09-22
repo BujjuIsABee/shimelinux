@@ -32,7 +32,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(Interact::class.java.name)
+private val logger: Logger = Logger.getLogger(Interact::class.java.name)
 
 /**
  * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found.

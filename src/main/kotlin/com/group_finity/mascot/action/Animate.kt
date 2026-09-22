@@ -28,7 +28,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(Animate::class.java.name)
+private val logger: Logger = Logger.getLogger(Animate::class.java.name)
 
 /**
  * An action that plays an animation.

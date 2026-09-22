@@ -51,10 +51,12 @@ class WaylandPopup(
     private var parent: JMenu? = null
 
     override fun show() {
+        // Set the popup's size
         contents.size = contents.preferredSize
         contents.doLayout()
         layer.setBounds(x, y, contents.width, contents.height)
-        redraw()
+
+        updateImage()
     }
 
     override fun hide() {
@@ -87,7 +89,7 @@ class WaylandPopup(
             val path = listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
             MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
 
-            redraw()
+            updateImage()
         }
 
         layer.dispatchEvents(
@@ -101,7 +103,7 @@ class WaylandPopup(
         )
     }
 
-    private fun redraw() {
+    private fun updateImage() {
         val width = contents.width
         val height = contents.height
 

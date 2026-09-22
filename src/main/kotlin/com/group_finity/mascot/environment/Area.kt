@@ -32,11 +32,16 @@ import java.awt.Rectangle
  * @author Bujju
  */
 class Area {
+    /**
+     * Whether there is an active interactive window (if the rectangle represents its bounds).
+     */
     var isVisible = true
+
     var left = 0
     var top = 0
     var right = 0
     var bottom = 0
+
     var dleft = 0
     var dtop = 0
     var dright = 0
@@ -53,7 +58,9 @@ class Area {
         get() = bottom - top
 
     /**
-     * Moves/resizes the rectangle.
+     * Sets the bounds of the rectangle.
+     *
+     * @param value The new bounds of the rectangle.
      */
     fun set(value: Rectangle) {
         dleft = value.x - left
@@ -68,7 +75,7 @@ class Area {
     }
 
     /**
-     * Gets whether a point at ([x], [y]) is inside the area.
+     * Gets whether a point at ([x], [y]) is inside the rectangle.
      */
     fun contains(x: Int, y: Int): Boolean = x in left..right && y in top..bottom
 

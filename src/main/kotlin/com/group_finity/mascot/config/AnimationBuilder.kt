@@ -45,7 +45,7 @@ import kotlin.io.path.exists
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-private val logger = Logger.getLogger(AnimationBuilder::class.java.name)
+private val logger: Logger = Logger.getLogger(AnimationBuilder::class.java.name)
 
 /**
  * Creates an animation from an Animation node.
@@ -63,10 +63,10 @@ class AnimationBuilder(
     animationNode: Entry,
     private val imageSet: String
 ) {
-    private val condition = animationNode.getAttribute(schema.getString("Condition")) ?: "true"
+    private val condition: String = animationNode.getAttribute(schema.getString("Condition")) ?: "true"
     private val poses = mutableListOf<Pose>()
     private val hotspots = mutableListOf<Hotspot>()
-    private val turn = animationNode.getAttribute(schema.getString("IsTurn")) ?: "false"
+    private val turn: String = animationNode.getAttribute(schema.getString("IsTurn")) ?: "false"
 
     init {
         logger.info { "Loading animation" }

@@ -30,7 +30,7 @@ import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(FallWithIE::class.java.name)
+private val logger: Logger = Logger.getLogger(FallWithIE::class.java.name)
 
 /**
  * An action that causes the mascot to fall while holding a window.

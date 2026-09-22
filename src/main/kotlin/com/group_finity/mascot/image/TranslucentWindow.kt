@@ -52,7 +52,7 @@ interface TranslucentWindow {
     /**
      * Sets whether the window should appear above other windows.
      */
-    fun setAlwaysOnTop(onTop: Boolean)
+    fun setAlwaysOnTop(value: Boolean)
 
     /**
      * Closes the window.

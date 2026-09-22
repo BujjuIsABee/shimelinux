@@ -173,7 +173,7 @@ abstract class ActionBase(
         variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue
     }
 
-    override fun toString() = try {
+    override fun toString(): String = try {
         "Action[className=${this::class.java.simpleName}, name=$name]"
     } catch (_: VariableException) {
         "Action[className=${this::class.java.simpleName}, name=null]"

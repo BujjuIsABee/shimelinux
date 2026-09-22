@@ -35,6 +35,7 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.UIManager
+import javax.swing.border.Border
 
 /**
  * Displays information about an image set.
@@ -54,8 +55,8 @@ class ImageSetChooserPanel(
     private val captionLabel: JLabel
     private val checkbox: JCheckBox
 
-    private val activeBorder = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"), 1)
-    private val inactiveBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1)
+    private val activeBorder: Border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"), 1)
+    private val inactiveBorder: Border = BorderFactory.createEmptyBorder(1, 1, 1, 1)
 
     init {
         minimumSize = Dimension(248, 80)

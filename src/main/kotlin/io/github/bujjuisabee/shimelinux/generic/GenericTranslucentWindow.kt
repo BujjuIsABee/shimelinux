@@ -70,10 +70,10 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
         }
     }
 
-    override fun setBounds(r: Rectangle) {
+    override fun setBounds(value: Rectangle) {
         // Allow mascots to go partially offscreen by offsetting the image and resizing the window
-        val newBounds = NativeFactory.instance.environment.screen.toRectangle().intersection(r)
-        offset = Point(r.x - newBounds.x, r.y - newBounds.y)
+        val newBounds = NativeFactory.instance.environment.screen.toRectangle().intersection(value)
+        offset = Point(value.x - newBounds.x, value.y - newBounds.y)
         super.setBounds(newBounds)
     }
 
@@ -92,7 +92,7 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
 
         val mask = maskCache.getOrPut(image) {
             val path = Path2D.Float()
-            val rect = Rectangle(0, 0, 1, 1)
+            val rect = Rectangle(1, 1)
 
             for (y in 0 until image.height) {
                 for (x in 0 until image.width) {

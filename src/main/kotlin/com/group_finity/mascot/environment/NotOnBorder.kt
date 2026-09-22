@@ -34,5 +34,5 @@ import java.awt.Point
 object NotOnBorder : Border {
     override fun isOn(location: Point) = false
 
-    override fun move(location: Point) = location
+    override fun move(location: Point): Point = location
 }

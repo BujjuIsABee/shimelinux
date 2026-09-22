@@ -36,9 +36,7 @@ import java.util.logging.SimpleFormatter
  * @author Bujju
  */
 class LogFormatter : SimpleFormatter() {
-    private val dateFormatter = DateTimeFormatter
-        .ofLocalizedDateTime(FormatStyle.MEDIUM)
-        .withZone(ZoneId.systemDefault())
+    private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())
 
     override fun format(record: LogRecord) = buildString {
         append(dateFormatter.format(Instant.ofEpochMilli(record.millis)))

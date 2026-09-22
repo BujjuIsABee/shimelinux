@@ -35,7 +35,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(ComplexMove::class.java.name)
+private val logger: Logger = Logger.getLogger(ComplexMove::class.java.name)
 
 /**
  * An action that creates a new mascot and/or scans for an affordance while [mascot] moves.
@@ -61,7 +61,7 @@ class ComplexMove(
     /**
      * Whether there are any turning animations in [animations].
      */
-    internal val hasTurningAnimation = animations.any { it.isTurn }
+    internal val hasTurningAnimation: Boolean = animations.any { it.isTurn }
 
     /**
      * Whether the mascot is currently turning.

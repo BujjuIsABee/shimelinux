@@ -99,7 +99,6 @@ class VirtualEnvironment : Environment() {
      * Adds a mascot to the window.
      *
      * @param mascot The mascot to add.
-     * @see VirtualTranslucentPanel
      */
     fun addShimeji(mascot: JPanel) {
         mascot.isOpaque = false

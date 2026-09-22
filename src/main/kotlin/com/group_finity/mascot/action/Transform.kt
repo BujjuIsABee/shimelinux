@@ -33,7 +33,7 @@ import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 
-private val logger = Logger.getLogger(Transform::class.java.name)
+private val logger: Logger = Logger.getLogger(Transform::class.java.name)
 
 /**
  * An action that causes the mascot to transform into another mascot.

@@ -64,7 +64,7 @@ object Sounds {
      * @param name The filename of the clip combined with its volume.
      */
     @JvmStatic
-    fun contains(name: String) = sounds.containsKey(name)
+    fun contains(name: String): Boolean = sounds.containsKey(name)
 
     /**
      * Gets a sound from [sounds]. The sound is closed when the sound is done playing.
@@ -72,7 +72,7 @@ object Sounds {
      * @param name The filename of the clip combined with its volume.
      */
     @JvmStatic
-    fun getSound(name: String) = sounds[name]?.also { it.open() }?.clip
+    fun getSound(name: String): Clip? = sounds[name]?.also { it.open() }?.clip
 
     /**
      * Gets all sounds from with the [name], regardless of their volume.
@@ -80,7 +80,7 @@ object Sounds {
      * @param name The filename of the clip, without the volume.
      */
     @JvmStatic
-    fun getSoundsIgnoringVolume(name: String) = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
+    fun getSoundsIgnoringVolume(name: String): List<Clip> = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
 
     /**
      * Contains a sound clip and a function to open it.

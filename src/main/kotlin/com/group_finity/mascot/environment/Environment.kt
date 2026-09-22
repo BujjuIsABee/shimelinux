@@ -39,12 +39,12 @@ import kotlin.concurrent.timer
  */
 abstract class Environment {
     /**
-     * An [Area] representing the bounds of the screen.
+     * An area representing the bounds of the primary monitor.
      */
     internal abstract val workArea: Area
 
     /**
-     * An [Area] representing the bounds of the active interactive window.
+     * An area representing the bounds of the active interactive window.
      */
     abstract val activeIE: Area
 
@@ -53,9 +53,24 @@ abstract class Environment {
      */
     abstract val activeIETitle: String
 
+    /**
+     * A [ComplexArea] representing the bounds of the screen.
+     */
     var complexScreen = ComplexArea()
+
+    /**
+     * An area representing the combined bounds of all screens.
+     */
     var screen = Area()
+
+    /**
+     * A movable point representing the absolute cursor position.
+     */
     var cursor = Location()
+
+    /**
+     * A collection of areas representing all screens.
+     */
     val screens: Collection<Area>
         get() = complexScreen.areas
 
@@ -76,11 +91,17 @@ abstract class Environment {
         cursor.set(cursorPos)
     }
 
+    /**
+     * Gets if [location] is on the floor or ceiling.
+     */
     fun isScreenTopBottom(location: Point): Boolean {
         val count = screens.count { it.topBorder.isOn(location) } + screens.count { it.bottomBorder.isOn(location) }
         return count == 1 || count == 0 && (workArea.topBorder.isOn(location) || workArea.bottomBorder.isOn(location))
     }
 
+    /**
+     * Gets if [location] is on the left or right walls.
+     */
     fun isScreenLeftRight(location: Point): Boolean {
         val count = screens.count { it.leftBorder.isOn(location) } + screens.count { it.rightBorder.isOn(location) }
         return count == 1 || count == 0 && (workArea.leftBorder.isOn(location) || workArea.rightBorder.isOn(location))
@@ -112,6 +133,9 @@ abstract class Environment {
         private val cursorPos: Point
             get() = MouseInfo.getPointerInfo()?.location ?: Point(0, 0)
 
+        /**
+         * Updates [screenRect] and [screenRects].
+         */
         fun updateScreenRect() {
             var screenRect = Rectangle()
             val screenRects = hashMapOf<String, Rectangle>()
