@@ -22,21 +22,15 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
-import com.group_finity.mascot.NativeFactory
-import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
-import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
+import java.awt.image.DataBufferInt
 
 /**
- * A native factory that displays mascots on native Wayland surfaces.
+ * Stores an image to be displayed on a Wayland layer surface.
  *
  * @author Bujju
  */
-class NativeFactoryImpl : NativeFactory() {
-    override val environment: Environment = WaylandEnvironment()
-
-    override fun newNativeImage(src: BufferedImage): NativeImage = WaylandNativeImage(src)
-
-    override fun newTranslucentWindow(): TranslucentWindow = WaylandTranslucentLayer()
+class WaylandNativeImage(managedImage: BufferedImage) : NativeImage {
+    val rgb: IntArray = (managedImage.raster.dataBuffer as DataBufferInt).data
 }

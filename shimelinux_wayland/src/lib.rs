@@ -24,6 +24,7 @@ use std::{sync::mpsc, thread};
 
 use jni::{
     Env, bind_java_type,
+    elements::ReleaseMode,
     objects::JIntArray,
     sys::{jboolean, jint, jlong},
 };
@@ -66,9 +67,9 @@ enum Event {
 }
 
 bind_java_type! {
-    /// Receives mouse events from a Wayland layer surface.
     MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
     methods {
+        #[allow(clippy::too_many_arguments)]
         fn update_cursor(
             left_pressed: jboolean,
             right_pressed: jboolean,
@@ -81,13 +82,12 @@ bind_java_type! {
 }
 
 bind_java_type! {
-    /// The foreign function interface accessed by Kotlin via JNI.
-    WaylandLib => io.github.bujjuisabee.shimelinux.wayland.WaylandLib,
+    WaylandLib => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib",
     type_map {
         MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
     },
     native_methods {
-        extern fn create_layer(mouse_receiver: MouseEventReceiver) -> jlong,
+        extern fn create_layer(mouse_event_receiver: MouseEventReceiver) -> jlong,
         extern fn set_bounds(sender_ptr: jlong, x: jint, y: jint, width: jint, height: jint),
         extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
         extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
@@ -98,23 +98,27 @@ bind_java_type! {
 impl WaylandLibNativeInterface for WaylandLibAPI {
     type Error = jni::errors::Error;
 
-    /// Creates a Wayland layer surface. Mouse events are sent to `mouse_event_receiver`.
+    /// Creates a Wayland layer surface and returns a pointer to the event sender.
     ///
-    /// Returns a pointer to the event sender and starts a daemon thread for the event loop.
+    /// Mouse events are sent to `mouse_event_receiver`.
     fn create_layer<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
         mouse_event_receiver: MouseEventReceiver<'local>,
     ) -> jni::errors::Result<jlong> {
+        // Get the event sender and receiver
         let (sender, receiver) = mpsc::channel::<Event>();
 
-        let connection = Connection::connect_to_env().unwrap();
-        let (globals, mut event_queue) = registry_queue_init(&connection).unwrap();
+        // Create the layer
+        let conn = Connection::connect_to_env().unwrap();
+        let (globals, mut event_queue) = registry_queue_init(&conn).unwrap();
         let qh = event_queue.handle();
 
         let compositor = CompositorState::bind(&globals, &qh).unwrap();
         let surface = compositor.create_surface(&qh);
-        let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
+        let shm = Shm::bind(&globals, &qh).unwrap();
+        let pool = SlotPool::new(128 * 128 * 4, &shm).unwrap();
+        let layer_shell = LayerShell::bind(&globals, &qh).unwrap();
         let layer = layer_shell.create_layer_surface(
             &qh,
             surface,
@@ -128,8 +132,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         layer.set_size(1, 1);
         layer.commit();
 
-        let shm = Shm::bind(&globals, &qh).expect("Failed to get shm");
-        let pool = SlotPool::new(128 * 128 * 4, &shm).expect("Failed to create pool");
         let mut layer_state = LayerState {
             compositor_state: compositor,
             registry_state: RegistryState::new(&globals),
@@ -138,41 +140,51 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
             cursor_state: CursorState::default(),
             shm,
             pool,
-
             mouse_event_receiver: env.new_global_ref(mouse_event_receiver).unwrap(),
             layer,
-            layer_mask: Vec::new(),
             configured: false,
             image_rgb: Vec::new(),
             image_bounds: Rect::default(),
+            image_changed: true,
+            layer_mask: Vec::new(),
         };
 
-        thread::spawn(move || {
-            'outer: loop {
-                let _ = event_queue.blocking_dispatch(&mut layer_state);
+        // Get a JavaVM so it can be attached to the thread. This ensures that the global reference
+        // to mouse_event_receiver can be freed without pausing to attach the JVM to the thread.
+        let jvm = env.get_java_vm().unwrap();
 
-                // Handle events
-                while let Ok(event) = receiver.try_recv() {
-                    match event {
-                        Event::SetBounds(bounds) => {
-                            layer_state.set_bounds(bounds);
-                        }
-                        Event::SetImage(rgb, update_mask) => {
-                            layer_state.set_image(rgb, update_mask);
-                        }
-                        Event::SetCursor(use_hand) => {
-                            layer_state.set_cursor(&connection, &qh, use_hand);
-                        }
-                        Event::Dispose() => {
-                            layer_state.dispose();
-                            layer_state.mouse_event_receiver.into_raw();
-                            break 'outer;
+        // Spawn a thread for the event loop
+        thread::spawn(move || {
+            let _ = jvm.attach_current_thread(|_env| -> jni::errors::Result<_> {
+                'outer: loop {
+                    let _ = event_queue.blocking_dispatch(&mut layer_state);
+
+                    // Handle events
+                    while let Ok(event) = receiver.try_recv() {
+                        match event {
+                            Event::SetBounds(bounds) => {
+                                layer_state.set_bounds(bounds);
+                            }
+                            Event::SetImage(rgb, update_mask) => {
+                                layer_state.set_image(rgb, update_mask);
+                            }
+                            Event::SetCursor(use_hand) => {
+                                layer_state.set_cursor(&conn, &qh, use_hand);
+                            }
+                            Event::Dispose() => {
+                                layer_state.dispose();
+                                layer_state.mouse_event_receiver.into_raw();
+                                break 'outer;
+                            }
                         }
                     }
                 }
-            }
+
+                Ok(())
+            });
         });
 
+        // Return a raw pointer to the event sender
         Ok(Box::into_raw(Box::new(sender)) as jlong)
     }
 
@@ -207,11 +219,12 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         rgb: JIntArray,
         update_mask: jboolean,
     ) -> jni::errors::Result<()> {
-        let mut rgb_raw = vec![0; rgb.len(env).unwrap_or_default()];
-        let _ = rgb.get_region(env, 0, &mut rgb_raw);
+        let elements = unsafe { rgb.get_elements(env, ReleaseMode::NoCopyBack)? };
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender.send(Event::SetImage(rgb_raw, update_mask)).expect("Failed to send SetImage event");
+        sender
+            .send(Event::SetImage(elements.to_vec(), update_mask))
+            .expect("Failed to send SetImage event");
 
         Ok(())
     }
@@ -224,7 +237,9 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         use_hand: jboolean,
     ) -> jni::errors::Result<()> {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender.send(Event::SetCursor(use_hand)).expect("Failed to send SetCursor event");
+        sender
+            .send(Event::SetCursor(use_hand))
+            .expect("Failed to send SetCursor event");
 
         Ok(())
     }
@@ -236,10 +251,12 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         sender_ptr: jlong,
     ) -> jni::errors::Result<()> {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
-        sender.send(Event::Dispose()).expect("Failed to send dispose event");
+        sender
+            .send(Event::Dispose())
+            .expect("Failed to send dispose event");
 
         // Free sender
-        let _ = unsafe { Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>) };
+        unsafe { drop(Box::from_raw(sender_ptr as *mut mpsc::Sender<Event>)) };
 
         Ok(())
     }

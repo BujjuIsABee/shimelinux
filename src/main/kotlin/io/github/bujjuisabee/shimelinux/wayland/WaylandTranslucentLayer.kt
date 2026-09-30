@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.Component
 
 /**
@@ -34,7 +33,7 @@ import java.awt.Component
  */
 class WaylandTranslucentLayer : TranslucentWindow, WaylandLib.MouseEventReceiver {
     private val layer = WaylandLayer(this, true)
-    private var image: GenericNativeImage? = null
+    private var image: WaylandNativeImage? = null
     private var imageChanged = false
 
     override fun asComponent(): Component = layer
@@ -42,7 +41,7 @@ class WaylandTranslucentLayer : TranslucentWindow, WaylandLib.MouseEventReceiver
     override fun setImage(image: NativeImage) {
         if (this.image != image) {
             imageChanged = true
-            this.image = image as GenericNativeImage
+            this.image = image as WaylandNativeImage
         }
     }
 

@@ -53,18 +53,11 @@ use wayland_cursor::CursorTheme;
 
 use crate::{MouseEventReceiver, Point, Rect};
 
-/// Stores the state of the cursor.
 #[derive(Default)]
 pub struct CursorState {
-    /// A wl_pointer provided to a layer surface.
     pub pointer: Option<WlPointer>,
-
-    /// The wl_surface to attach when setting the cursor.
     pub surface: Option<WlSurface>,
-
-    /// The serial provided when the pointer enters a layer surface. Required to set the cursor.
     pub serial: Option<u32>,
-
     pub left_pressed: bool,
     pub right_pressed: bool,
     pub left_released: bool,
@@ -72,7 +65,6 @@ pub struct CursorState {
     pub position: Point,
 }
 
-/// Represents Wayland layer surface.
 pub struct LayerState {
     pub compositor_state: CompositorState,
     pub registry_state: RegistryState,
@@ -81,24 +73,13 @@ pub struct LayerState {
     pub cursor_state: CursorState,
     pub shm: Shm,
     pub pool: SlotPool,
-
-    /// The object that mouse events will be sent to.
     pub mouse_event_receiver: Global<MouseEventReceiver<'static>>,
-
-    /// The layer surface.
     pub layer: LayerSurface,
-
-    /// Stores rectangles covering the non-transparent pixels of the layer surface. Used for the input region.
-    pub layer_mask: Vec<Rect>,
-
-    /// Whether the first configure event has been sent.
     pub configured: bool,
-
-    /// The image data displayed on the surface, in ARGB8888 format.
     pub image_rgb: Vec<i32>,
-
-    /// Stores the bounds requested by the last SetBounds event.
     pub image_bounds: Rect,
+    pub image_changed: bool,
+    pub layer_mask: Vec<Rect>,
 }
 
 delegate_compositor!(LayerState);
@@ -160,7 +141,8 @@ impl OutputHandler for LayerState {
 
     fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 
-    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
+    fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
+    }
 }
 
 delegate_layer!(LayerState);
@@ -228,7 +210,7 @@ impl PointerHandler for LayerState {
     ) {
         use PointerEventKind::*;
         for event in events {
-            // Skip events for other mascots
+            // Skip events for other layer surfaces
             if &event.surface != self.layer.wl_surface() {
                 continue;
             }
@@ -241,29 +223,29 @@ impl PointerHandler for LayerState {
                     self.cursor_state.serial = Some(serial);
                 }
                 Motion { .. } => {
-                    if let Some(pointer) = &self.cursor_state.pointer
-                        && let Some(serial) = self.cursor_state.serial
-                        && let Some(surface) = &self.cursor_state.surface
-                    {
+                    // Update cursor position
+                    let (x, y) = event.position;
+                    self.cursor_state.position = Point {
+                        x: x as i32,
+                        y: y as i32,
+                    };
+
+                    // Set cursor
+                    if let (Some(pointer), Some(serial), Some(surface)) = (
+                        &self.cursor_state.pointer,
+                        self.cursor_state.serial,
+                        &self.cursor_state.surface,
+                    ) {
                         pointer.set_cursor(serial, Some(surface), 0, 0);
                     }
-
-                    self.cursor_state.position.x = event.position.0 as i32;
-                    self.cursor_state.position.y = event.position.1 as i32;
                 }
                 Press { button, .. } => {
-                    if button == BTN_LEFT {
-                        self.cursor_state.left_pressed = true;
-                    } else if button == BTN_RIGHT {
-                        self.cursor_state.right_pressed = true;
-                    }
+                    self.cursor_state.left_pressed = button == BTN_LEFT;
+                    self.cursor_state.right_pressed = button == BTN_RIGHT;
                 }
                 Release { button, .. } => {
-                    if button == BTN_LEFT {
-                        self.cursor_state.left_released = true;
-                    } else if button == BTN_RIGHT {
-                        self.cursor_state.right_released = true;
-                    }
+                    self.cursor_state.left_released = button == BTN_LEFT;
+                    self.cursor_state.right_released = button == BTN_RIGHT;
                 }
                 Axis { .. } => {}
             }
@@ -273,20 +255,15 @@ impl PointerHandler for LayerState {
             let _ = jvm.attach_current_thread(|env| -> jni::errors::Result<_> {
                 self.mouse_event_receiver.update_cursor(
                     env,
-                    self.cursor_state.left_pressed,
-                    self.cursor_state.right_pressed,
-                    self.cursor_state.left_released,
-                    self.cursor_state.right_released,
+                    std::mem::take(&mut self.cursor_state.left_pressed),
+                    std::mem::take(&mut self.cursor_state.right_pressed),
+                    std::mem::take(&mut self.cursor_state.left_released),
+                    std::mem::take(&mut self.cursor_state.right_released),
                     self.cursor_state.position.x,
                     self.cursor_state.position.y,
                 )
             });
         }
-
-        self.cursor_state.left_pressed = false;
-        self.cursor_state.right_pressed = false;
-        self.cursor_state.left_released = false;
-        self.cursor_state.right_released = false;
     }
 }
 
@@ -320,6 +297,7 @@ impl LayerState {
     ///
     /// If `update_mask` is true, `layer_mask` will be updated.
     pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
+        self.image_changed = true;
         self.image_rgb = rgb;
 
         if update_mask {
@@ -330,8 +308,8 @@ impl LayerState {
     /// Sets the cursor displayed by the pointer's `surface`.
     ///
     /// If `use_hand` is true, the cursor will be set to a hand. Otherwise, it will be set to the regular cursor.
-    pub fn set_cursor(&mut self, connection: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
-        if let Ok(mut theme) = CursorTheme::load(connection, self.shm.wl_shm().clone(), 24)
+    pub fn set_cursor(&mut self, conn: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
+        if let Ok(mut theme) = CursorTheme::load(conn, self.shm.wl_shm().clone(), 24)
             && let Some(cursor) = theme.get_cursor(if use_hand { "pointer" } else { "left_ptr" })
         {
             let surface = self
@@ -358,11 +336,7 @@ impl LayerState {
 
     /// Redraws the layer surface.
     ///
-    /// If `layer_mask` is not empty, the input region will also be updated.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the buffer cannot be created.
+    /// The input region will also be updated if `layer_mask` is not empty.
     fn draw(&mut self, qh: &QueueHandle<Self>) {
         let width = self.image_bounds.width.max(1);
         let height = self.image_bounds.height.max(1);
@@ -370,35 +344,44 @@ impl LayerState {
 
         self.layer.set_size(width as u32, height as u32);
 
-        let (buffer, canvas) = self
-            .pool
-            .create_buffer(width, height, stride, Format::Argb8888)
-            .expect("Failed to create buffer");
+        let surface = self.layer.wl_surface();
 
-        if !self.image_rgb.is_empty() {
-            // Draw the image to the canvas
-            for y in 0..height {
-                for x in 0..width {
-                    let canvas_index = (((y * width + x) * 4) as usize).min(canvas.len() - 1);
-                    let image_index = ((y * width + x) as usize).min(self.image_rgb.len() - 1);
-                    canvas[canvas_index..canvas_index + 4].copy_from_slice(&self.image_rgb[image_index].to_le_bytes());
+        if self.image_changed {
+            let (buffer, canvas) = self
+                .pool
+                .create_buffer(width, height, stride, Format::Argb8888)
+                .expect("Failed to create buffer");
+
+            if !self.image_rgb.is_empty() {
+                // Draw the image to the canvas
+                for y in 0..height {
+                    for x in 0..width {
+                        let canvas_index = (((y * width + x) * 4) as usize).min(canvas.len() - 1);
+                        let image_index = ((y * width + x) as usize).min(self.image_rgb.len() - 1);
+                        let slice = &self.image_rgb[image_index].to_le_bytes();
+                        canvas[canvas_index..canvas_index + 4].copy_from_slice(slice);
+                    }
+                }
+
+                // Set the mask shape
+                if !self.layer_mask.is_empty() {
+                    let region = self.compositor_state.wl_compositor().create_region(qh, ());
+                    for rect in &self.layer_mask {
+                        region.add(rect.x, rect.y, rect.width, rect.height);
+                    }
+                    self.layer.set_input_region(Some(&region));
                 }
             }
 
-            // Set the mask shape
-            if !self.layer_mask.is_empty() {
-                let region = self.compositor_state.wl_compositor().create_region(&qh, ());
-                for rect in &self.layer_mask {
-                    region.add(rect.x, rect.y, rect.width, rect.height);
-                }
-                self.layer.set_input_region(Some(&region));
-            }
+            // Update the layer
+            surface.damage_buffer(0, 0, width, height);
+            let _ = buffer.attach_to(surface);
+
+            self.image_changed = false;
         }
 
-        // Update the layer
-        self.layer.wl_surface().damage_buffer(0, 0, width, height);
-        self.layer.wl_surface().frame(qh, self.layer.wl_surface().clone());
-        let _ = buffer.attach_to(self.layer.wl_surface());
+        surface.frame(qh, surface.clone());
+
         self.layer.commit();
     }
 
