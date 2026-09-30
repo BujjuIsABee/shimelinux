@@ -52,7 +52,6 @@ read -p "Install ShimeLinux? [y/N] "
 case $REPLY in
   [Yy])
     install
-    break
     ;;
   *)
     exit 0

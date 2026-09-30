@@ -86,7 +86,7 @@ Alternatively, you can also add ShimeLinux to your packages:
 
 ### Other distributions and operating systems
 
-If none of these options work for you, you can use the installation script. It will only work on Unix-like operating systems.
+If none of these options work for you, you can use the installation script.
 
 First, you will need to install the following dependencies:
 
@@ -98,13 +98,15 @@ First, you will need to install the following dependencies:
 - pkg-config
 - libappindicator or libayatana-appindicator
 
+Then, you can clone this repository and run the installation script:
+
 `git clone https://github.com/BujjuIsABee/shimelinux`
 
 `cd shimelinux`
 
 `./install.sh`
 
-To uninstall the program, use `uninstall.sh` instead.
+To uninstall ShimeLinux, run `uninstall.sh` instead.
 
 Alternatively, you can download the `.jar` file [here](https://github.com/BujjuIsABee/shimelinux/releases) and run it with Java.
 
@@ -112,24 +114,24 @@ Alternatively, you can download the `.jar` file [here](https://github.com/BujjuI
 
 ShimeLinux has been tested on the following operating systems and desktop environments:
 
-| Operating system | Desktop environment | Installation                                                                                                |
-|------------------|---------------------|-------------------------------------------------------------------------------------------------------------|
-| Arch Linux       | GNOME               | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux       | Hyprland            | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux       | KDE Plasma          | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux       | niri                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Arch Linux       | sway                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
-| Debian           | LXQt                | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| Debian           | MATE                | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| Fedora Linux     | KDE Plasma          | [Download `.rpm` file](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                   |
-| FreeBSD          | KDE Plasma          | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
-| FreeBSD          | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
-| Linux Mint       | Cinnamon            | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| NixOS            | KDE Plasma          | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
-| NixOS            | niri                | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
-| Pop!_OS          | COSMIC              | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| Ubuntu           | GNOME               | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
-| Void Linux       | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| Operating system | Desktop environment | Installation                                                                                                   |
+|------------------|---------------------|----------------------------------------------------------------------------------------------------------------|
+| Arch Linux       | GNOME               | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                          |
+| Arch Linux       | Hyprland            | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                          |
+| Arch Linux       | KDE Plasma          | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                          |
+| Arch Linux       | niri                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                          |
+| Arch Linux       | sway                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                          |
+| Debian           | LXQt                | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                   |
+| Debian           | MATE                | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                   |
+| Fedora Linux     | KDE Plasma          | [Download `.rpm` file](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                      |
+| FreeBSD          | KDE Plasma          | [Use installation script](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| FreeBSD          | Xfce                | [Use installation script](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
+| Linux Mint       | Cinnamon            | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                   |
+| NixOS            | KDE Plasma          | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                     |
+| NixOS            | niri                | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                     |
+| Pop!_OS          | COSMIC              | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                   |
+| Ubuntu           | GNOME               | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                   |
+| Void Linux       | Xfce                | [Use installation script](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
 
 ### Graphical issues on Wayland
 

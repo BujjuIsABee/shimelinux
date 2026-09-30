@@ -7,6 +7,7 @@ uninstall() {
   rm ~/.local/bin/shimelinux
   rm ~/.local/share/icons/hicolor/scalable/apps/shimelinux.svg
   rm ~/.local/share/applications/shimelinux.desktop
+  rm -rf ~/.config/shimelinux
 
   echo "Done!"
 }
@@ -16,22 +17,11 @@ if [ "$(id -u)" -eq 0 ]; then
   exit 1
 fi
 
+echo "WARNING: All Shimeji image sets will be permanently deleted!"
 read -p "Uninstall ShimeLinux? [y/N] "
 case $REPLY in
   [Yy])
     uninstall
-    break
-    ;;
-  *)
-    exit 0
-    ;;
-esac
-
-read -p "Permanently delete Shimeji image sets and configuration files? [y/N] "
-case $REPLY in
-  [Yy])
-    rm -rf ~/.config/shimelinux
-    echo "Done!"
     ;;
   *)
     exit 0
