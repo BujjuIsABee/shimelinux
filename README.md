@@ -2,20 +2,17 @@
 
 # ShimeLinux
 
-An unofficial Linux port of Shimeji-ee desktop pet. Any Shimeji made for the latest version of Shimeji-ee should work. See the supported operating systems, desktop environments, and tiling window managers [here](https://github.com/BujjuIsABee/shimelinux#compatibility).
+An unofficial port of Shimeji-ee desktop pet for Linux and BSD. Any Shimeji made for the latest version of Shimeji-ee should work. See the supported operating systems, desktop environments, and tiling Wayland compositors [here](https://github.com/BujjuIsABee/shimelinux#compatibility).
 
 [![Arch Linux]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)
+[![Debian]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)
 [![Fedora Linux]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)
 [![FreeBSD]](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems)
 [![Linux Mint]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)
 [![NixOS]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)
 [![Pop!_OS]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)
 [![Ubuntu]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)
-![Cinnamon]
-![GNOME]
-![Hyprland]
-![KDE Plasma]
-![niri]
+[![Void Linux]](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems)
 
 [![Release]](https://github.com/BujjuIsABee/shimelinux/releases)
 [![Issues]](https://github.com/BujjuIsABee/shimelinux/issues)
@@ -89,10 +86,27 @@ Alternatively, you can also add ShimeLinux to your packages:
 
 ### Other distributions and operating systems
 
-If none of these options work for you, you can download the `.jar` file [here](https://github.com/BujjuIsABee/shimelinux/releases). You will also need to install the following dependencies:
+If none of these options work for you, you can use the installation script. It will only work on Unix-like operating systems.
 
-- Java Runtime Environment (version 21 or later)
+First, you will need to install the following dependencies:
+
+- Git
+- Bash
+- Java Development Kit (version 21 or later)
+- Cargo
+- libxkbcommon
+- pkg-config
 - libappindicator or libayatana-appindicator
+
+`git clone https://github.com/BujjuIsABee/shimelinux`
+
+`cd shimelinux`
+
+`./install.sh`
+
+To uninstall the program, use `uninstall.sh` instead.
+
+Alternatively, you can download the `.jar` file [here](https://github.com/BujjuIsABee/shimelinux/releases) and run it with Java.
 
 ## Compatibility
 
@@ -105,6 +119,8 @@ ShimeLinux has been tested on the following operating systems and desktop enviro
 | Arch Linux       | KDE Plasma          | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
 | Arch Linux       | niri                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
 | Arch Linux       | sway                | [Install via AUR](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)                       |
+| Debian           | LXQt                | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| Debian           | MATE                | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
 | Fedora Linux     | KDE Plasma          | [Download `.rpm` file](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)                   |
 | FreeBSD          | KDE Plasma          | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
 | FreeBSD          | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
@@ -113,6 +129,7 @@ ShimeLinux has been tested on the following operating systems and desktop enviro
 | NixOS            | niri                | [Install via NUR](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)                                  |
 | Pop!_OS          | COSMIC              | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
 | Ubuntu           | GNOME               | [Download `.deb` file](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions)                |
+| Void Linux       | Xfce                | [Download `.jar` file](https://github.com/BujjuIsABee/shimelinux#other-distributions-and-operating-systems) |
 
 ### Graphical issues on Wayland
 
@@ -136,14 +153,11 @@ This project incorporates work from [Shimeji-ee by Kilkakon](https://kilkakon.co
 [Issues]: https://img.shields.io/github/issues/BujjuIsABee/shimelinux?style=for-the-badge&logo=github&color=f5c2e7&labelColor=363a4f
 [License]: https://img.shields.io/github/license/BujjuIsABee/shimelinux?style=for-the-badge&color=a6da95&labelColor=363a4f
 [Arch Linux]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=archlinux
+[Debian]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red
 [Fedora Linux]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=fedora
 [FreeBSD]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=freebsd&logoColor=red
 [Linux Mint]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=linuxmint
 [NixOS]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=nixos
 [Pop!_OS]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=popos
 [Ubuntu]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=ubuntu
-[Cinnamon]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=cinnamon
-[GNOME]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=gnome
-[Hyprland]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=hyprland
-[KDE Plasma]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=kdeplasma&logoColor=white
-[niri]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=niri
+[Void Linux]: https://img.shields.io/badge/-rgba(0,0,0,0)?style=flat-square&logo=voidlinux
