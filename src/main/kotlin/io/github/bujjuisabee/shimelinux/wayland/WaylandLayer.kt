@@ -139,15 +139,13 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
             button = button or MouseEvent.BUTTON3
         }
 
-        /*
-         * If absoluteLocation is being used to calculate the global cursor position, it should not be updated while the
-         * left mouse button is pressed so that mascots will not fly offscreen while being dragged with the cursor.
-         *
-         * When the global cursor position is provided directly by the compositor, like on KDE Plasma and Hyprland,
-         * absoluteLocation should always be updated so that popup menus will be displayed in the correct location.
-         */
+        val alwaysUpdateAbsoluteLocation = when (desktopType) {
+            "Hyprland", "KDE" -> true
+            else -> false
+        }
+
         isDragging = leftPressed || (isDragging && !leftReleased)
-        if (!isDragging || desktopType == "KDE" || desktopType == "Hyprland") {
+        if (!isDragging || alwaysUpdateAbsoluteLocation) {
             absoluteLocation = location
         }
 

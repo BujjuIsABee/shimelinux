@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
-import java.awt.image.DataBufferInt
 
 /**
  * Stores an image to be displayed on a Wayland layer surface.
@@ -32,5 +31,7 @@ import java.awt.image.DataBufferInt
  * @author Bujju
  */
 class WaylandNativeImage(managedImage: BufferedImage) : NativeImage {
-    val rgb: IntArray = (managedImage.raster.dataBuffer as DataBufferInt).data
+    val width: Int = managedImage.width
+    val height: Int = managedImage.height
+    val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 }

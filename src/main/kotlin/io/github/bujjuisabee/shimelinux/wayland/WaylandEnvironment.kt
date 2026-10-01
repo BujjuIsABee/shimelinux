@@ -66,7 +66,7 @@ class WaylandEnvironment : Environment() {
         // Update cursor position
         val cursorPos = when (desktopType) {
             "Hyprland" -> runCatching {
-                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toIntOrNull() ?: 0 }
+                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
                 Point(x, y)
             }.getOrNull()
 
