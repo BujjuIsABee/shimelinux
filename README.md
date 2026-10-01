@@ -92,17 +92,17 @@ To add more Shimeji, right-click on the system tray icon and select "Choose Shim
 
 ShimeLinux has been tested on the following operating systems and desktop environments:
 
-| Operating system | Desktop environment(s)                                                                                                                                                                                      | Install                                                                        |
-|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| Arch Linux       | • GNOME 50 <br/> • Hyprland v0.56.2 <br/> • KDE Plasma 6.6 and 6.7 <br/> • niri v26.04 <br/> • sway 1.12 <br/> • Awesome 4.3 <br/> • Cinnamon 6.6.9 <br/> • dwm 6.8 <br/> • i3 4.25.1 <br/> • xmonad 0.18.1 | [![AUR]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)   |
-| Debian 13.7      | • LXQt 2.1.0 <br/> • MATE 1.26                                                                                                                                                                              | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |                                                                             |
-| Fedora Linux 44  | • KDE Plasma 6.7                                                                                                                                                                                            | [![RPM]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)    |
-| FreeBSD 15.1     | • KDE Plasma 6.7 <br/> • Xfce 4.20                                                                                                                                                                          | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
-| Linux Mint 22.3  | • Cinnamon 6.6.9                                                                                                                                                                                            | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| NixOS 26.05      | • KDE Plasma 6.7 <br/> • niri v26.04                                                                                                                                                                        | [![NUR]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)              |
-| Pop!_OS 24.04    | • COSMIC 1.8                                                                                                                                                                                                | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| Ubuntu 26.04     | • GNOME 50                                                                                                                                                                                                  | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| Void Linux       | • Xfce 4.20                                                                                                                                                                                                 | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
+| Operating system | Desktop environment(s)                                                                                                                                                                                                     | Install                                                                        |
+|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| Arch Linux       | • GNOME 50 <br/> • Hyprland v0.56.2 <br/> • KDE Plasma 6.6 <br/> • KDE Plasma 6.7 <br/> • niri v26.04 <br/> • sway 1.12 <br/> • Awesome 4.3 <br/> • Cinnamon 6.6.9 <br/> • dwm 6.8 <br/> • i3 4.25.1 <br/> • xmonad 0.18.1 | [![AUR]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)   |
+| Debian 13.7      | • LXQt 2.1.0 <br/> • MATE 1.26                                                                                                                                                                                             | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |                                                                             |
+| Fedora Linux 44  | • KDE Plasma 6.7                                                                                                                                                                                                           | [![RPM]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)    |
+| FreeBSD 15.1     | • KDE Plasma 6.7 <br/> • Xfce 4.20                                                                                                                                                                                         | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
+| Linux Mint 22.3  | • Cinnamon 6.6.9                                                                                                                                                                                                           | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| NixOS 26.05      | • KDE Plasma 6.7 <br/> • niri v26.04                                                                                                                                                                                       | [![NUR]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)              |
+| Pop!_OS 24.04    | • COSMIC 1.8                                                                                                                                                                                                               | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| Ubuntu 26.04     | • GNOME 50                                                                                                                                                                                                                 | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| Void Linux       | • Xfce 4.20                                                                                                                                                                                                                | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
 
 [AUR]: https://img.shields.io/badge/AUR-rgba(0,0,0,0)?style=flat-square&logo=archlinux
 [DEB]: https://img.shields.io/badge/.deb-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red
@@ -112,10 +112,10 @@ ShimeLinux has been tested on the following operating systems and desktop enviro
 
 ### Graphical issues on Wayland
 
-When running ShimeLinux on Wayland, Shimeji may be displayed through XWayland instead of on native Wayland surfaces. If you notice graphical issues, such as a black background appearing behind Shimeji, try enabling the Wayland environment by right-clicking on the system tray icon, selecting "Settings," going to the "Environment" tab, and choosing "Wayland."
+When running ShimeLinux on Wayland, Shimeji may be displayed through XWayland instead of native Wayland surfaces. If you notice graphical issues, such as a black background appearing behind Shimeji, try enabling the Wayland environment by right-clicking on the system tray icon, selecting "Settings," going to the "Environment" tab, and choosing "Wayland."
 
 > [!NOTE]
-> This will not work on GNOME, Cinnamon's Wayland session, or any other desktop environment or compositor that does not implement the `wlr_layer_shell` protocol.
+> This will not work on GNOME, Cinnamon's Wayland session, or any other desktop environment/compositor that does not implement the `wlr_layer_shell` protocol.
 
 ## Building
 
@@ -124,7 +124,7 @@ First, install the following build dependencies:
 - Java Development Kit (version 21 or later)
 - Cargo
 - libxkbcommon
-- pkg-config.
+- pkg-config
 
 For Arch:
 
