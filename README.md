@@ -10,7 +10,7 @@ An unofficial port of Shimeji-ee desktop pet for Linux and BSD. Any Shimeji made
 [![Issues](https://img.shields.io/github/issues/BujjuIsABee/shimelinux?style=for-the-badge&logo=github&color=f5c2e7&labelColor=363a4f)](https://github.com/BujjuIsABee/shimelinux/issues)
 [![License](https://img.shields.io/github/license/BujjuIsABee/shimelinux?style=for-the-badge&color=a6da95&labelColor=363a4f)](https://github.com/BujjuIsABee/shimelinux/blob/master/LICENSE)
 
-![Screenshot](.github/images/screenshot.png)
+![Screenshot](.images/screenshot.png)
 
 </div>
 
