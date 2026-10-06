@@ -33,12 +33,16 @@
     <url type="vcs-browser">https://github.com/BujjuIsABee/shimelinux</url>
     <screenshots>
         <screenshot type="default">
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/3e7a5a071f31a15e839630eab6fd34c7c76580f5/img/settings.png</image>
-            <caption>A couple of Shimeji are climbing on the ShimeLinux settings window</caption>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/d6163999affacd1ba9b559e043d9588570984074/img/chooser.png</image>
+            <caption>The ShimeLinux image set chooser</caption>
         </screenshot>
         <screenshot>
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/3e7a5a071f31a15e839630eab6fd34c7c76580f5/img/windowed.png</image>
-            <caption>ShimeLinux in windowed mode with a blue background</caption>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/d6163999affacd1ba9b559e043d9588570984074/img/settings.png</image>
+            <caption>A couple of Shimeji climbing on the ShimeLinux settings window</caption>
+        </screenshot>
+        <screenshot>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/d6163999affacd1ba9b559e043d9588570984074/img/windowed.png</image>
+            <caption>ShimeLinux in windowed mode</caption>
         </screenshot>
     </screenshots>
     <releases>
