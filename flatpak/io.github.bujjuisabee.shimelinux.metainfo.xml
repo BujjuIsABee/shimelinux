@@ -12,9 +12,9 @@
         <p>ShimeLinux is a Linux port of Shimeji-ee desktop pet, an application which lets you have little characters (called Shimeji) walking around on your desktop.</p>
         <p>Features:</p>
         <ul>
-            <li>It supports desktop environments using X11, like Cinnamon and Xfce, and Wayland, like KDE Plasma and GNOME</li>
-            <li>It also works on tiling window managers, like Hyprland, niri, and sway</li>
             <li>It is compatible with any Shimeji made for the latest version of Shimeji-ee</li>
+            <li>It supports many Linux desktop environments and tiling window managers</li>
+            <li>It supports interactive windows on KDE Plasma</li>
         </ul>
     </description>
     <launchable type="desktop-id">io.github.bujjuisabee.shimelinux.desktop</launchable>
@@ -33,20 +33,21 @@
     <url type="vcs-browser">https://github.com/BujjuIsABee/shimelinux</url>
     <screenshots>
         <screenshot type="default">
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/7906bc6602ea1a7c0b572a0ef41dc86a1a33ce60/img/settings.png</image>
-            <caption>A couple of Shimeji are climbing on the ShimeLinux settings window.</caption>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/e1ab4988165a478bc516f88d05c9899f11d81e67/img/settings.png</image>
+            <caption>A couple of Shimeji are climbing on the ShimeLinux settings window</caption>
         </screenshot>
         <screenshot>
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/7906bc6602ea1a7c0b572a0ef41dc86a1a33ce60/img/chooser.png</image>
-            <caption>The Shimeji image set chooser is open while a bunch of Shimeji climb along the edges of the screen.</caption>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/e1ab4988165a478bc516f88d05c9899f11d81e67/img/windowed.png</image>
+            <caption>ShimeLinux in windowed mode with a blue background</caption>
         </screenshot>
     </screenshots>
     <releases>
 
     </releases>
-    <requires>
-        <control>keyboard</control>
+    <recommends>
         <control>pointing</control>
-        <display_length compare="ge">768</display_length>
-    </requires>
+    </recommends>
+    <supports>
+        <control>keyboard</control>
+    </supports>
 </component>
