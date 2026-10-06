@@ -59,6 +59,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
+import kotlin.io.path.relativeTo
 
 /**
  * A menu to choose which image sets to use.
@@ -232,7 +233,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             filePath = getPath("img", imageSet, "conf")
             actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
-            val actionsFile = "./${actionsPath.toString().substringAfter("/.config/shimelinux/")}"
+            val actionsFile = "./${actionsPath.relativeTo(getPath())}"
 
             // Determine behaviors file
             val behaviorsNames = listOf(
@@ -254,7 +255,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             filePath = getPath("img", imageSet, "conf")
             behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
-            val behaviorsFile = "./${behaviorsPath.toString().substringAfter("/.config/shimelinux/")}"
+            val behaviorsFile = "./${behaviorsPath.relativeTo(getPath())}"
 
             // Determine information file
             filePath = getPath("conf")
