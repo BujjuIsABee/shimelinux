@@ -10,7 +10,7 @@
     </developer>
     <description>
         <p>ShimeLinux is a Linux port of Shimeji-ee desktop pet, an application which lets you have little characters (called Shimeji) walking around on your desktop.</p>
-        <p>**Features**</p>
+        <p>Features:</p>
         <ul>
             <li>It supports desktop environments using X11, like Cinnamon and Xfce, and Wayland, like KDE Plasma and GNOME</li>
             <li>It also works on tiling window managers, like Hyprland, niri, and sway</li>
