@@ -10,14 +10,27 @@
     </developer>
     <description>
         <p>ShimeLinux is a Linux port of Shimeji-ee desktop pet, an application which lets you have little characters (called Shimeji) walking around on your desktop.</p>
-        <p><b>Features</b></p>
+        <p>**Features**</p>
         <ul>
-            <li>It supports desktop environments using X11, like Cinnamon and XFCE, and Wayland, like KDE Plasma and GNOME</li>
+            <li>It supports desktop environments using X11, like Cinnamon and Xfce, and Wayland, like KDE Plasma and GNOME</li>
             <li>It also works on tiling window managers, like Hyprland, niri, and sway</li>
             <li>It is compatible with any Shimeji made for the latest version of Shimeji-ee</li>
         </ul>
     </description>
     <launchable type="desktop-id">io.github.bujjuisabee.shimelinux.desktop</launchable>
+    <keywords>
+        <keyword>desktop-pet</keyword>
+        <keyword>shimeji</keyword>
+        <keyword>shimeji-ee</keyword>
+    </keywords>
+    <branding>
+        <color type="primary" scheme_preference="light">#84B0DB</color>
+        <color type="primary" scheme_preference="dark">#3c83c5</color>
+    </branding>
+    <content_rating type="oars-1.1"/>
+    <url type="homepage">https://github.com/BujjuIsABee/shimelinux</url>
+    <url type="bugtracker">https://github.com/BujjuIsABee/shimelinux/issues</url>
+    <url type="vcs-browser">https://github.com/BujjuIsABee/shimelinux</url>
     <screenshots>
         <screenshot type="default">
             <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/7906bc6602ea1a7c0b572a0ef41dc86a1a33ce60/img/settings.png</image>
@@ -31,4 +44,9 @@
     <releases>
 
     </releases>
+    <requires>
+        <control>keyboard</control>
+        <control>pointing</control>
+        <display_length compare="ge">768</display_length>
+    </requires>
 </component>
