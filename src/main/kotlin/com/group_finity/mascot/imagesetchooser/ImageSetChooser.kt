@@ -232,7 +232,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             filePath = getPath("img", imageSet, "conf")
             actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
-            val actionsFile = "./${actionsPath.subpath(4, actionsPath.nameCount)}"
+            val actionsFile = "./${actionsPath.toString().substringAfter("/.config/shimelinux/")}"
 
             // Determine behaviors file
             val behaviorsNames = listOf(
@@ -254,7 +254,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             filePath = getPath("img", imageSet, "conf")
             behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
-            val behaviorsFile = "./${behaviorsPath.subpath(4, behaviorsPath.nameCount)}"
+            val behaviorsFile = "./${behaviorsPath.toString().substringAfter("/.config/shimelinux/")}"
 
             // Determine information file
             filePath = getPath("conf")
