@@ -110,7 +110,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let (sender, receiver) = mpsc::channel::<Event>();
 
         // Create the layer
-        let conn = Connection::connect_to_env().unwrap();
+        let conn = Connection::connect_to_env().expect("Failed to connect to Wayland server");
         let (globals, mut event_queue) = registry_queue_init(&conn).unwrap();
         let qh = event_queue.handle();
 
@@ -118,7 +118,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let surface = compositor.create_surface(&qh);
         let shm = Shm::bind(&globals, &qh).unwrap();
         let pool = SlotPool::new(128 * 128 * 4, &shm).unwrap();
-        let layer_shell = LayerShell::bind(&globals, &qh).unwrap();
+        let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
         let layer = layer_shell.create_layer_surface(
             &qh,
             surface,
