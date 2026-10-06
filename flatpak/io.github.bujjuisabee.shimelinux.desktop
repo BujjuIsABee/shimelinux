@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=ShimeLinux
+Comment=Shimeji desktop pet
+Icon=io.github.bujjuisabee.shimelinux
+Type=Application
+Categories=Graphics;
+Exec=shimelinux
