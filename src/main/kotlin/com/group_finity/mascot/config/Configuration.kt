@@ -45,7 +45,6 @@ private val logger: Logger = Logger.getLogger(Configuration::class.java.name)
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Configuration {
     /**
@@ -66,9 +65,6 @@ class Configuration {
 
     /**
      * Loads a configuration for [imageSet].
-     *
-     * @param configurationNode The root node of the configuration.
-     * @param imageSet The image set that the configuration is for.
      */
     fun load(configurationNode: Entry, imageSet: String) {
         logger.info { "Reading configuration file" }
@@ -104,7 +100,7 @@ class Configuration {
         for (list in configurationNode.selectChildren(schema.getString("BehaviorList"))) {
             logger.info { "Reading behavior list" }
 
-            loadBehaviors(list, ArrayList())
+            loadBehaviors(list, mutableListOf())
         }
 
         // Load information
@@ -173,9 +169,7 @@ class Configuration {
     }
 
     /**
-     * Builds an action from its name.
-     *
-     * @return The action.
+     * Builds and returns an action from its [name].
      */
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name] ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
@@ -183,9 +177,7 @@ class Configuration {
     }
 
     /**
-     * Builds a behavior from its name, or resets [mascot] if it fails.
-     *
-     * @return The behavior.
+     * Builds and returns a behavior from its [name]. If the behavior does not exist, [mascot] will be reset.
      */
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name] ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
@@ -198,16 +190,12 @@ class Configuration {
     }
 
     /**
-     * Builds a behavior from its name.
-     *
-     * @return The behavior.
+     * Builds and returns a behavior from its [name].
      */
     fun buildBehavior(name: String): Behavior = behaviorBuilders[name]?.buildBehavior() ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
     /**
-     * Builds the next behavior for a [mascot].
-     *
-     * @return The behavior, or null if no behavior could be selected.
+     * Builds and returns the next behavior for [mascot], or returns null if no behavior can be selected.
      */
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -293,7 +281,7 @@ class Configuration {
     fun containsInformationKey(key: String?): Boolean = information.containsKey(key)
 
     /**
-     * Gets the value associated with the given key in [information], or null if the key does not exist.
+     * Gets the value associated with the [key] in [information], or null if the key does not exist.
      */
     fun getInformation(key: String): String? = information[key]
 }

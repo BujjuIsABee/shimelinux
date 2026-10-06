@@ -30,7 +30,6 @@ import java.awt.Rectangle
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()

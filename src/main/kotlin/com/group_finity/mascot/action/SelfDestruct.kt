@@ -29,13 +29,8 @@ import java.util.ResourceBundle
 /**
  * An action that dismisses the mascot on the penultimate frame of its current animation.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param params A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class SelfDestruct(

@@ -35,13 +35,8 @@ private val logger: Logger = Logger.getLogger(WalkWithIE::class.java.name)
 /**
  * An action that causes the mascot to walk while holding a window.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param params A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class WalkWithIE(
     schema: ResourceBundle,

@@ -39,7 +39,6 @@ private val logger: Logger = Logger.getLogger(Manager::class.java.name)
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Manager {
     private val mascots = mutableListOf<Mascot>()
@@ -68,9 +67,7 @@ class Manager {
      * Starts dispatching ticks to the mascots in the list.
      */
     fun start() {
-        if (timer == null) {
-            timer = timer(daemon = false, period = 40L) { tick() }
-        }
+        timer = timer ?: timer(daemon = false, period = 40L) { tick() }
     }
 
     /**
@@ -166,7 +163,7 @@ class Manager {
     }
 
     /**
-     * Sets the behavior to [name] for all mascots with the [imageSet].
+     * Sets the behavior to [name] for all mascots with the specified [imageSet].
      */
     fun setBehaviorAll(configuration: Configuration, name: String, imageSet: String) {
         synchronized(mascots) {
@@ -186,14 +183,13 @@ class Manager {
 
                         else -> throw e
                     }
-
                 }
             }
         }
     }
 
     /**
-     * Dismisses all mascots but one.
+     * Dismisses all mascots except one.
      */
     fun remainOne() {
         synchronized(mascots) {
@@ -219,7 +215,7 @@ class Manager {
     }
 
     /**
-     * Dismisses all mascots except one with the [imageSet].
+     * Dismisses all mascots except one with the specified [imageSet].
      */
     fun remainOne(imageSet: String) {
         synchronized(mascots) {
@@ -239,7 +235,7 @@ class Manager {
     }
 
     /**
-     * Dismisses all mascots with the [imageSet].
+     * Dismisses all mascots with the specified [imageSet].
      */
     fun remainNone(imageSet: String) {
         synchronized(mascots) {
@@ -254,7 +250,7 @@ class Manager {
     }
 
     /**
-     * Sets all [Mascot.isPaused] to [isPaused] for all mascots.
+     * Sets [Mascot.isPaused] to the opposite of [isPaused] for all mascots.
      */
     fun togglePauseAll() {
         synchronized(mascots) {
@@ -266,7 +262,7 @@ class Manager {
     }
 
     /**
-     * Gets the number of mascots with the [imageSet].
+     * Gets the number of mascots with the specified [imageSet].
      */
     fun getCount(imageSet: String?): Int = synchronized(mascots) {
         if (imageSet != null) {
@@ -277,7 +273,7 @@ class Manager {
     }
 
     /**
-     * Gets the first mascot with the [affordance].
+     * Gets the first mascot with the specified [affordance].
      */
     fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? = synchronized(mascots) {
         mascots.firstOrNull { it.affordances.contains(affordance) }?.let {

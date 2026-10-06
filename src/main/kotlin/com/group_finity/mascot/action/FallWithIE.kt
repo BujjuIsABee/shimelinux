@@ -35,13 +35,8 @@ private val logger: Logger = Logger.getLogger(FallWithIE::class.java.name)
 /**
  * An action that causes the mascot to fall while holding a window.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class FallWithIE(
     schema: ResourceBundle,

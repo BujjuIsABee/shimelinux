@@ -41,7 +41,6 @@ import javax.swing.border.Border
  * Displays information about an image set.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class ImageSetChooserPanel(
     val imageSet: String,

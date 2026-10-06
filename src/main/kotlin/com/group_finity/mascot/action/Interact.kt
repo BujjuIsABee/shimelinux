@@ -37,13 +37,8 @@ private val logger: Logger = Logger.getLogger(Interact::class.java.name)
 /**
  * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class Interact(

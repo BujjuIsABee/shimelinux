@@ -29,7 +29,6 @@ import com.group_finity.mascot.action.Action
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 interface IActionBuilder {
     /**
@@ -39,8 +38,6 @@ interface IActionBuilder {
 
     /**
      * Builds the action and returns it.
-     *
-     * @param params The parameters/variables to pass to the action.
      */
     fun buildAction(params: Map<String, String>): Action
 }

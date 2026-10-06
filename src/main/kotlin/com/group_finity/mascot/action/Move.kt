@@ -33,13 +33,8 @@ private val logger: Logger = Logger.getLogger(Move::class.java.name)
 /**
  * An action that causes the mascot to move.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 open class Move(
     schema: ResourceBundle,

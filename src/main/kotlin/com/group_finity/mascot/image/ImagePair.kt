@@ -27,7 +27,6 @@ package com.group_finity.mascot.image
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class ImagePair(val leftImage: MascotImage, val rightImage: MascotImage) {
     /**

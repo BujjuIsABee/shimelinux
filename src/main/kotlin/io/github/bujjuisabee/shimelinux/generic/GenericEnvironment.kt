@@ -33,8 +33,6 @@ import java.awt.Toolkit
 
 /**
  * A cross-platform environment.
- *
- * @author Bujju
  */
 class GenericEnvironment : Environment() {
     override val workArea: Area

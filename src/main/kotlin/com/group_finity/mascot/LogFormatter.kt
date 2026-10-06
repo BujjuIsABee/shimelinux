@@ -33,7 +33,6 @@ import java.util.logging.SimpleFormatter
  * Formats the logs.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class LogFormatter : SimpleFormatter() {
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())

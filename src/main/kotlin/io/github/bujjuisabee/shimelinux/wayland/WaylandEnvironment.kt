@@ -35,9 +35,7 @@ import java.awt.Rectangle
 import java.awt.Toolkit
 
 /**
- * An environment that works properly when mascots are not displayed by AWT/Swing.
- *
- * @author Bujju
+ * An environment that works properly when mascots are not displayed by AWT components.
  */
 class WaylandEnvironment : Environment() {
     override val workArea: Area

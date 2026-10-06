@@ -28,11 +28,8 @@ import org.w3c.dom.Element
 /**
  * An XML node.
  *
- * @param element The XML element for the node.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Entry(private val element: Element) {
     /**

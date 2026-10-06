@@ -30,7 +30,6 @@ import kotlin.io.path.Path
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
@@ -56,7 +55,8 @@ object ImagePairs {
     fun contains(fileName: String): Boolean = imagePairs.containsKey(fileName)
 
     /**
-     * Returns the right image from an image pair in [imagePairs] if [isLookRight] is true, or the left image if it is false.
+     * Returns the right image from an image pair in [imagePairs] if [isLookRight] is true, or the left image if it is
+     * false.
      */
     @JvmStatic
     fun getImage(fileName: String, isLookRight: Boolean): MascotImage? = imagePairs[fileName]?.getImage(isLookRight)

@@ -33,13 +33,8 @@ private val logger: Logger = Logger.getLogger(Animate::class.java.name)
 /**
  * An action that plays an animation.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 open class Animate(
     schema: ResourceBundle,

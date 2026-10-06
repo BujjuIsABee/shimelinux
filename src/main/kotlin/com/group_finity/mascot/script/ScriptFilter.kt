@@ -28,7 +28,6 @@ import org.openjdk.nashorn.api.scripting.ClassFilter
  * Restricts which classes a [Script] can access.
  *
  * @author Kilkakon
- * @author Bujju
  */
 object ScriptFilter : ClassFilter {
     override fun exposeToScripts(className: String): Boolean = className.startsWith("com.group_finity.mascot")

@@ -44,7 +44,6 @@ private val logger: Logger = Logger.getLogger(UserBehavior::class.java.name)
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class UserBehavior(
     private val name: String,

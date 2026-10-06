@@ -29,13 +29,8 @@ import java.util.ResourceBundle
 /**
  * Deprecated in Shimeji-ee; use Scan/Complex actions instead.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 @Deprecated("Deprecated in Shimeji-ee")
 class BroadcastJump(

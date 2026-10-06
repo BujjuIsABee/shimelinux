@@ -31,13 +31,8 @@ import kotlin.math.sqrt
 /**
  * An action that causes the mascot to jump.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 open class Jump(
     schema: ResourceBundle,

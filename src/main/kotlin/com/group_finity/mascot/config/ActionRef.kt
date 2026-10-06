@@ -32,12 +32,8 @@ private val logger: Logger = Logger.getLogger(ActionRef::class.java.name)
 /**
  * Creates an action from an ActionRef node.
  *
- * @param configuration The configuration defining the action reference.
- * @param refNode The node defining the action reference in the configuration.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class ActionRef(private val configuration: Configuration, refNode: Entry) : IActionBuilder {
     private val name: String = requireNotNull(refNode.getAttribute(configuration.schema.getString("Name"))) { "ActionReference requires Name attribute." }

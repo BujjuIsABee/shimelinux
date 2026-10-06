@@ -42,13 +42,8 @@ private val logger: Logger = Logger.getLogger(Breed.Delegate::class.java.name)
 /**
  * An action that creates a new mascot.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Breed(
     schema: ResourceBundle,
@@ -75,7 +70,6 @@ class Breed(
      * Handles the shared functionality of breeding actions.
      *
      * @author LavenderSnek
-     * @author Bujju
      */
     class Delegate(private val action: ActionBase) {
         /**
@@ -91,7 +85,7 @@ class Breed(
             get() = action.time % bornInterval == 0
 
         /**
-         * Whether it is the frame before the last frame of the current animation.
+         * Whether it is the frame before the final frame of the current animation.
          */
         val isPenultimateFrame: Boolean
             get() = action.time == checkNotNull(action.animation).duration - 1
@@ -115,7 +109,8 @@ class Breed(
             get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOR), DEFAULT_BORNBEHAVIOR)
 
         /**
-         * The image set that will be used for the new mascot(s). The same image set as [mascot] will be used if a valid image set is not provided.
+         * The image set that will be used for the new mascot(s). The same image set as [mascot] will be used if a valid
+         * image set is not provided.
          */
         private val bornMascot: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
@@ -139,7 +134,7 @@ class Breed(
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNCOUNT), DEFAULT_BORNCOUNT).toInt()
 
         /**
-         * Spawns the new mascot.
+         * Spawns a new mascot.
          */
         fun breed() {
             val scaling = getProperty("Scaling", 1.0)

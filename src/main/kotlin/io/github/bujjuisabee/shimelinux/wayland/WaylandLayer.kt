@@ -31,12 +31,8 @@ import java.awt.event.MouseEvent
 import kotlin.system.exitProcess
 
 /**
- * Creates a Wayland layer surface via [WaylandLib].
- *
- * @param mouseEventReceiver The object that will receive mouse events from the layer surface.
- * @param useMask Whether the layer surface's input region should be updated when [setImage] is called.
- *
- * @author Bujju
+ * Creates a Wayland layer surface via [WaylandLib]. Mouse events will be sent to [mouseEventReceiver]. If [useMask] is
+ * true, the surface's input region will be updated whenever [setImage] is called.
  */
 class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long = try {
@@ -83,9 +79,7 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     }
 
     /**
-     * Displays an image on the layer surface, and updates its input region if [useMask] is true.
-     *
-     * @param rgb The image to display (in ARGB8888 format).
+     * Displays the given [rgb] pixel data on the layer surface, and updates its input region if [useMask] is true.
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
@@ -115,9 +109,11 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     }
 
     /**
-     * Sends `MOUSE_PRESSED`, `MOUSE_RELEASED`, `MOUSE_MOVED`, and `MOUSE_DRAGGED` events to the event listeners attached to [component].
+     * Sends mouse events to the event listeners attached to [component].
      *
-     * @param component The [Component] that the events will be dispatched to.
+     * If [leftPressed] or [rightPressed] is true, a `MOUSE_PRESSED` event will be sent. If [leftReleased] or
+     * [rightReleased] is true, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] indicates that the
+     * cursor has moved, a `MOUSE_MOVED` (or `MOUSE_DRAGGED` if [leftPressed] or [rightPressed] are true) will be sent.
      */
     fun dispatchEvents(
         component: Component,

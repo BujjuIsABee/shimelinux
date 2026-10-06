@@ -36,13 +36,8 @@ import kotlin.math.abs
  *
  * -Signery
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 open class Fall(
     schema: ResourceBundle,

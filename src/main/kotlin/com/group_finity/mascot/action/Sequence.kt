@@ -28,13 +28,8 @@ import java.util.ResourceBundle
 /**
  * An action that triggers a sequence of actions.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param params A list of the mascot's variables.
- * @property actions The actions to trigger.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Sequence(
     schema: ResourceBundle,

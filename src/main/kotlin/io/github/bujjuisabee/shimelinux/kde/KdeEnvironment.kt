@@ -32,9 +32,7 @@ import java.awt.Rectangle
 import java.awt.Toolkit
 
 /**
- * An environment that supports interactive windows via KWin scripting.
- *
- * @author Bujju
+ * An environment that supports interactive windows via [KWin] scripting.
  */
 class KdeEnvironment : Environment() {
     override val workArea: Area

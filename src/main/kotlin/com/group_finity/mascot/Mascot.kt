@@ -52,14 +52,15 @@ private val logger: Logger = Logger.getLogger(Mascot::class.java.name)
 private val lastId = AtomicInteger()
 
 /**
- * A mascot object.
+ * A mascot object using the given [imageSet].
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Mascot(var imageSet: String) {
     private val id: Int = lastId.incrementAndGet()
+    private val window: TranslucentWindow = NativeFactory.instance.newTranslucentWindow()
+    private var debugWindow: DebugWindow? = null
 
     /**
      * The number of ticks that have elapsed while the mascot is animating.
@@ -68,28 +69,18 @@ class Mascot(var imageSet: String) {
         private set
 
     /**
-     * Whether the mascot is being animated.
+     * Whether the mascot is being animated and is not paused.
      */
     private var isAnimating = true
         get() = field && !isPaused
 
     /**
-     * Manages the behavior of a mascot by triggering actions.
+     * The active behavior, which triggers actions to manage the mascot's movement and animation.
      */
     var behavior: Behavior? = null
         set(value) {
             field = value?.also { it.init(this) }
         }
-
-    /**
-     * A window to display the mascot.
-     */
-    private val window: TranslucentWindow = NativeFactory.instance.newTranslucentWindow()
-
-    /**
-     * A menu to display statistics about the mascot.
-     */
-    private var debugWindow: DebugWindow? = null
 
     /**
      * The manager managing the mascot.
@@ -153,7 +144,7 @@ class Mascot(var imageSet: String) {
         get() = cursorPosition != null
 
     /**
-     * The position of the cursor. Always null unless a hotspot is clicked.
+     * The position of the cursor. Null unless a hotspot is clicked.
      */
     var cursorPosition: Point? = null
         set(value) {
@@ -284,9 +275,7 @@ class Mascot(var imageSet: String) {
         val debugMenu = JMenuItem(localize("RevealStatistics"))
         debugMenu.addActionListener {
             SwingUtilities.invokeLater {
-                if (debugWindow == null) {
-                    debugWindow = DebugWindow(imageSet)
-                }
+                debugWindow = debugWindow ?: DebugWindow(imageSet)
                 debugWindow?.isVisible = true
             }
         }
@@ -323,7 +312,7 @@ class Mascot(var imageSet: String) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
                     val caption = behaviorName
-                        .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+                        .replace(Regex("([a-z])(IE)?([A-Z])"), "$1 $2 $3")
                         .replace("  ", " ")
 
                     if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
@@ -394,7 +383,7 @@ class Mascot(var imageSet: String) {
         }
 
         val behaviorName = behavior.toString().substring(14, behavior.toString().length - 1)
-            .replace("([a-z])(IE)?([A-Z])", "$1 $2 $3")
+            .replace(Regex("([a-z])(IE)?([A-Z])"), "$1 $2 $3")
             .replace("  ", " ")
 
         debugWindow?.set(

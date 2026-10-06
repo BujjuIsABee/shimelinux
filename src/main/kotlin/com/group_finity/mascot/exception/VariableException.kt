@@ -27,7 +27,6 @@ package com.group_finity.mascot.exception
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class VariableException : Exception {
     constructor(message: String) : super(message)

@@ -10,4 +10,9 @@ case "$XDG_CURRENT_DESKTOP" in
     ;;
 esac
 
-exec java -jar "/usr/share/java/shimelinux.jar" "$@"
+JVM_ARGS="-XX:+UseSerialGC \
+-XX:-ShrinkHeapInSteps \
+-XX:MinHeapFreeRatio=10 \
+-XX:MaxHeapFreeRatio=40"
+
+exec java $JVM_ARGS -jar "/usr/share/java/shimelinux.jar" "$@"

@@ -40,12 +40,7 @@ private val logger: Logger = Logger.getLogger(ScanInteract::class.java.name)
 /**
  * An action that scans for a mascot with the [affordance], then sets [mascot]'s behavior if one is found.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class ScanInteract(

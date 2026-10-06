@@ -29,11 +29,7 @@ import java.awt.Shape
 /**
  * A clickable area on a mascot.
  *
- * @property behavior A behavior that is set for the mascot when the hotspot is clicked.
- * @property shape The shape of the clickable area.
- *
  * @author Kilkakon
- * @author Bujju
  */
 class Hotspot(val behavior: String?, val shape: Shape) {
     /**

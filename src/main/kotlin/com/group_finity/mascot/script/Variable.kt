@@ -27,7 +27,6 @@ package com.group_finity.mascot.script
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 abstract class Variable {
     /**
@@ -48,25 +47,6 @@ abstract class Variable {
     companion object {
         /**
          * Gets a variable from [source].
-         *
-         * @param source
-         * A [Script] whose value is **not** cleared when [initFrame] is called:
-         *
-         * ```js
-         * ${1 + 2}
-         * ```
-         *
-         * A [Script] whose value **is** cleared when [initFrame] is called:
-         *
-         * ```js
-         * #{1 + 2}
-         * ```
-         *
-         * A [Constant]:
-         *
-         * ```js
-         * 3
-         * ```
          */
         fun parse(source: String?): Variable? = if (source == null) {
             null

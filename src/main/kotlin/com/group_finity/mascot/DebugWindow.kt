@@ -33,8 +33,9 @@ import javax.swing.JPanel
 /**
  * A menu that shows statistics about a mascot for debugging purposes.
  *
+ * @param imageSet Used for the window's title.
+ *
  * @author Kilkakon
- * @author Bujju
  */
 class DebugWindow(imageSet: String) : JFrame() {
     private val panel: JPanel

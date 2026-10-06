@@ -32,8 +32,6 @@ import java.awt.image.BufferedImage
 
 /**
  * A native factory for KDE Plasma that supports interactive windows.
- *
- * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = KdeEnvironment()

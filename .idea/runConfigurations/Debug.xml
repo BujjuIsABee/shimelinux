@@ -6,6 +6,7 @@
     <option name="MAIN_CLASS_NAME" value="com.group_finity.mascot.Main" />
     <module name="shimelinux.main" />
     <shortenClasspath name="NONE" />
+    <option name="VM_PARAMETERS" value="-XX:+UseSerialGC -XX:-ShrinkHeapInSteps -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=40" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

@@ -45,9 +45,7 @@ private val gc: GraphicsConfiguration? =
     GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
 
 /**
- * Displays a mascot on a cross-platform [JWindow].
- *
- * @author Bujju
+ * Displays a mascot on a [JWindow].
  */
 class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
     private var image: GenericNativeImage? = null

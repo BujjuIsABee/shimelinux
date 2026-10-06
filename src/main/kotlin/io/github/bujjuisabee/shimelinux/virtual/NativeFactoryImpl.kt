@@ -26,19 +26,17 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
- * A native factory for windowed mode, where mascots are all displayed in a single window.
+ * A native factory for windowed mode, where mascots are all displayed within a single window.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = VirtualEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
+    override fun newNativeImage(src: BufferedImage): NativeImage = VirtualNativeImage(src)
 
     override fun newTranslucentWindow(): TranslucentWindow = VirtualTranslucentPanel().also { (environment as VirtualEnvironment).addShimeji(it) }
 }

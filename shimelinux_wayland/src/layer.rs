@@ -230,7 +230,7 @@ impl PointerHandler for LayerState {
                         y: y as i32,
                     };
 
-                    // Set cursor
+                    // Update cursor surface
                     if let (Some(pointer), Some(serial), Some(surface)) = (
                         &self.cursor_state.pointer,
                         self.cursor_state.serial,
@@ -251,6 +251,7 @@ impl PointerHandler for LayerState {
             }
         }
 
+        // Send events to mouse event receiver
         if let Ok(jvm) = JavaVM::singleton() {
             let _ = jvm.attach_current_thread(|env| -> jni::errors::Result<_> {
                 self.mouse_event_receiver.update_cursor(
@@ -373,7 +374,6 @@ impl LayerState {
                 }
             }
 
-            // Update the layer
             surface.damage_buffer(0, 0, width, height);
             let _ = buffer.attach_to(surface);
 

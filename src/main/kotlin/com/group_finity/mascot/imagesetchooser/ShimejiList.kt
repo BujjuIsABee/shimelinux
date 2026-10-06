@@ -30,7 +30,6 @@ import javax.swing.ListCellRenderer
  * A list of [ImageSetChooserPanel] components.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) : JList<ImageSetChooserPanel>(model) {
     init {

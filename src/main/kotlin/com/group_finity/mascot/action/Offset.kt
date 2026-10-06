@@ -28,12 +28,8 @@ import java.util.ResourceBundle
 /**
  * An action that instantly moves the mascot.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param params A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Offset(
     schema: ResourceBundle,

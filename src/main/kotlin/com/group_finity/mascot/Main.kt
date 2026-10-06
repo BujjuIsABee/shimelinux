@@ -34,9 +34,9 @@ import dorkbox.systemTray.Checkbox
 import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
+import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
-import java.io.File
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -63,7 +63,6 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 object Main {
     /**
@@ -107,7 +106,7 @@ object Main {
     }
 
     /**
-     * Shows an error message with the [message], and the message of the [exception].
+     * Shows an error message with the [message] combined with the message of the [exception].
      */
     @JvmStatic
     fun showError(message: String, exception: Throwable) {
@@ -192,12 +191,6 @@ object Main {
 
         // Set theme
         try {
-            if (activeEnvironment != "wayland") {
-                val defaultMenuScaling = System.getProperty("sun.java2d.uiScale")?.toIntOrNull() ?: 1
-                val menuScaling = getProperty("MenuScaling", defaultMenuScaling)
-                System.setProperty("sun.java2d.uiScale", menuScaling.toString())
-            }
-
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
             UIManager.setLookAndFeel(
@@ -377,7 +370,8 @@ object Main {
         try {
             val icon = SystemTray.get()
             loadResource("img/icon.png").use { icon.setImage(it) }
-            icon.status = "ShimeLinux"
+            icon.setStatus("ShimeLinux")
+            icon.setTooltip("ShimeLinux")
 
             val callShimejiMenu = MenuItem(localize("CallShimeji")) {
                 createMascot()
@@ -451,29 +445,18 @@ object Main {
             }
 
             val settingsMenu = MenuItem(localize("Settings")) {
-                PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+                // Disable Wayland popup factory so dropdown menus will be displayed correctly
+                if (activeEnvironment == "wayland") {
+                    PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+                }
 
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                NativeFactory.resetPopupFactory()
-
-                if (settings.isRestartRequired) {
-                    val response = JOptionPane.showConfirmDialog(
-                        null,
-                        localize("RestartRequiredMessage"),
-                        localize("RestartRequired"),
-                        JOptionPane.YES_NO_OPTION
-                    )
-
-                    if (response == JOptionPane.YES_OPTION) {
-                        val jarPath = this::class.java.protectionDomain.codeSource.location.path
-                        val restartProcess = ProcessBuilder("java", "-jar", jarPath)
-                        restartProcess.directory(File(System.getProperty("user.dir")))
-                        restartProcess.start()
-                        exit()
-                    }
+                if (activeEnvironment == "wayland") {
+                    PopupFactory.setSharedInstance(WaylandPopupFactory)
                 }
+
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()
                     NativeFactory.resetInstance()
@@ -690,7 +673,7 @@ object Main {
     }
 
     /**
-     * Creates a specific mascot.
+     * Creates a mascot with the specified [imageSet].
      */
     fun createMascot(imageSet: String) {
         logger.info { "Creating a mascot ($imageSet)" }
@@ -821,13 +804,10 @@ object Main {
     }
 
     /**
-     * Updates the active image sets without affecting mascots that are already active.
-     *
-     * @param newImageSets The new list of image sets.
+     * Sets the active image to [newImageSets] without affecting mascots that are already active.
      *
      * @author LavenderSnek
      * @author Kilkakon
-     * @author Bujju
      */
     private fun setActiveImageSets(newImageSets: MutableList<String>?) {
         if (newImageSets == null) return

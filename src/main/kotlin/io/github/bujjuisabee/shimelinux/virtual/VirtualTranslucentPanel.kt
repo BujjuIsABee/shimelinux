@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.Component
 import java.awt.Graphics
 import javax.swing.JPanel
@@ -33,23 +32,22 @@ import javax.swing.JPanel
  * A panel that displays a mascot for the [VirtualEnvironment].
  *
  * @author Kilkakon
- * @author Bujju
  */
 class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
-    private var image: GenericNativeImage? = null
+    private var image: VirtualNativeImage? = null
 
     override fun paintComponent(g: Graphics) {
         image?.let { g.drawImage(it.managedImage, 0, 0, null) }
     }
 
     override fun contains(x: Int, y: Int): Boolean = super.contains(x, y) && image?.let {
-        (it.rgb[y * width + x] shr 24) and 0xFF > 0 // check if pixel at (x, y) has alpha greater than 0
+        (it.managedImage.getRGB(x, y) shr 24) and 0xFF > 0 // check if pixel at (x, y) has alpha greater than 0
     } == true
 
     override fun asComponent(): Component = this
 
     override fun setImage(image: NativeImage) {
-        this.image = image as GenericNativeImage
+        this.image = image as VirtualNativeImage
     }
 
     override fun updateImage() {

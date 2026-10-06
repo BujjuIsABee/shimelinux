@@ -30,7 +30,6 @@ import javax.script.Bindings
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class VariableMap : Bindings {
     val rawMap = linkedMapOf<String, Variable>()
@@ -45,7 +44,7 @@ class VariableMap : Bindings {
         get() = rawMap.size
 
     /**
-     * Initializes every variable
+     * Initializes every variable.
      */
     fun init() {
         for (variable in rawMap.values) {
@@ -54,7 +53,7 @@ class VariableMap : Bindings {
     }
 
     /**
-     * Calls [Variable.initFrame] on every variable
+     * Calls [Variable.initFrame] on every variable.
      */
     fun initFrame() {
         for (variable in rawMap.values) {

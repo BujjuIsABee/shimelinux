@@ -25,17 +25,14 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.Mascot
 
 /**
- * An action that behaviors can trigger for a mascot.
+ * Temporarily handles the movement and animation of a mascot.
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 interface Action {
     /**
-     * Initializes the action for [mascot]; called once when the behavior is initialized.
-     *
-     * @param mascot The mascot that will be affected by the action.
+     * Initializes the action for [mascot].
      */
     fun init(mascot: Mascot)
 

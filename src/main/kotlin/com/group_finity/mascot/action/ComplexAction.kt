@@ -29,13 +29,8 @@ import java.util.ResourceBundle
 /**
  * An action that triggers other actions.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param params A list of the mascot's variables.
- * @property actions An array of actions that can be triggered by the complex action.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 abstract class ComplexAction(
     schema: ResourceBundle,

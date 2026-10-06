@@ -30,12 +30,7 @@ import java.util.ResourceBundle
 /**
  * An action that creates a new mascot while [mascot] moves.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param context A list of the mascot's variables.
- *
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class BreedMove(

@@ -27,6 +27,5 @@ package com.group_finity.mascot.exception
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class LostGroundException : Exception()

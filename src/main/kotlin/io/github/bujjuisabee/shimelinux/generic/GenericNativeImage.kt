@@ -27,13 +27,22 @@ import java.awt.image.BufferedImage
 import java.util.Objects
 
 /**
- * A cross-platform image.
- *
- * @author Bujju
+ * A cross-platform native image that stores [managedImage].
  */
 class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
+    /**
+     * The image's width.
+     */
     val width: Int = managedImage.width
+
+    /**
+     * The image's height.
+     */
     val height: Int = managedImage.height
+
+    /**
+     * The image's pixel data.
+     */
     val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
 
     override fun hashCode(): Int = Objects.hash(rgb)

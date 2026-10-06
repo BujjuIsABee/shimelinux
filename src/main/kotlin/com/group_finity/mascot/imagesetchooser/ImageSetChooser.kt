@@ -64,7 +64,6 @@ import kotlin.io.path.outputStream
  * A menu to choose which image sets to use.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val listPanel: JPanel
@@ -159,7 +158,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             } catch (_: IOException) {
                 JOptionPane.showMessageDialog(
                     this@ImageSetChooser,
-                    localize("FailedOpenFileBrowserErrorMessage") + "\n${getPath("img")}",
+                    localize("FailedOpenFileManagerErrorMessage") + "\n${getPath("img")}",
                     "Error",
                     JOptionPane.PLAIN_MESSAGE
                 )

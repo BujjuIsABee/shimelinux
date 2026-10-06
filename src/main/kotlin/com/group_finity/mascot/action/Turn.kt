@@ -33,13 +33,8 @@ private val logger: Logger = Logger.getLogger(Turn::class.java.name)
 /**
  * An action that causes the mascot to turn.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param params A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class Turn(
@@ -50,7 +45,8 @@ class Turn(
     private var isTurning = false
 
     /**
-     * The direction that the mascot will turn towards. The direction opposite of its current direction will be used if a direction is not provided.
+     * The direction that the mascot will turn towards. The direction opposite of its current direction will be used if
+     * a direction is not provided.
      */
     private val isLookRight: Boolean
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)

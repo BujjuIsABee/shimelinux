@@ -38,13 +38,8 @@ private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 /**
  * Builds a behavior from a Behavior node.
  *
- * @param configuration The configuration defining the behavior.
- * @param behaviorNode The node defining the behavior within the configuration.
- * @param conditions The conditions that must be met for the behavior to be triggered.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class BehaviorBuilder(
     private val configuration: Configuration,

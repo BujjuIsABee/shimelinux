@@ -32,13 +32,8 @@ import java.util.ResourceBundle
 /**
  * The base implementation of an action.
  *
- * @property schema The schema used for the mascot's configuration.
- * @property animations The animations that are played by the action.
- * @property variables A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 abstract class ActionBase(
     internal val schema: ResourceBundle,
@@ -92,8 +87,6 @@ abstract class ActionBase(
 
     /**
      * An affordance that will be added to the mascot on the next frame.
-     *
-     * @see Mascot.affordances
      */
     internal val affordance: String
         get() = eval(schema.getString(PARAMETER_AFFORDANCE), DEFAULT_AFFORDANCE)
@@ -163,11 +156,7 @@ abstract class ActionBase(
     }
 
     /**
-     * Returns the value of a variable in [variables], or [defaultValue] if the variable does not exist.
-     *
-     * @param T The type that the variable's value will be cast to.
-     * @param name The key/name of the variable to evaluate.
-     * @param defaultValue The value to return if the variable does not exist.
+     * Returns the value of a variable in [variables], cast to [T], or [defaultValue] if the variable does not exist.
      */
     internal inline fun <reified T> eval(name: String, defaultValue: T): T = synchronized(variables) {
         variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue

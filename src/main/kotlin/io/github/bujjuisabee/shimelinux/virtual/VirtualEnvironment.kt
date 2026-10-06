@@ -41,7 +41,6 @@ import javax.swing.JPanel
  * An environment that displays mascots within a single window.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class VirtualEnvironment : Environment() {
     override val workArea: Area
@@ -96,9 +95,7 @@ class VirtualEnvironment : Environment() {
     }
 
     /**
-     * Adds a mascot to the window.
-     *
-     * @param mascot The mascot to add.
+     * Adds a [mascot] to the environment.
      */
     fun addShimeji(mascot: JPanel) {
         mascot.isOpaque = false

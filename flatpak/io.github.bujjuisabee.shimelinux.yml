@@ -13,9 +13,12 @@ build-options:
     CARGO_NET_OFFLINE: 'true'
 command: /app/bin/shimelinux
 finish-args:
+  # Required for Java Swing (GUI Toolkit)
   - --socket=x11
-  - --socket=wayland
   - --share=ipc
+  # Required to create Wayland layer surfaces with the wlr_layer_shell protocol
+  - --socket=wayland
+  # Required for an optional, opt-in feature where Shimeji can stand on and throw windows on KDE Plasma
   - --talk-name=org.kde.KWin
   - --talk-name=org.kde.kwin.Scripting
 modules:

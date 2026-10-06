@@ -26,6 +26,7 @@ import com.group_finity.mascot.NativeFactory
 import java.awt.Component
 import java.awt.Point
 import java.awt.image.BufferedImage
+import java.awt.image.DataBufferInt
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.MenuElement
@@ -36,8 +37,6 @@ import javax.swing.UIManager
 
 /**
  * A popup menu that is displayed on a Wayland layer surface.
- *
- * @author Bujju
  */
 class WaylandPopup(
     private val owner: Component?,
@@ -51,7 +50,6 @@ class WaylandPopup(
     private var parent: JMenu? = null
 
     override fun show() {
-        // Set the popup's size
         contents.size = contents.preferredSize
         contents.doLayout()
         layer.setBounds(x, y, contents.width, contents.height)
@@ -85,9 +83,7 @@ class WaylandPopup(
                 closeSubmenu()
             }
 
-            // Update the menu selection
-            val path = listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
-            MenuSelectionManager.defaultManager().selectedPath = path.toTypedArray()
+            MenuSelectionManager.defaultManager().selectedPath = listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>().toTypedArray()
 
             updateImage()
         }
@@ -104,30 +100,26 @@ class WaylandPopup(
     }
 
     private fun updateImage() {
-        val width = contents.width
-        val height = contents.height
-
-        // Draw the popup to an image
-        val buffer = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        // Draw the popup to an image buffer
+        val buffer = BufferedImage(contents.width, contents.height, BufferedImage.TYPE_INT_ARGB)
         val g2d = buffer.createGraphics()
         contents.paint(g2d)
         g2d.dispose()
 
-        // Display the image on the layer surface
-        layer.setImage(buffer.getRGB(0, 0, width, height, null, 0, width))
+        // Display the image buffer on the layer surface
+        layer.setImage((buffer.raster.dataBuffer as DataBufferInt).data)
     }
 
     private fun openSubmenu(menu: JMenu) {
-        // Check if the menu is already showing
         if (menu.getClientProperty("isShowing") == true) return
-
-        menu.putClientProperty("isShowing", true)
 
         val location = getSubmenuOrigin(x, y, menu)
         val popup = WaylandPopupFactory.getPopup(contents, menu.popupMenu, location.x, location.y) as WaylandPopup
         popup.parent = menu
         popup.show()
         submenu = popup
+
+        menu.putClientProperty("isShowing", true)
     }
 
     private fun closeSubmenu() {

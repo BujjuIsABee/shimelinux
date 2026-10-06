@@ -33,9 +33,7 @@ import java.awt.Rectangle
 import java.io.File
 
 /**
- * Manages the KWin script.
- *
- * @author Bujju
+ * Manages a script used to interact with the KWin compositor.
  */
 object KWin {
     private var dbus: DBusConnection
@@ -109,17 +107,12 @@ object KWin {
     @DBusInterfaceName("org.kde.kwin.Scripting")
     interface KWinScripting : DBusInterface {
         /**
-         * Loads a KWin script at [path].
-         *
-         * @param path The absolute file path of the script.
-         * @param name Used to identify the script when calling [unloadScript].
+         * Loads the KWin script at [path] and assigns it the given [name].
          */
         fun loadScript(path: String, name: String): Int
 
         /**
-         * Unloads a KWin script.
-         *
-         * @param name The name provided for the script when [loadScript] was called.
+         * Unloads the KWin script with the given [name].
          */
         fun unloadScript(name: String)
     }
@@ -146,9 +139,8 @@ object KWin {
     @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
     interface KWinClient : DBusInterface {
         /**
-         * Called whenever a window becomes active.
-         *
-         * @param caption The window's title.
+         * Called whenever a window becomes active, providing the window's [caption], [x] and [y] position, [width], and
+         * [height].
          */
         fun setActiveWindow(
             caption: String,
@@ -164,17 +156,18 @@ object KWin {
         fun resetActiveWindow()
 
         /**
-         * Reports the absolute position of the cursor.
+         * Provides the [x] and [y] position of the cursor.
          */
         fun setCursorPosition(x: Int, y: Int)
 
         /**
-         * Requests [windowPosition].
+         * Returns a map with three keys: `hasValue` is `true` if [windowPosition] is not null, or `false` if it is.
+         * `x` and `y` are the X and Y positions of [windowPosition], or `-1` if it is null.
          */
         fun getWindowPosition(): Map<String, Variant<*>>
 
         /**
-         * Requests [restoreWindows].
+         * Returns [restoreWindows].
          */
         fun getRestoreWindows(): Boolean
     }
@@ -216,7 +209,7 @@ object KWin {
     }
 
     /**
-     * Represents a window from KWin.
+     * Represents a window from the KWin compositor.
      *
      * @property caption The window's title.
      * @property bounds The window's frame geometry.

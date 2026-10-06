@@ -72,7 +72,6 @@ val activeEnvironment: String
  * A factory for platform-specific objects.
  *
  * @author Kilkakon
- * @author Bujju
  */
 abstract class NativeFactory {
     /**
@@ -86,7 +85,7 @@ abstract class NativeFactory {
     abstract fun newTranslucentWindow(): TranslucentWindow
 
     /**
-     * Gets a platform-specific [NativeImage].
+     * Gets a platform-specific [NativeImage] from the given [src].
      */
     abstract fun newNativeImage(src: BufferedImage): NativeImage
 
@@ -109,13 +108,7 @@ abstract class NativeFactory {
                 else -> GenericNativeFactory()
             }
 
-            resetPopupFactory()
-        }
-
-        /**
-         * Resets the shared popup factory instance based on [activeEnvironment].
-         */
-        fun resetPopupFactory() {
+            // Reset popup factory
             if (activeEnvironment == "wayland") {
                 PopupFactory.setSharedInstance(WaylandPopupFactory)
             } else if (UIManager.getLookAndFeel() is FlatLaf) {

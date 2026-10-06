@@ -20,58 +20,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.group_finity.mascot.action
+package io.github.bujjuisabee.shimelinux.virtual
 
-import com.group_finity.mascot.Mascot
-import com.group_finity.mascot.animation.Animation
-import com.group_finity.mascot.environment.Border
-import com.group_finity.mascot.script.VariableMap
-import java.util.ResourceBundle
+import com.group_finity.mascot.image.NativeImage
+import java.awt.image.BufferedImage
 
 /**
- * An action that places the mascot on a specific border.
+ * Stores [managedImage] so it can be displayed in the [VirtualEnvironment].
  *
- * @author Yuki Yamada
  * @author Kilkakon
  */
-abstract class BorderedAction(
-    schema: ResourceBundle,
-    animations: List<Animation>,
-    context: VariableMap
-) : ActionBase(schema, animations, context) {
-    /**
-     * The border that the mascot will be placed on.
-     */
-    internal var border: Border? = null
-        private set
-
-    /**
-     * The type of border that the mascot will be placed on.
-     */
-    private val borderType: String?
-        get() = eval(schema.getString(PARAMETER_BORDERTYPE), DEFAULT_BORDERTYPE)
-
-    override fun init(mascot: Mascot) {
-        super.init(mascot)
-
-        border = when (borderType) {
-            schema.getString(BORDERTYPE_CEILING) -> environment.ceiling
-            schema.getString(BORDERTYPE_WALL) -> environment.wall
-            schema.getString(BORDERTYPE_FLOOR) -> environment.floor
-            else -> null
-        }
-    }
-
-    override fun tick() {
-        border?.let { mascot.anchor = it.move(mascot.anchor) }
-    }
-
-    companion object {
-        const val PARAMETER_BORDERTYPE = "BorderType"
-        private val DEFAULT_BORDERTYPE: String? = null
-
-        const val BORDERTYPE_CEILING = "Ceiling"
-        const val BORDERTYPE_WALL = "Wall"
-        const val BORDERTYPE_FLOOR = "Floor"
-    }
-}
+class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage

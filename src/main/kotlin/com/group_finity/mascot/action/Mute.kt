@@ -30,11 +30,7 @@ import java.util.ResourceBundle
 /**
  * An action that stops all sounds or stops a specific sound that is currently playing.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param params A list of the mascot's variables.
- *
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class Mute(

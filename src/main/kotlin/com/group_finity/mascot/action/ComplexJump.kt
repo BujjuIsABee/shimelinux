@@ -41,12 +41,7 @@ private val logger: Logger = Logger.getLogger(ComplexJump::class.java.name)
 /**
  * An action that creates a new mascot and/or scans for an affordance while [mascot] jumps.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param params A list of the mascot's variables.
- *
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class ComplexJump(
@@ -60,9 +55,7 @@ class ComplexJump(
     private var isScanEnabled = false
 
     /**
-     * The characteristics of the action, separated by '/'.
-     * - Breed
-     * - Scan
+     * The characteristics of the action ("Breed" and/or "Scan"), separated by '/'.
      */
     private val characteristics: String
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)

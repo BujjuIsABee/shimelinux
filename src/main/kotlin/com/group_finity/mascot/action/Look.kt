@@ -28,19 +28,16 @@ import java.util.ResourceBundle
 /**
  * An action that causes the mascot to look in a specific direction.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param params A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Look(
     schema: ResourceBundle,
     params: VariableMap
 ) : InstantAction(schema, params) {
     /**
-     * The direction that the mascot will look towards. The direction opposite of its current direction will be used if a direction is not provided.
+     * The direction that the mascot will look towards. The direction opposite of its current direction will be used if
+     * a direction is not provided.
      */
     private val isLookRight: Boolean
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)

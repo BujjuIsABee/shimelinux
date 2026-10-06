@@ -31,11 +31,10 @@ import java.awt.Toolkit
 import kotlin.concurrent.timer
 
 /**
- * Defines a platform specific environment, which tracks the screens, cursor, and windows that mascots can interact with.
+ * Defines a platform specific environment, which tracks the screens, cursor, and interactive windows.
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 abstract class Environment {
     /**

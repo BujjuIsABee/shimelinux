@@ -29,25 +29,24 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 /**
- * Gets a path within the config directory.
+ * Gets the path specified by [subpaths] within the config directory.
  */
-fun getPath(vararg subpaths: String): Path {
-    val base = if (!System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
-        Path(System.getProperty("XDG_CONFIG_HOME"), "shimelinux")
-    } else {
-        Path(System.getProperty("user.home"), ".config", "shimelinux")
-    }
-
-    return Path(base.toString(), *subpaths)
+fun getPath(vararg subpaths: String): Path = if (!System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
+    Path(System.getProperty("XDG_CONFIG_HOME"), "shimelinux", *subpaths)
+} else {
+    Path(System.getProperty("user.home"), ".config", "shimelinux", *subpaths)
 }
 
 /**
- * Loads the resource at [path] and returns an input stream, or null if the resource does not exist.
+ * Loads the resource at [path].
+ *
+ * @return An input stream, or null if the resource does not exist.
  */
 fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 
 /**
- * Gets a property and casts it to [T], or returns [defaultValue] if the property does not exist or the cast fails.
+ * Returns the value of the property from [Main.properties] corresponding to the specified [key] and casts it to [T], or
+ * returns [defaultValue] if the property does not exist or the cast fails.
  */
 inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     Main.properties.getProperty(key, defaultValue.toString()).let { value ->
@@ -60,26 +59,21 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     }
 
 /**
- * Translates a string to the current language.
+ * Returns the localized string corresponding to the specified [key], or [key] if it does not exist.
  */
 fun localize(key: String): String = Main.languageBundle.getString(key)
 
 /**
- * Executes a command and returns the output.
- *
- * @param command The command to run.
- * @param args The command line arguments to pass to the command.
+ * Executes the [command] with the specified [args] and returns the process's stdout.
  */
 fun execute(command: String, vararg args: String): String {
     val process = ProcessBuilder(command, *args).start()
     process.waitFor()
-    return process.inputStream.bufferedReader().use { it.readLines().joinToString("\n") }
+    return process.inputStream.bufferedReader().useLines { it.joinToString("\n") }
 }
 
 /**
- * Applies insets to the rectangle.
- *
- * @param insets The insets to apply.
+ * Applies the [insets] to the rectangle.
  */
 fun Rectangle.applyInsets(insets: Insets) {
     x += insets.left

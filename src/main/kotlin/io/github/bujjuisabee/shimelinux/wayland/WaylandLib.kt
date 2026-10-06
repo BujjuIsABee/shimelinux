@@ -30,8 +30,6 @@ import kotlin.system.exitProcess
 
 /**
  * A foreign function interface for creating and managing Wayland layer surfaces.
- *
- * @author Bujju
  */
 object WaylandLib {
     init {
@@ -54,40 +52,30 @@ object WaylandLib {
     }
 
     /**
-     * Creates a Wayland layer surface, returning a pointer to the event sender.
-     *
-     * @param mouseEventReceiver The object that will receive mouse events from the layer surface.
+     * Creates a Wayland layer surface and returns a pointer to the event sender. Mouse events will be sent to
+     * [mouseEventReceiver].
      */
     external fun createLayer(mouseEventReceiver: MouseEventReceiver): Long
 
     /**
-     * Sends a SetBounds event to a layer surface.
-     *
-     * @param senderPtr A pointer to the event sender.
+     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] to a layer surface.
      */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
     /**
-     * Sends a SetImage event to a layer surface.
-     *
-     * @param senderPtr A pointer to the event sender.
-     * @param rgb The image data to send (in ARGB8888 format).
-     * @param updateMask Whether to update the surface's input region.
+     * Uses [senderPtr] to send a SetImage event with the given [rgb] pixel data to a layer surface. If [updateMask] is
+     * true, the surface's input region will be updated as well.
      */
     external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)
 
     /**
-     * Sends a SetCursor event to a layer surface.
-     *
-     * @param senderPtr A pointer to the event sender.
-     * @param useHand If true, the pointer will be set to a hand. Otherwise, it will be set to the regular pointer.
+     * Uses [senderPtr] to send a SetCursor event to a layer surface. If [useHand] is true, the cursor will be set to a
+     * hand.
      */
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
     /**
-     * Sends a Dispose event to a layer surface.
-     *
-     * @param senderPtr A pointer to the event sender.
+     * Uses [senderPtr] to send a Dispose event to a layer surface.
      */
     external fun dispose(senderPtr: Long)
 
@@ -96,7 +84,9 @@ object WaylandLib {
      */
     interface MouseEventReceiver {
         /**
-         * Called when the layer surface receives mouse events.
+         * Called when the layer surface receives mouse events, providing information about the cursor state via
+         * [leftPressed], [rightPressed], [leftReleased], and [rightReleased], and its position via [positionX] and
+         * [positionY].
          */
         fun updateCursor(
             leftPressed: Boolean,

@@ -30,7 +30,6 @@ import kotlin.math.abs
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Wall(val area: Area, val isRight: Boolean) : Border {
     val x: Int

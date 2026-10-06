@@ -26,12 +26,11 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
 /**
- * Stores an image to be displayed on a Wayland layer surface.
- *
- * @author Bujju
+ * Stores pixel data from [managedImage] so it can be displayed on a Wayland layer surface.
  */
 class WaylandNativeImage(managedImage: BufferedImage) : NativeImage {
-    val width: Int = managedImage.width
-    val height: Int = managedImage.height
-    val rgb: IntArray = managedImage.getRGB(0, 0, width, height, null, 0, width)
+    /**
+     * The image's pixel data.
+     */
+    val rgb: IntArray = managedImage.getRGB(0, 0, managedImage.width, managedImage.height, null, 0, managedImage.width)
 }

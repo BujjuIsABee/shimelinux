@@ -38,13 +38,8 @@ private val logger: Logger = Logger.getLogger(Transform::class.java.name)
 /**
  * An action that causes the mascot to transform into another mascot.
  *
- * @param schema The schema used for the mascot's configuration.
- * @param animations The animations that are played by the action.
- * @param params A list of the mascot's variables.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 @Suppress("unused")
 class Transform(
@@ -59,7 +54,8 @@ class Transform(
         get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOR), DEFAULT_TRANSFORMBEHAVIOR)
 
     /**
-     * The image set that the mascot will transform into. The same image set as [mascot] will be used if a valid image set is not provided.
+     * The image set that the mascot will transform into. The same image set as [mascot] will be used if a valid image
+     * set is not provided.
      */
     private val transformMascot: String
         get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), DEFAULT_TRANSFORMMASCOT)

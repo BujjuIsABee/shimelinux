@@ -47,7 +47,6 @@ import javax.swing.event.HyperlinkEvent
  * A menu that displays information about a mascot.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     private val imagePanel: JPanel

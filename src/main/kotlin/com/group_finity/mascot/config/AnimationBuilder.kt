@@ -50,13 +50,8 @@ private val logger: Logger = Logger.getLogger(AnimationBuilder::class.java.name)
 /**
  * Creates an animation from an Animation node.
  *
- * @param schema The schema used for the configuration.
- * @param animationNode The node defining the animation within the configuration.
- * @param imageSet The image set that the animation is defined for.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class AnimationBuilder(
     private val schema: ResourceBundle,

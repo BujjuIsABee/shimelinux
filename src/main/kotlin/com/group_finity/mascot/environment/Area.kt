@@ -29,7 +29,6 @@ import java.awt.Rectangle
  *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Area {
     /**
@@ -59,8 +58,6 @@ class Area {
 
     /**
      * Sets the bounds of the rectangle.
-     *
-     * @param value The new bounds of the rectangle.
      */
     fun set(value: Rectangle) {
         dleft = value.x - left

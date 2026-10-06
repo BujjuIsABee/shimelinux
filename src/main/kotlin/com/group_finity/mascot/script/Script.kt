@@ -35,12 +35,8 @@ private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(
 /**
  * A variable whose value is evaluated from JavaScript.
  *
- * @param source See [Variable.parse].
- * @param isClearAtInitFrame Whether the variable's value should be cleared when [initFrame] is called.
- *
  * @author Yuki Yamada
  * @author Kilkakon
- * @author Bujju
  */
 class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
     private val compiled: CompiledScript = try {

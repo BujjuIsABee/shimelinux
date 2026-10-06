@@ -23,7 +23,6 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
-import dorkbox.desktop.Desktop
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -35,8 +34,6 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Image
 import java.awt.Insets
-import java.net.URI
-import java.util.Hashtable
 import java.util.Properties
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
@@ -79,7 +76,6 @@ private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
  * The settings menu.
  *
  * @author Kilkakon
- * @author Bujju
  */
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val tabbedPane: JTabbedPane
@@ -101,10 +97,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val interactiveWindowsFooterPanel: JPanel
     private val addInteractiveWindowButton: JButton
     private val removeInteractiveWindowButton: JButton
-    private val menuTab: JPanel
-    private val menuScalingPanel: JPanel
-    private val menuScalingSlider: JSlider
-    private val themePanel: JPanel
+    private val themeTab: JPanel
     private val themeComboBox: JComboBox<String>
     private val themeCardsPanel: JPanel
     private val flatThemeCard: JPanel
@@ -163,10 +156,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val aboutIcon: JLabel
     private val titleLabel: JLabel
     private val versionLabel: JLabel
-    private val aboutButtonsPanel: JPanel
-    private val githubButton: JButton
-    private val issuesButton: JButton
-    private val shimejieeButton: JButton
     private val footerPanel: JPanel
     private val doneButton: JButton
     private val cancelButton: JButton
@@ -176,7 +165,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private var scaling: Double = getProperty("Scaling", 1.0)
     private var opacity: Double = getProperty("Opacity", 1.0)
     private var filter: String = getProperty("Filter", "Nearest")
-    private var menuScaling: Int = getProperty("MenuScaling", 1)
     private var theme: String = getProperty("Theme", "FlatDark")
     private var environment: String = getProperty("Environment", "linux")
     private var overrideScreenDimensions: Boolean = getProperty("OverrideScreenDimensions", false)
@@ -195,24 +183,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val initialDarkTheme = Properties()
     private val initialLightTheme = Properties()
 
-    /**
-     * Whether the program needs to be restarted to apply changes.
-     */
-    var isRestartRequired = false
-
-    /**
-     * Whether the environment needs to be reloaded to apply changes.
-     */
     var isEnvironmentReloadRequired = false
-
-    /**
-     * Whether all mascots need to be reloaded to apply changes.
-     */
     var isImageReloadRequired = false
-
-    /**
-     * Whether the window cache needs to be refreshed to apply changes.
-     */
     var isInteractiveWindowReloadRequired = false
 
     init {
@@ -389,38 +361,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         interactiveWindowsTab.add(interactiveWindowsTabbedPane, BorderLayout.CENTER)
         interactiveWindowsTab.add(interactiveWindowsFooterPanel, BorderLayout.SOUTH)
 
-        menuTab = JPanel(BorderLayout())
-        menuTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
-
-        menuScalingPanel = JPanel()
-        menuScalingPanel.isVisible = activeEnvironment != "wayland"
-        menuScalingPanel.layout = BoxLayout(menuScalingPanel, BoxLayout.Y_AXIS)
-        menuScalingPanel.border = BorderFactory.createTitledBorder(localize("MenuScaling"))
-
-        menuScalingSlider = JSlider()
-        menuScalingSlider.minimum = 1
-        menuScalingSlider.maximum = 3
-        menuScalingSlider.majorTickSpacing = 1
-        menuScalingSlider.paintLabels = true
-        menuScalingSlider.paintTicks = true
-        menuScalingSlider.snapToTicks = true
-        menuScalingSlider.value = menuScaling
-        menuScalingSlider.labelTable = Hashtable(
-            mapOf(
-                1 to JLabel("1x"),
-                2 to JLabel("2x"),
-                3 to JLabel("3x")
-            )
-        )
-        menuScalingSlider.addChangeListener {
-            menuScaling = menuScalingSlider.value
-        }
-
-        menuScalingPanel.add(menuScalingSlider)
-
-        themePanel = JPanel()
-        themePanel.layout = BoxLayout(themePanel, BoxLayout.Y_AXIS)
-        themePanel.border = BorderFactory.createTitledBorder(localize("Theme"))
+        themeTab = JPanel()
+        themeTab.layout = BoxLayout(themeTab, BoxLayout.Y_AXIS)
+        themeTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         val themeCardLayout = CardLayout()
 
@@ -746,11 +689,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             else -> 0
         }
 
-        themePanel.add(themeComboBox)
-        themePanel.add(themeCardsPanel)
-
-        menuTab.add(menuScalingPanel, BorderLayout.NORTH)
-        menuTab.add(themePanel, BorderLayout.CENTER)
+        themeTab.add(themeComboBox)
+        themeTab.add(themeCardsPanel)
 
         environmentTab = JPanel()
         environmentTab.layout = BoxLayout(environmentTab, BoxLayout.Y_AXIS)
@@ -1132,41 +1072,17 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         versionLabel = JLabel(VERSION)
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
-        aboutButtonsPanel = JPanel(FlowLayout())
-
-        githubButton = JButton("GitHub")
-        githubButton.addActionListener {
-            Desktop.browseURL(URI("https://github.com/BujjuIsABee/shimelinux"))
-        }
-
-        issuesButton = JButton("Issues")
-        issuesButton.addActionListener {
-            Desktop.browseURL(URI("https://github.com/BujjuIsABee/shimelinux/issues"))
-        }
-
-        shimejieeButton = JButton("Shimeji-ee")
-        shimejieeButton.addActionListener {
-            Desktop.browseURL(URI("https://kilkakon.com/shimeji"))
-        }
-
-        aboutButtonsPanel.add(githubButton)
-        aboutButtonsPanel.add(issuesButton)
-        aboutButtonsPanel.add(shimejieeButton)
-
         aboutTab.add(Box.createVerticalGlue())
-        aboutTab.add(Box.createVerticalStrut(30))
         aboutTab.add(aboutIcon)
         aboutTab.add(titleLabel)
         aboutTab.add(versionLabel)
-        aboutTab.add(Box.createVerticalStrut(30))
-        aboutTab.add(aboutButtonsPanel)
         aboutTab.add(Box.createVerticalGlue())
 
         tabbedPane.addTab(localize("General"), generalTab)
         if (activeEnvironment == "kde") {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
-        tabbedPane.addTab(localize("Menu"), menuTab)
+        tabbedPane.addTab(localize("Theme"), themeTab)
         tabbedPane.addTab(localize("Environment"), environmentTab)
         tabbedPane.addTab(localize("About"), aboutTab)
 
@@ -1230,11 +1146,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             isInteractiveWindowReloadRequired = true
         }
 
-        if (getProperty("MenuScaling", 1) != menuScaling) {
-            Main.properties.setProperty("MenuScaling", menuScaling.toString())
-            isRestartRequired = true
-        }
-
         if (getProperty("Theme", "FlatDark") != theme) {
             Main.properties.setProperty("Theme", theme)
         }
@@ -1242,11 +1153,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         if (getProperty("Environment", "linux") != environment) {
             Main.properties.setProperty("Environment", environment)
             isEnvironmentReloadRequired = true
-
-            if (activeEnvironment == "wayland" && menuScaling != 1) {
-                Main.properties.setProperty("MenuScaling", "1")
-                isRestartRequired = true
-            }
         }
 
         if (getProperty("OverrideScreenDimensions", false) != overrideScreenDimensions) {

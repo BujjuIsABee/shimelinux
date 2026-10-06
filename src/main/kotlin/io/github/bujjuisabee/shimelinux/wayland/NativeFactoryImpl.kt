@@ -30,8 +30,6 @@ import java.awt.image.BufferedImage
 
 /**
  * A native factory that displays mascots on native Wayland surfaces.
- *
- * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = WaylandEnvironment()
