@@ -9,12 +9,12 @@
         <name>Bujju</name>
     </developer>
     <description>
-        <p>ShimeLinux is a Linux port of Shimeji-ee desktop pet, an application which lets you have little characters (called Shimeji) walking around on your desktop.</p>
+        <p>ShimeLinux is a Linux port of Shimeji-ee, a desktop pet application that lets you have little characters (called Shimeji) walking around on your screen.</p>
         <p>Features:</p>
         <ul>
             <li>It is compatible with any Shimeji made for the latest version of Shimeji-ee</li>
-            <li>It supports many Linux desktop environments and tiling window managers</li>
             <li>It supports interactive windows on KDE Plasma</li>
+            <li>It works on many Linux desktop environments and tiling window managers</li>
         </ul>
     </description>
     <launchable type="desktop-id">io.github.bujjuisabee.shimelinux.desktop</launchable>
@@ -24,7 +24,7 @@
         <keyword>shimeji-ee</keyword>
     </keywords>
     <branding>
-        <color type="primary" scheme_preference="light">#84B0DB</color>
+        <color type="primary" scheme_preference="light">#9cbefe2</color>
         <color type="primary" scheme_preference="dark">#3c83c5</color>
     </branding>
     <content_rating type="oars-1.1"/>
@@ -32,16 +32,16 @@
     <url type="bugtracker">https://github.com/BujjuIsABee/shimelinux/issues</url>
     <url type="vcs-browser">https://github.com/BujjuIsABee/shimelinux</url>
     <screenshots>
+        <screenshot>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/9837451d5bcf86eb5cd6a3450007c4473f6a55a0/img/settings.png</image>
+            <caption>A couple of Shimeji climbing on the settings window</caption>
+        </screenshot>
         <screenshot type="default">
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/d6163999affacd1ba9b559e043d9588570984074/img/chooser.png</image>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/9837451d5bcf86eb5cd6a3450007c4473f6a55a0/img/chooser.png</image>
             <caption>The ShimeLinux image set chooser</caption>
         </screenshot>
         <screenshot>
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/d6163999affacd1ba9b559e043d9588570984074/img/settings.png</image>
-            <caption>A couple of Shimeji climbing on the ShimeLinux settings window</caption>
-        </screenshot>
-        <screenshot>
-            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/d6163999affacd1ba9b559e043d9588570984074/img/windowed.png</image>
+            <image>https://raw.githubusercontent.com/BujjuIsABee/shimelinux/9837451d5bcf86eb5cd6a3450007c4473f6a55a0/img/windowed.png</image>
             <caption>ShimeLinux in windowed mode</caption>
         </screenshot>
     </screenshots>
