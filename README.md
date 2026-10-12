@@ -116,17 +116,17 @@ The `.jar` file will be in `build/libs`.
 
 ShimeLinux has been tested on the following operating systems and desktop environments:
 
-| Operating system | Desktop environment(s)                                                                                                                       | Install                                                                        |
-|------------------|----------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| Arch Linux       | • GNOME <br/> • Hyprland <br/> • KDE Plasma <br/> • niri <br/> • sway <br/> • awesome <br/> • Cinnamon <br/> • dwm <br/> • i3 <br/> • xmonad | [![AUR]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)   |
-| Debian           | • LXQt <br/> • MATE                                                                                                                          | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |                                                                             |
-| Fedora Linux     | • KDE Plasma                                                                                                                                 | [![RPM]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)    |
-| FreeBSD          | • KDE Plasma <br/> • Xfce                                                                                                                    | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
-| Linux Mint       | • Cinnamon                                                                                                                                   | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| NixOS            | • KDE Plasma <br/> • niri                                                                                                                    | [![NUR]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)              |
-| Pop!_OS          | • COSMIC                                                                                                                                     | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| Ubuntu           | • GNOME                                                                                                                                      | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| Void Linux       | • Xfce                                                                                                                                       | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
+| Operating system | Desktop environment(s)                                                                                            | Install                                                                        |
+|------------------|-------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| Arch Linux       | • Cinnamon <br/> • GNOME <br/> • Hyprland <br/> • i3 <br/> • KDE Plasma <br/> • mangowm <br/> • niri <br/> • sway | [![AUR]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)   |
+| Debian           | • LXQt <br/> • MATE                                                                                               | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |                                                                             |
+| Fedora Linux     | • KDE Plasma                                                                                                      | [![RPM]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)    |
+| FreeBSD          | • KDE Plasma <br/> • Xfce                                                                                         | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
+| Linux Mint       | • Cinnamon                                                                                                        | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| NixOS            | • KDE Plasma <br/> • niri                                                                                         | [![NUR]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)              |
+| Pop!_OS          | • COSMIC                                                                                                          | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| Ubuntu           | • GNOME                                                                                                           | [![DEB]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| Void Linux       | • Xfce                                                                                                            | [![JAR]](https://github.com/BujjuIsABee/shimelinux#other)                      |
 
 [AUR]: https://img.shields.io/badge/AUR-rgba(0,0,0,0)?style=flat-square&logo=archlinux
 [DEB]: https://img.shields.io/badge/.deb-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red

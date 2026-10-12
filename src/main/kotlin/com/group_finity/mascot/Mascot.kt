@@ -55,7 +55,7 @@ private val lastId = AtomicInteger()
  * A mascot object using the given [imageSet].
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Mascot(var imageSet: String) {
     private val id: Int = lastId.incrementAndGet()
@@ -346,7 +346,7 @@ class Mascot(var imageSet: String) {
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
-        if (activeEnvironment == "kde") {
+        if (NativeFactory.current == "kde") {
             popup.add(restoreWindowsMenu)
         }
         popup.add(debugMenu)

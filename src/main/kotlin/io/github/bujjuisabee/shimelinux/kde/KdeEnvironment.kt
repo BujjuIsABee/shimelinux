@@ -22,17 +22,23 @@
 
 package io.github.bujjuisabee.shimelinux.kde
 
+import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.ui.FlatPopupFactory
+import com.group_finity.mascot.Platform
 import com.group_finity.mascot.applyInsets
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.Toolkit
+import javax.swing.PopupFactory
+import javax.swing.UIManager
 
 /**
- * An environment that supports interactive windows via [KWin] scripting.
+ * An environment that supports interactive windows via [KWin].
  */
 class KdeEnvironment : Environment() {
     override val workArea: Area
@@ -43,9 +49,17 @@ class KdeEnvironment : Environment() {
 
     private val windowCache = mutableMapOf<String, Boolean>()
 
-    override fun tick() {
-        super.tick()
+    init {
+        if (Platform.sessionType == "wayland") {
+            PopupFactory.setSharedInstance(WaylandPopupFactory)
+        } else if (UIManager.getLookAndFeel() is FlatLaf) {
+            PopupFactory.setSharedInstance(FlatPopupFactory())
+        } else {
+            PopupFactory.setSharedInstance(PopupFactory())
+        }
+    }
 
+    override fun tick() {
         // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect = Rectangle(

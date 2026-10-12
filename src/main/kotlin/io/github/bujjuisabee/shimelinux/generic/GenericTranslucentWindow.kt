@@ -23,9 +23,10 @@
 package io.github.bujjuisabee.shimelinux.generic
 
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.Platform
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import com.group_finity.mascot.sessionType
+// import com.group_finity.mascot.sessionType
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Component
@@ -54,16 +55,8 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
     init {
         System.setProperty("sun.awt.noerasebackground", "true") // Reduces flickering
 
-        // Force floating windows on X11 tiling window managers
-        if (sessionType == "x11") {
-            val session = System.getenv("DESKTOP_SESSION")
-            if (session.contains("awesome") ||
-                session.contains("dwm") ||
-                session.contains("i3") ||
-                session.contains("xmonad")
-            ) {
-                type = Type.POPUP
-            }
+        if (Platform.isTilingWindowManager) {
+            type = Type.POPUP
         }
 
         background = Color(0, 0, 0, 0)

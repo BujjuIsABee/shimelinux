@@ -22,8 +22,8 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.Platform
 import com.group_finity.mascot.applyInsets
-import com.group_finity.mascot.desktopType
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
@@ -33,6 +33,8 @@ import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.Toolkit
+import javax.swing.PopupFactory
+import kotlin.collections.map
 
 /**
  * An environment that works properly when mascots are not displayed by AWT components.
@@ -43,6 +45,10 @@ class WaylandEnvironment : Environment() {
 
     override val activeIE = Area()
     override val activeIETitle = ""
+
+    init {
+        PopupFactory.setSharedInstance(WaylandPopupFactory)
+    }
 
     override fun tick() {
         // Update screen bounds
@@ -62,18 +68,23 @@ class WaylandEnvironment : Environment() {
         screen.set(screenRect)
 
         // Update cursor position
-        val cursorPos = when (desktopType) {
-            "Hyprland" -> runCatching {
-                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
-                Point(x, y)
-            }.getOrNull()
+        cursor.set(
+            when (Platform.currentDesktop) {
+                "hyprland" -> runCatching {
+                    val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
+                    Point(x, y)
+                }.getOrNull()
 
-            "KDE" -> KWin.cursorPosition
+                "mango" -> runCatching {
+                    val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }
+                    Point(x.toDouble().toInt(), y.toDouble().toInt())
+                }.getOrNull()
 
-            else -> absoluteCursorPosition
-        }
+                "kde" -> KWin.cursorPosition
 
-        cursor.set(cursorPos ?: Point(0, 0))
+                else -> absoluteCursorPosition
+            } ?: Point(0, 0)
+        )
 
         activeIE.isVisible = false
     }
@@ -88,7 +99,7 @@ class WaylandEnvironment : Environment() {
 
     companion object {
         /**
-         * An approximation of the absolute cursor position based on the values reported by the compositor.
+         * An approximation of the absolute cursor position based on the relative position provided by the compositor.
          */
         var absoluteCursorPosition: Point? = null
     }

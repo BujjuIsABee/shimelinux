@@ -49,12 +49,6 @@ import javax.swing.event.HyperlinkEvent
  * @author Kilkakon
  */
 class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
-    private val imagePanel: JPanel
-    private val splashImageLabel: JLabel
-    private val footerPanel: JPanel
-    private val closeButton: JButton
-    private val editorPane: JEditorPane
-
     init {
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         iconImage = icon
@@ -63,20 +57,20 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
 
-        imagePanel = JPanel()
+        val imagePanel = JPanel()
         imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
 
         val splashImage = checkNotNull(config.getInformation("SplashImage"))
-        splashImageLabel = JLabel()
+        val splashImageLabel = JLabel()
         splashImageLabel.alignmentX = CENTER_ALIGNMENT
         splashImageLabel.icon = ImageIcon(getPath("img", imageSet, splashImage).toString())
 
         imagePanel.add(splashImageLabel)
 
-        footerPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
+        val footerPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
         footerPanel.preferredSize = Dimension(380, 36)
 
-        closeButton = JButton(localize("Close"))
+        val closeButton = JButton(localize("Close"))
         closeButton.minimumSize = Dimension(95, 23)
         closeButton.maximumSize = Dimension(130, 26)
         closeButton.preferredSize = Dimension(130, 26)
@@ -87,7 +81,7 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         val textColor = UIManager.getColor("Label.foreground")
         val linkColor = UIManager.getColor("textHighlight")
 
-        editorPane = JEditorPane()
+        val editorPane = JEditorPane()
         editorPane.border = null
         editorPane.isEditable = false
         editorPane.contentType = "text/html"

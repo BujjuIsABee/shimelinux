@@ -62,7 +62,7 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  * The entry point of the program.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 object Main {
     /**
@@ -372,6 +372,9 @@ object Main {
             loadResource("img/icon.png").use { icon.setImage(it) }
             icon.setStatus("ShimeLinux")
             icon.setTooltip("ShimeLinux")
+            icon.menu.callback = {
+                createMascot()
+            }
 
             val callShimejiMenu = MenuItem(localize("CallShimeji")) {
                 createMascot()
@@ -429,11 +432,11 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            if (activeEnvironment == "kde") {
+            if (NativeFactory.current == "kde") {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
-            if (activeEnvironment != "wayland") {
+            if (NativeFactory.current == "wayland") {
                 allowedBehaviorsSubmenu.add(multiscreenMenu)
             }
 
@@ -446,34 +449,20 @@ object Main {
 
             val settingsMenu = MenuItem(localize("Settings")) {
                 // Disable Wayland popup factory so dropdown menus will be displayed correctly
-                if (activeEnvironment == "wayland") {
+                if (NativeFactory.current == "wayland" || NativeFactory.current == "kde" && Platform.sessionType == "wayland") {
                     PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
                 }
 
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                if (activeEnvironment == "wayland") {
+                if (NativeFactory.current == "wayland" || NativeFactory.current == "kde" && Platform.sessionType == "wayland") {
                     PopupFactory.setSharedInstance(WaylandPopupFactory)
                 }
 
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()
                     NativeFactory.resetInstance()
-
-                    if (activeEnvironment == "kde" && !allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
-                        allowedBehaviorsSubmenu.add(throwingMenu, 3)
-                        icon.menu.add(restoreWindowsMenu, 3)
-                    } else if (activeEnvironment != "kde" && allowedBehaviorsSubmenu.entries.contains(throwingMenu)) {
-                        allowedBehaviorsSubmenu.remove(throwingMenu)
-                        icon.menu.remove(restoreWindowsMenu)
-                    }
-
-                    if (activeEnvironment != "wayland" && !allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
-                        allowedBehaviorsSubmenu.add(multiscreenMenu, 4)
-                    } else if (activeEnvironment == "wayland" && allowedBehaviorsSubmenu.entries.contains(multiscreenMenu)) {
-                        allowedBehaviorsSubmenu.remove(multiscreenMenu)
-                    }
                 }
                 if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
                     val isExitOnLastRemoved = manager.isExitOnLastRemoved
@@ -634,8 +623,6 @@ object Main {
             val pauseAllMenu = MenuItem(localize("PauseAnimations"))
             pauseAllMenu.callback = {
                 manager.togglePauseAll()
-
-                // Update pause menu item text
                 pauseAllMenu.text = localize(if (manager.isPaused) "ResumeAnimations" else "PauseAnimations")
             }
 
@@ -646,7 +633,7 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            if (activeEnvironment == "kde") {
+            if (NativeFactory.current == "kde") {
                 icon.menu.add(restoreWindowsMenu)
             }
             icon.menu.add(JSeparator())

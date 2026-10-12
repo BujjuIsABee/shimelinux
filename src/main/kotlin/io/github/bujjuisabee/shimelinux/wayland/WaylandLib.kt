@@ -84,7 +84,7 @@ object WaylandLib {
      */
     interface MouseEventReceiver {
         /**
-         * Called when the layer surface receives mouse events, providing information about the cursor state via
+         * Called when the layer surface receives mouse events, providing information about the state of the cursor via
          * [leftPressed], [rightPressed], [leftReleased], and [rightReleased], and its position via [positionX] and
          * [positionY].
          */

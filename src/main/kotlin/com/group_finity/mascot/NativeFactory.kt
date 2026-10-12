@@ -22,15 +22,11 @@
 
 package com.group_finity.mascot
 
-import com.formdev.flatlaf.FlatLaf
-import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.image.BufferedImage
-import javax.swing.PopupFactory
-import javax.swing.UIManager
 
 import io.github.bujjuisabee.shimelinux.generic.NativeFactoryImpl as GenericNativeFactory
 import io.github.bujjuisabee.shimelinux.kde.NativeFactoryImpl as KdeNativeFactory
@@ -38,40 +34,7 @@ import io.github.bujjuisabee.shimelinux.wayland.NativeFactoryImpl as WaylandNati
 import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
 /**
- * Gets the name of the current desktop environment.
- */
-val desktopType: String? = System.getenv("XDG_CURRENT_DESKTOP")
-
-/**
- * Gets the name of the current display server protocol (i.e., Wayland or X11).
- */
-val sessionType: String? = System.getenv("XDG_SESSION_TYPE")
-
-/**
- * Gets the name of the environment chosen automatically based on the [desktopType].
- */
-val defaultEnvironment: String = when (desktopType) {
-    "KDE" -> "kde"
-    "COSMIC", "Hyprland", "niri", "sway" -> "wayland"
-    else -> "generic"
-}
-
-/**
- * Gets the name of the current environment.
- */
-val activeEnvironment: String
-    get() = when (getProperty("Environment", "")) {
-        "kde" if (desktopType == "KDE") -> "kde"
-        "wayland" if (sessionType == "wayland") -> "wayland"
-        "generic" -> "generic"
-        "virtual" -> "virtual"
-        else -> defaultEnvironment
-    }
-
-/**
  * A factory for platform-specific objects.
- *
- * @author Kilkakon
  */
 abstract class NativeFactory {
     /**
@@ -92,29 +55,41 @@ abstract class NativeFactory {
     companion object {
         lateinit var instance: NativeFactory
 
+        /**
+         * The name of the environment chosen automatically based [Platform.currentDesktop]
+         */
+        val default: String = when {
+            Platform.currentDesktop.contains("kde") -> "kde"
+            Platform.isTilingWindowManager -> "wayland"
+            else -> "generic"
+        }
+
+        /**
+         * The name of the current environment.
+         */
+        val current: String
+            get() = when (getProperty("Environment", "")) {
+                "kde" if (Platform.currentDesktop.contains("kde")) -> "kde"
+                "wayland" if (Platform.supportsWaylandLayerSurfaces) -> "wayland"
+                "generic" -> "generic"
+                "virtual" -> "virtual"
+                else -> default
+            }
+
         init {
             resetInstance()
         }
 
         /**
-         * Resets [instance] based on [activeEnvironment].
+         * Sets [instance] to [current]. The shared popup factory instance is also updated; if [current] is `wayland`, the
+         * [WaylandPopupFactory] will be used.
          */
         fun resetInstance() {
-            instance = when (activeEnvironment) {
+            instance = when (current) {
                 "kde" -> KdeNativeFactory()
                 "wayland" -> WaylandNativeFactory()
-                "generic" -> GenericNativeFactory()
                 "virtual" -> VirtualNativeFactory()
                 else -> GenericNativeFactory()
-            }
-
-            // Reset popup factory
-            if (activeEnvironment == "wayland") {
-                PopupFactory.setSharedInstance(WaylandPopupFactory)
-            } else if (UIManager.getLookAndFeel() is FlatLaf) {
-                PopupFactory.setSharedInstance(FlatPopupFactory())
-            } else {
-                PopupFactory.setSharedInstance(PopupFactory())
             }
         }
     }

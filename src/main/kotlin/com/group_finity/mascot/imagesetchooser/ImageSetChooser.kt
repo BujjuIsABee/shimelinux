@@ -23,9 +23,9 @@
 package com.group_finity.mascot.imagesetchooser
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.Platform
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
-import com.group_finity.mascot.defaultEnvironment
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
@@ -67,20 +67,6 @@ import kotlin.io.path.relativeTo
  * @author Kilkakon
  */
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
-    private val listPanel: JPanel
-    private val leftList: ShimejiList
-    private val rightList: ShimejiList
-    private val listScrollPane: JScrollPane
-    private val headerPanel: JPanel
-    private val labelsPanel: JPanel
-    private val clearAllLabel: JLabel
-    private val selectAllLabel: JLabel
-    private val footerPanel: JPanel
-    private val moreButton: JButton
-    private val useSelectedButton: JButton
-    private val useAllButton: JButton
-    private val cancelButton: JButton
-
     private val confPath = getPath("conf", "settings.properties")
     private val topDir = getPath("img")
     private var selectAllSets = false
@@ -93,35 +79,32 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setIconImage(icon)
         title = localize("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)
+        isResizable = !Platform.isTilingWindowManager
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BorderLayout()
         rootPane.border = BorderFactory.createEmptyBorder(10, 10, 0, 10)
 
-        if (defaultEnvironment == "wayland") {
-            isResizable = false
-        }
+        val listPanel = JPanel(GridLayout(1, 2, 0, 0))
 
-        listPanel = JPanel(GridLayout(1, 2, 0, 0))
-
-        leftList = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        val leftList = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
         leftList.border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
 
-        rightList = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
+        val rightList = ShimejiList(DefaultListModel<ImageSetChooserPanel>())
         rightList.border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
 
         listPanel.add(leftList)
         listPanel.add(rightList)
 
-        listScrollPane = JScrollPane(listPanel)
+        val listScrollPane = JScrollPane(listPanel)
         listScrollPane.preferredSize = Dimension(518, 100)
         listScrollPane.verticalScrollBar.unitIncrement = 10
 
-        headerPanel = JPanel(BorderLayout())
+        val headerPanel = JPanel(BorderLayout())
 
-        labelsPanel = JPanel(FlowLayout())
+        val labelsPanel = JPanel(FlowLayout())
         labelsPanel.layout = BoxLayout(labelsPanel, BoxLayout.X_AXIS)
 
-        clearAllLabel = JLabel("<html><u>" + localize("ClearAll") + "</u></html>")
+        val clearAllLabel = JLabel("<html><u>" + localize("ClearAll") + "</u></html>")
         clearAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         clearAllLabel.foreground = UIManager.getColor("textHighlight")
         clearAllLabel.addMouseListener(object : MouseAdapter() {
@@ -131,7 +114,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         })
 
-        selectAllLabel = JLabel("<html><u>" + localize("SelectAll") + "</u></html>")
+        val selectAllLabel = JLabel("<html><u>" + localize("SelectAll") + "</u></html>")
         selectAllLabel.cursor = Cursor(Cursor.HAND_CURSOR)
         selectAllLabel.foreground = UIManager.getColor("textHighlight")
         selectAllLabel.addMouseListener(object : MouseAdapter() {
@@ -148,9 +131,9 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         headerPanel.add(JLabel(localize("SelectImageSetsToUse")), BorderLayout.WEST)
         headerPanel.add(labelsPanel, BorderLayout.EAST)
 
-        footerPanel = JPanel(FlowLayout(FlowLayout.CENTER))
+        val footerPanel = JPanel(FlowLayout(FlowLayout.CENTER))
 
-        moreButton = JButton(localize("More"))
+        val moreButton = JButton(localize("More"))
         moreButton.addActionListener {
             try {
                 Desktop.browseDirectory(getPath("img").toString())
@@ -166,7 +149,7 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        useSelectedButton = JButton(localize("UseSelected"))
+        val useSelectedButton = JButton(localize("UseSelected"))
         useSelectedButton.addActionListener {
             imageSets.clear()
 
@@ -187,13 +170,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             dispose()
         }
 
-        useAllButton = JButton(localize("UseAll"))
+        val useAllButton = JButton(localize("UseAll"))
         useAllButton.addActionListener {
             wasCancelled = false
             dispose()
         }
 
-        cancelButton = JButton(localize("Cancel"))
+        val cancelButton = JButton(localize("Cancel"))
         cancelButton.addActionListener { dispose() }
 
         footerPanel.add(moreButton)

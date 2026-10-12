@@ -23,7 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.desktopType
+import com.group_finity.mascot.Platform
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Point
@@ -79,7 +79,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     }
 
     /**
-     * Displays the given [rgb] pixel data on the layer surface, and updates its input region if [useMask] is true.
+     * Displays the given [rgb] pixel data on the layer surface. If [useMask] is true, the surface's input region will
+     * be updated as well.
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
@@ -113,7 +114,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
      *
      * If [leftPressed] or [rightPressed] is true, a `MOUSE_PRESSED` event will be sent. If [leftReleased] or
      * [rightReleased] is true, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] indicates that the
-     * cursor has moved, a `MOUSE_MOVED` (or `MOUSE_DRAGGED` if [leftPressed] or [rightPressed] are true) will be sent.
+     * cursor has moved, a `MOUSE_MOVED` (or `MOUSE_DRAGGED` if [leftPressed] or [rightPressed] is true) event will be
+     * sent.
      */
     fun dispatchEvents(
         component: Component,
@@ -135,13 +137,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
             button = button or MouseEvent.BUTTON3
         }
 
-        val alwaysUpdateAbsoluteLocation = when (desktopType) {
-            "Hyprland", "KDE" -> true
-            else -> false
-        }
-
         isDragging = leftPressed || (isDragging && !leftReleased)
-        if (!isDragging || alwaysUpdateAbsoluteLocation) {
+        if (!isDragging || Platform.providesAbsoluteCursorPosition) {
             absoluteLocation = location
         }
 

@@ -22,6 +22,8 @@
 
 package io.github.bujjuisabee.shimelinux.virtual
 
+import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
@@ -36,6 +38,8 @@ import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
+import javax.swing.PopupFactory
+import javax.swing.UIManager
 
 /**
  * An environment that displays mascots within a single window.
@@ -52,6 +56,12 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
+        if (UIManager.getLookAndFeel() is FlatLaf) {
+            PopupFactory.setSharedInstance(FlatPopupFactory())
+        } else {
+            PopupFactory.setSharedInstance(PopupFactory())
+        }
+
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         display.iconImage = icon
         display.title = "ShimeLinux"
@@ -95,7 +105,7 @@ class VirtualEnvironment : Environment() {
     }
 
     /**
-     * Adds a [mascot] to the environment.
+     * Adds the [mascot] to the environment.
      */
     fun addShimeji(mascot: JPanel) {
         mascot.isOpaque = false
