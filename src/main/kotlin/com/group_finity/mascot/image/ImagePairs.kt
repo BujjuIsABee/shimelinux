@@ -30,6 +30,7 @@ import kotlin.io.path.Path
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()

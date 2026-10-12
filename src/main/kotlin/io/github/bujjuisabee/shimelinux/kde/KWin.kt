@@ -34,6 +34,8 @@ import java.io.File
 
 /**
  * Manages a script used to interact with the KWin compositor.
+ *
+ * @author Bujju
  */
 object KWin {
     private var dbus: DBusConnection

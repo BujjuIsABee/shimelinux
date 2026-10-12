@@ -31,6 +31,7 @@ import java.util.ResourceBundle
  * An action that creates a new mascot while [mascot] moves.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 @Suppress("unused")
 class BreedMove(

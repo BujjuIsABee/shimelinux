@@ -76,6 +76,7 @@ private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
  * The settings menu.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val themeComboBox: JComboBox<String>

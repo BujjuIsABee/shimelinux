@@ -64,7 +64,7 @@ import kotlin.io.path.relativeTo
 /**
  * A menu to choose which image sets to use.
  *
- * @author Kilkakon
+ * @author Bujju
  */
 class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val confPath = getPath("conf", "settings.properties")

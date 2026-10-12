@@ -31,6 +31,7 @@ import java.util.ResourceBundle
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 @Suppress("unused")
 class SelfDestruct(

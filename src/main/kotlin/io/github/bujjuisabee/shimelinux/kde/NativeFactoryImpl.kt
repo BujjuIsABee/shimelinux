@@ -37,6 +37,8 @@ import java.awt.image.BufferedImage
  * A native factory for KDE Plasma that supports interactive windows. If [Platform.sessionType] is `wayland`, mascots
  * will be displayed on Wayland layer surfaces via [WaylandTranslucentLayer]. Otherwise, they will be displayed via
  * [GenericTranslucentWindow].
+ *
+ * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = KdeEnvironment()

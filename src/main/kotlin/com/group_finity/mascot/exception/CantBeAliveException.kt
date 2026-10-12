@@ -27,6 +27,7 @@ package com.group_finity.mascot.exception
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class CantBeAliveException : Exception {
     constructor(message: String) : super(message)

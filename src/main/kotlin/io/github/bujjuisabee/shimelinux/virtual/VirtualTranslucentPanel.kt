@@ -32,6 +32,7 @@ import javax.swing.JPanel
  * A panel that displays a mascot for the [VirtualEnvironment].
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     private var image: VirtualNativeImage? = null

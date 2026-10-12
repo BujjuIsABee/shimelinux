@@ -29,6 +29,7 @@ import java.awt.Point
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Location {
     var x = 0

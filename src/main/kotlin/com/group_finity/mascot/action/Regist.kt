@@ -39,6 +39,7 @@ private val logger: Logger = Logger.getLogger(Regist::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Regist(
     schema: ResourceBundle,

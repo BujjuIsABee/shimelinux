@@ -27,6 +27,7 @@ package com.group_finity.mascot.script
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 abstract class Variable {
     /**
@@ -40,7 +41,7 @@ abstract class Variable {
     abstract fun initFrame()
 
     /**
-     * Gets the value of the variable.
+     * Gets the value of the variable, passing the given [variables].
      */
     abstract fun get(variables: VariableMap): Any?
 

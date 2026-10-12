@@ -33,6 +33,7 @@ import java.util.ResourceBundle
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class ThrowIE(
     schema: ResourceBundle,

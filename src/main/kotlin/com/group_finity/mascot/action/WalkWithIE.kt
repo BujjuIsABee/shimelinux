@@ -37,6 +37,7 @@ private val logger: Logger = Logger.getLogger(WalkWithIE::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class WalkWithIE(
     schema: ResourceBundle,

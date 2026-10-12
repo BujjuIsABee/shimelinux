@@ -63,6 +63,7 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 object Main {
     /**
@@ -801,6 +802,7 @@ object Main {
      *
      * @author LavenderSnek
      * @author Kilkakon
+     * @author Bujju
      */
     private fun setActiveImageSets(newImageSets: MutableList<String>?) {
         if (newImageSets == null) return

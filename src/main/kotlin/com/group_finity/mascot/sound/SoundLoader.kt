@@ -31,10 +31,11 @@ import javax.sound.sampled.LineEvent
  * Loads sounds.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 object SoundLoader {
     /**
-     * Loads a sound. The clip is not opened until the sound is played.
+     * Loads a sound at [filename] with the specified [volume]. The clip is not opened until the sound is played.
      */
     @JvmStatic
     fun load(filename: String, volume: Float) {

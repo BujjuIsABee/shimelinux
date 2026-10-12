@@ -28,6 +28,10 @@ import java.util.Objects
 
 /**
  * A cross-platform native image that stores [managedImage].
+ *
+ * @author Yuki Yamada
+ * @author Shimeji-ee Group
+ * @author Bujju
  */
 class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
     /**

@@ -35,6 +35,7 @@ import kotlin.concurrent.timer
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 abstract class Environment {
     /**

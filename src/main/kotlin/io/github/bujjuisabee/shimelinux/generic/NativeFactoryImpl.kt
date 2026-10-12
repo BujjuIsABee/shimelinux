@@ -30,6 +30,10 @@ import java.awt.image.BufferedImage
 
 /**
  * A cross-platform native factory.
+ *
+ * @author Yuki Yamada
+ * @author Shimeji-ee Group
+ * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = GenericEnvironment()

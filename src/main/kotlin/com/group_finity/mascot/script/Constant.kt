@@ -27,6 +27,7 @@ package com.group_finity.mascot.script
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Constant(private val value: Any?) : Variable() {
     override fun init() {}

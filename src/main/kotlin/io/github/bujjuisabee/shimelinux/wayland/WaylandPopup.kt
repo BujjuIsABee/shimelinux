@@ -37,6 +37,8 @@ import javax.swing.UIManager
 
 /**
  * A popup menu that is displayed on a Wayland layer surface.
+ *
+ * @author Bujju
  */
 class WaylandPopup(
     private val owner: Component?,
@@ -83,7 +85,9 @@ class WaylandPopup(
                 closeSubmenu()
             }
 
-            MenuSelectionManager.defaultManager().selectedPath = listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>().toTypedArray()
+            MenuSelectionManager.defaultManager().selectedPath =
+                listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
+                    .toTypedArray()
 
             updateImage()
         }

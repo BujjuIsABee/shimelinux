@@ -27,6 +27,8 @@ import java.awt.image.BufferedImage
 
 /**
  * Stores pixel data from [managedImage] so it can be displayed on a Wayland layer surface.
+ *
+ * @author Bujju
  */
 class WaylandNativeImage(managedImage: BufferedImage) : NativeImage {
     /**

@@ -33,6 +33,8 @@ import kotlin.system.exitProcess
 /**
  * Creates a Wayland layer surface via [WaylandLib]. Mouse events will be sent to [mouseEventReceiver]. If [useMask] is
  * true, the surface's input region will be updated whenever [setImage] is called.
+ *
+ * @author Bujju
  */
 class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long = try {

@@ -34,6 +34,7 @@ import java.util.ResourceBundle
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 abstract class ActionBase(
     internal val schema: ResourceBundle,
@@ -147,7 +148,7 @@ abstract class ActionBase(
     internal abstract fun tick()
 
     /**
-     * Puts a variable in [variables].
+     * Puts a variable with the given [key] and [value] in [variables].
      */
     internal fun putVariable(key: String, value: Any?) {
         synchronized(variables) {
@@ -156,7 +157,8 @@ abstract class ActionBase(
     }
 
     /**
-     * Returns the value of a variable in [variables], cast to [T], or [defaultValue] if the variable does not exist.
+     * Returns the value of the variable in [variables] with the specified [name], cast as [T], or [defaultValue] if the
+     * variable does not exist.
      */
     internal inline fun <reified T> eval(name: String, defaultValue: T): T = synchronized(variables) {
         variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue

@@ -44,6 +44,7 @@ private val logger: Logger = Logger.getLogger(Breed.Delegate::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Breed(
     schema: ResourceBundle,
@@ -70,6 +71,7 @@ class Breed(
      * Handles the shared functionality of breeding actions.
      *
      * @author LavenderSnek
+     * @author Bujju
      */
     class Delegate(private val action: ActionBase) {
         /**

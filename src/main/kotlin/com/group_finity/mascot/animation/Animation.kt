@@ -32,6 +32,7 @@ import com.group_finity.mascot.script.VariableMap
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Animation(
     private val condition: Variable,
@@ -49,7 +50,7 @@ class Animation(
     }
 
     /**
-     * Whether the conditions for the animation to play are currently met.
+     * Evaluates whether the conditions for the animation to play are currently met using the given [variables].
      */
     fun isEffective(variables: VariableMap): Boolean = condition.get(variables) as Boolean
 
@@ -68,7 +69,7 @@ class Animation(
     }
 
     /**
-     * Progresses the animation.
+     * Progresses the animation for [mascot] to the frame at [time].
      */
     fun next(mascot: Mascot, time: Int) {
         checkNotNull(getPoseAt(time)).next(mascot)

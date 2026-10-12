@@ -38,6 +38,7 @@ import kotlin.math.abs
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 open class Fall(
     schema: ResourceBundle,

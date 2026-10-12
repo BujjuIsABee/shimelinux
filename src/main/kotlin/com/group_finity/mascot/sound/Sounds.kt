@@ -29,6 +29,7 @@ import javax.sound.sampled.Clip
  * Stores sounds.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 object Sounds {
     private val sounds = mutableMapOf<String, Sound>()

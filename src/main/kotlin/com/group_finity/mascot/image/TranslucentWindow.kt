@@ -29,6 +29,7 @@ import java.awt.Component
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 interface TranslucentWindow {
     /**

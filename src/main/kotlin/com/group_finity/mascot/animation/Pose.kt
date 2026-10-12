@@ -32,6 +32,7 @@ import java.nio.file.Path
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Pose(
     private val leftImage: Path?,

@@ -29,6 +29,7 @@ import com.group_finity.mascot.action.Action
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 interface IActionBuilder {
     /**
@@ -37,7 +38,7 @@ interface IActionBuilder {
     fun validate()
 
     /**
-     * Builds the action and returns it.
+     * Builds the action, passing the given [params].
      */
     fun buildAction(params: Map<String, String>): Action
 }

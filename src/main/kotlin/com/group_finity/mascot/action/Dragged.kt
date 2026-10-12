@@ -35,6 +35,7 @@ import kotlin.math.roundToInt
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Dragged(
     schema: ResourceBundle,

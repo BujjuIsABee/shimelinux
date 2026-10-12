@@ -30,6 +30,7 @@ import kotlin.math.abs
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
     val y: Int

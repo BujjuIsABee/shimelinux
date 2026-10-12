@@ -27,5 +27,6 @@ package com.group_finity.mascot.image
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 interface NativeImage

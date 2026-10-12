@@ -47,6 +47,10 @@ private val gc: GraphicsConfiguration? =
 
 /**
  * Displays a mascot on a [JWindow].
+ *
+ * @author Yuki Yamada
+ * @author Shimeji-ee Group
+ * @author Bujju
  */
 class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
     private var image: GenericNativeImage? = null

@@ -46,6 +46,7 @@ private val logger: Logger = Logger.getLogger(ActionBuilder::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema

@@ -39,6 +39,7 @@ private val logger: Logger = Logger.getLogger(Interact::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 @Suppress("unused")
 class Interact(

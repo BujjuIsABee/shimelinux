@@ -30,6 +30,7 @@ import java.awt.Rectangle
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
@@ -49,7 +50,7 @@ class ComplexArea {
     }
 
     /**
-     * Sets the bounds of the area with the [name].
+     * Sets the bounds of the area with the specified [name].
      */
     fun set(name: String, value: Rectangle) {
         if (areaMap.values.any { it.toRectangle() == value }) return

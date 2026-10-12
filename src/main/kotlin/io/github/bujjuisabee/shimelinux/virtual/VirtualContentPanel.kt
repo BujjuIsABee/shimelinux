@@ -36,6 +36,7 @@ import javax.swing.JPanel
  * determined by [preferredSize], [background], and [image] respectively.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class VirtualContentPanel(
     preferredSize: Dimension,

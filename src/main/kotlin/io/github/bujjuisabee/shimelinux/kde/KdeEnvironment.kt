@@ -39,6 +39,8 @@ import javax.swing.UIManager
 
 /**
  * An environment that supports interactive windows via [KWin].
+ *
+ * @author Bujju
  */
 class KdeEnvironment : Environment() {
     override val workArea: Area

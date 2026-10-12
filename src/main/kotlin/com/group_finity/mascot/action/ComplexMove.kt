@@ -41,6 +41,7 @@ private val logger: Logger = Logger.getLogger(ComplexMove::class.java.name)
  * An action that creates a new mascot and/or scans for an affordance while [mascot] moves.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 @Suppress("unused")
 class ComplexMove(

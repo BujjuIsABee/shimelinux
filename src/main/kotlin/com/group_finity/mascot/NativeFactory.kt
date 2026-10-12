@@ -35,6 +35,8 @@ import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNati
 
 /**
  * A factory for platform-specific objects.
+ *
+ * @author Bujju
  */
 abstract class NativeFactory {
     /**

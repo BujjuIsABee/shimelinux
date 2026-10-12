@@ -32,6 +32,7 @@ import java.awt.Point
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class MascotEnvironment(private val mascot: Mascot) {
     private val impl = NativeFactory.instance.environment

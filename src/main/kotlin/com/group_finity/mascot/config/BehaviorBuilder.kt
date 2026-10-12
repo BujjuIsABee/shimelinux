@@ -40,6 +40,7 @@ private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class BehaviorBuilder(
     private val configuration: Configuration,
@@ -128,7 +129,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Checks if the conditions for the behavior are currently met.
+     * Evaluates whether the conditions for the behavior are currently met using the given [context].
      */
     fun isEffective(context: VariableMap): Boolean {
         return frequency != 0 && conditions.filterNotNull().none {

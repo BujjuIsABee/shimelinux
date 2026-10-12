@@ -28,6 +28,8 @@ import java.awt.Component
 
 /**
  * Displays a mascot on a Wayland layer surface.
+ *
+ * @author Bujju
  */
 class WaylandTranslucentLayer : TranslucentWindow, WaylandLib.MouseEventReceiver {
     private val layer = WaylandLayer(this, true)

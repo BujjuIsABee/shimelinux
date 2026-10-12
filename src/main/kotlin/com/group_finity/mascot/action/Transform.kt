@@ -40,6 +40,7 @@ private val logger: Logger = Logger.getLogger(Transform::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 @Suppress("unused")
 class Transform(

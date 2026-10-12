@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage
  * A native factory for windowed mode, where mascots are all displayed within a single window.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = VirtualEnvironment()

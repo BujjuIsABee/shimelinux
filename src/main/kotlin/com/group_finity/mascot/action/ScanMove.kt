@@ -42,6 +42,7 @@ private val logger: Logger = Logger.getLogger(ScanMove::class.java.name)
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 @Suppress("unused")
 class ScanMove(

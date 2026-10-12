@@ -29,5 +29,6 @@ import java.awt.image.BufferedImage
  * Stores [managedImage] so it can be displayed in the [VirtualEnvironment].
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage

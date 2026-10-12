@@ -38,6 +38,8 @@ import kotlin.collections.map
 
 /**
  * An environment that works properly when mascots are not displayed by AWT components.
+ *
+ * @author Bujju
  */
 class WaylandEnvironment : Environment() {
     override val workArea: Area
@@ -85,8 +87,6 @@ class WaylandEnvironment : Environment() {
                 else -> absoluteCursorPosition
             } ?: Point(0, 0)
         )
-
-        activeIE.isVisible = false
     }
 
     override fun moveActiveIE(point: Point) {}

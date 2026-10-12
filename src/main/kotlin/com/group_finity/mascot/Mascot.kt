@@ -56,6 +56,7 @@ private val lastId = AtomicInteger()
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Mascot(var imageSet: String) {
     private val id: Int = lastId.incrementAndGet()

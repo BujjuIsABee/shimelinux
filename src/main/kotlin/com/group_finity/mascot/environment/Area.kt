@@ -29,18 +29,14 @@ import java.awt.Rectangle
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Area {
-    /**
-     * Whether there is an active interactive window (if the rectangle represents its bounds).
-     */
     var isVisible = true
-
     var left = 0
     var top = 0
     var right = 0
     var bottom = 0
-
     var dleft = 0
     var dtop = 0
     var dright = 0

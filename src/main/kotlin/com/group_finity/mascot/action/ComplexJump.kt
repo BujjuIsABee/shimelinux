@@ -42,6 +42,7 @@ private val logger: Logger = Logger.getLogger(ComplexJump::class.java.name)
  * An action that creates a new mascot and/or scans for an affordance while [mascot] jumps.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 @Suppress("unused")
 class ComplexJump(

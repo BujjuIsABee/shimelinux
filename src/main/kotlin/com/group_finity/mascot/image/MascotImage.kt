@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class MascotImage(val image: NativeImage, val center: Point, val size: Dimension) {
     constructor(image: BufferedImage, center: Point) : this(

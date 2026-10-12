@@ -30,6 +30,7 @@ import java.awt.event.MouseEvent
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 interface Behavior {
     /**

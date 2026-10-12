@@ -37,6 +37,10 @@ import javax.swing.UIManager
 
 /**
  * A cross-platform environment.
+ *
+ * @author Yuki Yamada
+ * @author Shimeji-ee Group
+ * @author Bujju
  */
 class GenericEnvironment : Environment() {
     override val workArea: Area
@@ -71,15 +75,15 @@ class GenericEnvironment : Environment() {
         }
 
         screen.set(screenRect)
-
-        activeIE.isVisible = false
     }
 
     override fun moveActiveIE(point: Point) {}
 
     override fun restoreIE() {}
 
-    override fun refreshCache() {}
+    override fun refreshCache() {
+        // I feel so refreshed
+    }
 
     override fun dispose() {}
 }

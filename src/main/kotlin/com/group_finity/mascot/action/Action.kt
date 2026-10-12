@@ -29,6 +29,7 @@ import com.group_finity.mascot.Mascot
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 interface Action {
     /**

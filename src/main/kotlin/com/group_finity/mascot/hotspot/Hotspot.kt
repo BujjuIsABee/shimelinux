@@ -30,10 +30,11 @@ import java.awt.Shape
  * A clickable area on a mascot.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class Hotspot(val behavior: String?, val shape: Shape) {
     /**
-     * Checks if [point] is inside the hotspot.
+     * Checks if [point] is inside the hotspot for the given [mascot].
      */
     fun contains(mascot: Mascot, point: Point): Boolean = shape.contains(
         if (mascot.isLookRight) Point(mascot.bounds.width - point.x, point.y) else point

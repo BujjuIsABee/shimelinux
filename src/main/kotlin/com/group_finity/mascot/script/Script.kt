@@ -37,6 +37,7 @@ private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
     private val compiled: CompiledScript = try {

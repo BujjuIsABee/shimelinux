@@ -47,6 +47,7 @@ import javax.swing.UIManager
  * An environment that displays mascots within a single window.
  *
  * @author Kilkakon
+ * @author Bujju
  */
 class VirtualEnvironment : Environment() {
     override val workArea: Area
@@ -96,8 +97,6 @@ class VirtualEnvironment : Environment() {
         val point = info?.location ?: Point(0, 0)
         SwingUtilities.convertPointFromScreen(point, display.contentPane)
         cursor.set(point)
-
-        activeIE.isVisible = false
     }
 
     override fun moveActiveIE(point: Point) {}

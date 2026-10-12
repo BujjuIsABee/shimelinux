@@ -30,6 +30,7 @@ import javax.script.Bindings
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 class VariableMap : Bindings {
     val rawMap = linkedMapOf<String, Variable>()

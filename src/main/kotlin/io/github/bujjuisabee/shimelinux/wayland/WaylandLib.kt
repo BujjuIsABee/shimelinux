@@ -30,6 +30,8 @@ import kotlin.system.exitProcess
 
 /**
  * A foreign function interface for creating and managing Wayland layer surfaces.
+ *
+ * @author Bujju
  */
 object WaylandLib {
     init {

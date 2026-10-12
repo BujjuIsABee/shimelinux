@@ -33,6 +33,7 @@ import kotlin.math.sqrt
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
+ * @author Bujju
  */
 open class Jump(
     schema: ResourceBundle,
