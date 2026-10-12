@@ -29,7 +29,7 @@ import java.awt.event.MouseEvent
  * Defines a behavior, which triggers actions for a mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 interface Behavior {
     /**

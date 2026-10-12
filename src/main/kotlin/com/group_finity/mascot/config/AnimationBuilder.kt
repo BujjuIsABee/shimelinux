@@ -51,7 +51,7 @@ private val logger: Logger = Logger.getLogger(AnimationBuilder::class.java.name)
  * Creates an animation from an Animation node.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class AnimationBuilder(
     private val schema: ResourceBundle,

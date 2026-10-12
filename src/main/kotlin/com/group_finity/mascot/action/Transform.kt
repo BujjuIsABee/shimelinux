@@ -39,7 +39,7 @@ private val logger: Logger = Logger.getLogger(Transform::class.java.name)
  * An action that causes the mascot to transform into another mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Suppress("unused")
 class Transform(

@@ -43,7 +43,7 @@ private val logger: Logger = Logger.getLogger(Breed.Delegate::class.java.name)
  * An action that creates a new mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Breed(
     schema: ResourceBundle,

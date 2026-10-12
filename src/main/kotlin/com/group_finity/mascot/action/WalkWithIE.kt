@@ -36,7 +36,7 @@ private val logger: Logger = Logger.getLogger(WalkWithIE::class.java.name)
  * An action that causes the mascot to walk while holding a window.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class WalkWithIE(
     schema: ResourceBundle,

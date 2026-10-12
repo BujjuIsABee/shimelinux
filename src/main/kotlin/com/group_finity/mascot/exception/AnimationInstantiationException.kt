@@ -26,7 +26,7 @@ package com.group_finity.mascot.exception
  * An exception thrown when an animation cannot be instantiated.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class AnimationInstantiationException : Exception {
     @Suppress("unused")

@@ -37,7 +37,7 @@ import kotlin.math.abs
  * -Signery
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 open class Fall(
     schema: ResourceBundle,

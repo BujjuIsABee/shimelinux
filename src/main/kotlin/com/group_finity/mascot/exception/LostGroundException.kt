@@ -26,6 +26,6 @@ package com.group_finity.mascot.exception
  * An exception thrown when a mascot needs to be reset.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class LostGroundException : Exception()

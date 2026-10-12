@@ -31,7 +31,7 @@ import com.group_finity.mascot.script.VariableMap
  * An animation for a mascot that can be played by an action.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Animation(
     private val condition: Variable,

@@ -30,7 +30,7 @@ import java.util.ResourceBundle
  * An action that is applied when it is initialized, then immediately ends.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 abstract class InstantAction(
     schema: ResourceBundle,

@@ -32,7 +32,7 @@ import java.util.ResourceBundle
  * An action that causes the mascot to throw a window.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class ThrowIE(
     schema: ResourceBundle,

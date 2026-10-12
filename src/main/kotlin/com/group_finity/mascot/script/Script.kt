@@ -36,7 +36,7 @@ private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(
  * A variable whose value is evaluated from JavaScript.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Script(private val source: String?, private val isClearAtInitFrame: Boolean) : Variable() {
     private val compiled: CompiledScript = try {

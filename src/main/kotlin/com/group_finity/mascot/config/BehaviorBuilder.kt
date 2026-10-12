@@ -39,7 +39,7 @@ private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
  * Builds a behavior from a Behavior node.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class BehaviorBuilder(
     private val configuration: Configuration,

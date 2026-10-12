@@ -34,7 +34,7 @@ private val logger: Logger = Logger.getLogger(Turn::class.java.name)
  * An action that causes the mascot to turn.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Suppress("unused")
 class Turn(

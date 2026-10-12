@@ -33,7 +33,7 @@ import java.util.ResourceBundle
  * The base implementation of an action.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 abstract class ActionBase(
     internal val schema: ResourceBundle,

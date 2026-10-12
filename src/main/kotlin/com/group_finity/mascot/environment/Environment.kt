@@ -34,7 +34,7 @@ import kotlin.concurrent.timer
  * Defines a platform specific environment, which tracks the screens, cursor, and interactive windows.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 abstract class Environment {
     /**

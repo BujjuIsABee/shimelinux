@@ -28,7 +28,7 @@ import java.awt.Point
  * A movable point.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Location {
     var x = 0

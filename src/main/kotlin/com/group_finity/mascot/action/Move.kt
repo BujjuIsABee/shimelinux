@@ -34,7 +34,7 @@ private val logger: Logger = Logger.getLogger(Move::class.java.name)
  * An action that causes the mascot to move.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 open class Move(
     schema: ResourceBundle,

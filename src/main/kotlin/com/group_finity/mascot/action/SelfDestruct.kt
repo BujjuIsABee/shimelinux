@@ -30,7 +30,7 @@ import java.util.ResourceBundle
  * An action that dismisses the mascot on the penultimate frame of its current animation.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Suppress("unused")
 class SelfDestruct(

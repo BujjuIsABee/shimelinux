@@ -38,7 +38,7 @@ private val logger: Logger = Logger.getLogger(Regist::class.java.name)
  * An action that occurs after a random amount of time while the mascot is being dragged with the cursor.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Regist(
     schema: ResourceBundle,

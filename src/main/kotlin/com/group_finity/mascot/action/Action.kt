@@ -28,7 +28,7 @@ import com.group_finity.mascot.Mascot
  * Temporarily handles the movement and animation of a mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 interface Action {
     /**

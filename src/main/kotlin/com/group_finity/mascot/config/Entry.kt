@@ -29,7 +29,7 @@ import org.w3c.dom.Element
  * An XML node.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Entry(private val element: Element) {
     /**

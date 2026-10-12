@@ -29,7 +29,7 @@ import java.util.ResourceBundle
  * An action that triggers the first effective action in [actions].
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Select(
     schema: ResourceBundle,

@@ -38,7 +38,7 @@ private val logger: Logger = Logger.getLogger(Manager::class.java.name)
  * Manages a list of mascots.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Manager {
     private val mascots = mutableListOf<Mascot>()

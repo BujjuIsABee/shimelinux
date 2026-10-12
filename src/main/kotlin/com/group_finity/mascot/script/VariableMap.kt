@@ -29,7 +29,7 @@ import javax.script.Bindings
  * Stores a collection of variables.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class VariableMap : Bindings {
     val rawMap = linkedMapOf<String, Variable>()

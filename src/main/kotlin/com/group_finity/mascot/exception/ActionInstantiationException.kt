@@ -26,7 +26,7 @@ package com.group_finity.mascot.exception
  * An exception thrown when an action cannot be instantiated.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class ActionInstantiationException : Exception {
     constructor(message: String) : super(message)

@@ -38,7 +38,7 @@ private val logger: Logger = Logger.getLogger(Interact::class.java.name)
  * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Suppress("unused")
 class Interact(

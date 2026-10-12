@@ -28,7 +28,7 @@ import java.awt.Point
  * A border that a mascot can stand/climb on.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 interface Border {
     /**

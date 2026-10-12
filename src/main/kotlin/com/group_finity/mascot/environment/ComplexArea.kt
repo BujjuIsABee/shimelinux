@@ -29,7 +29,7 @@ import java.awt.Rectangle
  * An area made of multiple areas.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()

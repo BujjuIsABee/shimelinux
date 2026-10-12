@@ -34,7 +34,7 @@ private val logger: Logger = Logger.getLogger(Stay::class.java.name)
  * An action that causes the mascot to stand still on a border.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 open class Stay(
     schema: ResourceBundle,

@@ -34,7 +34,7 @@ import kotlin.math.roundToInt
  * An action that occurs while the mascot is being dragged with the cursor.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Dragged(
     schema: ResourceBundle,

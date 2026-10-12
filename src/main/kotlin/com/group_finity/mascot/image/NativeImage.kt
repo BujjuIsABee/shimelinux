@@ -26,6 +26,6 @@ package com.group_finity.mascot.image
  * A platform-specific image.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 interface NativeImage

@@ -26,7 +26,7 @@ package com.group_finity.mascot.exception
  * An exception thrown when a mascot configuration file cannot be parsed.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class ConfigurationException : Exception {
     constructor(message: String) : super(message)

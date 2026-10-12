@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage
  * An image that can be displayed in an animation.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class MascotImage(val image: NativeImage, val center: Point, val size: Dimension) {
     constructor(image: BufferedImage, center: Point) : this(

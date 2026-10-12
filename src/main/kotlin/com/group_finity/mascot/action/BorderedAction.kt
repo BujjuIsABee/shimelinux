@@ -32,7 +32,7 @@ import java.util.ResourceBundle
  * An action that places the mascot on a specific border.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 abstract class BorderedAction(
     schema: ResourceBundle,

@@ -34,7 +34,7 @@ private val logger: Logger = Logger.getLogger(Animate::class.java.name)
  * An action that plays an animation.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 open class Animate(
     schema: ResourceBundle,

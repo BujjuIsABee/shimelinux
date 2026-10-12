@@ -41,7 +41,7 @@ private val logger: Logger = Logger.getLogger(ScanMove::class.java.name)
  * An action that scans for a mascot with the [affordance] and causes [mascot] to move towards it if one is found.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Suppress("unused")
 class ScanMove(

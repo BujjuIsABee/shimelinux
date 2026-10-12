@@ -30,7 +30,7 @@ import java.util.ResourceBundle
  * Deprecated in Shimeji-ee.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Deprecated("Deprecated in Shimeji-ee")
 class MoveWithTurn(

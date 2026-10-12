@@ -29,7 +29,7 @@ import java.util.ResourceBundle
  * An action that instantly moves the mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Offset(
     schema: ResourceBundle,

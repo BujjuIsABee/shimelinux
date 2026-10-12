@@ -29,7 +29,7 @@ import kotlin.io.path.Path
  * Stores image pairs.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()

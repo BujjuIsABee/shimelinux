@@ -29,7 +29,7 @@ import java.util.ResourceBundle
  * An action that triggers a sequence of actions.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Sequence(
     schema: ResourceBundle,

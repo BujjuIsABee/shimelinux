@@ -42,7 +42,7 @@ private val logger: Logger = Logger.getLogger(ScanJump::class.java.name)
  * An action that scans for a mascot with the [affordance] and causes [mascot] to jump towards it if one is found.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Suppress("unused")
 class ScanJump(

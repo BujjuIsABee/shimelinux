@@ -43,7 +43,7 @@ private val logger: Logger = Logger.getLogger(UserBehavior::class.java.name)
  * The base implementation of a behavior.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class UserBehavior(
     private val name: String,

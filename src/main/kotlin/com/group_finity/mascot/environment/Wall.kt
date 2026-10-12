@@ -29,7 +29,7 @@ import kotlin.math.abs
  * A horizontal border.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Wall(val area: Area, val isRight: Boolean) : Border {
     val x: Int

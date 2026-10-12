@@ -30,7 +30,7 @@ import java.util.ResourceBundle
  * Deprecated in Shimeji-ee; use Scan/Complex actions instead.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 @Deprecated("Deprecated in Shimeji-ee")
 class BroadcastMove(

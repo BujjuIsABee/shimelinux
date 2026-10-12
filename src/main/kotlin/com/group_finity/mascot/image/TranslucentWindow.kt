@@ -28,7 +28,7 @@ import java.awt.Component
  * A platform-specific window that displays a mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 interface TranslucentWindow {
     /**

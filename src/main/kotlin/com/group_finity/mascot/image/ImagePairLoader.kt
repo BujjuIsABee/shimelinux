@@ -38,7 +38,7 @@ import kotlin.math.roundToInt
  * Loads image pairs.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 object ImagePairLoader {
     /**

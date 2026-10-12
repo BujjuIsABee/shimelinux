@@ -30,7 +30,7 @@ import java.util.ResourceBundle
  * An action that triggers other actions.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 abstract class ComplexAction(
     schema: ResourceBundle,

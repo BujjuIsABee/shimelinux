@@ -31,7 +31,7 @@ import java.nio.file.Path
  * A frame of an animation.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Pose(
     private val leftImage: Path?,

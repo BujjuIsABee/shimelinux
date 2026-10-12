@@ -28,7 +28,7 @@ import com.group_finity.mascot.action.Action
  * Builds an action.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 interface IActionBuilder {
     /**

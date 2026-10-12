@@ -28,7 +28,7 @@ import java.awt.Rectangle
  * A movable rectangle.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Area {
     /**

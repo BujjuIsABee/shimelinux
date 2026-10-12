@@ -44,7 +44,7 @@ private val logger: Logger = Logger.getLogger(Configuration::class.java.name)
  * Parses an XML configuration file for a mascot.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Configuration {
     /**

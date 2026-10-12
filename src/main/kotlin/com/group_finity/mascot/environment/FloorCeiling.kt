@@ -29,7 +29,7 @@ import kotlin.math.abs
  * A vertical border.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
     val y: Int

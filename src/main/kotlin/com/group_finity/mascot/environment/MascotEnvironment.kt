@@ -31,7 +31,7 @@ import java.awt.Point
  * Exposes the [Environment] instance to mascots and variables.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class MascotEnvironment(private val mascot: Mascot) {
     private val impl = NativeFactory.instance.environment

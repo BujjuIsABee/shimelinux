@@ -26,7 +26,7 @@ package com.group_finity.mascot.script
  * Defines a variable that provides a value.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 abstract class Variable {
     /**

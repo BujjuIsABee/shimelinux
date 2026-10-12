@@ -26,7 +26,7 @@ package com.group_finity.mascot.image
  * Stores a pair of left and right images.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class ImagePair(val leftImage: MascotImage, val rightImage: MascotImage) {
     /**

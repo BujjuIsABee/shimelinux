@@ -29,7 +29,7 @@ import java.util.ResourceBundle
  * An action that causes the mascot to look in a specific direction.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 class Look(
     schema: ResourceBundle,

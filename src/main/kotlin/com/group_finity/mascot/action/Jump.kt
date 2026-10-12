@@ -32,7 +32,7 @@ import kotlin.math.sqrt
  * An action that causes the mascot to jump.
  *
  * @author Yuki Yamada
- * @author Kilkakon
+ * @author Shimeji-ee Group
  */
 open class Jump(
     schema: ResourceBundle,
