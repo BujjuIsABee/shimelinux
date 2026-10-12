@@ -20,8 +20,9 @@ Provide steps to reproduce the bug.
 **System information**
 Answer the following questions:
 
-- Which Linux distribution are you using?
-- Which desktop environment are you using?
+- Which operating system are you using?
+- Which desktop environment / window manager are you using?
+- How did you install the application?
 
 **Screenshots/Logs**
-If possible, provide screenshots and logs showing the issue. Logs are located at the config directory (~/.config/shimelinux).
+If possible, provide a screenshot or video showing the issue. Please also attach logs from the config directory (`~/.config/shimelinux` or `~/.var/app/io.github.bujjuisabee.shimelinux/config/.config`).
