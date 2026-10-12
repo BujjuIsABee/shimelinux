@@ -131,12 +131,17 @@ class WaylandPopup(
     }
 
     private fun getSubmenuOrigin(x: Int, y: Int, submenu: JMenu): Point {
-        val x = x + contents.width + UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
-        val y = y + submenu.y + UIManager.getInt("Menu.submenuPopupOffsetY")
         val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
+        val submenuSize = submenu.popupMenu.preferredSize
+
+        val rightX = x + contents.width - 2
+        val leftX = x - submenuSize.width + 2
+        val x = if (rightX + submenuSize.width > screenBounds.x + screenBounds.width) leftX else rightX
+        val y = y + submenu.y + UIManager.getInt("Menu.submenuPopupOffsetY")
+
         return Point(
-            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - submenu.popupMenu.preferredSize.width),
-            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - submenu.popupMenu.preferredSize.height)
+            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - submenuSize.width),
+            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - submenuSize.height)
         )
     }
 }
