@@ -369,6 +369,12 @@ object Main {
 
         try {
             val icon = SystemTray.get()
+
+            if (icon == null) {
+                logger.warning { "System tray not available" }
+                return
+            }
+
             loadResource("img/icon.png").use { icon.setImage(it) }
             icon.setStatus("ShimeLinux")
             icon.setTooltip("ShimeLinux")

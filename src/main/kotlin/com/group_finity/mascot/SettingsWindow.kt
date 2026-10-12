@@ -705,7 +705,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
         screenXSpinner.value = getProperty("ScreenX", NativeFactory.instance.environment.screen.left)
         screenXSpinner.addChangeListener {
-            newProperties.setProperty("ScreenX", screenXSpinner.value as String)
+            newProperties.setProperty("ScreenX", (screenXSpinner.value as Int).toString())
         }
 
         val screenYSpinner = object : JSpinner() {
@@ -713,7 +713,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
         screenYSpinner.value = getProperty("ScreenY", NativeFactory.instance.environment.screen.top)
         screenYSpinner.addChangeListener {
-            newProperties.setProperty("ScreenY", screenYSpinner.value as String)
+            newProperties.setProperty("ScreenY", (screenYSpinner.value as Int).toString())
         }
 
         screenPositionRightPanel.add(screenXSpinner)
@@ -736,7 +736,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
         screenWidthSpinner.value = getProperty("ScreenWidth", NativeFactory.instance.environment.screen.width)
         screenWidthSpinner.addChangeListener {
-            newProperties.setProperty("ScreenWidth", screenWidthSpinner.value as String)
+            newProperties.setProperty("ScreenWidth", (screenWidthSpinner.value as Int).toString())
         }
 
         val screenHeightSpinner = object : JSpinner() {
@@ -744,7 +744,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
         screenHeightSpinner.value = getProperty("ScreenHeight", NativeFactory.instance.environment.screen.height)
         screenHeightSpinner.addChangeListener {
-            newProperties.setProperty("ScreenHeight", screenHeightSpinner.value as String)
+            newProperties.setProperty("ScreenHeight", (screenHeightSpinner.value as Int).toString())
         }
 
         screenSizeRightPanel.add(screenWidthSpinner)

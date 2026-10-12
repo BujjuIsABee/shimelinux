@@ -31,6 +31,7 @@ import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -39,6 +40,7 @@ import javax.imageio.ImageIO
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.PopupFactory
+import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
@@ -89,7 +91,11 @@ class VirtualEnvironment : Environment() {
     override fun tick() {
         screenRect.bounds = display.contentPane.bounds
         screen.set(screenRect)
-        cursor.set(display.mousePosition ?: Point(0, 0))
+
+        val info = MouseInfo.getPointerInfo()
+        val point = info?.location ?: Point(0, 0)
+        SwingUtilities.convertPointFromScreen(point, display.contentPane)
+        cursor.set(point)
 
         activeIE.isVisible = false
     }
@@ -98,7 +104,11 @@ class VirtualEnvironment : Environment() {
 
     override fun restoreIE() {}
 
-    override fun refreshCache() {}
+    override fun refreshCache() {
+        // I feel so refreshed
+
+        // good for you buddy
+    }
 
     override fun dispose() {
         display.dispose()
