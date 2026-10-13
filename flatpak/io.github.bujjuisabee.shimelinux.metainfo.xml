@@ -24,7 +24,7 @@
         <keyword>shimeji-ee</keyword>
     </keywords>
     <branding>
-        <color type="primary" scheme_preference="light">#9cbefe2</color>
+        <color type="primary" scheme_preference="light">#9cbfe2</color>
         <color type="primary" scheme_preference="dark">#3c83c5</color>
     </branding>
     <content_rating type="oars-1.1"/>
