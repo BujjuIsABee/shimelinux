@@ -28,7 +28,7 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 
 /**
- * An image that can be displayed in an animation.
+ * Stores an [image] so it can be displayed on a [TranslucentWindow].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

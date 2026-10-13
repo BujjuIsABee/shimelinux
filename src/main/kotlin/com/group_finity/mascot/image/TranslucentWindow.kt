@@ -33,12 +33,12 @@ import java.awt.Component
  */
 interface TranslucentWindow {
     /**
-     * Gets the window as a [Component].
+     * Gets the window as an AWT component.
      */
     fun asComponent(): Component
 
     /**
-     * Displays [image] on the window.
+     * Sets the [image] displayed by the window.
      */
     fun setImage(image: NativeImage)
 
@@ -48,7 +48,7 @@ interface TranslucentWindow {
     fun updateImage()
 
     /**
-     * Sets whether the window should appear above other windows to [value].
+     * Sets whether the window should appear above other windows.
      */
     fun setAlwaysOnTop(value: Boolean)
 

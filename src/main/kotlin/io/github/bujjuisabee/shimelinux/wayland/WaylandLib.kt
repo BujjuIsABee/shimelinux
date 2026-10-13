@@ -60,7 +60,8 @@ object WaylandLib {
     external fun createLayer(mouseEventReceiver: MouseEventReceiver): Long
 
     /**
-     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] to a layer surface.
+     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] values
+     * to a layer surface.
      */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
@@ -89,6 +90,8 @@ object WaylandLib {
          * Called when the layer surface receives mouse events, providing information about the state of the cursor via
          * [leftPressed], [rightPressed], [leftReleased], and [rightReleased], and its position via [positionX] and
          * [positionY].
+         *
+         * @see WaylandLayer.dispatchEvents
          */
         fun updateCursor(
             leftPressed: Boolean,

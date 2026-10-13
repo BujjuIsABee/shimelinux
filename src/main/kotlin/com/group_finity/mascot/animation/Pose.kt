@@ -55,7 +55,7 @@ class Pose(
         get() = ImagePairs.getImagePair(imageName)
 
     /**
-     * Applies the pose to [mascot].
+     * Applies the pose to the given [mascot].
      */
     fun next(mascot: Mascot) {
         mascot.anchor.translate(if (mascot.isLookRight) -dx else dx, dy)

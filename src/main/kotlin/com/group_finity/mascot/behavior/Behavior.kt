@@ -26,7 +26,7 @@ import com.group_finity.mascot.Mascot
 import java.awt.event.MouseEvent
 
 /**
- * Defines a behavior, which triggers actions for a mascot.
+ * Handles the long-term behavior of a mascot.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -34,7 +34,7 @@ import java.awt.event.MouseEvent
  */
 interface Behavior {
     /**
-     * Initializes the behavior for the [mascot].
+     * Initializes the behavior for the given [mascot].
      */
     fun init(mascot: Mascot)
 

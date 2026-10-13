@@ -94,10 +94,10 @@ class WaylandPopup(
 
         layer.dispatchEvents(
             target,
-            leftPressed,
-            rightPressed,
-            leftReleased,
-            rightReleased,
+            leftPressed && target !is JMenu,
+            rightPressed && target !is JMenu,
+            leftReleased && target !is JMenu,
+            rightReleased && target !is JMenu,
             targetPosition.x,
             targetPosition.y
         )
@@ -138,8 +138,10 @@ class WaylandPopup(
         val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
         val submenuSize = submenu.popupMenu.preferredSize
 
-        val rightX = x + contents.width + UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
-        val leftX = x - submenuSize.width - UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
+        val offsetX = UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
+        val rightX = x + contents.width + offsetX
+        val leftX = x - submenuSize.width - offsetX
+
         val x = if (rightX + submenuSize.width > screenBounds.x + screenBounds.width) leftX else rightX
         val y = y + submenu.y + UIManager.getInt("Menu.submenuPopupOffsetY")
 

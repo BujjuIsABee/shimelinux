@@ -675,6 +675,21 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             } else {
                 environmentCardLayout.show(environmentCardsPanel, "regular")
             }
+
+            // Toggle the interactive windows tab
+            val index = tabbedPane.indexOfComponent(interactiveWindowsTab)
+            val isKde = when (newProperties.getProperty("Environment", "")) {
+                "kde" -> true
+                "wayland", "generic", "virtual" -> false
+                else if (NativeFactory.default == "kde") -> true
+                else -> false
+            }
+
+            if (isKde && index == -1) {
+                tabbedPane.add(interactiveWindowsTab, localize("InteractiveWindows"), 1)
+            } else if (!isKde && index != -1) {
+                tabbedPane.removeTabAt(index)
+            }
         }
 
         val regularEnvironmentCard = JPanel(BorderLayout())

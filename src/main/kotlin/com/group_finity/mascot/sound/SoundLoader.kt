@@ -35,7 +35,7 @@ import javax.sound.sampled.LineEvent
  */
 object SoundLoader {
     /**
-     * Loads a sound at [filename] with the specified [volume]. The clip is not opened until the sound is played.
+     * Loads a sound at [filename] with the given [volume].
      */
     @JvmStatic
     fun load(filename: String, volume: Float) {

@@ -29,7 +29,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 /**
- * Gets the path specified by [subpaths] within the config directory.
+ * Gets the path at [subpaths] relative to the config directory.
  */
 fun getPath(vararg subpaths: String): Path = if (!System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
     Path(System.getProperty("XDG_CONFIG_HOME"), "shimelinux", *subpaths)
@@ -38,15 +38,13 @@ fun getPath(vararg subpaths: String): Path = if (!System.getProperty("XDG_CONFIG
 }
 
 /**
- * Loads the resource at [path].
- *
- * @return An input stream, or null if the resource does not exist.
+ * Returns an input stream to the resource at [path], or null if the resource does not exist.
  */
 fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 
 /**
- * Returns the value of the property from [Main.properties] corresponding to the specified [key] and casts it to [T], or
- * returns [defaultValue] if the property does not exist or the cast fails.
+ * Returns the value of the property in [Main.properties] corresponding to the given [key], cast as [T], or
+ * [defaultValue] if the property does not exist or if the cast fails.
  */
 inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     Main.properties.getProperty(key, defaultValue.toString()).let { value ->
@@ -59,12 +57,13 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     }
 
 /**
- * Returns the localized string corresponding to the specified [key], or [key] if it does not exist.
+ * Returns the localized string corresponding to the given [key], or throws an exception if the string does not exist in
+ * the current language file or the default language file (`language.properties`).
  */
 fun localize(key: String): String = Main.languageBundle.getString(key)
 
 /**
- * Executes the [command] with the specified [args] and returns the process's stdout.
+ * Executes the [command] with the given command line [args] and returns what the process writes to standard output.
  */
 fun execute(command: String, vararg args: String): String {
     val process = ProcessBuilder(command, *args).start()

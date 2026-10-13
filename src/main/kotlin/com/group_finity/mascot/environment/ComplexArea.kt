@@ -50,7 +50,7 @@ class ComplexArea {
     }
 
     /**
-     * Sets the bounds of the area with the specified [name].
+     * Sets the bounds of the area with the given [name].
      */
     fun set(name: String, value: Rectangle) {
         if (areaMap.values.any { it.toRectangle() == value }) return

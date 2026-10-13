@@ -23,13 +23,13 @@
 package com.group_finity.mascot
 
 /**
- * Provides information about the current desktop environment.
+ * Provides information about the current desktop environment or window manager.
  *
  * @author Bujju
  */
 object Platform {
     /**
-     * The name of the current desktop environment or compositor.
+     * The name of the current desktop environment or window manager.
      */
     val currentDesktop: String = System.getenv("XDG_CURRENT_DESKTOP")?.lowercase() ?: "unknown"
 
@@ -45,13 +45,13 @@ object Platform {
         listOf("cosmic", "hyprland", "i3", "mango", "niri", "sway").any { currentDesktop.contains(it) }
 
     /**
-     * Whether [currentDesktop] should be assumed to support the wlr_layer_shell protocol.
+     * Whether [currentDesktop] should be assumed to support the wlr-layer-shell protocol.
      */
     val supportsWaylandLayerSurfaces: Boolean =
         sessionType == "wayland" && !listOf("gnome", "cinnamon").any { currentDesktop.contains(it) }
 
     /**
-     * Whether [currentDesktop] directly provides the absolute position of the cursor.
+     * Whether [currentDesktop] provides the absolute position of the cursor.
      */
     val providesAbsoluteCursorPosition: Boolean =
         sessionType != "wayland" || listOf("hyprland", "kde", "mango").any { currentDesktop.contains(it) }

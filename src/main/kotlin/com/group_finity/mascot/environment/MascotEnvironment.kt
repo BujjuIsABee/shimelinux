@@ -28,7 +28,7 @@ import com.group_finity.mascot.getProperty
 import java.awt.Point
 
 /**
- * Exposes the [Environment] instance to mascots and variables.
+ * Manages the platform-specific [Environment] instance and exposes it to mascots and scripts.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -165,7 +165,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Refreshes which screen is used for the work area.
+     * Updates which screen is used for the work area.
      */
     fun refreshWorkArea() {
         getWorkArea(true)

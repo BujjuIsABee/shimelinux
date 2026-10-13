@@ -109,7 +109,7 @@ object KWin {
     @DBusInterfaceName("org.kde.kwin.Scripting")
     interface KWinScripting : DBusInterface {
         /**
-         * Loads the KWin script at [path] and assigns it the given [name].
+         * Loads the KWin script at the given [path].
          */
         fun loadScript(path: String, name: String): Int
 
@@ -136,13 +136,13 @@ object KWin {
     }
 
     /**
-     * An interface containing methods called by the KWin script.
+     * Defines methods called by the KWin script.
      */
     @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
     interface KWinClient : DBusInterface {
         /**
-         * Called whenever a window becomes active, providing the window's [caption], [x] and [y] position, [width], and
-         * [height].
+         * Called whenever a window becomes active, providing the window's title via [caption] and bounds via [x], [y],
+         * [width], and [height].
          */
         fun setActiveWindow(
             caption: String,
@@ -163,8 +163,8 @@ object KWin {
         fun setCursorPosition(x: Int, y: Int)
 
         /**
-         * Returns a map with three keys: `hasValue` is `true` if [windowPosition] is not null, or `false` if it is.
-         * `x` and `y` are the X and Y positions of [windowPosition], or `-1` if it is null.
+         * Returns a map where `hasValue` is whether [windowPosition] is not null and `x` and `y` are the X and Y values
+         * of [windowPosition].
          */
         fun getWindowPosition(): Map<String, Variant<*>>
 

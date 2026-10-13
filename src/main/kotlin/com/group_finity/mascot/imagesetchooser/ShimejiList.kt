@@ -37,7 +37,7 @@ class ShimejiList(private val model: DefaultListModel<ImageSetChooserPanel>) : J
     }
 
     /**
-     * Adds an image set to the list.
+     * Adds the given [imageSet] to the list.
      */
     fun addShimeji(
         imageSet: String,

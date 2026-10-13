@@ -252,7 +252,7 @@ class Configuration {
     }
 
     /**
-     * Returns whether an action builder with the specified [name] exists.
+     * Returns whether an action builder with the given [name] exists.
      */
     fun hasAction(name: String): Boolean = actionBuilders.containsKey(name)
 
@@ -264,30 +264,30 @@ class Configuration {
             .none { it == builder.name }
 
     /**
-     * Returns whether a behavior builder with the specified [name] exists and is enabled for [mascot].
+     * Returns whether a behavior builder with the given [name] exists and is enabled for [mascot].
      */
     fun isBehaviorEnabled(name: String?, mascot: Mascot): Boolean =
         behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
 
     /**
-     * Returns whether a behavior builder with the specified [name] exists and should be hidden from the Set Behavior
+     * Returns whether a behavior builder with the given [name] exists and should be hidden from the Set Behavior
      * and Allowed Behaviors lists.
      */
     fun isBehaviorHidden(name: String?): Boolean = behaviorBuilders[name]?.isHidden == true
 
     /**
-     * Returns whether a behavior builder with the specified [name] exists and should be toggleable in the Allowed
+     * Returns whether a behavior builder with the given [name] exists and should be toggleable in the Allowed
      * Behaviors list.
      */
     fun isBehaviorToggleable(name: String?): Boolean = behaviorBuilders[name]?.isToggleable == true
 
     /**
-     * Returns whether [information] contains the specified [key].
+     * Returns whether [information] contains the given [key].
      */
     fun containsInformationKey(key: String?): Boolean = information.containsKey(key)
 
     /**
-     * Gets the value associated with the specified [key] in [information], or null if the key does not exist.
+     * Gets the value associated with the given [key] in [information], or null if the key does not exist.
      */
     fun getInformation(key: String): String? = information[key]
 }

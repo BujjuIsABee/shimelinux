@@ -25,7 +25,6 @@ package com.group_finity.mascot
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.image.BufferedImage
 
 import io.github.bujjuisabee.shimelinux.generic.NativeFactoryImpl as GenericNativeFactory
@@ -50,7 +49,7 @@ abstract class NativeFactory {
     abstract fun newTranslucentWindow(): TranslucentWindow
 
     /**
-     * Gets a platform-specific [NativeImage] from the given [src].
+     * Gets a platform-specific [NativeImage].
      */
     abstract fun newNativeImage(src: BufferedImage): NativeImage
 
@@ -58,7 +57,7 @@ abstract class NativeFactory {
         lateinit var instance: NativeFactory
 
         /**
-         * The name of the environment chosen automatically based [Platform.currentDesktop]
+         * The name of the environment chosen automatically based on [Platform.currentDesktop].
          */
         val default: String = when {
             Platform.currentDesktop.contains("kde") -> "kde"
@@ -83,8 +82,7 @@ abstract class NativeFactory {
         }
 
         /**
-         * Sets [instance] to [current]. The shared popup factory instance is also updated; if [current] is `wayland`, the
-         * [WaylandPopupFactory] will be used.
+         * Updates [instance] to match the [current] environment.
          */
         fun resetInstance() {
             instance = when (current) {

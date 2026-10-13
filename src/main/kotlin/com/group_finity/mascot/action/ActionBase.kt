@@ -157,7 +157,7 @@ abstract class ActionBase(
     }
 
     /**
-     * Returns the value of the variable in [variables] with the specified [name], cast as [T], or [defaultValue] if the
+     * Returns the value of the variable in [variables] with the given [name], cast as [T], or [defaultValue] if the
      * variable does not exist.
      */
     internal inline fun <reified T> eval(name: String, defaultValue: T): T = synchronized(variables) {

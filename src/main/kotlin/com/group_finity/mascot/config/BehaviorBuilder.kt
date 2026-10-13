@@ -117,7 +117,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Builds the behavior and the associated action and returns it.
+     * Builds the behavior and the associated action.
      */
     fun buildBehavior(): Behavior {
         try {

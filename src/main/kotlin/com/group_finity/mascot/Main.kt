@@ -66,11 +66,8 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  * @author Bujju
  */
 object Main {
-    /**
-     * Deprecated; Kept for Shimeji-ee compatibility.
-     */
     @JvmStatic
-    @Deprecated("Replace with Main", ReplaceWith("Main"))
+    @Deprecated("Main is now an object", ReplaceWith("Main"))
     val instance = this
 
     /**
@@ -238,7 +235,9 @@ object Main {
             val infoAlreadySeen = getProperty("InformationDismissed", "")
             val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
             configurations[imageSet]?.let { config ->
-                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
+                if (config.containsInformationKey("SplashImage")
+                    && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
+                ) {
                     val info = InformationWindow(imageSet, config)
                     info.isVisible = true
                     setMascotInformationDismissed(imageSet)
@@ -252,7 +251,7 @@ object Main {
     }
 
     /**
-     * Creates a [Configuration] for [imageSet].
+     * Creates a [Configuration] for the given [imageSet].
      */
     private fun loadConfiguration(imageSet: String): Boolean {
         try {
@@ -443,33 +442,58 @@ object Main {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
-            if (NativeFactory.current == "wayland") {
+            if (NativeFactory.current != "wayland") {
                 allowedBehaviorsSubmenu.add(multiscreenMenu)
             }
 
             val chooseShimejiMenu = MenuItem(localize("ChooseShimeji")) {
+                // Pause all mascots so they don't throw the window offscreen
+                if (!manager.isPaused) {
+                    manager.togglePauseAll()
+                }
+
                 val chooser = ImageSetChooser(null, true)
                 chooser.isVisible = true
+
+                if (manager.isPaused) {
+                    manager.togglePauseAll()
+                }
 
                 setActiveImageSets(chooser.imageSets.takeUnless { chooser.wasCancelled })
             }
 
             val settingsMenu = MenuItem(localize("Settings")) {
                 // Disable Wayland popup factory so dropdown menus will be displayed correctly
-                if (NativeFactory.current == "wayland" || NativeFactory.current == "kde" && Platform.sessionType == "wayland") {
+                if (NativeFactory.current == "wayland") {
                     PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+                }
+
+                // Pause all mascots so they don't throw the window offscreen
+                if (!manager.isPaused) {
+                    manager.togglePauseAll()
                 }
 
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                if (NativeFactory.current == "wayland" || NativeFactory.current == "kde" && Platform.sessionType == "wayland") {
+                if (manager.isPaused) {
+                    manager.togglePauseAll()
+                }
+
+                if (NativeFactory.current == "wayland") {
                     PopupFactory.setSharedInstance(WaylandPopupFactory)
                 }
 
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()
                     NativeFactory.resetInstance()
+
+                    // Refresh the tray icon
+                    val icon = SystemTray.get()
+                    for (entry in icon.menu.entries) {
+                        icon.menu.remove(entry)
+                    }
+                    createTrayIcon()
                 }
                 if (settings.isEnvironmentReloadRequired || settings.isImageReloadRequired) {
                     val isExitOnLastRemoved = manager.isExitOnLastRemoved
@@ -667,7 +691,7 @@ object Main {
     }
 
     /**
-     * Creates a mascot with the specified [imageSet].
+     * Creates a mascot with the given [imageSet].
      */
     fun createMascot(imageSet: String) {
         logger.info { "Creating a mascot ($imageSet)" }
@@ -881,7 +905,9 @@ object Main {
                 val infoAlreadySeen = getProperty("InformationDismissed", "")
                 val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
                 configurations[imageSet]?.let { config ->
-                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))) {
+                    if (config.containsInformationKey("SplashImage")
+                        && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
+                    ) {
                         val info = InformationWindow(imageSet, config)
                         info.isVisible = true
                         setMascotInformationDismissed(imageSet)
@@ -896,8 +922,14 @@ object Main {
         }
     }
 
+    /**
+     * Gets whether there is a configuration for the given [imageSet].
+     */
     fun hasConfiguration(imageSet: String): Boolean = configurations.containsKey(imageSet)
 
+    /**
+     * Gets the configuration for the given [imageSet].
+     */
     fun getConfiguration(imageSet: String): Configuration = checkNotNull(configurations[imageSet])
 
     /**

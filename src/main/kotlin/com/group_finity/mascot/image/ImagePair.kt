@@ -23,7 +23,7 @@
 package com.group_finity.mascot.image
 
 /**
- * Stores a pair of left and right images.
+ * Stores a left and a right image.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

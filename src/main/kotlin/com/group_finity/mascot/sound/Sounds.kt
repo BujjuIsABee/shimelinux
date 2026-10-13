@@ -49,9 +49,9 @@ object Sounds {
         }
 
     /**
-     * Adds a sound to [sounds].
+     * Adds a [sound] with [name] as its key.
      *
-     * @param name The name of the sound combined with its volume.
+     * @param name The sound's filename combined with its volume.
      */
     @JvmStatic
     fun load(name: String, sound: Sound) {
@@ -59,25 +59,25 @@ object Sounds {
     }
 
     /**
-     * Gets whether [sounds] contains a sound with [name] as its key.
+     * Gets whether there is a sound with the given [name].
      *
-     * @param name The filename of the clip combined with its volume.
+     * @param name The sound's filename combined with its volume.
      */
     @JvmStatic
     fun contains(name: String): Boolean = sounds.containsKey(name)
 
     /**
-     * Gets a sound from [sounds]. The sound is closed when the sound is done playing.
+     * Gets the sound with the given [name].
      *
-     * @param name The filename of the clip combined with its volume.
+     * @param name The sound's filename combined with its volume.
      */
     @JvmStatic
     fun getSound(name: String): Clip? = sounds[name]?.also { it.open() }?.clip
 
     /**
-     * Gets all sounds from with the [name], regardless of their volume.
+     * Gets all sounds with the given [name].
      *
-     * @param name The filename of the clip without the volume.
+     * @param name The sound's filename.
      */
     @JvmStatic
     fun getSoundsIgnoringVolume(name: String): List<Clip> = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }

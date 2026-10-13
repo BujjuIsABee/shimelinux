@@ -59,11 +59,8 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
-        if (UIManager.getLookAndFeel() is FlatLaf) {
-            PopupFactory.setSharedInstance(FlatPopupFactory())
-        } else {
-            PopupFactory.setSharedInstance(PopupFactory())
-        }
+        PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+        activeIE.isVisible = false
 
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         display.iconImage = icon
@@ -90,9 +87,11 @@ class VirtualEnvironment : Environment() {
     }
 
     override fun tick() {
+        // Update screen bounds
         screenRect.bounds = display.contentPane.bounds
         screen.set(screenRect)
 
+        // Update cursor position
         val info = MouseInfo.getPointerInfo()
         val point = info?.location ?: Point(0, 0)
         SwingUtilities.convertPointFromScreen(point, display.contentPane)
@@ -114,7 +113,7 @@ class VirtualEnvironment : Environment() {
     }
 
     /**
-     * Adds the [mascot] to the environment.
+     * Adds [mascot] to the environment.
      */
     fun addShimeji(mascot: JPanel) {
         mascot.isOpaque = false

@@ -25,7 +25,7 @@ package com.group_finity.mascot.action
 import com.group_finity.mascot.Mascot
 
 /**
- * Temporarily handles the movement and animation of a mascot.
+ * Handles the short-term movement and animation of a mascot.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -33,7 +33,7 @@ import com.group_finity.mascot.Mascot
  */
 interface Action {
     /**
-     * Initializes the action for [mascot].
+     * Initializes the action for the given [mascot].
      */
     fun init(mascot: Mascot)
 

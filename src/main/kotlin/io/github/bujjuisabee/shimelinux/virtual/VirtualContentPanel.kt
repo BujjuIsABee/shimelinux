@@ -32,8 +32,7 @@ import java.awt.event.ComponentEvent
 import javax.swing.JPanel
 
 /**
- * A panel that displays the background of the [VirtualEnvironment]. Its default size, color, and image are
- * determined by [preferredSize], [background], and [image] respectively.
+ * Displays the background of the [VirtualEnvironment].
  *
  * @author Kilkakon
  * @author Bujju

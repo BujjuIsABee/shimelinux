@@ -68,11 +68,13 @@ class Manager {
      * Starts dispatching ticks to the mascots in the list.
      */
     fun start() {
-        timer = timer ?: timer(daemon = false, period = 40L) { tick() }
+        if (timer == null) {
+            timer = timer(daemon = false, period = 40L) { tick() }
+        }
     }
 
     /**
-     * Stops ticks from being dispatched to the mascots in the list.
+     * Stops the tick timer.
      */
     fun stop() {
         timer?.let {
@@ -88,16 +90,10 @@ class Manager {
         NativeFactory.instance.environment.tick()
 
         synchronized(mascots) {
-            // Add added mascots
-            for (mascot in added) {
-                mascots.add(mascot)
-            }
+            mascots.addAll(added)
             added.clear()
 
-            // Remove removed mascots
-            for (mascot in removed) {
-                mascots.remove(mascot)
-            }
+            mascots.removeAll(removed)
             removed.clear()
 
             // Update mascots
@@ -164,7 +160,7 @@ class Manager {
     }
 
     /**
-     * Sets the behavior to [name] for all mascots with the specified [imageSet].
+     * Sets the behavior to [name] for all mascots with the given [imageSet].
      */
     fun setBehaviorAll(configuration: Configuration, name: String, imageSet: String) {
         synchronized(mascots) {
@@ -216,7 +212,7 @@ class Manager {
     }
 
     /**
-     * Dismisses all mascots except one with the specified [imageSet].
+     * Dismisses all mascots except one with the given [imageSet].
      */
     fun remainOne(imageSet: String) {
         synchronized(mascots) {
@@ -236,7 +232,7 @@ class Manager {
     }
 
     /**
-     * Dismisses all mascots with the specified [imageSet].
+     * Dismisses all mascots with the given [imageSet].
      */
     fun remainNone(imageSet: String) {
         synchronized(mascots) {
@@ -251,7 +247,7 @@ class Manager {
     }
 
     /**
-     * Sets [Mascot.isPaused] to the opposite of [isPaused] for all mascots.
+     * If all mascots are paused, unpause all of them. Otherwise, pause all of them.
      */
     fun togglePauseAll() {
         synchronized(mascots) {
@@ -263,7 +259,7 @@ class Manager {
     }
 
     /**
-     * Gets the number of mascots with the specified [imageSet].
+     * Gets the number of mascots with the given [imageSet].
      */
     fun getCount(imageSet: String?): Int = synchronized(mascots) {
         if (imageSet != null) {
@@ -274,7 +270,7 @@ class Manager {
     }
 
     /**
-     * Gets the first mascot with the specified [affordance].
+     * Gets the first mascot with the given [affordance].
      */
     fun getMascotWithAffordance(affordance: String): WeakReference<Mascot>? = synchronized(mascots) {
         mascots.firstOrNull { it.affordances.contains(affordance) }?.let {
@@ -283,7 +279,7 @@ class Manager {
     }
 
     /**
-     * Whether there is more than one mascot at [anchor].
+     * Gets whether there is more than one mascot at [anchor].
      */
     fun hasOverlappingMascotsAtPoint(anchor: Point): Boolean = synchronized(mascots) {
         mascots.count { it.anchor == anchor } > 1

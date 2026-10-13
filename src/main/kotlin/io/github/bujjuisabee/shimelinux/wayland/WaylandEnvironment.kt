@@ -50,6 +50,7 @@ class WaylandEnvironment : Environment() {
 
     init {
         PopupFactory.setSharedInstance(WaylandPopupFactory)
+        activeIE.isVisible = false
     }
 
     override fun tick() {

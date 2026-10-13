@@ -36,7 +36,7 @@ abstract class Variable {
     abstract fun init()
 
     /**
-     * Called when the first frame of the animation associated with the variable is initialized.
+     * Called on the first frame of an animation.
      */
     abstract fun initFrame()
 

@@ -26,7 +26,7 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
 /**
- * Stores [managedImage] so it can be displayed in the [VirtualEnvironment].
+ * Stores [managedImage] for the [VirtualEnvironment].
  *
  * @author Kilkakon
  * @author Bujju

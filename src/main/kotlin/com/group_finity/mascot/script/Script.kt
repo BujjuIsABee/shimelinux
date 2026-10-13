@@ -33,7 +33,7 @@ import javax.script.ScriptException
 private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
 
 /**
- * A variable whose value is evaluated from JavaScript.
+ * A variable with a value determined by a JavaScript script.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

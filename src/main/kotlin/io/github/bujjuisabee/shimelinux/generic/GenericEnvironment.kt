@@ -50,11 +50,8 @@ class GenericEnvironment : Environment() {
     override val activeIETitle = ""
 
     init {
-        if (UIManager.getLookAndFeel() is FlatLaf) {
-            PopupFactory.setSharedInstance(FlatPopupFactory())
-        } else {
-            PopupFactory.setSharedInstance(PopupFactory())
-        }
+        PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+        activeIE.isVisible = false
     }
 
     override fun tick() {

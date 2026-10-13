@@ -76,7 +76,7 @@ class Entry(private val element: Element) {
     /**
      * The child nodes inside the node.
      *
-     * @return A [List] with an [Entry] for the "Child" node:
+     * @return A [List] with an [Entry] for the "Child" node for the following XML node:
      *
      * ```xml
      * <Node>
@@ -94,17 +94,17 @@ class Entry(private val element: Element) {
     private val childMap: Map<String, List<Entry>> = children.groupBy { it.name }
 
     /**
-     * Gets the value of an attribute with the specified [name], or null if it does not exist.
+     * Gets the value of an attribute with the given [name], or null if it does not exist.
      */
     fun getAttribute(name: String): String? = element.getAttributeNode(name)?.value
 
     /**
-     * Returns whether there is a node in [children] with the specified [name].
+     * Gets whether there is a node in [children] with the given [name].
      */
     fun hasChild(name: String): Boolean = children.any { it.name == name }
 
     /**
-     * Gets all nodes in [children] with the specified [name].
+     * Gets all nodes in [children] with the given [name].
      */
     fun selectChildren(name: String): List<Entry> = childMap[name].orEmpty()
 }

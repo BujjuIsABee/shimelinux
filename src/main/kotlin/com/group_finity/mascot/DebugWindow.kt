@@ -31,7 +31,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 /**
- * A menu that shows statistics about a mascot for debugging purposes.
+ * A menu that shows statistics about a mascot.
  *
  * @author Kilkakon
  * @author Bujju

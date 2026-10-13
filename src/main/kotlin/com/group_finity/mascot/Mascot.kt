@@ -52,7 +52,7 @@ private val logger: Logger = Logger.getLogger(Mascot::class.java.name)
 private val lastId = AtomicInteger()
 
 /**
- * A mascot object using the given [imageSet].
+ * A mascot object. Its appearance and behavior is defined by the [imageSet].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -64,37 +64,17 @@ class Mascot(var imageSet: String) {
     private var debugWindow: DebugWindow? = null
 
     /**
-     * The number of ticks that have elapsed while the mascot is animating.
-     */
-    var time = 0
-        private set
-
-    /**
-     * Whether the mascot is being animated and is not paused.
-     */
-    private var isAnimating = true
-        get() = field && !isPaused
-
-    /**
-     * The active behavior, which triggers actions to manage the mascot's movement and animation.
-     */
-    var behavior: Behavior? = null
-        set(value) {
-            field = value?.also { it.init(this) }
-        }
-
-    /**
      * The manager managing the mascot.
      */
     var manager: Manager? = null
 
     /**
-     * The mascot's position.
+     * The mascot's ground coordinates.
      */
     var anchor = Point(0, 0)
 
     /**
-     * The image to display on [window].
+     * The image to display.
      */
     var image: MascotImage? = null
 
@@ -104,9 +84,24 @@ class Mascot(var imageSet: String) {
     var isLookRight = false
 
     /**
-     * Whether the mascot is currently being dragged with the cursor.
+     * Handles the mascot's long-term behavior by triggering short-term actions.
      */
-    var isDragging = false
+    var behavior: Behavior? = null
+        set(value) {
+            field = value?.also { it.init(this) }
+        }
+
+    /**
+     * Increments with each [tick].
+     */
+    var time = 0
+        private set
+
+    /**
+     * Whether the animation is playing.
+     */
+    private var isAnimating = true
+        get() = field && !isPaused
 
     /**
      * Whether the mascot is paused.
@@ -114,17 +109,23 @@ class Mascot(var imageSet: String) {
     var isPaused = false
 
     /**
-     * The sound being played by the mascot, or null if no sound is playing.
+     * Whether the mascot is being dragged with the cursor.
      */
-    var sound: String? = null
+    var isDragging = false
 
     /**
-     * Contains information about the bounds of the screen, the location of the cursor, and the active interactive window.
+     * Contains information about the bounds of the screen, the location of the cursor, and the active interactive
+     * window.
      */
     val environment = MascotEnvironment(this)
 
     /**
-     * A list of variables that can be accessed by scripts.
+     * The sound to play.
+     */
+    var sound: String? = null
+
+    /**
+     * A list of variables. Variables can be accessed in scripts.
      */
     val variables = VariableMap()
 
@@ -145,7 +146,7 @@ class Mascot(var imageSet: String) {
         get() = cursorPosition != null
 
     /**
-     * The position of the cursor. Null unless a hotspot is clicked.
+     * Stores the cursor position when a hotspot is triggered.
      */
     var cursorPosition: Point? = null
         set(value) {
@@ -166,14 +167,14 @@ class Mascot(var imageSet: String) {
         } ?: window.asComponent().bounds
 
     /**
-     * The number of mascots with the same image set managed by this mascot's manager.
+     * The number of mascots with the same [imageSet] managed by [manager].
      */
     @Suppress("unused")
     val count: Int
         get() = manager?.getCount(imageSet) ?: 0
 
     /**
-     * The total number of mascots managed by this mascot's manager.
+     * The total number of mascots managed by [manager].
      */
     @Suppress("unused")
     val totalCount: Int
@@ -309,15 +310,19 @@ class Mascot(var imageSet: String) {
         val behaviorsSubmenu = JMenu(localize("SetBehavior"))
         val allowedSubmenu = JMenu(localize("AllowedBehaviors"))
         val config = Main.getConfiguration(imageSet)
-        for (behaviorName in config.behaviorNames) {
+        for (behaviorName in config.behaviorNames.filter { !it.contains('/') }) {
             try {
                 if (!config.isBehaviorHidden(behaviorName)) {
-                    val caption = behaviorName
-                        .replace(Regex("([a-z])(IE)?([A-Z])"), "$1 $2 $3")
-                        .replace("  ", " ")
+                    val caption = if (Main.languageBundle.containsKey(behaviorName)) {
+                        localize(behaviorName)
+                    } else {
+                        behaviorName
+                            .replace(Regex("([a-z])(IE)?([A-Z])"), "$1 $2 $3")
+                            .replace("  ", " ")
+                    }
 
-                    if (config.isBehaviorEnabled(behaviorName, this) && !behaviorName.contains('/')) {
-                        val item = JMenuItem(if (Main.languageBundle.containsKey(behaviorName)) localize(behaviorName) else caption)
+                    if (config.isBehaviorEnabled(behaviorName, this)) {
+                        val item = JMenuItem(caption)
                         item.addActionListener {
                             try {
                                 behavior = config.buildBehavior(behaviorName)
@@ -328,7 +333,7 @@ class Mascot(var imageSet: String) {
                         }
                         behaviorsSubmenu.add(item)
                     }
-                    if (config.isBehaviorToggleable(behaviorName) && !behaviorName.contains('/')) {
+                    if (config.isBehaviorToggleable(behaviorName)) {
                         val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
                         toggleItem.addActionListener {
                             Main.setMascotBehaviorEnabled(

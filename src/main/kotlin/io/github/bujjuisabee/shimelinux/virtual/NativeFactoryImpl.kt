@@ -39,5 +39,6 @@ class NativeFactoryImpl : NativeFactory() {
 
     override fun newNativeImage(src: BufferedImage): NativeImage = VirtualNativeImage(src)
 
-    override fun newTranslucentWindow(): TranslucentWindow = VirtualTranslucentPanel().also { (environment as VirtualEnvironment).addShimeji(it) }
+    override fun newTranslucentWindow(): TranslucentWindow = VirtualTranslucentPanel()
+        .also { (environment as VirtualEnvironment).addShimeji(it) } // add the mascot to environment
 }

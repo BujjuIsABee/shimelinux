@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage
 import java.util.Objects
 
 /**
- * A cross-platform native image that stores [managedImage].
+ * Stores [managedImage].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
