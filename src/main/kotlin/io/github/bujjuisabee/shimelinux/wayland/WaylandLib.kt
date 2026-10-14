@@ -57,7 +57,7 @@ object WaylandLib {
      * Creates a Wayland layer surface and returns a pointer to the event sender. Mouse events will be sent to
      * [mouseEventReceiver].
      */
-    external fun createLayer(mouseEventReceiver: MouseEventReceiver): Long
+    external fun createLayer(mascotLayer: Int, mouseEventReceiver: MouseEventReceiver): Long
 
     /**
      * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] values to a layer

@@ -34,6 +34,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Image
 import java.awt.Insets
+import java.awt.event.HierarchyEvent
 import java.util.Properties
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
@@ -670,116 +671,81 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 }
             )
 
-            if (newProperties.getProperty("Environment", "") == "virtual") {
-                environmentCardLayout.show(environmentCardsPanel, "virtual")
-            } else {
-                environmentCardLayout.show(environmentCardsPanel, "regular")
+            val environment = when (newProperties.getProperty("Environment", "")) {
+                "kde" -> "kde"
+                "wayland" -> "wayland"
+                "generic" -> "generic"
+                "virtual" -> "virtual"
+                else -> NativeFactory.default
             }
+
+            environmentCardLayout.show(environmentCardsPanel, environment)
 
             // Toggle the interactive windows tab
             val index = tabbedPane.indexOfComponent(interactiveWindowsTab)
-            val isKde = when (newProperties.getProperty("Environment", "")) {
-                "kde" -> true
-                "wayland", "generic", "virtual" -> false
-                else if (NativeFactory.default == "kde") -> true
-                else -> false
-            }
-
-            if (isKde && index == -1) {
+            if (environment == "kde" && index == -1) {
                 tabbedPane.add(interactiveWindowsTab, localize("InteractiveWindows"), 1)
-            } else if (!isKde && index != -1) {
+            } else if (environment != "kde" && index != -1) {
                 tabbedPane.removeTabAt(index)
             }
         }
 
-        val regularEnvironmentCard = JPanel(BorderLayout())
+        val kdeEnvironmentCard = JPanel(BorderLayout())
 
-        val regularEnvironmentSettingsPanel = JPanel()
-        regularEnvironmentSettingsPanel.layout = BoxLayout(regularEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
+        val kdeEnvironmentSettingsPanel = JPanel()
+        kdeEnvironmentSettingsPanel.layout = BoxLayout(kdeEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
 
-        val screenDimensionsPanel = JPanel()
-        screenDimensionsPanel.isVisible = getProperty("OverrideScreenDimensions", false)
-        screenDimensionsPanel.layout = BoxLayout(screenDimensionsPanel, BoxLayout.Y_AXIS)
-        screenDimensionsPanel.alignmentX = LEFT_ALIGNMENT
-
-        val overrideScreenDimensionsCheckBox = JCheckBox(localize("OverrideScreenDimensions"))
-        overrideScreenDimensionsCheckBox.isSelected = screenDimensionsPanel.isVisible
-        overrideScreenDimensionsCheckBox.horizontalAlignment = SwingConstants.LEFT
-        overrideScreenDimensionsCheckBox.addActionListener {
-            newProperties.setProperty("OverrideScreenDimensions", overrideScreenDimensionsCheckBox.isSelected.toString())
-            screenDimensionsPanel.isVisible = overrideScreenDimensionsCheckBox.isSelected
+        val useWaylandLayersCheckBox = JCheckBox("Use Wayland Layer Surfaces")
+        useWaylandLayersCheckBox.isSelected = getProperty("UseWaylandLayersKde", true)
+        useWaylandLayersCheckBox.horizontalAlignment = SwingConstants.LEFT
+        useWaylandLayersCheckBox.addActionListener {
+            newProperties.setProperty("UseWaylandLayersKde", useWaylandLayersCheckBox.isSelected.toString())
         }
 
-        val screenPositionPanel = JPanel(BorderLayout())
-        screenPositionPanel.alignmentX = LEFT_ALIGNMENT
+        val kdeScreenDimensionsPanel = ScreenDimensionsPanel()
+        kdeScreenDimensionsPanel.alignmentX = LEFT_ALIGNMENT
 
-        val screenPositionRightPanel = JPanel()
-        screenPositionRightPanel.layout = BoxLayout(screenPositionRightPanel, BoxLayout.X_AXIS)
+        kdeEnvironmentSettingsPanel.add(useWaylandLayersCheckBox)
+        kdeEnvironmentSettingsPanel.add(kdeScreenDimensionsPanel)
 
-        val screenXSpinner = object : JSpinner() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
-        }
-        screenXSpinner.value = getProperty("ScreenX", NativeFactory.instance.environment.screen.left)
-        screenXSpinner.addChangeListener {
-            newProperties.setProperty("ScreenX", (screenXSpinner.value as Int).toString())
-        }
+        kdeEnvironmentCard.add(kdeEnvironmentSettingsPanel, BorderLayout.NORTH)
 
-        val screenYSpinner = object : JSpinner() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
-        }
-        screenYSpinner.value = getProperty("ScreenY", NativeFactory.instance.environment.screen.top)
-        screenYSpinner.addChangeListener {
-            newProperties.setProperty("ScreenY", (screenYSpinner.value as Int).toString())
-        }
+        val waylandEnvironmentCard = JPanel(BorderLayout())
 
-        screenPositionRightPanel.add(screenXSpinner)
-        screenPositionRightPanel.add(Box.createHorizontalStrut(3))
-        screenPositionRightPanel.add(JLabel("x"))
-        screenPositionRightPanel.add(Box.createHorizontalStrut(3))
-        screenPositionRightPanel.add(screenYSpinner)
+        val waylandEnvironmentSettingsPanel = JPanel()
+        waylandEnvironmentSettingsPanel.layout = BoxLayout(waylandEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
 
-        screenPositionPanel.add(JLabel(localize("Position")), BorderLayout.WEST)
-        screenPositionPanel.add(screenPositionRightPanel, BorderLayout.EAST)
+        val layerLabel = JLabel("Layer")
+        layerLabel.horizontalAlignment = SwingConstants.LEFT
 
-        val screenSizePanel = JPanel(BorderLayout())
-        screenSizePanel.alignmentX = LEFT_ALIGNMENT
-
-        val screenSizeRightPanel = JPanel()
-        screenSizeRightPanel.layout = BoxLayout(screenSizeRightPanel, BoxLayout.X_AXIS)
-
-        val screenWidthSpinner = object : JSpinner() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
-        }
-        screenWidthSpinner.value = getProperty("ScreenWidth", NativeFactory.instance.environment.screen.width)
-        screenWidthSpinner.addChangeListener {
-            newProperties.setProperty("ScreenWidth", (screenWidthSpinner.value as Int).toString())
+        val layerComboBox = JComboBox<String>()
+        layerComboBox.alignmentX = LEFT_ALIGNMENT
+        layerComboBox.addItem("Background")
+        layerComboBox.addItem("Bottom")
+        layerComboBox.addItem("Top")
+        layerComboBox.addItem("Overlay")
+        layerComboBox.selectedIndex = getProperty("MascotLayerWayland", 3)
+        layerComboBox.addActionListener {
+            newProperties.setProperty("MascotLayerWayland", layerComboBox.selectedIndex.toString())
         }
 
-        val screenHeightSpinner = object : JSpinner() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
-        }
-        screenHeightSpinner.value = getProperty("ScreenHeight", NativeFactory.instance.environment.screen.height)
-        screenHeightSpinner.addChangeListener {
-            newProperties.setProperty("ScreenHeight", (screenHeightSpinner.value as Int).toString())
-        }
+        val waylandScreenDimensionsPanel = ScreenDimensionsPanel()
+        waylandScreenDimensionsPanel.alignmentX = LEFT_ALIGNMENT
 
-        screenSizeRightPanel.add(screenWidthSpinner)
-        screenSizeRightPanel.add(Box.createHorizontalStrut(3))
-        screenSizeRightPanel.add(JLabel("x"))
-        screenSizeRightPanel.add(Box.createHorizontalStrut(3))
-        screenSizeRightPanel.add(screenHeightSpinner)
+        waylandEnvironmentSettingsPanel.add(JLabel("Layer"))
+        waylandEnvironmentSettingsPanel.add(layerComboBox)
+        waylandEnvironmentSettingsPanel.add(waylandScreenDimensionsPanel)
 
-        screenSizePanel.add(JLabel(localize("Size")), BorderLayout.WEST)
-        screenSizePanel.add(screenSizeRightPanel, BorderLayout.EAST)
+        waylandEnvironmentCard.add(waylandEnvironmentSettingsPanel, BorderLayout.NORTH)
 
-        screenDimensionsPanel.add(screenPositionPanel)
-        screenDimensionsPanel.add(Box.createVerticalStrut(3))
-        screenDimensionsPanel.add(screenSizePanel)
+        val genericEnvironmentCard = JPanel(BorderLayout())
 
-        regularEnvironmentSettingsPanel.add(overrideScreenDimensionsCheckBox)
-        regularEnvironmentSettingsPanel.add(screenDimensionsPanel)
+        val genericEnvironmentSettingsPanel = JPanel()
+        genericEnvironmentSettingsPanel.layout = BoxLayout(genericEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
 
-        regularEnvironmentCard.add(regularEnvironmentSettingsPanel, BorderLayout.NORTH)
+        genericEnvironmentSettingsPanel.add(ScreenDimensionsPanel())
+
+        genericEnvironmentCard.add(genericEnvironmentSettingsPanel, BorderLayout.NORTH)
 
         val virtualEnvironmentCard = JPanel(BorderLayout())
 
@@ -977,14 +943,12 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         virtualEnvironmentCard.add(virtualEnvironmentSettingsPanel, BorderLayout.NORTH)
 
-        environmentCardsPanel.add(regularEnvironmentCard, "regular")
+        environmentCardsPanel.add(kdeEnvironmentCard, "kde")
+        environmentCardsPanel.add(waylandEnvironmentCard, "wayland")
+        environmentCardsPanel.add(genericEnvironmentCard, "generic")
         environmentCardsPanel.add(virtualEnvironmentCard, "virtual")
 
-        if (NativeFactory.current == "virtual") {
-            environmentCardLayout.show(environmentCardsPanel, "virtual")
-        } else {
-            environmentCardLayout.show(environmentCardsPanel, "regular")
-        }
+        environmentCardLayout.show(environmentCardsPanel, NativeFactory.current)
 
         environmentTab.add(environmentComboBox)
         environmentTab.add(Box.createVerticalStrut(3))
@@ -1050,15 +1014,14 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         if (getProperty("InteractiveWindows", "") != newProperties.getProperty("InteractiveWindows", "") ||
-            getProperty("InteractiveWindowsBlacklist", "") != newProperties.getProperty(
-                "InteractiveWindowsBlacklist",
-                ""
-            )
+            getProperty("InteractiveWindowsBlacklist", "") != newProperties.getProperty("InteractiveWindowsBlacklist", "")
         ) {
             isInteractiveWindowReloadRequired = true
         }
 
         if (getProperty("Environment", "") != newProperties.getProperty("Environment", "") ||
+            getProperty("UseWaylandLayersKde", "true") != newProperties.getProperty("UseWaylandLayersKde", "true") ||
+            getProperty("MascotLayerWayland", "3") != newProperties.getProperty("MascotLayerWayland", "3") ||
             getProperty("WindowSize", "600x500") != newProperties.getProperty("WindowSize", "600x500") ||
             getProperty("Background", "#00FF00") != newProperties.getProperty("Background", "#00FF00") ||
             getProperty("BackgroundImage", "") != newProperties.getProperty("BackgroundImage", "") ||
@@ -1146,5 +1109,103 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         windowBackgroundImagePreview.icon = ImageIcon(image)
         windowBackgroundImagePreview.preferredSize = Dimension(image.getWidth(null), image.getHeight(null))
+    }
+
+    private inner class ScreenDimensionsPanel : JPanel() {
+        private val overrideScreenDimensionsCheckBox: JCheckBox
+        private val screenPositionPanel: JPanel
+        private val screenXSpinner: JSpinner
+        private val screenYSpinner: JSpinner
+        private val screenSizePanel: JPanel
+        private val screenWidthSpinner: JSpinner
+        private val screenHeightSpinner: JSpinner
+
+        init {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            alignmentX = LEFT_ALIGNMENT
+
+            overrideScreenDimensionsCheckBox = JCheckBox(localize("OverrideScreenDimensions"))
+            overrideScreenDimensionsCheckBox.horizontalAlignment = SwingConstants.LEFT
+            overrideScreenDimensionsCheckBox.addActionListener {
+                newProperties.setProperty("OverrideScreenDimensions", overrideScreenDimensionsCheckBox.isSelected.toString())
+                screenPositionPanel.isVisible = overrideScreenDimensionsCheckBox.isSelected
+                screenSizePanel.isVisible = overrideScreenDimensionsCheckBox.isSelected
+            }
+
+            screenPositionPanel = JPanel(BorderLayout())
+            screenPositionPanel.alignmentX = LEFT_ALIGNMENT
+
+            val screenPositionRightPanel = JPanel()
+            screenPositionRightPanel.layout = BoxLayout(screenPositionRightPanel, BoxLayout.X_AXIS)
+
+            screenXSpinner = object : JSpinner() {
+                override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            }
+            screenXSpinner.addChangeListener {
+                newProperties.setProperty("ScreenX", (screenXSpinner.value as Int).toString())
+            }
+
+            screenYSpinner = object : JSpinner() {
+                override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            }
+            screenYSpinner.addChangeListener {
+                newProperties.setProperty("ScreenY", (screenYSpinner.value as Int).toString())
+            }
+
+            screenPositionRightPanel.add(screenXSpinner)
+            screenPositionRightPanel.add(Box.createHorizontalStrut(3))
+            screenPositionRightPanel.add(JLabel("x"))
+            screenPositionRightPanel.add(Box.createHorizontalStrut(3))
+            screenPositionRightPanel.add(screenYSpinner)
+
+            screenPositionPanel.add(JLabel(localize("Position")), BorderLayout.WEST)
+            screenPositionPanel.add(screenPositionRightPanel, BorderLayout.EAST)
+
+            screenSizePanel = JPanel(BorderLayout())
+            screenSizePanel.alignmentX = LEFT_ALIGNMENT
+
+            val screenSizeRightPanel = JPanel()
+            screenSizeRightPanel.layout = BoxLayout(screenSizeRightPanel, BoxLayout.X_AXIS)
+
+            screenWidthSpinner = object : JSpinner() {
+                override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            }
+            screenWidthSpinner.addChangeListener {
+                newProperties.setProperty("ScreenWidth", (screenWidthSpinner.value as Int).toString())
+            }
+
+            screenHeightSpinner = object : JSpinner() {
+                override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+            }
+            screenHeightSpinner.addChangeListener {
+                newProperties.setProperty("ScreenHeight", (screenHeightSpinner.value as Int).toString())
+            }
+
+            screenSizeRightPanel.add(screenWidthSpinner)
+            screenSizeRightPanel.add(Box.createHorizontalStrut(3))
+            screenSizeRightPanel.add(JLabel("x"))
+            screenSizeRightPanel.add(Box.createHorizontalStrut(3))
+            screenSizeRightPanel.add(screenHeightSpinner)
+
+            screenSizePanel.add(JLabel(localize("Size")), BorderLayout.WEST)
+            screenSizePanel.add(screenSizeRightPanel, BorderLayout.EAST)
+
+            add(overrideScreenDimensionsCheckBox)
+            add(screenPositionPanel)
+            add(Box.createVerticalStrut(3))
+            add(screenSizePanel)
+
+            addHierarchyListener { e ->
+                if ((e.changeFlags and HierarchyEvent.SHOWING_CHANGED.toLong()) != 0L) {
+                    overrideScreenDimensionsCheckBox.isSelected = newProperties.getProperty("OverrideScreenDimensions", "false").toBoolean()
+                    screenPositionPanel.isVisible = overrideScreenDimensionsCheckBox.isSelected
+                    screenXSpinner.value = newProperties.getProperty("ScreenX", NativeFactory.instance.environment.screen.left.toString()).toInt()
+                    screenYSpinner.value = newProperties.getProperty("ScreenY", NativeFactory.instance.environment.screen.top.toString()).toInt()
+                    screenSizePanel.isVisible = overrideScreenDimensionsCheckBox.isSelected
+                    screenWidthSpinner.value = newProperties.getProperty("ScreenWidth", NativeFactory.instance.environment.screen.width.toString()).toInt()
+                    screenHeightSpinner.value = newProperties.getProperty("ScreenHeight", NativeFactory.instance.environment.screen.height.toString()).toInt()
+                }
+            }
+        }
     }
 }

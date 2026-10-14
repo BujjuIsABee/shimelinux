@@ -51,7 +51,7 @@ class KdeEnvironment : Environment() {
     private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
-        if (Platform.sessionType == "wayland") {
+        if (Platform.sessionType == "wayland" && getProperty("UseWaylandLayersKde", true)) {
             PopupFactory.setSharedInstance(WaylandPopupFactory)
         } else if (UIManager.getLookAndFeel() is FlatLaf) {
             PopupFactory.setSharedInstance(FlatPopupFactory())

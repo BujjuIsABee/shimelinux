@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.wayland
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.Platform
+import com.group_finity.mascot.getProperty
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Point
@@ -41,7 +42,7 @@ import kotlin.system.exitProcess
  */
 class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long = try {
-        WaylandLib.createLayer(mouseEventReceiver)
+        WaylandLib.createLayer(getProperty("MascotLayerWayland", 3), mouseEventReceiver)
     } catch (e: Throwable) {
         Main.showError("Fatal error in libshimelinux_wayland.", e)
         exitProcess(0)

@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.kde
 import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.environment.Environment
+import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
@@ -42,13 +43,13 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = KdeEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = if (Platform.sessionType == "wayland") {
+    override fun newNativeImage(src: BufferedImage): NativeImage = if (Platform.sessionType == "wayland" && getProperty("UseWaylandLayersKde", true)) {
         WaylandNativeImage(src)
     } else {
         GenericNativeImage(src)
     }
 
-    override fun newTranslucentWindow(): TranslucentWindow = if (Platform.sessionType == "wayland") {
+    override fun newTranslucentWindow(): TranslucentWindow = if (Platform.sessionType == "wayland" && getProperty("UseWaylandLayersKde", true)) {
         WaylandTranslucentLayer()
     } else {
         GenericTranslucentWindow()

@@ -87,7 +87,7 @@ bind_java_type! {
         MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
     },
     native_methods {
-        extern fn create_layer(mouse_event_receiver: MouseEventReceiver) -> jlong,
+        extern fn create_layer(mascot_layer: jint, mouse_event_receiver: MouseEventReceiver) -> jlong,
         extern fn set_bounds(sender_ptr: jlong, x: jint, y: jint, width: jint, height: jint),
         extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
         extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
@@ -104,6 +104,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
     fn create_layer<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
+        mascot_layer: jint,
         mouse_event_receiver: MouseEventReceiver<'local>,
     ) -> jni::errors::Result<jlong> {
         // Get the event sender and receiver
@@ -122,7 +123,12 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let layer = layer_shell.create_layer_surface(
             &qh,
             surface,
-            Layer::Overlay,
+            match mascot_layer {
+                0 => Layer::Background,
+                1 => Layer::Bottom,
+                2 => Layer::Top,
+                _ => Layer::Overlay,
+            },
             Some("shimelinux"),
             None,
         );
