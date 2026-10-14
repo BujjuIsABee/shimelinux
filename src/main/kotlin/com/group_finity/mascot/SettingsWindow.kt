@@ -66,7 +66,7 @@ import javax.swing.border.BevelBorder
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
-private const val VERSION = "v1.3.4"
+private const val VERSION = "v1.4.0"
 private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
 private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
 private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
@@ -695,17 +695,41 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val kdeEnvironmentSettingsPanel = JPanel()
         kdeEnvironmentSettingsPanel.layout = BoxLayout(kdeEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
 
-        val useWaylandLayersCheckBox = JCheckBox("Use Wayland Layer Surfaces")
-        useWaylandLayersCheckBox.isSelected = getProperty("UseWaylandLayersKde", true)
+        val layerLabelKde = JLabel("Layer")
+        val layerComboBoxKde = JComboBox<String>()
+        val layerComboBoxWayland = JComboBox<String>()
+
+        val useWaylandLayersCheckBox = JCheckBox("Use Wayland Layers")
+        useWaylandLayersCheckBox.isVisible = Platform.sessionType == "wayland"
+        useWaylandLayersCheckBox.isSelected = getProperty("UseWaylandLayersKde", true) && useWaylandLayersCheckBox.isVisible
         useWaylandLayersCheckBox.horizontalAlignment = SwingConstants.LEFT
         useWaylandLayersCheckBox.addActionListener {
             newProperties.setProperty("UseWaylandLayersKde", useWaylandLayersCheckBox.isSelected.toString())
+            layerLabelKde.isVisible = useWaylandLayersCheckBox.isSelected
+            layerComboBoxKde.isVisible = useWaylandLayersCheckBox.isSelected
         }
+
+        layerLabelKde.isVisible = useWaylandLayersCheckBox.isSelected
+        layerLabelKde.horizontalAlignment = SwingConstants.LEFT
+        layerComboBoxKde.isVisible = useWaylandLayersCheckBox.isSelected
+        layerComboBoxKde.alignmentX = LEFT_ALIGNMENT
+        layerComboBoxKde.addItem("Background")
+        layerComboBoxKde.addItem("Bottom")
+        layerComboBoxKde.addItem("Top")
+        layerComboBoxKde.addItem("Overlay")
+        layerComboBoxKde.selectedIndex = getProperty("MascotLayerWayland", 3)
+        layerComboBoxKde.addActionListener {
+            newProperties.setProperty("MascotLayerWayland", layerComboBoxKde.selectedIndex.toString())
+            layerComboBoxWayland.selectedIndex = layerComboBoxKde.selectedIndex
+        }
+
 
         val kdeScreenDimensionsPanel = ScreenDimensionsPanel()
         kdeScreenDimensionsPanel.alignmentX = LEFT_ALIGNMENT
 
         kdeEnvironmentSettingsPanel.add(useWaylandLayersCheckBox)
+        kdeEnvironmentSettingsPanel.add(layerLabelKde)
+        kdeEnvironmentSettingsPanel.add(layerComboBoxKde)
         kdeEnvironmentSettingsPanel.add(kdeScreenDimensionsPanel)
 
         kdeEnvironmentCard.add(kdeEnvironmentSettingsPanel, BorderLayout.NORTH)
@@ -715,25 +739,25 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val waylandEnvironmentSettingsPanel = JPanel()
         waylandEnvironmentSettingsPanel.layout = BoxLayout(waylandEnvironmentSettingsPanel, BoxLayout.Y_AXIS)
 
-        val layerLabel = JLabel("Layer")
-        layerLabel.horizontalAlignment = SwingConstants.LEFT
+        val layerLabelWayland = JLabel("Layer")
+        layerLabelWayland.horizontalAlignment = SwingConstants.LEFT
 
-        val layerComboBox = JComboBox<String>()
-        layerComboBox.alignmentX = LEFT_ALIGNMENT
-        layerComboBox.addItem("Background")
-        layerComboBox.addItem("Bottom")
-        layerComboBox.addItem("Top")
-        layerComboBox.addItem("Overlay")
-        layerComboBox.selectedIndex = getProperty("MascotLayerWayland", 3)
-        layerComboBox.addActionListener {
-            newProperties.setProperty("MascotLayerWayland", layerComboBox.selectedIndex.toString())
+        layerComboBoxWayland.alignmentX = LEFT_ALIGNMENT
+        layerComboBoxWayland.addItem("Background")
+        layerComboBoxWayland.addItem("Bottom")
+        layerComboBoxWayland.addItem("Top")
+        layerComboBoxWayland.addItem("Overlay")
+        layerComboBoxWayland.selectedIndex = getProperty("MascotLayerWayland", 3)
+        layerComboBoxWayland.addActionListener {
+            newProperties.setProperty("MascotLayerWayland", layerComboBoxWayland.selectedIndex.toString())
+            layerComboBoxKde.selectedIndex = layerComboBoxWayland.selectedIndex
         }
 
         val waylandScreenDimensionsPanel = ScreenDimensionsPanel()
         waylandScreenDimensionsPanel.alignmentX = LEFT_ALIGNMENT
 
         waylandEnvironmentSettingsPanel.add(JLabel("Layer"))
-        waylandEnvironmentSettingsPanel.add(layerComboBox)
+        waylandEnvironmentSettingsPanel.add(layerComboBoxWayland)
         waylandEnvironmentSettingsPanel.add(waylandScreenDimensionsPanel)
 
         waylandEnvironmentCard.add(waylandEnvironmentSettingsPanel, BorderLayout.NORTH)
