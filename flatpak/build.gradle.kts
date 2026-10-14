@@ -86,6 +86,6 @@ tasks.clean {
 }
 
 tasks.flatpakGradleGenerator {
-    outputFile = file("flatpak/gradle-sources.json")
+    outputFile = file("./gradle-sources.json")
     downloadDirectory = "./offline-repository"
 }

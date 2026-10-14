@@ -1,0 +1,38 @@
+name: Update Flatpak Sources
+
+on: workflow_dispatch
+
+jobs:
+  update-flatpak-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 21
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-state: '3.13'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Install Python Dependencies
+        run: pip install tomlkit aiohttp
+      - name: Generate Gradle Sources
+        run: |
+          cp flatpak/build.gradle.kts .
+          ./gradlew flatpakGradleGenerator --no-configuration-cache
+      - name: Generate Cargo Sources
+        run: |
+          curl -O https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/cargo/flatpak-cargo-generator.py
+          python3 flatpak-cargo.generator.py shimelinux_wayland/Cargo.lock -o cargo-sources.json
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-sources
+          path: |
+            ./gradle-sources.json
+            ./cargo-sources.json
