@@ -69,24 +69,25 @@ class WaylandEnvironment : Environment() {
 
         screen.set(screenRect)
 
-        absoluteCursorPosition = when (Platform.currentDesktop) {
-            "hyprland" -> runCatching {
-                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
-                Point(x, y)
-            }.getOrNull()
-
-            "mango" -> runCatching {
-                val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }
-                Point(x.toDouble().toInt(), y.toDouble().toInt())
-            }.getOrNull()
-
-            "kde" -> KWin.cursorPosition
-
-            else -> absoluteCursorPosition
-        }
 
         // Update cursor position
-        cursor.set(absoluteCursorPosition ?: Point(0, 0))
+        cursor.set(
+            when (Platform.currentDesktop) {
+                "hyprland" -> runCatching {
+                    val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
+                    Point(x, y)
+                }.getOrNull()
+
+                "mango" -> runCatching {
+                    val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }
+                    Point(x.toDouble().toInt(), y.toDouble().toInt())
+                }.getOrNull()
+
+                "kde" -> KWin.cursorPosition
+
+                else -> absoluteCursorPosition
+            } ?: Point(0, 0)
+        )
     }
 
     override fun moveActiveIE(point: Point) {}

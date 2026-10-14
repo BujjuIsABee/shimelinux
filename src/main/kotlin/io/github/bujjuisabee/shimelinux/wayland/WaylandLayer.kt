@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.Platform
 import java.awt.Component
 import java.awt.Cursor
@@ -149,6 +150,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
             absoluteLocation = location
         }
 
+        val absoluteCursorPosition = NativeFactory.instance.environment.cursor
+
         if (leftPressed || rightPressed) {
             component.dispatchEvent(
                 MouseEvent(
@@ -157,12 +160,12 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     System.currentTimeMillis(),
                     modifiers,
                     if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        (WaylandEnvironment.absoluteCursorPosition?.x ?: 0) - location.x
+                        absoluteCursorPosition.x - location.x
                     } else {
                         positionX
                     },
                     if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        (WaylandEnvironment.absoluteCursorPosition?.y ?: 0) - location.y
+                        absoluteCursorPosition.y - location.y
                     } else {
                         positionY
                     },
@@ -181,12 +184,12 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     System.currentTimeMillis(),
                     modifiers,
                     if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        (WaylandEnvironment.absoluteCursorPosition?.x ?: 0) - location.x
+                        absoluteCursorPosition.x - location.x
                     } else {
                         positionX
                     },
                     if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        (WaylandEnvironment.absoluteCursorPosition?.y ?: 0) - location.y
+                        absoluteCursorPosition.y - location.y
                     } else {
                         positionY
                     },
@@ -208,17 +211,17 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     System.currentTimeMillis(),
                     modifiers,
                     if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        (WaylandEnvironment.absoluteCursorPosition?.x ?: 0) - location.x
+                        absoluteCursorPosition.x - location.x
                     } else {
                         positionX
                     },
                     if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        (WaylandEnvironment.absoluteCursorPosition?.y ?: 0) - location.y
+                        absoluteCursorPosition.y - location.y
                     } else {
                         positionY
                     },
                     0,
-                    rightReleased,
+                    false,
                     button
                 )
             )

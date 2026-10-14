@@ -29,6 +29,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Logger
+import kotlin.math.abs
 
 private val logger: Logger = Logger.getLogger(WalkWithIE::class.java.name)
 
@@ -67,12 +68,18 @@ class WalkWithIE(
         }
 
         if (mascot.isLookRight) {
-            if (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom) {
+            val distanceX = abs((mascot.anchor.x - offsetX) - activeIE.left)
+            val distanceY = abs((mascot.anchor.y + offsetY) - activeIE.bottom)
+
+            if (distanceX > 2 || distanceY > 2) {
                 logger.info { "Lost ground ($mascot, $this)" }
                 throw LostGroundException()
             }
         } else {
-            if (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom) {
+            val distanceX = abs((mascot.anchor.x + offsetX) - activeIE.right)
+            val distanceY = abs((mascot.anchor.y + offsetY) - activeIE.bottom)
+
+            if (distanceX > 2 || distanceY > 2) {
                 logger.info { "Lost ground ($mascot, $this)" }
                 throw LostGroundException()
             }
