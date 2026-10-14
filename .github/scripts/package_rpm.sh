@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 NAME='shimelinux'
-VERSION='1.3.4'
+VERSION='1.4.0'
 RELEASE='1%{?dist}'
 SUMMARY='An unofficial Linux port of Shimeji-ee Desktop Pet'
 BUILD_ARCH='noarch'

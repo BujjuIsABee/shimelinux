@@ -46,6 +46,23 @@
         </screenshot>
     </screenshots>
     <releases>
+        <release version="1.4.0" date="2026-10-13">
+            <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.0</url>
+            <description>
+                <p>Changelog:</p>
+                <ul>
+                    <li>Shimeji are now displayed on native Wayland surfaces on KDE Plasma. This can be disabled in the Environment tab in settings.</li>
+                    <li>You can now set which layer Shimeji will be displayed on in the Environment tab when using the Wayland or KDE environment.</li>
+                    <li>The Wayland environment now supports the Mango compositor.</li>
+                    <li>Fixed a bug where Shimeji would keep falling over while trying to move a window.</li>
+                    <li>Fixed a bug where the cursor position would be slightly off when using the windowed environment.</li>
+                    <li>Fixed several bugs with popup menus in the Wayland environment.</li>
+                    <li>Shimeji will now be paused when the settings menu and image set chooser are open.</li>
+                    <li>The Wayland environment can no longer be enabled on GNOME and Cinnamon.</li>
+                    <li>There will no longer be an error message every time the program starts if the system tray icon cannot be created.</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.3.4" date="2026-10-06">
             <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.3.4</url>
             <description>
