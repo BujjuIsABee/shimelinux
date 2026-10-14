@@ -35,7 +35,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(Interact::class.java.name)
 
 /**
- * An action that sets [mascot]'s behavior if another mascot with the [affordance] is found.
+ * An action that sets the behavior of [mascot] if another mascot with the [affordance] is found.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

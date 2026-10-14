@@ -44,12 +44,12 @@ interface Behavior {
     fun next()
 
     /**
-     * Called when a mouse button is pressed while inside the bounds of the mascot.
+     * Called when a mouse button is pressed inside the bounds of the mascot.
      */
     fun mousePressed(e: MouseEvent)
 
     /**
-     * Called when a mouse button is released after being pressed inside the bounds of the mascot.
+     * Called when a mouse button is released inside the bounds of the mascot.
      */
     fun mouseReleased(e: MouseEvent)
 }

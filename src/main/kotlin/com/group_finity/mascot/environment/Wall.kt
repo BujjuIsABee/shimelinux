@@ -33,21 +33,48 @@ import kotlin.math.abs
  * @author Bujju
  */
 class Wall(val area: Area, val isRight: Boolean) : Border {
+    /**
+     * The position of the border on the X-axis.
+     */
     val x: Int
         get() = if (isRight) area.right else area.left
+
+    /**
+     * The position of the top edge of the border on the Y-axis.
+     */
     val top: Int
         get() = area.top
+
+    /**
+     * The position of the bottom edge of the border on the Y-axis.
+     */
     val bottom: Int
         get() = area.bottom
+
+    /**
+     * The distance that the [x] position of the border moved the last time [Area.set] was called on the [area].
+     */
     val dx: Int
         @JvmName("getDX")
         get() = if (isRight) area.dright else area.dleft
+
+    /**
+     * The distance that the top edge of the border moved the last time [Area.set] was called on the [area].
+     */
     val dtop: Int
         @JvmName("getDTop")
         get() = area.dtop
+
+    /**
+     * The distance that the bottom edge of the border moved the last time [Area.set] was called on the [area].
+     */
     val dbottom: Int
         @JvmName("getDBottom")
         get() = area.dbottom
+
+    /**
+     * The height of the border.
+     */
     val height: Int
         get() = area.height
 

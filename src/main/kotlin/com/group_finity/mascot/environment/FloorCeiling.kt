@@ -33,21 +33,48 @@ import kotlin.math.abs
  * @author Bujju
  */
 class FloorCeiling(val area: Area, val isBottom: Boolean) : Border {
+    /**
+     * The position of the border on the Y-axis.
+     */
     val y: Int
         get() = if (isBottom) area.bottom else area.top
+
+    /**
+     * The position of the left edge of the border on the X-axis.
+     */
     val left: Int
         get() = area.left
+
+    /**
+     * The position of the right edge of the border on the X-axis.
+     */
     val right: Int
         get() = area.right
+
+    /**
+     * The distance that the [y] position of the border moved the last time [Area.set] was called on the [area].
+     */
     val dy: Int
         @JvmName("getDY")
         get() = if (isBottom) area.dbottom else area.dtop
+
+    /**
+     * The distance that the left edge of the border moved the last time [Area.set] was called on the [area].
+     */
     val dleft: Int
         @JvmName("getDLeft")
         get() = area.dleft
+
+    /**
+     * The distance that the right edge of the border moved the last time [Area.set] was called on the [area].
+     */
     val dright: Int
         @JvmName("getDRight")
         get() = area.dright
+
+    /**
+     * The width of the border.
+     */
     val width: Int
         get() = area.width
 

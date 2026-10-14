@@ -38,7 +38,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ScanMove::class.java.name)
 
 /**
- * An action that scans for a mascot with the [affordance] and causes [mascot] to move towards it if one is found.
+ * An action that scans for a mascot with the [affordance] and causes [mascot] to move toward it if one is found.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -58,7 +58,7 @@ class ScanMove(
     internal val hasTurningAnimation: Boolean = animations.any { it.isTurn }
 
     /**
-     * Whether the mascot is currently turning.
+     * Whether the [mascot] is currently turning.
      */
     internal var isTurning = false
 

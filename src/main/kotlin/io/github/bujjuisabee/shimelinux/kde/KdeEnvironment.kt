@@ -24,10 +24,11 @@ package io.github.bujjuisabee.shimelinux.kde
 
 import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
-import com.group_finity.mascot.applyInsets
+import com.group_finity.mascot.Platform
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
@@ -50,7 +51,13 @@ class KdeEnvironment : Environment() {
     private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
-        PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+        if (Platform.sessionType == "wayland") {
+            PopupFactory.setSharedInstance(WaylandPopupFactory)
+        } else if (UIManager.getLookAndFeel() is FlatLaf) {
+            PopupFactory.setSharedInstance(FlatPopupFactory())
+        } else {
+            PopupFactory.setSharedInstance(PopupFactory())
+        }
     }
 
     override fun tick() {

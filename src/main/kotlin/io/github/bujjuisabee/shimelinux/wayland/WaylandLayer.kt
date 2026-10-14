@@ -27,7 +27,9 @@ import com.group_finity.mascot.Platform
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Point
+import java.awt.Window
 import java.awt.event.MouseEvent
+import javax.swing.JDialog
 import kotlin.system.exitProcess
 
 /**
@@ -128,6 +130,9 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
         positionX: Int,
         positionY: Int
     ) {
+        // Block mouse events when dialog windows are open
+        if (Window.getWindows().any { it is JDialog && it.isModal && it.isVisible }) return
+
         var modifiers = MouseEvent.NOBUTTON
         var button = MouseEvent.NOBUTTON
         if (leftPressed || leftReleased) {
@@ -151,10 +156,18 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     MouseEvent.MOUSE_PRESSED,
                     System.currentTimeMillis(),
                     modifiers,
-                    positionX,
-                    positionY,
+                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
+                        (WaylandEnvironment.absoluteCursorPosition?.x ?: 0) - location.x
+                    } else {
+                        positionX
+                    },
+                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
+                        (WaylandEnvironment.absoluteCursorPosition?.y ?: 0) - location.y
+                    } else {
+                        positionY
+                    },
                     1,
-                    false,
+                    rightPressed,
                     button
                 )
             )
@@ -167,10 +180,18 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     MouseEvent.MOUSE_RELEASED,
                     System.currentTimeMillis(),
                     modifiers,
-                    positionX,
-                    positionY,
+                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
+                        (WaylandEnvironment.absoluteCursorPosition?.x ?: 0) - location.x
+                    } else {
+                        positionX
+                    },
+                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
+                        (WaylandEnvironment.absoluteCursorPosition?.y ?: 0) - location.y
+                    } else {
+                        positionY
+                    },
                     1,
-                    rightReleased,
+                    false,
                     button
                 )
             )
@@ -186,8 +207,16 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
                     System.currentTimeMillis(),
                     modifiers,
-                    positionX,
-                    positionY,
+                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
+                        (WaylandEnvironment.absoluteCursorPosition?.x ?: 0) - location.x
+                    } else {
+                        positionX
+                    },
+                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
+                        (WaylandEnvironment.absoluteCursorPosition?.y ?: 0) - location.y
+                    } else {
+                        positionY
+                    },
                     0,
                     rightReleased,
                     button

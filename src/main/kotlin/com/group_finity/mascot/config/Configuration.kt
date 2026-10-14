@@ -41,7 +41,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(Configuration::class.java.name)
 
 /**
- * Parses an XML configuration file for a mascot.
+ * Parses an XML configuration file for an image set.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -65,7 +65,7 @@ class Configuration {
         get() = behaviorBuilders.keys
 
     /**
-     * Loads a configuration for [imageSet] from the given [configurationNode].
+     * Loads a configuration for the [imageSet] from the given [configurationNode].
      */
     fun load(configurationNode: Entry, imageSet: String) {
         logger.info { "Reading configuration file" }
@@ -170,7 +170,7 @@ class Configuration {
     }
 
     /**
-     * Builds an action from its [name], passing the given [params].
+     * Builds the action with the specified [name], passing the given [params].
      */
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name] ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
@@ -178,7 +178,8 @@ class Configuration {
     }
 
     /**
-     * Builds a behavior from its [name]. If the behavior does not exist, [mascot] will be reset.
+     * Builds the behavior with the specified [name]. If the behavior is not enabled for the given [mascot], its
+     * position and behavior will be reset.
      */
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name] ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
@@ -191,12 +192,12 @@ class Configuration {
     }
 
     /**
-     * Builds a behavior from its [name].
+     * Builds the behavior with the specified [name].
      */
     fun buildBehavior(name: String): Behavior = behaviorBuilders[name]?.buildBehavior() ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
     /**
-     * Builds the next behavior for [mascot]. Returns null if no behavior can be selected.
+     * Builds the next behavior for the given [mascot]. Returns null if no behavior can be selected.
      */
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -252,42 +253,42 @@ class Configuration {
     }
 
     /**
-     * Returns whether an action builder with the given [name] exists.
+     * Returns whether an action builder with the specified [name] exists.
      */
     fun hasAction(name: String): Boolean = actionBuilders.containsKey(name)
 
     /**
-     * Returns whether the given [builder] is enabled for [mascot].
+     * Returns whether the given [builder] is enabled for the given [mascot].
      */
     fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean =
         !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split('/')
             .none { it == builder.name }
 
     /**
-     * Returns whether a behavior builder with the given [name] exists and is enabled for [mascot].
+     * Returns whether a behavior builder with the specified [name] exists and is enabled for the given [mascot].
      */
     fun isBehaviorEnabled(name: String?, mascot: Mascot): Boolean =
         behaviorBuilders[name]?.let { isBehaviorEnabled(it, mascot) } == true
 
     /**
-     * Returns whether a behavior builder with the given [name] exists and should be hidden from the Set Behavior
+     * Returns whether a behavior builder with the specified [name] exists and should be hidden from the Set Behavior
      * and Allowed Behaviors lists.
      */
     fun isBehaviorHidden(name: String?): Boolean = behaviorBuilders[name]?.isHidden == true
 
     /**
-     * Returns whether a behavior builder with the given [name] exists and should be toggleable in the Allowed
+     * Returns whether a behavior builder with the specified [name] exists and should be toggleable in the Allowed
      * Behaviors list.
      */
     fun isBehaviorToggleable(name: String?): Boolean = behaviorBuilders[name]?.isToggleable == true
 
     /**
-     * Returns whether [information] contains the given [key].
+     * Returns whether [information] contains the specified [key].
      */
     fun containsInformationKey(key: String?): Boolean = information.containsKey(key)
 
     /**
-     * Gets the value associated with the given [key] in [information], or null if the key does not exist.
+     * Gets the value associated with the specified [key] in [information], or null if the key does not exist.
      */
     fun getInformation(key: String): String? = information[key]
 }

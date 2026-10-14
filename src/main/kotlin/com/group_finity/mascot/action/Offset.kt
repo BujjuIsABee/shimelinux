@@ -26,7 +26,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that instantly moves the mascot.
+ * An action that instantly moves the [mascot].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -37,13 +37,13 @@ class Offset(
     params: VariableMap
 ) : InstantAction(schema, params) {
     /**
-     * The horizontal distance to move the mascot.
+     * The horizontal distance to move the [mascot].
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
 
     /**
-     * The vertical distance to move the mascot.
+     * The vertical distance to move the [mascot].
      */
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()

@@ -23,22 +23,34 @@
 package io.github.bujjuisabee.shimelinux.kde
 
 import com.group_finity.mascot.NativeFactory
+import com.group_finity.mascot.Platform
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
 import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import io.github.bujjuisabee.shimelinux.generic.GenericTranslucentWindow
+import io.github.bujjuisabee.shimelinux.wayland.WaylandNativeImage
+import io.github.bujjuisabee.shimelinux.wayland.WaylandTranslucentLayer
 import java.awt.image.BufferedImage
 
 /**
- * A native factory for KDE Plasma that supports interactive windows.
+ * A native factory for KDE Plasma that supports interactive windows. On Wayland, mascots and popup menus are displayed
+ * on native Wayland surfaces.
  *
  * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = KdeEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
+    override fun newNativeImage(src: BufferedImage): NativeImage = if (Platform.sessionType == "wayland") {
+        WaylandNativeImage(src)
+    } else {
+        GenericNativeImage(src)
+    }
 
-    override fun newTranslucentWindow(): TranslucentWindow = GenericTranslucentWindow()
+    override fun newTranslucentWindow(): TranslucentWindow = if (Platform.sessionType == "wayland") {
+        WaylandTranslucentLayer()
+    } else {
+        GenericTranslucentWindow()
+    }
 }

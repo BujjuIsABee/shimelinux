@@ -36,7 +36,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
- * A popup menu that is displayed on a Wayland layer surface.
+ * Displays a popup menu on a Wayland layer surface.
  *
  * @author Bujju
  */
@@ -115,7 +115,7 @@ class WaylandPopup(
     }
 
     private fun openSubmenu(menu: JMenu) {
-        if (menu.getClientProperty("isShowing") == true) return
+        if (menu.getClientProperty("WaylandPopup.isShowing") == true) return
 
         val location = getSubmenuOrigin(x, y, menu)
         val popup = WaylandPopupFactory.getPopup(contents, menu.popupMenu, location.x, location.y) as WaylandPopup
@@ -123,31 +123,36 @@ class WaylandPopup(
         popup.show()
         submenu = popup
 
-        menu.putClientProperty("isShowing", true)
+        menu.putClientProperty("WaylandPopup.isShowing", true)
     }
 
     private fun closeSubmenu() {
         submenu?.let {
-            it.parent?.putClientProperty("isShowing", false)
+            it.parent?.putClientProperty("WaylandPopup.isShowing", false)
             it.hide()
             submenu = null
         }
     }
 
-    private fun getSubmenuOrigin(x: Int, y: Int, submenu: JMenu): Point {
+    private fun getSubmenuOrigin(positionX: Int, positionY: Int, submenu: JMenu): Point {
         val screenBounds = NativeFactory.instance.environment.screen.toRectangle()
-        val submenuSize = submenu.popupMenu.preferredSize
+        val popupSize = submenu.popupMenu.preferredSize
 
-        val offsetX = UIManager.getInt("Menu.submenuPopupOffsetX").coerceAtMost(-2)
-        val rightX = x + contents.width + offsetX
-        val leftX = x - submenuSize.width - offsetX
+        val xOffset = UIManager.getInt("Menu.submenuPopupOffsetX")
+        var x = positionX + submenu.width + xOffset
+        if (x + popupSize.width >= screenBounds.x + screenBounds.width && screenBounds.width - submenu.width < 2 * (positionX - screenBounds.x)) {
+            x = positionX - popupSize.width - xOffset
+        }
 
-        val x = if (rightX + submenuSize.width > screenBounds.x + screenBounds.width) leftX else rightX
-        val y = y + submenu.y + UIManager.getInt("Menu.submenuPopupOffsetY")
+        val yOffset = UIManager.getInt("Menu.submenuPopupOffsetY")
+        var y = positionY + submenu.y + yOffset
+        if (y + popupSize.height >= screenBounds.y + screenBounds.height && screenBounds.height - submenu.height < 2 * (positionY - screenBounds.y)) {
+            y = positionY + submenu.y + submenu.height - popupSize.height - yOffset
+        }
 
         return Point(
-            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - submenuSize.width),
-            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - submenuSize.height)
+            x.coerceIn(screenBounds.x, screenBounds.x + screenBounds.width - popupSize.width),
+            y.coerceIn(screenBounds.y, screenBounds.y + screenBounds.height - popupSize.height)
         )
     }
 }

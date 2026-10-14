@@ -56,7 +56,7 @@ class ComplexJump(
     private var isScanEnabled = false
 
     /**
-     * The characteristics of the action ("Breed" and/or "Scan"), separated by '/'.
+     * The characteristics of the action ("Breed" and/or "Scan"), separated by a forward slash.
      */
     private val characteristics: String
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
@@ -80,19 +80,21 @@ class ComplexJump(
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
-     * The velocity of the mascot as it jumps towards the target position.
+     * The velocity of the [mascot] as it jumps toward the target position.
      */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
 
     /**
-     * The X-position that the mascot jumps towards. The X-position of [target] will be used instead if [isScanEnabled] is true.
+     * The Y position that the [mascot] jumps toward. The X position of [target] will be used instead if [isScanEnabled]
+     * is true.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y-position that the mascot jumps towards. The Y-position of [target] will be used instead if [isScanEnabled] is true.
+     * The Y position that the [mascot] jumps toward. The Y position of [target] will be used instead if [isScanEnabled]
+     * is true.
      */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()

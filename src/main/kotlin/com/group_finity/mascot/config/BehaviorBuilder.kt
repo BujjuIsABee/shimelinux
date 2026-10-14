@@ -36,7 +36,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 
 /**
- * Builds a behavior from a Behavior node.
+ * Builds a behavior from the given [behaviorNode].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

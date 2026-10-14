@@ -27,7 +27,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that is applied when it is initialized, then immediately ends.
+ * An action that acts immediately and lasts a single frame.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

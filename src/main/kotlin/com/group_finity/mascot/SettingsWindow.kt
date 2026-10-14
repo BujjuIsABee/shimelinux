@@ -792,20 +792,20 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val windowDimensionsRightPanel = JPanel()
         windowDimensionsRightPanel.layout = BoxLayout(windowDimensionsRightPanel, BoxLayout.X_AXIS)
 
-        val (windowWidth, windowHeight) = getProperty("ScreenSize", "600x500").split('x').map { it.toIntOrNull() ?: 0 }
+        val (windowWidth, windowHeight) = getProperty("WindowSize", "600x500").split('x').map { it.toIntOrNull() ?: 0 }
 
         val widthSpinner = JSpinner()
         widthSpinner.value = windowWidth
         widthSpinner.addChangeListener {
-            val (_, windowHeight) = newProperties.getProperty("ScreenSize", "600x500").split('x')
-            newProperties.setProperty("ScreenSize", "${widthSpinner.value}x${windowHeight}")
+            val (_, windowHeight) = newProperties.getProperty("WindowSize", "600x500").split('x')
+            newProperties.setProperty("WindowSize", "${widthSpinner.value}x${windowHeight}")
         }
 
         val heightSpinner = JSpinner()
         heightSpinner.value = windowHeight
         heightSpinner.addChangeListener {
-            val (windowWidth, _) = newProperties.getProperty("ScreenSize", "600x500").split('x')
-            newProperties.setProperty("ScreenSize", "${windowWidth}x${heightSpinner.value}")
+            val (windowWidth, _) = newProperties.getProperty("WindowSize", "600x500").split('x')
+            newProperties.setProperty("WindowSize", "${windowWidth}x${heightSpinner.value}")
         }
 
         windowDimensionsRightPanel.add(widthSpinner)

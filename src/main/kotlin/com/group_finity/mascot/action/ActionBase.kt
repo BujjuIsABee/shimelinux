@@ -60,7 +60,7 @@ abstract class ActionBase(
         get() = animations.firstOrNull { it.isEffective(variables) }
 
     /**
-     * The amount of ticks that have passed since the action began.
+     * The number of ticks that have passed since the action began.
      */
     internal var time = 0
         get() = mascot.time - field
@@ -69,7 +69,7 @@ abstract class ActionBase(
         }
 
     /**
-     * Whether the mascot can be dragged with the cursor.
+     * Whether the [mascot] can be dragged with the mouse.
      */
     open val isDraggable: Boolean
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), DEFAULT_DRAGGABLE)
@@ -87,7 +87,7 @@ abstract class ActionBase(
         get() = eval<Number>(schema.getString(PARAMETER_DURATION), DEFAULT_DURATION).toInt()
 
     /**
-     * An affordance that will be added to the mascot on the next frame.
+     * An affordance that will be added to the [mascot] on the next frame.
      */
     internal val affordance: String
         get() = eval(schema.getString(PARAMETER_AFFORDANCE), DEFAULT_AFFORDANCE)
@@ -157,7 +157,7 @@ abstract class ActionBase(
     }
 
     /**
-     * Returns the value of the variable in [variables] with the given [name], cast as [T], or [defaultValue] if the
+     * Returns the value of the variable in [variables] with the specified [name], cast as [T], or [defaultValue] if the
      * variable does not exist.
      */
     internal inline fun <reified T> eval(name: String, defaultValue: T): T = synchronized(variables) {

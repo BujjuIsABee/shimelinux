@@ -39,7 +39,7 @@ import kotlin.math.sqrt
 private val logger: Logger = Logger.getLogger(ScanJump::class.java.name)
 
 /**
- * An action that scans for a mascot with the [affordance] and causes [mascot] to jump towards it if one is found.
+ * An action that scans for a mascot with the [affordance] and causes [mascot] to jump toward it if one is found.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -72,7 +72,7 @@ class ScanJump(
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
-     * The velocity of the mascot as it jumps.
+     * The velocity of the [mascot] as it jumps.
      */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()

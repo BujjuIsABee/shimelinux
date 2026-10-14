@@ -68,9 +68,7 @@ class Manager {
      * Starts dispatching ticks to the mascots in the list.
      */
     fun start() {
-        if (timer == null) {
-            timer = timer(daemon = false, period = 40L) { tick() }
-        }
+        timer = timer ?: timer(daemon = false, period = 40L) { tick() }
     }
 
     /**

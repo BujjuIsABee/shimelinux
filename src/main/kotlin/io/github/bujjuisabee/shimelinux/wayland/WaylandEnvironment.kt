@@ -23,7 +23,6 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Platform
-import com.group_finity.mascot.applyInsets
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
@@ -70,24 +69,24 @@ class WaylandEnvironment : Environment() {
 
         screen.set(screenRect)
 
+        absoluteCursorPosition = when (Platform.currentDesktop) {
+            "hyprland" -> runCatching {
+                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
+                Point(x, y)
+            }.getOrNull()
+
+            "mango" -> runCatching {
+                val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }
+                Point(x.toDouble().toInt(), y.toDouble().toInt())
+            }.getOrNull()
+
+            "kde" -> KWin.cursorPosition
+
+            else -> absoluteCursorPosition
+        }
+
         // Update cursor position
-        cursor.set(
-            when (Platform.currentDesktop) {
-                "hyprland" -> runCatching {
-                    val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
-                    Point(x, y)
-                }.getOrNull()
-
-                "mango" -> runCatching {
-                    val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }
-                    Point(x.toDouble().toInt(), y.toDouble().toInt())
-                }.getOrNull()
-
-                "kde" -> KWin.cursorPosition
-
-                else -> absoluteCursorPosition
-            } ?: Point(0, 0)
-        )
+        cursor.set(absoluteCursorPosition ?: Point(0, 0))
     }
 
     override fun moveActiveIE(point: Point) {}
@@ -100,7 +99,8 @@ class WaylandEnvironment : Environment() {
 
     companion object {
         /**
-         * An approximation of the absolute cursor position based on the relative position provided by the compositor.
+         * The absolute cursor position. If [Platform.providesAbsoluteCursorPosition] is false, this is an approximation
+         * based on the relative cursor position reported by the compositor.
          */
         var absoluteCursorPosition: Point? = null
     }

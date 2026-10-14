@@ -32,13 +32,28 @@ import java.awt.Point
  * @author Bujju
  */
 class Location {
+    /**
+     * The position of the point on the X-axis.
+     */
     var x = 0
+
+    /**
+     * The position of the point on the Y-axis.
+     */
     var y = 0
+
+    /**
+     * The distance that the [x] position of the point moved the last time [set] was called.
+     */
     var dx = 0
+
+    /**
+     * The distance that the [y] position of the point moved the last time [set] was called.
+     */
     var dy = 0
 
     /**
-     * Moves the point by [value].
+     * Sets the position of the point.
      */
     fun set(value: Point) {
         dx = (dx + value.x - x) / 2

@@ -114,7 +114,7 @@ class Mascot(var imageSet: String) {
     var isDragging = false
 
     /**
-     * Contains information about the bounds of the screen, the location of the cursor, and the active interactive
+     * Stores information about the bounds of the screen, the location of the cursor, and the active interactive
      * window.
      */
     val environment = MascotEnvironment(this)

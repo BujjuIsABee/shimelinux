@@ -60,8 +60,8 @@ object WaylandLib {
     external fun createLayer(mouseEventReceiver: MouseEventReceiver): Long
 
     /**
-     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] values
-     * to a layer surface.
+     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] values to a layer
+     * surface.
      */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 

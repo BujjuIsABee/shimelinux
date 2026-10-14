@@ -22,8 +22,6 @@
 
 package com.group_finity.mascot
 
-import java.awt.Insets
-import java.awt.Rectangle
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -38,12 +36,12 @@ fun getPath(vararg subpaths: String): Path = if (!System.getProperty("XDG_CONFIG
 }
 
 /**
- * Returns an input stream to the resource at [path], or null if the resource does not exist.
+ * Returns an input stream to the resource at the given [path], or null if the resource does not exist.
  */
 fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 
 /**
- * Returns the value of the property in [Main.properties] corresponding to the given [key], cast as [T], or
+ * Returns the value of the property in [Main.properties] corresponding to the specified [key], cast as [T], or
  * [defaultValue] if the property does not exist or if the cast fails.
  */
 inline fun <reified T> getProperty(key: String, defaultValue: T): T =
@@ -57,8 +55,8 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     }
 
 /**
- * Returns the localized string corresponding to the given [key], or throws an exception if the string does not exist in
- * the current language file or the default language file (`language.properties`).
+ * Returns the localized string corresponding to the specified [key], or throws an exception if the string does not
+ * exist in the current language file or the default language file (`language.properties`).
  */
 fun localize(key: String): String = Main.languageBundle.getString(key)
 
@@ -69,14 +67,4 @@ fun execute(command: String, vararg args: String): String {
     val process = ProcessBuilder(command, *args).start()
     process.waitFor()
     return process.inputStream.bufferedReader().useLines { it.joinToString("\n") }
-}
-
-/**
- * Applies the [insets] to the rectangle.
- */
-fun Rectangle.applyInsets(insets: Insets) {
-    x += insets.left
-    y += insets.top
-    width -= (insets.left + insets.right)
-    height -= (insets.top + insets.bottom)
 }

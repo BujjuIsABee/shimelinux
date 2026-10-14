@@ -33,7 +33,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(FallWithIE::class.java.name)
 
 /**
- * An action that causes the mascot to fall while holding a window.
+ * An action that causes the [mascot] to fall while holding a window.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -45,13 +45,13 @@ class FallWithIE(
     context: VariableMap
 ) : Fall(schema, animations, context) {
     /**
-     * The horizontal distance between the mascot and the window.
+     * The horizontal distance between the [mascot] and the window.
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETX), DEFAULT_IEOFFSETX).toInt()
 
     /**
-     * The vertical distance between the mascot and the window.
+     * The vertical distance between the [mascot] and the window.
      */
     private val offsetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETY), DEFAULT_IEOFFSETY).toInt()

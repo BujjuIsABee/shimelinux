@@ -31,7 +31,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(Stay::class.java.name)
 
 /**
- * An action that causes the mascot to stand still on a border.
+ * An action that causes the [mascot] to stand still on a border.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

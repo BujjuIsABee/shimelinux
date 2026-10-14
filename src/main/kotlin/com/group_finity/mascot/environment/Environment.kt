@@ -22,8 +22,8 @@
 
 package com.group_finity.mascot.environment
 
-import com.group_finity.mascot.applyInsets
 import java.awt.GraphicsEnvironment
+import java.awt.Insets
 import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.Rectangle
@@ -31,7 +31,7 @@ import java.awt.Toolkit
 import kotlin.concurrent.timer
 
 /**
- * Defines a platform specific environment, which tracks the screens, cursor, and interactive windows.
+ * Tracks the screen bounds, cursor position, and interactive windows.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -54,7 +54,7 @@ abstract class Environment {
     abstract val activeIETitle: String
 
     /**
-     * A [ComplexArea] representing the bounds of the screen.
+     * A complex area representing the bounds of the screens.
      */
     var complexScreen = ComplexArea()
 
@@ -64,7 +64,7 @@ abstract class Environment {
     var screen = Area()
 
     /**
-     * A movable point representing the absolute cursor position.
+     * Represents the position of the cursor on the screen.
      */
     var cursor = Location()
 
@@ -92,7 +92,7 @@ abstract class Environment {
     }
 
     /**
-     * Gets if [location] is on the floor or ceiling.
+     * Gets whether the given [location] is on one of the screen's vertical borders.
      */
     fun isScreenTopBottom(location: Point): Boolean {
         val count = screens.count { it.topBorder.isOn(location) } + screens.count { it.bottomBorder.isOn(location) }
@@ -100,7 +100,7 @@ abstract class Environment {
     }
 
     /**
-     * Gets if [location] is on the left or right walls.
+     * Gets whether the given [location] is on one of the screen's horizontal borders.
      */
     fun isScreenLeftRight(location: Point): Boolean {
         val count = screens.count { it.leftBorder.isOn(location) } + screens.count { it.rightBorder.isOn(location) }
@@ -108,7 +108,7 @@ abstract class Environment {
     }
 
     /**
-     * Moves the active interactive window to [point].
+     * Moves the active interactive window to the given [point].
      */
     abstract fun moveActiveIE(point: Point)
 
@@ -150,6 +150,16 @@ abstract class Environment {
 
             this.screenRects = screenRects
             this.screenRect = screenRect
+        }
+
+        /**
+         * Applies the given [insets] to the rectangle.
+         */
+        fun Rectangle.applyInsets(insets: Insets) {
+            x += insets.left
+            y += insets.top
+            width -= (insets.left + insets.right)
+            height -= (insets.top + insets.bottom)
         }
     }
 }

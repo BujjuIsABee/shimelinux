@@ -215,21 +215,35 @@ impl PointerHandler for LayerState {
                 continue;
             }
 
+            // Update cursor position
+            let (x, y) = event.position;
+            self.cursor_state.position = Point {
+                x: x as i32,
+                y: y as i32,
+            };
+
             match event.kind {
                 Enter { serial } => {
                     self.cursor_state.serial = Some(serial);
+
+                    // Update cursor surface
+                    if let (Some(pointer), Some(surface)) =
+                        (&self.cursor_state.pointer, &self.cursor_state.surface)
+                    {
+                        pointer.set_cursor(serial, Some(surface), 0, 0);
+                    }
                 }
                 Leave { serial } => {
                     self.cursor_state.serial = Some(serial);
+
+                    // Update cursor surface
+                    if let (Some(pointer), Some(surface)) =
+                        (&self.cursor_state.pointer, &self.cursor_state.surface)
+                    {
+                        pointer.set_cursor(serial, Some(surface), 0, 0);
+                    }
                 }
                 Motion { .. } => {
-                    // Update cursor position
-                    let (x, y) = event.position;
-                    self.cursor_state.position = Point {
-                        x: x as i32,
-                        y: y as i32,
-                    };
-
                     // Update cursor surface
                     if let (Some(pointer), Some(serial), Some(surface)) = (
                         &self.cursor_state.pointer,

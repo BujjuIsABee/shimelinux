@@ -36,7 +36,7 @@ class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
 
     /**
-     * The areas that make up this complex area.
+     * The areas that make up the complex area.
      */
     val areas: Collection<Area>
         get() = areaMap.values
@@ -50,7 +50,7 @@ class ComplexArea {
     }
 
     /**
-     * Sets the bounds of the area with the given [name].
+     * Sets the bounds of the area with the specified [name].
      */
     fun set(name: String, value: Rectangle) {
         if (areaMap.values.any { it.toRectangle() == value }) return
@@ -60,27 +60,39 @@ class ComplexArea {
     }
 
     /**
-     * Removes all areas whose name is not in [deviceNames].
+     * Removes all areas that does not have its name in [deviceNames].
      */
     fun retain(deviceNames: Collection<String>) {
         areaMap.entries.removeIf { !deviceNames.contains(it.key) }
     }
 
+    /**
+     * Gets the interactable border on the complex area's floor.
+     */
     @Suppress("unused")
     fun getBottomBorder(location: Point): FloorCeiling? = areaMap.values.lastOrNull { it.bottomBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.topBorder.isOn(location) } }
         ?.bottomBorder
 
+    /**
+     * Gets the interactable border on the complex area's ceiling.
+     */
     @Suppress("unused")
     fun getTopBorder(location: Point): FloorCeiling? = areaMap.values.lastOrNull { it.topBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.bottomBorder.isOn(location) } }
         ?.topBorder
 
+    /**
+     * Gets the interactable border on the complex area's left wall.
+     */
     @Suppress("unused")
     fun getLeftBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.rightBorder.isOn(location) } }
-        ?.rightBorder
+        ?.rightBorder // do not change; this is wrong in Shimeji-ee as well and is kept for compatibility.
 
+    /**
+     * Gets the interactable border on the complex area's right wall.
+     */
     @Suppress("unused")
     fun getRightBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.rightBorder.isOn(location) }
         ?.takeUnless { areaMap.values.any { it.leftBorder.isOn(location) } }

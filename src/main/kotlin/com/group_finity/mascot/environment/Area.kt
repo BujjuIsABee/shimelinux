@@ -32,23 +32,80 @@ import java.awt.Rectangle
  * @author Bujju
  */
 class Area {
+    /**
+     * Whether the interactive window that the area represents is active.
+     */
     var isVisible = true
+
+    /**
+     * The position of the left edge of the rectangle on the X-axis.
+     */
     var left = 0
+
+    /**
+     * The position of the top edge of the rectangle on the Y-axis.
+     */
     var top = 0
+
+    /**
+     * The position of the right edge of the rectangle on the X-axis.
+     */
     var right = 0
+
+    /**
+     * The position of the bottom edge of the rectangle on the Y-axis.
+     */
     var bottom = 0
+
+    /**
+     * The distance that the left edge of the rectangle moved the last time [set] was called.
+     */
     var dleft = 0
+
+    /**
+     * The distance that the top edge of the rectangle moved the last time [set] was called.
+     */
     var dtop = 0
+
+    /**
+     * The distance that the right edge of the rectangle moved the last time [set] was called.
+     */
     var dright = 0
+
+    /**
+     * The distance that the bottom edge of the rectangle moved the last time [set] was called.
+     */
     var dbottom = 0
 
+    /**
+     * The interactable border on the area's left wall.
+     */
     val leftBorder = Wall(this, false)
+
+    /**
+     * The interactable border on the area's ceiling.
+     */
     val topBorder = FloorCeiling(this, false)
+
+    /**
+     * The interactable border on the area's right wall.
+     */
     val rightBorder = Wall(this, true)
+
+    /**
+     * The interactable border on the area's floor.
+     */
     val bottomBorder = FloorCeiling(this, true)
 
+    /**
+     * The width of the rectangle.
+     */
     val width: Int
         get() = right - left
+
+    /**
+     * The height of the rectangle.
+     */
     val height: Int
         get() = bottom - top
 
@@ -68,7 +125,7 @@ class Area {
     }
 
     /**
-     * Gets whether a point at ([x], [y]) is inside the rectangle.
+     * Gets whether a point at the given [x] and [y] coordinates is inside the rectangle.
      */
     fun contains(x: Int, y: Int): Boolean = x in left..right && y in top..bottom
 

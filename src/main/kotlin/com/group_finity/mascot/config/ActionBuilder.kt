@@ -42,7 +42,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ActionBuilder::class.java.name)
 
 /**
- * Builds an action from an Action node.
+ * Builds an action from the given [actionNode].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

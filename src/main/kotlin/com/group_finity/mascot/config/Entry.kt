@@ -94,17 +94,17 @@ class Entry(private val element: Element) {
     private val childMap: Map<String, List<Entry>> = children.groupBy { it.name }
 
     /**
-     * Gets the value of an attribute with the given [name], or null if it does not exist.
+     * Gets the value of an attribute with the specified [name], or null if it does not exist.
      */
     fun getAttribute(name: String): String? = element.getAttributeNode(name)?.value
 
     /**
-     * Gets whether there is a node in [children] with the given [name].
+     * Gets whether there is a node in [children] with the specified [name].
      */
     fun hasChild(name: String): Boolean = children.any { it.name == name }
 
     /**
-     * Gets all nodes in [children] with the given [name].
+     * Gets all nodes in [children] with the specified [name].
      */
     fun selectChildren(name: String): List<Entry> = childMap[name].orEmpty()
 }

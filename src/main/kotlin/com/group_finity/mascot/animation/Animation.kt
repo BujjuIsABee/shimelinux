@@ -28,7 +28,7 @@ import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
 
 /**
- * An animation for a mascot that can be played by an action.
+ * An animation that can be played by an action.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -69,14 +69,14 @@ class Animation(
     }
 
     /**
-     * Progresses the animation for [mascot] to the frame at [time].
+     * Progresses the animation for the given [mascot] to the frame at [time].
      */
     fun next(mascot: Mascot, time: Int) {
         checkNotNull(getPoseAt(time)).next(mascot)
     }
 
     /**
-     * Gets which pose should be displayed at [time].
+     * Gets which pose should be displayed at the given [time].
      */
     fun getPoseAt(time: Int): Pose? {
         var t = time % duration

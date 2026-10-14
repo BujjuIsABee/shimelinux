@@ -30,7 +30,7 @@ import java.util.ResourceBundle
 import kotlin.math.abs
 
 /**
- * An action that occurs while the mascot is falling.
+ * An action that occurs while the [mascot] is falling.
  *
  * "I'm falling!"
  *
@@ -51,13 +51,13 @@ open class Fall(
     private var modY = 0.0
 
     /**
-     * The initial horizontal velocity of the mascot.
+     * The initial horizontal velocity of the [mascot].
      */
     private val initialVx: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVX), DEFAULT_INITIALVX).toInt()
 
     /**
-     * The initial vertical velocity of the mascot.
+     * The initial vertical velocity of the [mascot].
      */
     private val initialVy: Int
         get() = eval<Number>(schema.getString(PARAMETER_INITIALVY), DEFAULT_INITIALVY).toInt()

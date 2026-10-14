@@ -29,7 +29,7 @@ import java.awt.Point
 import java.util.ResourceBundle
 
 /**
- * An action that causes the mascot to throw a window.
+ * An action that causes the [mascot] to throw a window.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

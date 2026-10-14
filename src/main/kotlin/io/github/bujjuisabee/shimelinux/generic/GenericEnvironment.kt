@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.generic
 
 import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
-import com.group_finity.mascot.applyInsets
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty

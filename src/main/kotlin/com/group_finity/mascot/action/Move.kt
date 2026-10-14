@@ -31,7 +31,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(Move::class.java.name)
 
 /**
- * An action that causes the mascot to move.
+ * An action that causes the [mascot] to move.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -48,7 +48,7 @@ open class Move(
     internal open val hasTurningAnimation: Boolean = animations.any { it.isTurn }
 
     /**
-     * Whether the mascot is currently turning.
+     * Whether the [mascot] is currently turning.
      */
     internal var isTurning = false
 
@@ -56,13 +56,13 @@ open class Move(
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
 
     /**
-     * The X-position that the mascot moves towards.
+     * The X position that the [mascot] moves toward.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y-position that the mascot moves towards.
+     * The Y position that the [mascot] moves toward.
      */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()

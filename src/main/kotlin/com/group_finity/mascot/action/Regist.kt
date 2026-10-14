@@ -35,7 +35,7 @@ import kotlin.math.roundToInt
 private val logger: Logger = Logger.getLogger(Regist::class.java.name)
 
 /**
- * An action that occurs after a random amount of time while the mascot is being dragged with the cursor.
+ * An action that occurs after a random amount of time while the [mascot] is being dragged with the mouse.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -49,14 +49,14 @@ class Regist(
     private var scaling = 0.0
 
     /**
-     * The horizontal offset used when calculating the distance between the mascot and the cursor.
+     * The horizontal offset used when calculating the distance between the [mascot] and the mouse.
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()
 
     /**
-     * Defines how the offset will be calculated. Use "ImageAnchor" to calculate it relative to left corner of the
-     * mascot. Use "Origin" to calculate it relative to the center of the mascot.
+     * Defines how the offset will be calculated. "ImageAnchor" is relative to left corner of the [mascot] and "Origin"
+     * is relative to the center of the [mascot].
      */
     private val offsetType: String
         get() = eval(schema.getString(PARAMETER_OFFSETTYPE), DEFAULT_OFFSETTYPE)

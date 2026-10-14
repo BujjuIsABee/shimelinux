@@ -81,25 +81,25 @@ class Breed(
             get() = getProperty(if (bornTransient) "Transients" else "Breeding", true)
 
         /**
-         * Whether a new mascot can be spawned on this frame, based on [bornInterval].
+         * Whether this frame is a multiple of the [bornInterval].
          */
         val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
 
         /**
-         * Whether it is the frame before the final frame of the current animation.
+         * Whether this frame is the penultimate frame of the action's [animation].
          */
         val isPenultimateFrame: Boolean
             get() = action.time == checkNotNull(action.animation).duration - 1
 
         /**
-         * The X-position of the new mascot(s) relative to [mascot].
+         * The X position of the new mascot(s) relative to [mascot].
          */
         private val bornX: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNX), DEFAULT_BORNX).toInt()
 
         /**
-         * The Y-position of the new mascot(s) relative to [mascot].
+         * The Y position of the new mascot(s) relative to [mascot].
          */
         private val bornY: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNY), DEFAULT_BORNY).toInt()
@@ -111,20 +111,20 @@ class Breed(
             get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOR), DEFAULT_BORNBEHAVIOR)
 
         /**
-         * The image set that will be used for the new mascot(s). The same image set as [mascot] will be used if a valid
-         * image set is not provided.
+         * The image set that will be used for the new mascot(s). The same image set as [mascot] will be used if a
+         * valid image set is not provided.
          */
         private val bornMascot: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
 
         /**
-         * Whether the new mascot(s) will be temporary, like a projectile.
+         * Whether the new mascot(s) will be temporary. Transient breeding actions can be used to create projectiles.
          */
         private val bornTransient: Boolean
             get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
 
         /**
-         * The number of ticks that must pass before a new mascot will be spawned.
+         * The number of ticks that must pass before a new mascot can be spawned.
          */
         private val bornInterval: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNINTERVAL), DEFAULT_BORNINTERVAL).toInt()

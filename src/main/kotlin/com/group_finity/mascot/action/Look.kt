@@ -26,7 +26,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that causes the mascot to look in a specific direction.
+ * An action that causes the [mascot] to look in a specific direction.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -37,7 +37,7 @@ class Look(
     params: VariableMap
 ) : InstantAction(schema, params) {
     /**
-     * The direction that the mascot will look towards. The direction opposite of its current direction will be used if
+     * The direction that the [mascot] will look toward. The direction opposite of its current direction will be used if
      * a direction is not provided.
      */
     private val isLookRight: Boolean

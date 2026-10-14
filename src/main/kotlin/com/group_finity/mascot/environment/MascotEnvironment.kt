@@ -28,7 +28,7 @@ import com.group_finity.mascot.getProperty
 import java.awt.Point
 
 /**
- * Manages the platform-specific [Environment] instance and exposes it to mascots and scripts.
+ * Manages the platform-specific [Environment] instance for the given [mascot].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -39,19 +39,19 @@ class MascotEnvironment(private val mascot: Mascot) {
     private var currentWorkArea: Area? = null
 
     /**
-     * An [Area] representing the bounds of the screen; used when Multiscreen is disabled.
+     * An area representing the bounds of the primary monitor.
      */
     val workArea: Area
         get() = getWorkArea(false)
 
     /**
-     * An [Area] representing the bounds of the screen; used when Multiscreen is enabled.
+     * An area representing the combined bounds of all screens.
      */
     val screen: Area
         get() = impl.screen
 
     /**
-     * An [Area] representing the bounds of the active interactive window.
+     * An area representing the bounds of the active interactive window.
      */
     val activeIE: Area
         get() = if (!getProperty("Multiscreen", true) &&
@@ -68,21 +68,46 @@ class MascotEnvironment(private val mascot: Mascot) {
     val activeIETitle: String
         get() = impl.activeIETitle
 
+    /**
+     * A complex area representing the bounds of the screens.
+     */
     @Suppress("unused")
     val complexScreen: ComplexArea
         get() = impl.complexScreen
+
+    /**
+     * Represents the position of the cursor on the screen.
+     */
     val cursor: Location
         get() = impl.cursor
 
+    /**
+     * The interactable border on the environment's ceiling.
+     */
     val ceiling: Border
         get() = getCeiling(false)
+
+    /**
+     * The interactable border on the environment's floor.
+     */
     val floor: Border
         get() = getFloor(false)
+
+    /**
+     * The interactable border on the wall that the mascot is facing.
+     */
     val wall: Border
         get() = getWall(false)
 
+    /**
+     * Gets whether the mascot is on one of the environment's vertical borders.
+     */
     val isScreenTopBottom: Boolean
         get() = impl.isScreenTopBottom(mascot.anchor)
+
+    /**
+     * Gets whether the mascot is on one of the environment's horizontal borders.
+     */
     val isScreenLeftRight: Boolean
         get() = impl.isScreenLeftRight(mascot.anchor)
 
@@ -90,6 +115,10 @@ class MascotEnvironment(private val mascot: Mascot) {
         impl.init()
     }
 
+    /**
+     * Gets an area representing the bounds of the primary monitor. If [ignoreSettings] is true, the state of the
+     * Multiscreen setting will be ignored.
+     */
     fun getWorkArea(ignoreSettings: Boolean): Area {
         currentWorkArea?.let { area ->
             if (!ignoreSettings && !getProperty("Multiscreen", true)) {
@@ -114,6 +143,10 @@ class MascotEnvironment(private val mascot: Mascot) {
         }
     }
 
+    /**
+     * Gets the interactable border on the environment's ceiling. If [ignoreSeparator] is true, the top border will be
+     * returned even if [isScreenTopBottom] is false.
+     */
     fun getCeiling(ignoreSeparator: Boolean): Border = if (activeIE.bottomBorder.isOn(mascot.anchor)) {
         activeIE.bottomBorder
     } else if (workArea.topBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
@@ -122,6 +155,10 @@ class MascotEnvironment(private val mascot: Mascot) {
         NotOnBorder
     }
 
+    /**
+     * Gets the interactable border on the environment's floor. If [ignoreSeparator] is true, the bottom border will be
+     * returned even if [isScreenTopBottom] is false.
+     */
     fun getFloor(ignoreSeparator: Boolean): Border = if (activeIE.topBorder.isOn(mascot.anchor)) {
         activeIE.topBorder
     } else if (workArea.bottomBorder.isOn(mascot.anchor) && (!ignoreSeparator || isScreenTopBottom)) {
@@ -130,6 +167,10 @@ class MascotEnvironment(private val mascot: Mascot) {
         NotOnBorder
     }
 
+    /**
+     * Gets the interactable border on the wall that the mascot is facing. If [ignoreSeparator] is true, the border will
+     * be returned even if [isScreenLeftRight] is false.
+     */
     fun getWall(ignoreSeparator: Boolean): Border {
         if (mascot.isLookRight) {
             if (activeIE.leftBorder.isOn(mascot.anchor)) {
@@ -150,7 +191,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Moves the active interactive window to [point].
+     * Moves the active interactive window to the given [point].
      */
     fun moveActiveIE(point: Point) {
         impl.moveActiveIE(point)

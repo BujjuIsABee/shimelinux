@@ -29,7 +29,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that places the mascot on a specific border.
+ * An action that places the [mascot] on a specific border.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -41,13 +41,13 @@ abstract class BorderedAction(
     context: VariableMap
 ) : ActionBase(schema, animations, context) {
     /**
-     * The border that the mascot will be placed on.
+     * The border that the [mascot] will be placed on.
      */
     internal var border: Border? = null
         private set
 
     /**
-     * The type of border that the mascot will be placed on.
+     * The type of border that the [mascot] will be placed on.
      */
     private val borderType: String?
         get() = eval(schema.getString(PARAMETER_BORDERTYPE), DEFAULT_BORDERTYPE)

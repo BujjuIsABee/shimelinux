@@ -26,7 +26,7 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
 /**
- * Stores [managedImage] for the [VirtualEnvironment].
+ * Stores [managedImage] so it can be displayed on a [VirtualTranslucentPanel].
  *
  * @author Kilkakon
  * @author Bujju

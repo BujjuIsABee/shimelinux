@@ -31,28 +31,37 @@ object Platform {
     /**
      * The name of the current desktop environment or window manager.
      */
-    val currentDesktop: String = System.getenv("XDG_CURRENT_DESKTOP")?.lowercase() ?: "unknown"
+    val currentDesktop: String by lazy {
+        val currentDesktop = System.getenv("XDG_CURRENT_DESKTOP").takeUnless { it.isNullOrBlank() }
+        val desktopSession = System.getenv("DESKTOP_SESSION").takeUnless { it.isNullOrBlank() }
+        (currentDesktop ?: desktopSession ?: "").lowercase()
+    }
 
     /**
      * The name of the current display server protocol.
      */
-    val sessionType: String = System.getenv("XDG_SESSION_TYPE")?.lowercase() ?: "unknown"
+    val sessionType: String by lazy {
+        val sessionType = System.getenv("XDG_SESSION_TYPE").takeUnless { it.isNullOrBlank() }
+        (sessionType ?: "").lowercase()
+    }
 
     /**
      * Whether [currentDesktop] is a tiling window manager.
      */
     val isTilingWindowManager: Boolean =
-        listOf("cosmic", "hyprland", "i3", "mango", "niri", "sway").any { currentDesktop.contains(it) }
+        currentDesktop.containsAny("awesome", "cosmic", "dwm", "hyprland", "i3", "mango", "niri", "sway", "xmonad")
 
     /**
      * Whether [currentDesktop] should be assumed to support the wlr-layer-shell protocol.
      */
     val supportsWaylandLayerSurfaces: Boolean =
-        sessionType == "wayland" && !listOf("gnome", "cinnamon").any { currentDesktop.contains(it) }
+        sessionType == "wayland" && !currentDesktop.containsAny("gnome", "cinnamon")
 
     /**
      * Whether [currentDesktop] provides the absolute position of the cursor.
      */
     val providesAbsoluteCursorPosition: Boolean =
-        sessionType != "wayland" || listOf("hyprland", "kde", "mango").any { currentDesktop.contains(it) }
+        sessionType != "wayland" || currentDesktop.containsAny("hyprland", "kde", "mango")
+
+    private fun String.containsAny(vararg others: String): Boolean = others.any { contains(it) }
 }

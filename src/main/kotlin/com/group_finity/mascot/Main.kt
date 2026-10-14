@@ -464,7 +464,7 @@ object Main {
 
             val settingsMenu = MenuItem(localize("Settings")) {
                 // Disable Wayland popup factory so dropdown menus will be displayed correctly
-                if (NativeFactory.current == "wayland") {
+                if (NativeFactory.current == "wayland" || NativeFactory.current == "kde" && Platform.sessionType == "wayland") {
                     PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
                 }
 
@@ -480,7 +480,7 @@ object Main {
                     manager.togglePauseAll()
                 }
 
-                if (NativeFactory.current == "wayland") {
+                if (NativeFactory.current == "wayland" || NativeFactory.current == "kde" && Platform.sessionType == "wayland") {
                     PopupFactory.setSharedInstance(WaylandPopupFactory)
                 }
 
