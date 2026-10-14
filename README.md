@@ -80,38 +80,11 @@ Alternatively, you can add ShimeLinux to your packages:
 
 ### Other
 
-If none of these options work for you, you can install ShimeLinux from Flathub.
+If none of these options work for you, you can install ShimeLinux from Flathub:
 
 [<img width=150 src="https://flathub.org/api/badge" />](https://flathub.org/en/apps/io.github.bujjuisabee.shimelinux)
 
 If you are using an operating system that cannot run Flatpak apps, you can download the `.jar` file [here](https://github.com/BujjuIsABee/shimelinux/releases) and run it with Java. You may also need to install libappindicator or libayatana-appindicator for the system tray icon to work.
-
-## Compatibility
-
-ShimeLinux has been tested on the following operating systems and desktop environments / window managers:
-
-| Operating system | Desktop environment(s)                                                                                          | Install                                                                         |
-|------------------|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| Arch Linux       | • Cinnamon <br/> • GNOME <br/> • Hyprland <br/> • i3 <br/> • KDE Plasma <br/> • Mango <br/> • niri <br/> • sway | [![AUR]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)    |
-| Debian           | • LXQt <br/> • MATE                                                                                             | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |                                                                             |
-| Fedora Linux     | • KDE Plasma                                                                                                    | [![.rpm]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)    |
-| FreeBSD          | • KDE Plasma <br/> • Xfce                                                                                       | [![.jar]](https://github.com/BujjuIsABee/shimelinux#other)                      |
-| Gentoo Linux     | • KDE Plasma                                                                                                    | [![Flatpak]](https://github.com/BujjuIsABee/shimelinux#other)                   |
-| Linux Mint       | • Cinnamon                                                                                                      | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| NixOS            | • KDE Plasma <br/> • niri                                                                                       | [![NUR]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)               |
-| Pop!_OS          | • COSMIC                                                                                                        | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| Ubuntu           | • GNOME                                                                                                         | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
-| Void Linux       | • Xfce                                                                                                          | [![Flatpak]](https://github.com/BujjuIsABee/shimelinux#other)                   |
-
-[AUR]: https://img.shields.io/badge/AUR-rgba(0,0,0,0)?style=flat-square&logo=archlinux
-[.deb]: https://img.shields.io/badge/.deb-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red
-[.rpm]: https://img.shields.io/badge/.rpm-rgba(0,0,0,0)?style=flat-square&logo=redhat&logoColor=red
-[.jar]: https://custom-icon-badges.demolab.com/badge/.jar-rgba(0,0,0,0)?style=flat-square&logo=java&logoColor=orange
-[NUR]: https://img.shields.io/badge/NUR-rgba(0,0,0,0)?style=flat-square&logo=nixos
-[Flatpak]: https://img.shields.io/badge/Flatpak-rgba(0,0,0,0)?style=flat-square&logo=flatpak
-
-> [!NOTE]
-> If an operating system or desktop environment / window manager is not listed above, it may still work. If you encounter any issues, please report them [here](https://github.com/BujjuIsABee/shimelinux/issues).
 
 ## Building
 
@@ -142,6 +115,33 @@ Finally, use Gradle to build:
 ```
 
 The `.jar` file will be in `build/libs`.
+
+## Compatibility
+
+ShimeLinux has been tested on the following operating systems and desktop environments / window managers:
+
+| Operating system | Desktop environment(s)                                                                                                                                                    | Install                                                                         |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| Arch Linux       | • awesome <br/> • Cinnamon <br/> • COSMIC <br/> • dwm <br/> • GNOME <br/> • Hyprland <br/> • i3 <br/> • KDE Plasma <br/> • Mango <br/> • niri <br/> • sway <br/> • xmonad | [![AUR]](https://github.com/BujjuIsABee/shimelinux#arch-based-distributions)    |
+| Debian           | • LXQt <br/> • MATE                                                                                                                                                       | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |                                                                             |
+| Fedora Linux     | • KDE Plasma                                                                                                                                                              | [![.rpm]](https://github.com/BujjuIsABee/shimelinux#rpm-based-distributions)    |
+| FreeBSD          | • KDE Plasma <br/> • Xfce                                                                                                                                                 | [![.jar]](https://github.com/BujjuIsABee/shimelinux#other)                      |
+| Gentoo Linux     | • KDE Plasma                                                                                                                                                              | [![Flatpak]](https://github.com/BujjuIsABee/shimelinux#other)                   |
+| Linux Mint       | • Cinnamon                                                                                                                                                                | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| NixOS            | • KDE Plasma <br/> • niri                                                                                                                                                 | [![NUR]](https://github.com/BujjuIsABee/shimelinux#nix-and-nixos)               |
+| Pop!_OS          | • COSMIC                                                                                                                                                                  | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| Ubuntu           | • GNOME                                                                                                                                                                   | [![.deb]](https://github.com/BujjuIsABee/shimelinux#debian-based-distributions) |
+| Void Linux       | • Xfce                                                                                                                                                                    | [![Flatpak]](https://github.com/BujjuIsABee/shimelinux#other)                   |
+
+[AUR]: https://img.shields.io/badge/AUR-rgba(0,0,0,0)?style=flat-square&logo=archlinux
+[.deb]: https://img.shields.io/badge/.deb-rgba(0,0,0,0)?style=flat-square&logo=debian&logoColor=red
+[.rpm]: https://img.shields.io/badge/.rpm-rgba(0,0,0,0)?style=flat-square&logo=redhat&logoColor=red
+[.jar]: https://custom-icon-badges.demolab.com/badge/.jar-rgba(0,0,0,0)?style=flat-square&logo=java&logoColor=orange
+[NUR]: https://img.shields.io/badge/NUR-rgba(0,0,0,0)?style=flat-square&logo=nixos
+[Flatpak]: https://img.shields.io/badge/Flatpak-rgba(0,0,0,0)?style=flat-square&logo=flatpak
+
+> [!NOTE]
+> If an operating system or desktop environment / window manager is not listed above, it may still work. If you encounter any issues, please report them [here](https://github.com/BujjuIsABee/shimelinux/issues).
 
 ## Licenses
 
