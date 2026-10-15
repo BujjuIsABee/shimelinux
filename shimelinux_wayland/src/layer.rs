@@ -22,9 +22,8 @@
 
 use jni::{refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
-    compositor::{CompositorHandler, CompositorState},
-    delegate_compositor, delegate_layer, delegate_output, delegate_pointer, delegate_registry,
-    delegate_seat, delegate_shm,
+    compositor::{CompositorHandler, CompositorState, FrameCallbackData},
+    delegate_registry,
     output::{OutputHandler, OutputState},
     registry::{ProvidesRegistryState, RegistryState},
     registry_handlers,
@@ -82,7 +81,6 @@ pub struct LayerState {
     pub layer_mask: Vec<Rect>,
 }
 
-delegate_compositor!(LayerState);
 impl CompositorHandler for LayerState {
     fn scale_factor_changed(
         &mut self,
@@ -131,7 +129,6 @@ impl CompositorHandler for LayerState {
     }
 }
 
-delegate_output!(LayerState);
 impl OutputHandler for LayerState {
     fn output_state(&mut self) -> &mut OutputState {
         &mut self.output_state
@@ -145,7 +142,6 @@ impl OutputHandler for LayerState {
     }
 }
 
-delegate_layer!(LayerState);
 impl LayerShellHandler for LayerState {
     fn closed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _layer: &LayerSurface) {}
 
@@ -164,7 +160,6 @@ impl LayerShellHandler for LayerState {
     }
 }
 
-delegate_seat!(LayerState);
 impl SeatHandler for LayerState {
     fn seat_state(&mut self) -> &mut SeatState {
         &mut self.seat_state
@@ -199,7 +194,6 @@ impl SeatHandler for LayerState {
     fn remove_seat(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _seat: WlSeat) {}
 }
 
-delegate_pointer!(LayerState);
 impl PointerHandler for LayerState {
     fn pointer_frame(
         &mut self,
@@ -282,23 +276,14 @@ impl PointerHandler for LayerState {
     }
 }
 
-delegate_shm!(LayerState);
 impl ShmHandler for LayerState {
     fn shm_state(&mut self) -> &mut Shm {
         &mut self.shm
     }
 }
 
-delegate_registry!(LayerState);
-impl ProvidesRegistryState for LayerState {
-    fn registry(&mut self) -> &mut RegistryState {
-        &mut self.registry_state
-    }
-
-    registry_handlers![];
-}
-
 delegate_noop!(LayerState: ignore WlRegion);
+
 impl LayerState {
     /// Sets the size and position of the layer surface.
     ///
@@ -394,7 +379,7 @@ impl LayerState {
             self.image_changed = false;
         }
 
-        surface.frame(qh, surface.clone());
+        surface.frame(qh, FrameCallbackData(surface.clone()));
 
         self.layer.commit();
     }
@@ -427,3 +412,15 @@ impl LayerState {
         self.layer_mask = rects;
     }
 }
+
+delegate_registry!(LayerState);
+
+impl ProvidesRegistryState for LayerState {
+    fn registry(&mut self) -> &mut RegistryState {
+        &mut self.registry_state
+    }
+
+    registry_handlers![];
+}
+
+smithay_client_toolkit::delegate_dispatch2!(LayerState);

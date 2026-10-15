@@ -29,11 +29,7 @@ import kotlin.io.path.Path
 /**
  * Gets the path at [subpaths] relative to the config directory.
  */
-fun getPath(vararg subpaths: String): Path = if (!System.getProperty("XDG_CONFIG_HOME").isNullOrBlank()) {
-    Path(System.getProperty("XDG_CONFIG_HOME"), "shimelinux", *subpaths)
-} else {
-    Path(System.getProperty("user.home"), ".config", "shimelinux", *subpaths)
-}
+fun getPath(vararg subpaths: String): Path = Path(System.getProperty("user.home"), ".config", "shimelinux", *subpaths)
 
 /**
  * Returns an input stream to the resource at the given [path], or null if the resource does not exist.

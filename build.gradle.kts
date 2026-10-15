@@ -1,5 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.21"
+    id("com.github.gmazzo.buildconfig") version "6.1.2"
+    id("io.github.jwharm.flatpak-gradle-generator") version "1.8.0"
 }
 
 group = "io.github.bujjuisabee"
@@ -11,9 +13,9 @@ repositories {
 
 dependencies {
     implementation("com.dorkbox:SystemTray:4.4")
-    implementation("com.formdev:flatlaf:3.7.1")
-    implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
-    implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
+    implementation("com.formdev:flatlaf:3.7.2")
+    implementation("com.github.hypfvieh:dbus-java-core:5.2.2")
+    implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.2")
     implementation("org.openjdk.nashorn:nashorn-core:15.7")
 
     testImplementation(kotlin("test"))
@@ -22,6 +24,10 @@ dependencies {
 
 kotlin {
     jvmToolchain(21)
+}
+
+buildConfig {
+    buildConfigField("VERSION", provider { project.version.toString() })
 }
 
 tasks.register("buildWaylandLib", Exec::class) {
@@ -81,4 +87,9 @@ tasks.test {
 
 tasks.clean {
     dependsOn("cleanWaylandLib")
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("./gradle-sources.json")
+    downloadDirectory = "./offline-repository"
 }

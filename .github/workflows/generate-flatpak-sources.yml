@@ -22,9 +22,7 @@ jobs:
       - name: Install Python Dependencies
         run: pip install tomlkit aiohttp
       - name: Generate Gradle Sources
-        run: |
-          cp flatpak/build.gradle.kts .
-          ./gradlew flatpakGradleGenerator --no-configuration-cache
+        run: ./gradlew flatpakGradleGenerator --no-configuration-cache
       - name: Generate Cargo Sources
         run: |
           curl -O https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/cargo/flatpak-cargo-generator.py
