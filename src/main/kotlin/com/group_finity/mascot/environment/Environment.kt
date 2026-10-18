@@ -123,7 +123,7 @@ abstract class Environment {
     abstract fun refreshCache()
 
     /**
-     * Disposes of the environment.
+     * Disposes the environment.
      */
     abstract fun dispose()
 

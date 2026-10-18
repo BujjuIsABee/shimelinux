@@ -52,11 +52,11 @@ class Transform(
      * The behavior to set for the [mascot] after it transforms.
      */
     private val transformBehavior: String
-        get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOR), DEFAULT_TRANSFORMBEHAVIOR)
+        get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOUR), DEFAULT_TRANSFORMBEHAVIOUR)
 
     /**
-     * The image set that the [mascot] will transform into. The same image set will be used if a valid image set is not
-     * provided.
+     * The image set that the [mascot] will transform into. If a valid image set is not provided, [mascot]'s image set
+     * will be used.
      */
     private val transformMascot: String
         get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), DEFAULT_TRANSFORMMASCOT)
@@ -93,9 +93,15 @@ class Transform(
     }
 
     companion object {
-        const val PARAMETER_TRANSFORMBEHAVIOR = "TransformBehavior"
-        private const val DEFAULT_TRANSFORMBEHAVIOR = ""
+        /**
+         * The key for the name of the [transformBehavior] parameter in the schema.
+         */
+        const val PARAMETER_TRANSFORMBEHAVIOUR = "TransformBehavior"
+        private const val DEFAULT_TRANSFORMBEHAVIOUR = ""
 
+        /**
+         * The key for the name of the [transformMascot] parameter in the schema.
+         */
         const val PARAMETER_TRANSFORMMASCOT = "TransformMascot"
         private const val DEFAULT_TRANSFORMMASCOT = ""
     }

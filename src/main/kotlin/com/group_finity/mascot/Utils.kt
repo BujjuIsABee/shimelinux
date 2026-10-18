@@ -27,12 +27,12 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 /**
- * Gets the path at [subpaths] relative to the config directory.
+ * Returns the path at [subpaths] relative to the config directory.
  */
 fun getPath(vararg subpaths: String): Path = Path(System.getProperty("user.home"), ".config", "shimelinux", *subpaths)
 
 /**
- * Returns an input stream to the resource at the given [path], or null if the resource does not exist.
+ * Returns an input stream to the resource at the given [path], or `null` if the resource does not exist.
  */
 fun loadResource(path: String): InputStream? = Main::class.java.getResourceAsStream("/$path")
 

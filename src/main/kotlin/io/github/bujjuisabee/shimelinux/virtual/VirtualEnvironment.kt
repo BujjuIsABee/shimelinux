@@ -82,6 +82,7 @@ class VirtualEnvironment : Environment() {
         )
 
         display.pack()
+        display.setLocationRelativeTo(null)
         display.isVisible = true
         display.toFront()
     }

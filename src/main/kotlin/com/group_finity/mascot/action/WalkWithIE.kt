@@ -105,9 +105,15 @@ class WalkWithIE(
     }
 
     companion object {
+        /**
+         * The key for the name of the [offsetX] parameter in the schema.
+         */
         const val PARAMETER_IEOFFSETX = "IeOffsetX"
         private const val DEFAULT_IEOFFSETX = 0
 
+        /**
+         * The key for the name of the [offsetY] parameter in the schema.
+         */
         const val PARAMETER_IEOFFSETY = "IeOffsetY"
         private const val DEFAULT_IEOFFSETY = 0
     }

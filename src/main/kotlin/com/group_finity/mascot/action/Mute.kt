@@ -63,6 +63,9 @@ class Mute(
     }
 
     companion object {
+        /**
+         * The key for the name of the [sound] parameter in the schema.
+         */
         const val PARAMETER_SOUND = "Sound"
         private val DEFAULT_SOUND: String? = null
     }

@@ -36,7 +36,7 @@ object ImagePairs {
     private val imagePairs = ConcurrentHashMap<String, ImagePair>()
 
     /**
-     * Adds an [imagePair] with [fileName] as its key.
+     * Adds an [imagePair] to [imagePairs] with [fileName] as its key.
      *
      * @param fileName The filename of the left and right image combined, or just the left image if there is no right
      * image.
@@ -47,7 +47,7 @@ object ImagePairs {
     }
 
     /**
-     * Gets whether there is an image pair with the given [fileName].
+     * Returns whether there is an image pair in [imagePairs] with the given [fileName].
      *
      * @param fileName The filename of the left and right image combined, or just the left image if there is no right
      * image.
@@ -56,7 +56,7 @@ object ImagePairs {
     fun contains(fileName: String): Boolean = imagePairs.containsKey(fileName)
 
     /**
-     * Gets the image pair with the given [fileName].
+     * Returns the image pair in [imagePairs] with the given [fileName].
      *
      * @param fileName The filename of the left and right image combined, or just the left image if there is no right
      * image.
@@ -65,8 +65,8 @@ object ImagePairs {
     fun getImagePair(fileName: String): ImagePair? = imagePairs[fileName]
 
     /**
-     * Returns the right image of the image pair with the given [fileName] if [isLookRight] is true, or the left image
-     * if it is false.
+     * Returns the right image of the image pair with the given [fileName] in [imagePairs] if [isLookRight] is `true`,
+     * or the left image if it is `false`.
      *
      * @param fileName The filename of the left and right image combined, or just the left image if there is no right
      * image.
@@ -75,7 +75,7 @@ object ImagePairs {
     fun getImage(fileName: String, isLookRight: Boolean): MascotImage? = imagePairs[fileName]?.getImage(isLookRight)
 
     /**
-     * Removes all image pairs.
+     * Removes all image pairs in [imagePairs].
      */
     @JvmStatic
     fun clear() {
@@ -83,7 +83,7 @@ object ImagePairs {
     }
 
     /**
-     * Removes all image pairs for the image set called [searchTerm].
+     * Removes all image pairs in [imagePairs] for the image set matching the given [searchTerm].
      */
     @JvmStatic
     fun removeAll(searchTerm: String) {

@@ -29,7 +29,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that places the [mascot] on a specific border.
+ * An action that places the [mascot] on a border.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -68,11 +68,26 @@ abstract class BorderedAction(
     }
 
     companion object {
-        const val PARAMETER_BORDERTYPE = "BorderType"
-        private val DEFAULT_BORDERTYPE: String? = null
+        /**
+         * The default value of the [borderType] parameter.
+         */
+        @JvmField
+        val DEFAULT_BORDERTYPE: String? = null
+        private const val PARAMETER_BORDERTYPE = "BorderType"
 
+        /**
+         * The key for the [borderType] value that places the mascot on the ceiling in the [schema].
+         */
         const val BORDERTYPE_CEILING = "Ceiling"
+
+        /**
+         * The key for the [borderType] value that places the mascot on a wall in the [schema].
+         */
         const val BORDERTYPE_WALL = "Wall"
+
+        /**
+         * The key for the [borderType] value that places the mascot on the floor in the [schema].
+         */
         const val BORDERTYPE_FLOOR = "Floor"
     }
 }

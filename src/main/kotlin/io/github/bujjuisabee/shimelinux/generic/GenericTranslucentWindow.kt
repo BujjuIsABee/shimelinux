@@ -26,7 +26,6 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
-// import com.group_finity.mascot.sessionType
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Component
@@ -46,7 +45,7 @@ private val gc: GraphicsConfiguration? =
     GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
 
 /**
- * Displays a mascot on a [JWindow].
+ * Displays a mascot on a cross-platform [JWindow].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

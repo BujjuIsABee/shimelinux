@@ -56,12 +56,12 @@ object KWin {
         private set
 
     /**
-     * If not null, the active window will be moved to this position.
+     * If not `null`, the active window will be moved to this position.
      */
     var windowPosition: Point? = null
 
     /**
-     * If true, all windows that are offscreen will be moved to the center of the screen.
+     * If `true`, all windows that are offscreen will be moved to the center of the screen.
      */
     var restoreWindows = false
 
@@ -163,8 +163,8 @@ object KWin {
         fun setCursorPosition(x: Int, y: Int)
 
         /**
-         * Returns a map where `hasValue` is whether [windowPosition] is not null and `x` and `y` are the X and Y values
-         * of [windowPosition].
+         * Returns a map. The key `hasValue` corresponds to a [Boolean] which is `true` if [windowPosition] is not
+         * `null`, or `false` if it is. The keys `x` and `y` correspond to the X and Y values of [windowPosition].
          */
         fun getWindowPosition(): Map<String, Variant<*>>
 

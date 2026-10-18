@@ -119,7 +119,7 @@ class UserBehavior(
                         mascot.resetAnchor()
 
                         try {
-                            mascot.behavior = configuration.buildBehavior(BEHAVIORNAME_FALL)
+                            mascot.behavior = configuration.buildBehavior(BEHAVIOURNAME_FALL)
                         } catch (e: BehaviorInstantiationException) {
                             throw CantBeAliveException(localize("FailedFallingActionInitializeErrorMessage"), e)
                         }
@@ -139,7 +139,7 @@ class UserBehavior(
             mascot.isDragging = false
 
             try {
-                mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIORNAME_FALL))
+                mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_FALL))
             } catch (e: BehaviorInstantiationException) {
                 throw CantBeAliveException(localize("FailedFallingActionInitializeErrorMessage"), e)
             }
@@ -181,7 +181,7 @@ class UserBehavior(
 
             if (!handled) {
                 try {
-                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIORNAME_DRAGGED))
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(localize("FailedDragActionInitializeErrorMessage"), e)
                 }
@@ -200,7 +200,7 @@ class UserBehavior(
                 mascot.isDragging = false
 
                 try {
-                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIORNAME_THROWN))
+                    mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_THROWN))
                 } catch (e: BehaviorInstantiationException) {
                     throw CantBeAliveException(localize("FailedDropActionInitializeErrorMessage"), e)
                 }
@@ -213,8 +213,19 @@ class UserBehavior(
     enum class HotspotResult { INACTIVE, ACTIVE_NULL, ACTIVE }
 
     companion object {
-        const val BEHAVIORNAME_FALL = "Fall"
-        const val BEHAVIORNAME_DRAGGED = "Dragged"
-        const val BEHAVIORNAME_THROWN = "Thrown"
+        /**
+         * The key for the name of the Fall behavior in the [configuration]'s schema.
+         */
+        const val BEHAVIOURNAME_FALL = "Fall"
+
+        /**
+         * The key for the name of the Dragged behavior in the [configuration]'s schema.
+         */
+        const val BEHAVIOURNAME_DRAGGED = "Dragged"
+
+        /**
+         * The key for the name of the Thrown behavior in the [configuration]'s schema.
+         */
+        const val BEHAVIOURNAME_THROWN = "Thrown"
     }
 }

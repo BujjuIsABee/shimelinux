@@ -43,7 +43,7 @@ import kotlin.math.roundToInt
  */
 object ImagePairLoader {
     /**
-     * Loads an image pair. If [rightPath] is null, the right image will be the left image flipped.
+     * Loads an image pair. If [rightPath] is `null`, the right image will be the left image flipped.
      */
     @JvmStatic
     fun load(leftPath: Path, rightPath: Path?, center: Point, scaling: Double, filter: Filter, opacity: Double) {

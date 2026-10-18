@@ -85,6 +85,8 @@ function tick() {
                     width: window.width,
                     height: window.height
                 };
+
+                resetActiveWindow();
             }
         }
     );
@@ -129,6 +131,8 @@ function isWindowOnscreen(window) {
 }
 
 workspace.windowActivated.connect(onWindowActivated);
+
+onWindowActivated(workspace.activeWindow);
 
 // Start a timer to call tick every 40 milliseconds
 const timer = new QTimer();

@@ -56,13 +56,13 @@ open class Move(
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
 
     /**
-     * The X position that the [mascot] moves toward.
+     * The X position that the [mascot] moves towards.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y position that the [mascot] moves toward.
+     * The Y position that the [mascot] moves towards.
      */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
@@ -122,9 +122,15 @@ open class Move(
     }
 
     companion object {
+        /**
+         * The key for the name of the [targetX] parameter in the schema.
+         */
         const val PARAMETER_TARGETX = "TargetX"
         private const val DEFAULT_TARGETX = Int.MAX_VALUE
 
+        /**
+         * The key for the name of the [targetY] parameter in the schema.
+         */
         const val PARAMETER_TARGETY = "TargetY"
         private const val DEFAULT_TARGETY = Int.MAX_VALUE
     }

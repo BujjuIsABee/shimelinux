@@ -23,6 +23,7 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
+import io.github.bujjuisabee.shimelinux.BuildConfig
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Color
@@ -66,7 +67,6 @@ import javax.swing.border.BevelBorder
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
 
-private const val VERSION = "v1.4.0"
 private const val DEFAULT_DARK_BACKGROUND_COLOR = "#202020"
 private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
 private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
@@ -86,19 +86,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val flatThemeAccentColorTextField: JTextField
     private val windowBackgroundImagePreview: JLabel
 
-    private val newProperties = Properties().apply { putAll(Main.properties) }
-    private val oldDarkTheme = Properties().apply {
-        runCatching {
-            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { load(it) }
-        }
-    }
-    private val newDarkTheme = Properties().apply { putAll(oldDarkTheme) }
-    private val oldLightTheme = Properties().apply {
-        runCatching {
-            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { load(it) }
-        }
-    }
-    private val newLightTheme = Properties().apply { putAll(oldLightTheme) }
+    private val oldDarkTheme = Properties()
+    private val oldLightTheme = Properties()
+    private val newDarkTheme = Properties()
+    private val newLightTheme = Properties()
+    private val newProperties = Properties()
 
     var isEnvironmentReloadRequired = false
     var isImageReloadRequired = false
@@ -110,6 +102,16 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         title = localize("Settings")
         isResizable = !Platform.isTilingWindowManager
         layout = BorderLayout()
+
+        try {
+            getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { oldDarkTheme.load(it) }
+            getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { oldLightTheme.load(it) }
+        } catch (_: Exception) {
+        }
+
+        newDarkTheme.putAll(oldDarkTheme)
+        newLightTheme.putAll(oldLightTheme)
+        newProperties.putAll(Main.properties)
 
         val tabbedPane = object : JTabbedPane() {
             override fun getPreferredSize() = super.preferredSize.apply { width = 450 }
@@ -989,7 +991,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         titleLabel.font = titleLabel.font.deriveFont(Font.BOLD, titleLabel.font.size + 10.0f)
         titleLabel.alignmentX = CENTER_ALIGNMENT
 
-        val versionLabel = JLabel(VERSION)
+        val versionLabel = JLabel("v${BuildConfig.VERSION}")
         versionLabel.alignmentX = CENTER_ALIGNMENT
 
         aboutTab.add(Box.createVerticalGlue())

@@ -53,9 +53,15 @@ class Offset(
     }
 
     companion object {
+        /**
+         * The key for the name of the [offsetX] parameter in the schema.
+         */
         const val PARAMETER_OFFSETX = "X"
         private const val DEFAULT_OFFSETX = 0
 
+        /**
+         * The key for the name of the [offsetY] parameter in the schema.
+         */
         const val PARAMETER_OFFSETY = "Y"
         private const val DEFAULT_OFFSETY = 0
     }

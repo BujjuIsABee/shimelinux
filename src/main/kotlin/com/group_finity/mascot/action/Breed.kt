@@ -31,7 +31,6 @@ import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
-import java.awt.Point
 import java.util.ResourceBundle
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -81,13 +80,13 @@ class Breed(
             get() = getProperty(if (bornTransient) "Transients" else "Breeding", true)
 
         /**
-         * Whether this frame is a multiple of the [bornInterval].
+         * Whether the current frame is a multiple of the [bornInterval].
          */
         val isIntervalFrame: Boolean
             get() = action.time % bornInterval == 0
 
         /**
-         * Whether this frame is the penultimate frame of the action's [animation].
+         * Whether the current frame is the penultimate frame of the action's [animation].
          */
         val isPenultimateFrame: Boolean
             get() = action.time == checkNotNull(action.animation).duration - 1
@@ -108,17 +107,17 @@ class Breed(
          * The initial behavior of the new mascot(s).
          */
         private val bornBehavior: String
-            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOR), DEFAULT_BORNBEHAVIOR)
+            get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), DEFAULT_BORNBEHAVIOUR)
 
         /**
-         * The image set that will be used for the new mascot(s). The same image set as [mascot] will be used if a
-         * valid image set is not provided.
+         * The image set that will be used for the new mascot(s). If a valid image set is not provided, [mascot]'s image
+         * set will be used.
          */
         private val bornMascot: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
 
         /**
-         * Whether the new mascot(s) will be temporary. Transient breeding actions can be used to create projectiles.
+         * Whether the new mascot(s) will be temporary.
          */
         private val bornTransient: Boolean
             get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
@@ -147,13 +146,13 @@ class Breed(
 
                 logger.info { "Mascot breeding (${action.mascot}, $action, $mascot)" }
 
-                mascot.anchor = if (action.mascot.isLookRight) {
-                    Point(
+                if (action.mascot.isLookRight) {
+                    mascot.anchor.setLocation(
                         action.mascot.anchor.x - (bornX * scaling).roundToInt(),
                         action.mascot.anchor.y + (bornY * scaling).roundToInt()
                     )
                 } else {
-                    Point(
+                    mascot.anchor.setLocation(
                         action.mascot.anchor.x + (bornX * scaling).roundToInt(),
                         action.mascot.anchor.y + (bornY * scaling).roundToInt()
                     )
@@ -199,24 +198,45 @@ class Breed(
         }
 
         companion object {
+            /**
+             * The key for the name of the [bornX] parameter in the schema.
+             */
             const val PARAMETER_BORNX = "BornX"
             private const val DEFAULT_BORNX = 0
 
+            /**
+             * The key for the name of the [bornY] parameter in the schema.
+             */
             const val PARAMETER_BORNY = "BornY"
             private const val DEFAULT_BORNY = 0
 
-            const val PARAMETER_BORNBEHAVIOR = "BornBehavior"
-            private const val DEFAULT_BORNBEHAVIOR = ""
+            /**
+             * The key for the name of the [bornBehavior] parameter in the schema.
+             */
+            const val PARAMETER_BORNBEHAVIOUR = "BornBehavior"
+            private const val DEFAULT_BORNBEHAVIOUR = ""
 
+            /**
+             * The key for the name of the [bornMascot] parameter in the schema.
+             */
             const val PARAMETER_BORNMASCOT = "BornMascot"
             private const val DEFAULT_BORNMASCOT = ""
 
+            /**
+             * The key for the name of the [bornInterval] parameter in the schema.
+             */
             const val PARAMETER_BORNINTERVAL = "BornInterval"
             private const val DEFAULT_BORNINTERVAL = 1
 
+            /**
+             * The key for the name of the [bornTransient] parameter in the schema.
+             */
             const val PARAMETER_BORNTRANSIENT = "BornTransient"
             private const val DEFAULT_BORNTRANSIENT = false
 
+            /**
+             * The key for the name of the [bornCount] parameter in the schema.
+             */
             const val PARAMETER_BORNCOUNT = "BornCount"
             private const val DEFAULT_BORNCOUNT = 1
         }

@@ -20,7 +20,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.wayland
+package io.github.bujjuisabee.shimelinux.wayland.lib
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.loadResource
@@ -60,20 +60,19 @@ object WaylandLib {
     external fun createLayer(mascotLayer: Int, mouseEventReceiver: MouseEventReceiver): Long
 
     /**
-     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] values to a layer
-     * surface.
+     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] to a layer surface.
      */
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
     /**
      * Uses [senderPtr] to send a SetImage event with the given [rgb] pixel data to a layer surface. If [updateMask] is
-     * true, the surface's input region will be updated as well.
+     * `true`, the surface's input region will be updated as well.
      */
     external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)
 
     /**
-     * Uses [senderPtr] to send a SetCursor event to a layer surface. If [useHand] is true, the cursor will be set to a
-     * hand.
+     * Uses [senderPtr] to send a SetCursor event to a layer surface. The cursor will be set to a hand if [useHand] is
+     * `true`, or the regular pointer if it is `false`.
      */
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
@@ -81,25 +80,4 @@ object WaylandLib {
      * Uses [senderPtr] to send a Dispose event to a layer surface.
      */
     external fun dispose(senderPtr: Long)
-
-    /**
-     * Receives mouse events from a Wayland layer surface.
-     */
-    interface MouseEventReceiver {
-        /**
-         * Called when the layer surface receives mouse events, providing information about the state of the cursor via
-         * [leftPressed], [rightPressed], [leftReleased], and [rightReleased], and its position via [positionX] and
-         * [positionY].
-         *
-         * @see WaylandLayer.dispatchEvents
-         */
-        fun updateCursor(
-            leftPressed: Boolean,
-            rightPressed: Boolean,
-            leftReleased: Boolean,
-            rightReleased: Boolean,
-            positionX: Int,
-            positionY: Int
-        )
-    }
 }

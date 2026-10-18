@@ -36,7 +36,18 @@ import javax.swing.PopupFactory
 import kotlin.collections.map
 
 /**
- * An environment that works properly when mascots are not displayed by AWT components.
+ * The absolute cursor position, or an approximation of it based on the [relativeCursorPosition] if
+ * [Platform.providesAbsoluteCursorPosition] is `false`
+ */
+var absoluteCursorPosition = Point(0, 0)
+
+/**
+ * The relative cursor position reported by the compositor.
+ */
+var relativeCursorPosition = Point(0, 0)
+
+/**
+ * An environment that works properly when mascots are not displayed via X11 or XWayland windows.
  *
  * @author Bujju
  */
@@ -69,25 +80,24 @@ class WaylandEnvironment : Environment() {
 
         screen.set(screenRect)
 
-
         // Update cursor position
-        cursor.set(
-            when (Platform.currentDesktop) {
-                "hyprland" -> runCatching {
-                    val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
-                    Point(x, y)
-                }.getOrNull()
+        when (Platform.currentDesktop) {
+            "hyprland" -> runCatching {
+                val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
+                absoluteCursorPosition = Point(x, y)
+            }
 
-                "mango" -> runCatching {
-                    val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }
-                    Point(x.toDouble().toInt(), y.toDouble().toInt())
-                }.getOrNull()
+            "mango" -> runCatching {
+                val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }.take(2).map { it.toDouble().toInt() }
+                absoluteCursorPosition = Point(x, y)
+            }
 
-                "kde" -> KWin.cursorPosition
+            "kde" -> runCatching {
+                absoluteCursorPosition = checkNotNull(KWin.cursorPosition)
+            }
+        }
 
-                else -> absoluteCursorPosition
-            } ?: Point(0, 0)
-        )
+        cursor.set(absoluteCursorPosition)
     }
 
     override fun moveActiveIE(point: Point) {}
@@ -97,12 +107,4 @@ class WaylandEnvironment : Environment() {
     override fun refreshCache() {}
 
     override fun dispose() {}
-
-    companion object {
-        /**
-         * The absolute cursor position. If [Platform.providesAbsoluteCursorPosition] is false, this is an approximation
-         * based on the relative cursor position reported by the compositor.
-         */
-        var absoluteCursorPosition: Point? = null
-    }
 }

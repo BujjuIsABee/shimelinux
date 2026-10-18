@@ -23,7 +23,7 @@
 use jni::{refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
     compositor::{CompositorHandler, CompositorState, FrameCallbackData},
-    delegate_registry,
+    delegate_dispatch2, delegate_registry,
     output::{OutputHandler, OutputState},
     registry::{ProvidesRegistryState, RegistryState},
     registry_handlers,
@@ -50,35 +50,26 @@ use wayland_client::{
 };
 use wayland_cursor::CursorTheme;
 
-use crate::{MouseEventReceiver, Point, Rect};
-
-#[derive(Default)]
-pub struct CursorState {
-    pub pointer: Option<WlPointer>,
-    pub surface: Option<WlSurface>,
-    pub serial: Option<u32>,
-    pub left_pressed: bool,
-    pub right_pressed: bool,
-    pub left_released: bool,
-    pub right_released: bool,
-    pub position: Point,
-}
+use crate::{MouseEventReceiver, Rect};
 
 pub struct LayerState {
     pub compositor_state: CompositorState,
     pub registry_state: RegistryState,
     pub output_state: OutputState,
     pub seat_state: SeatState,
-    pub cursor_state: CursorState,
     pub shm: Shm,
-    pub pool: SlotPool,
-    pub mouse_event_receiver: Global<MouseEventReceiver<'static>>,
+
     pub layer: LayerSurface,
     pub configured: bool,
+    pub pool: SlotPool,
     pub image_rgb: Vec<i32>,
     pub image_bounds: Rect,
     pub image_changed: bool,
     pub layer_mask: Vec<Rect>,
+    pub mouse_event_receiver: Global<MouseEventReceiver<'static>>,
+    pub pointer: Option<WlPointer>,
+    pub pointer_surface: Option<WlSurface>,
+    pub serial: Option<u32>,
 }
 
 impl CompositorHandler for LayerState {
@@ -174,8 +165,8 @@ impl SeatHandler for LayerState {
         seat: WlSeat,
         capability: Capability,
     ) {
-        if capability == Capability::Pointer && self.cursor_state.pointer.is_none() {
-            self.cursor_state.pointer = self.seat_state.get_pointer(qh, &seat).ok();
+        if capability == Capability::Pointer && self.pointer.is_none() {
+            self.pointer = self.seat_state.get_pointer(qh, &seat).ok();
         }
     }
 
@@ -186,8 +177,8 @@ impl SeatHandler for LayerState {
         _seat: WlSeat,
         capability: Capability,
     ) {
-        if capability == Capability::Pointer && self.cursor_state.pointer.is_some() {
-            self.cursor_state.pointer.take().unwrap().release();
+        if capability == Capability::Pointer && self.pointer.is_some() {
+            self.pointer.take().unwrap().release();
         }
     }
 
@@ -203,57 +194,42 @@ impl PointerHandler for LayerState {
         events: &[PointerEvent],
     ) {
         use PointerEventKind::*;
-        for event in events {
-            // Skip events for other layer surfaces
-            if &event.surface != self.layer.wl_surface() {
-                continue;
-            }
 
+        let mut left_pressed = false;
+        let mut right_pressed = false;
+        let mut left_released = false;
+        let mut right_released = false;
+        let mut position_x = 0;
+        let mut position_y = 0;
+
+        for event in events {
             // Update cursor position
             let (x, y) = event.position;
-            self.cursor_state.position = Point {
-                x: x as i32,
-                y: y as i32,
-            };
+            position_x = x as i32;
+            position_y = y as i32;
 
             match event.kind {
                 Enter { serial } => {
-                    self.cursor_state.serial = Some(serial);
-
-                    // Update cursor surface
-                    if let (Some(pointer), Some(surface)) =
-                        (&self.cursor_state.pointer, &self.cursor_state.surface)
-                    {
-                        pointer.set_cursor(serial, Some(surface), 0, 0);
-                    }
+                    self.serial = Some(serial);
                 }
                 Leave { serial } => {
-                    self.cursor_state.serial = Some(serial);
-
-                    // Update cursor surface
-                    if let (Some(pointer), Some(surface)) =
-                        (&self.cursor_state.pointer, &self.cursor_state.surface)
-                    {
-                        pointer.set_cursor(serial, Some(surface), 0, 0);
-                    }
+                    self.serial = Some(serial);
                 }
                 Motion { .. } => {
                     // Update cursor surface
-                    if let (Some(pointer), Some(serial), Some(surface)) = (
-                        &self.cursor_state.pointer,
-                        self.cursor_state.serial,
-                        &self.cursor_state.surface,
-                    ) {
+                    if let (Some(pointer), Some(serial), Some(surface)) =
+                        (&self.pointer, self.serial, &self.pointer_surface)
+                    {
                         pointer.set_cursor(serial, Some(surface), 0, 0);
                     }
                 }
                 Press { button, .. } => {
-                    self.cursor_state.left_pressed = button == BTN_LEFT;
-                    self.cursor_state.right_pressed = button == BTN_RIGHT;
+                    left_pressed = button == BTN_LEFT;
+                    right_pressed = button == BTN_RIGHT;
                 }
                 Release { button, .. } => {
-                    self.cursor_state.left_released = button == BTN_LEFT;
-                    self.cursor_state.right_released = button == BTN_RIGHT;
+                    left_released = button == BTN_LEFT;
+                    right_released = button == BTN_RIGHT;
                 }
                 Axis { .. } => {}
             }
@@ -264,12 +240,12 @@ impl PointerHandler for LayerState {
             let _ = jvm.attach_current_thread(|env| -> jni::errors::Result<_> {
                 self.mouse_event_receiver.update_cursor(
                     env,
-                    std::mem::take(&mut self.cursor_state.left_pressed),
-                    std::mem::take(&mut self.cursor_state.right_pressed),
-                    std::mem::take(&mut self.cursor_state.left_released),
-                    std::mem::take(&mut self.cursor_state.right_released),
-                    self.cursor_state.position.x,
-                    self.cursor_state.position.y,
+                    left_pressed,
+                    right_pressed,
+                    left_released,
+                    right_released,
+                    position_x,
+                    position_y,
                 )
             });
         }
@@ -285,17 +261,11 @@ impl ShmHandler for LayerState {
 delegate_noop!(LayerState: ignore WlRegion);
 
 impl LayerState {
-    /// Sets the size and position of the layer surface.
-    ///
-    /// The position is set immediately; the size is set the next time `draw()` is called.
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
         self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
-    /// Sets the image displayed by the layer surface.
-    ///
-    /// If `update_mask` is true, `layer_mask` will be updated.
     pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
         self.image_changed = true;
         self.image_rgb = rgb;
@@ -305,16 +275,12 @@ impl LayerState {
         }
     }
 
-    /// Sets the cursor displayed by the pointer's `surface`.
-    ///
-    /// If `use_hand` is true, the cursor will be set to a hand. Otherwise, it will be set to the regular cursor.
     pub fn set_cursor(&mut self, conn: &Connection, qh: &QueueHandle<Self>, use_hand: bool) {
         if let Ok(mut theme) = CursorTheme::load(conn, self.shm.wl_shm().clone(), 24)
             && let Some(cursor) = theme.get_cursor(if use_hand { "pointer" } else { "left_ptr" })
         {
             let surface = self
-                .cursor_state
-                .surface
+                .pointer_surface
                 .get_or_insert(self.compositor_state.create_surface(qh));
 
             // Attach None to clear the previous buffer
@@ -325,18 +291,14 @@ impl LayerState {
             surface.attach(Some(&cursor[0]), 0, 0);
             surface.commit();
 
-            self.cursor_state.surface = Some(surface.clone());
+            self.pointer_surface = Some(surface.clone());
         }
     }
 
-    /// Destroys the layer surface.
     pub fn dispose(&mut self) {
         self.layer.wl_surface().destroy();
     }
 
-    /// Redraws the layer surface.
-    ///
-    /// The input region will also be updated if `layer_mask` is not empty.
     fn draw(&mut self, qh: &QueueHandle<Self>) {
         let width = self.image_bounds.width.max(1);
         let height = self.image_bounds.height.max(1);
@@ -384,7 +346,6 @@ impl LayerState {
         self.layer.commit();
     }
 
-    /// Updates `layer_mask` based on `image_rgb`.
     fn update_layer_mask(&mut self) {
         let mut rects: Vec<Rect> = Vec::new();
         let width = self.image_bounds.width;
@@ -423,4 +384,4 @@ impl ProvidesRegistryState for LayerState {
     registry_handlers![];
 }
 
-smithay_client_toolkit::delegate_dispatch2!(LayerState);
+delegate_dispatch2!(LayerState);

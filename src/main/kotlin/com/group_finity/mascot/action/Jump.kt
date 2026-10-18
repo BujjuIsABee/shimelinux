@@ -47,13 +47,13 @@ open class Jump(
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
 
     /**
-     * The X position that the [mascot] jumps toward.
+     * The X position that the [mascot] jumps towards.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y position that the [mascot] jumps toward.
+     * The Y position that the [mascot] jumps towards.
      */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
@@ -96,16 +96,32 @@ open class Jump(
     }
 
     companion object {
+        /**
+         * The key for the name of the [velocity] parameter in the schema.
+         */
         const val PARAMETER_VELOCITY = "VelocityParam"
         private const val DEFAULT_VELOCITY = 20.0
 
+        /**
+         * The key for the name of the [targetX] parameter in the schema.
+         */
         const val PARAMETER_TARGETX = "TargetX"
         private const val DEFAULT_TARGETX = 0
 
+        /**
+         * The key for the name of the [targetY] parameter in the schema.
+         */
         const val PARAMETER_TARGETY = "TargetY"
         private const val DEFAULT_TARGETY = 0
 
+        /**
+         * The key for the name of the `VelocityX` variable in the schema.
+         */
         const val VARIABLE_VELOCITYX = "VelocityX"
+
+        /**
+         * The key for the name of the `VelocityY` variable in the schema.
+         */
         const val VARIABLE_VELOCITYY = "VelocityY"
     }
 }

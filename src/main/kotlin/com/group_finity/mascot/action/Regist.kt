@@ -97,9 +97,15 @@ class Regist(
     }
 
     companion object {
+        /**
+         * The key for the name of the [offsetX] parameter in the schema.
+         */
         const val PARAMETER_OFFSETX = "OffsetX"
         private const val DEFAULT_OFFSETX = 0
 
+        /**
+         * The key for the name of the [offsetType] parameter in the schema.
+         */
         const val PARAMETER_OFFSETTYPE = "OffsetType"
         private const val DEFAULT_OFFSETTYPE = "ImageAnchor"
     }

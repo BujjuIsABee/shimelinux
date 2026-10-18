@@ -51,7 +51,7 @@ class Interact(
      * The behavior to set for [mascot] if another mascot with the [affordance] is found.
      */
     private val behavior: String
-        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), DEFAULT_BEHAVIOUR)
 
     override fun hasNext(): Boolean = super.hasNext() && mascot.manager?.hasOverlappingMascotsAtPoint(mascot.anchor) == true
 
@@ -79,7 +79,10 @@ class Interact(
     }
 
     companion object {
-        const val PARAMETER_BEHAVIOR = "Behavior"
-        private const val DEFAULT_BEHAVIOR = ""
+        /**
+         * The key for the name of the [behavior] parameter in the schema.
+         */
+        const val PARAMETER_BEHAVIOUR = "Behavior"
+        private const val DEFAULT_BEHAVIOUR = ""
     }
 }

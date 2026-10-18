@@ -94,19 +94,19 @@ class MascotEnvironment(private val mascot: Mascot) {
         get() = getFloor(false)
 
     /**
-     * The interactable border on the wall that the mascot is facing.
+     * The interactable border on the wall that the [mascot] is facing.
      */
     val wall: Border
         get() = getWall(false)
 
     /**
-     * Gets whether the mascot is on one of the environment's vertical borders.
+     * Gets whether the [mascot] is on one of the environment's vertical borders.
      */
     val isScreenTopBottom: Boolean
         get() = impl.isScreenTopBottom(mascot.anchor)
 
     /**
-     * Gets whether the mascot is on one of the environment's horizontal borders.
+     * Gets whether the [mascot] is on one of the environment's horizontal borders.
      */
     val isScreenLeftRight: Boolean
         get() = impl.isScreenLeftRight(mascot.anchor)
@@ -116,8 +116,8 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Gets an area representing the bounds of the primary monitor. If [ignoreSettings] is true, the state of the
-     * Multiscreen setting will be ignored.
+     * Gets an area representing the bounds of the primary monitor. If [ignoreSettings] is `true`, the Multiscreen
+     * setting will be ignored.
      */
     fun getWorkArea(ignoreSettings: Boolean): Area {
         currentWorkArea?.let { area ->
@@ -144,8 +144,8 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Gets the interactable border on the environment's ceiling. If [ignoreSeparator] is true, the top border will be
-     * returned even if [isScreenTopBottom] is false.
+     * Gets the interactable border on the environment's ceiling. If [ignoreSeparator] is `true`, the top border will be
+     * returned even if [isScreenTopBottom] is `false`.
      */
     fun getCeiling(ignoreSeparator: Boolean): Border = if (activeIE.bottomBorder.isOn(mascot.anchor)) {
         activeIE.bottomBorder
@@ -156,8 +156,8 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Gets the interactable border on the environment's floor. If [ignoreSeparator] is true, the bottom border will be
-     * returned even if [isScreenTopBottom] is false.
+     * Gets the interactable border on the environment's floor. If [ignoreSeparator] is `true`, the bottom border will
+     * be returned even if [isScreenTopBottom] is `false`.
      */
     fun getFloor(ignoreSeparator: Boolean): Border = if (activeIE.topBorder.isOn(mascot.anchor)) {
         activeIE.topBorder
@@ -168,8 +168,8 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Gets the interactable border on the wall that the mascot is facing. If [ignoreSeparator] is true, the border will
-     * be returned even if [isScreenLeftRight] is false.
+     * Gets the interactable border on the wall that the [mascot] is facing. If [ignoreSeparator] is `true`, the border
+     * will be returned even if [isScreenLeftRight] is `false`.
      */
     fun getWall(ignoreSeparator: Boolean): Border {
         if (mascot.isLookRight) {
@@ -206,7 +206,7 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
-     * Updates which screen is used for the work area.
+     * Updates which screen is used for the [workArea].
      */
     fun refreshWorkArea() {
         getWorkArea(true)

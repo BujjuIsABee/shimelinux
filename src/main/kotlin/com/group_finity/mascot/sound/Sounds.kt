@@ -49,7 +49,7 @@ object Sounds {
         }
 
     /**
-     * Adds a [sound] with [name] as its key.
+     * Adds a [sound] to [sounds] with [name] as its key.
      *
      * @param name The sound's filename combined with its volume.
      */
@@ -59,7 +59,7 @@ object Sounds {
     }
 
     /**
-     * Gets whether there is a sound with the given [name].
+     * Returns whether there is a sound in [sounds] with the given [name].
      *
      * @param name The sound's filename combined with its volume.
      */
@@ -67,7 +67,7 @@ object Sounds {
     fun contains(name: String): Boolean = sounds.containsKey(name)
 
     /**
-     * Gets the sound with the given [name].
+     * Returns the sound in [sounds] with the given [name].
      *
      * @param name The sound's filename combined with its volume.
      */
@@ -75,7 +75,7 @@ object Sounds {
     fun getSound(name: String): Clip? = sounds[name]?.also { it.open() }?.clip
 
     /**
-     * Gets all sounds with the given [name].
+     * Returns all sounds in [sounds] with the given [name].
      *
      * @param name The sound's filename.
      */
@@ -83,7 +83,7 @@ object Sounds {
     fun getSoundsIgnoringVolume(name: String): List<Clip> = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
 
     /**
-     * Contains a sound clip and a function to open it.
+     * Stores a sound clip and a function to open it.
      */
     data class Sound(val clip: Clip, val open: () -> Unit)
 }

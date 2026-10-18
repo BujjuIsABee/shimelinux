@@ -24,6 +24,7 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
+import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import java.awt.Component
 
 /**
@@ -31,7 +32,7 @@ import java.awt.Component
  *
  * @author Bujju
  */
-class WaylandTranslucentLayer : TranslucentWindow, WaylandLib.MouseEventReceiver {
+class WaylandTranslucentLayer : TranslucentWindow, MouseEventReceiver {
     private val layer = WaylandLayer(this, true)
     private var image: WaylandNativeImage? = null
     private var imageChanged = false

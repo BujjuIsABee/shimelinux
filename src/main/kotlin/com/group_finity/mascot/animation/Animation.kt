@@ -30,6 +30,11 @@ import com.group_finity.mascot.script.VariableMap
 /**
  * An animation that can be played by an action.
  *
+ * @param condition A condition that must be met for the animation to play.
+ * @param poses The animation's frames.
+ * @param hotspots The hotspots that can be interacted with while the animation is playing.
+ * @param isTurn Whether it is a turning animation.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju
@@ -50,7 +55,7 @@ class Animation(
     }
 
     /**
-     * Evaluates whether the conditions for the animation to play are currently met using the given [variables].
+     * Returns whether the conditions for the animation to play are currently met.
      */
     fun isEffective(variables: VariableMap): Boolean = condition.get(variables) as Boolean
 

@@ -41,7 +41,7 @@ use smithay_client_toolkit::{
 };
 use wayland_client::{Connection, globals::registry_queue_init};
 
-use crate::layer::{CursorState, LayerState};
+use crate::layer::LayerState;
 
 mod layer;
 
@@ -67,7 +67,7 @@ enum Event {
 }
 
 bind_java_type! {
-    MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
+    MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver",
     methods {
         #[allow(clippy::too_many_arguments)]
         fn update_cursor(
@@ -82,9 +82,9 @@ bind_java_type! {
 }
 
 bind_java_type! {
-    WaylandLib => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib",
+    WaylandLib => "io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib",
     type_map {
-        MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.WaylandLib$MouseEventReceiver",
+        MouseEventReceiver => "io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver",
     },
     native_methods {
         extern fn create_layer(mascot_layer: jint, mouse_event_receiver: MouseEventReceiver) -> jlong,
@@ -98,9 +98,6 @@ bind_java_type! {
 impl WaylandLibNativeInterface for WaylandLibAPI {
     type Error = jni::errors::Error;
 
-    /// Creates a Wayland layer surface and returns a pointer to the event sender.
-    ///
-    /// Mouse events are sent to `mouse_event_receiver`.
     fn create_layer<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -115,11 +112,9 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let (globals, mut event_queue) = registry_queue_init(&conn).unwrap();
         let qh = event_queue.handle();
 
-        let compositor = CompositorState::bind(&globals, &qh).unwrap();
+        let compositor = CompositorState::bind(&globals, &qh).expect("wl_compositor not available");
         let surface = compositor.create_surface(&qh);
-        let shm = Shm::bind(&globals, &qh).unwrap();
-        let pool = SlotPool::new(128 * 128 * 4, &shm).unwrap();
-        let layer_shell = LayerShell::bind(&globals, &qh).expect("Failed to get layer shell");
+        let layer_shell = LayerShell::bind(&globals, &qh).expect("wlr_layer_shell not available");
         let layer = layer_shell.create_layer_surface(
             &qh,
             surface,
@@ -138,21 +133,27 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         layer.set_size(1, 1);
         layer.commit();
 
+        let shm = Shm::bind(&globals, &qh).expect("wl_shm not available");
+        let pool = SlotPool::new(128 * 128 * 4, &shm).expect("Failed to create pool");
+
         let mut layer_state = LayerState {
             compositor_state: compositor,
             registry_state: RegistryState::new(&globals),
             output_state: OutputState::new(&globals, &qh),
             seat_state: SeatState::new(&globals, &qh),
-            cursor_state: CursorState::default(),
             shm,
-            pool,
-            mouse_event_receiver: env.new_global_ref(mouse_event_receiver).unwrap(),
+
             layer,
             configured: false,
+            pool,
             image_rgb: Vec::new(),
             image_bounds: Rect::default(),
             image_changed: true,
             layer_mask: Vec::new(),
+            mouse_event_receiver: env.new_global_ref(mouse_event_receiver).unwrap(),
+            pointer: None,
+            pointer_surface: None,
+            serial: None,
         };
 
         // Get a JavaVM so it can be attached to the thread. This ensures that the global reference
@@ -194,7 +195,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(Box::into_raw(Box::new(sender)) as jlong)
     }
 
-    /// Sends a SetBounds event using the `sender_ptr`.
     fn set_bounds<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -217,7 +217,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
-    /// Sends a SetImage event using the `sender_ptr`.
     fn set_image<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -235,7 +234,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
-    /// Sends a SetCursor event using the `sender_ptr`.
     fn set_cursor<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -250,7 +248,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
-    /// Sends a Dispose event using the `sender_ptr`.
     fn dispose<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,

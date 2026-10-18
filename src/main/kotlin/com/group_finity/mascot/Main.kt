@@ -67,7 +67,6 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  */
 object Main {
     @JvmStatic
-    @Deprecated("Main is now an object", ReplaceWith("Main"))
     val instance = this
 
     /**
@@ -213,7 +212,7 @@ object Main {
             val chooser = ImageSetChooser(null, true)
             chooser.isVisible = true
 
-            imageSets = chooser.imageSets.takeUnless { chooser.wasCancelled } ?: exit()
+            imageSets = chooser.imageSets.takeIf { !chooser.wasCancelled } ?: exit()
         }
 
         // Load mascots
@@ -459,7 +458,7 @@ object Main {
                     manager.togglePauseAll()
                 }
 
-                setActiveImageSets(chooser.imageSets.takeUnless { chooser.wasCancelled })
+                setActiveImageSets(chooser.imageSets.takeIf { !chooser.wasCancelled })
             }
 
             val settingsMenu = MenuItem(localize("Settings")) {

@@ -46,8 +46,7 @@ class Turn(
     private var isTurning = false
 
     /**
-     * The direction that the [mascot] will turn towards. The direction opposite of its current direction will be used
-     * if a direction is not provided.
+     * The direction that the [mascot] will turn towards.
      */
     private val isLookRight: Boolean
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)
@@ -72,6 +71,9 @@ class Turn(
     }
 
     companion object {
+        /**
+         * The key for the name of the [isLookRight] parameter in the schema.
+         */
         const val PARAMETER_LOOKRIGHT = "LookRight"
     }
 }

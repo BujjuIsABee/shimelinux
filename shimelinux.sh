@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-case "$XDG_CURRENT_DESKTOP" in
-  "Hyprland" | "niri" | *sway*)
+case "${XDG_CURRENT_DESKTOP:-$DESKTOP_SESSION}" in
+  *Hyprland* | *niri* | *river* | *sway*)
     export _JAVA_AWT_WM_NONREPARENTING=1
     ;;
 esac

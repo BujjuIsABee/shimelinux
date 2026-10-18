@@ -23,17 +23,17 @@
 package com.group_finity.mascot
 
 /**
- * Provides information about the current desktop environment or window manager.
+ * Provides information about the current desktop environment.
  *
  * @author Bujju
  */
 object Platform {
     /**
-     * The name of the current desktop environment or window manager.
+     * The name of the current desktop environment.
      */
     val currentDesktop: String by lazy {
-        val currentDesktop = System.getenv("XDG_CURRENT_DESKTOP").takeUnless { it.isNullOrBlank() }
-        val desktopSession = System.getenv("DESKTOP_SESSION").takeUnless { it.isNullOrBlank() }
+        val currentDesktop = System.getenv("XDG_CURRENT_DESKTOP").takeIf { !it.isNullOrBlank() }
+        val desktopSession = System.getenv("DESKTOP_SESSION").takeIf { !it.isNullOrBlank() }
         (currentDesktop ?: desktopSession ?: "").lowercase()
     }
 
@@ -41,7 +41,7 @@ object Platform {
      * The name of the current display server protocol.
      */
     val sessionType: String by lazy {
-        val sessionType = System.getenv("XDG_SESSION_TYPE").takeUnless { it.isNullOrBlank() }
+        val sessionType = System.getenv("XDG_SESSION_TYPE").takeIf { !it.isNullOrBlank() }
         (sessionType ?: "").lowercase()
     }
 
@@ -49,13 +49,13 @@ object Platform {
      * Whether [currentDesktop] is a tiling window manager.
      */
     val isTilingWindowManager: Boolean =
-        currentDesktop.containsAny("awesome", "cosmic", "dwm", "hyprland", "i3", "mango", "niri", "sway", "xmonad")
+        currentDesktop.containsAny("awesome", "cosmic", "dwm", "hyprland", "i3", "mango", "niri", "river", "sway", "xmonad")
 
     /**
      * Whether [currentDesktop] should be assumed to support the wlr-layer-shell protocol.
      */
     val supportsWaylandLayerSurfaces: Boolean =
-        sessionType == "wayland" && !currentDesktop.containsAny("gnome", "cinnamon")
+        sessionType == "wayland" && !currentDesktop.containsAny("gnome", "cinnamon") && System.getProperty("flatpak") != "true"
 
     /**
      * Whether [currentDesktop] provides the absolute position of the cursor.

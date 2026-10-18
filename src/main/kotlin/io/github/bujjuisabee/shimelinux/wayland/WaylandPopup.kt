@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.NativeFactory
+import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import java.awt.Component
 import java.awt.Point
 import java.awt.image.BufferedImage
@@ -45,9 +46,9 @@ class WaylandPopup(
     private val contents: Component,
     private val x: Int,
     private val y: Int,
-) : Popup(owner, contents, x, y), WaylandLib.MouseEventReceiver {
+) : Popup(owner, contents, x, y), MouseEventReceiver {
     private val layer = WaylandLayer(this, false)
-    private var previousTarget: Component? = null
+    private var target: Component? = null
     private var submenu: WaylandPopup? = null
     private var parent: JMenu? = null
 
@@ -76,8 +77,8 @@ class WaylandPopup(
         val target = SwingUtilities.getDeepestComponentAt(contents, positionX, positionY) ?: contents
         val targetPosition = SwingUtilities.convertPoint(contents, positionX, positionY, target)
 
-        if (previousTarget != target) {
-            previousTarget = target
+        if (this.target != target) {
+            this.target = target
 
             if (target is JMenu) {
                 openSubmenu(target)
@@ -140,13 +141,13 @@ class WaylandPopup(
 
         val xOffset = UIManager.getInt("Menu.submenuPopupOffsetX")
         var x = positionX + submenu.width + xOffset
-        if (x + popupSize.width >= screenBounds.x + screenBounds.width && screenBounds.width - submenu.width < 2 * (positionX - screenBounds.x)) {
+        if (x + popupSize.width >= screenBounds.x + screenBounds.width) {
             x = positionX - popupSize.width - xOffset
         }
 
         val yOffset = UIManager.getInt("Menu.submenuPopupOffsetY")
         var y = positionY + submenu.y + yOffset
-        if (y + popupSize.height >= screenBounds.y + screenBounds.height && screenBounds.height - submenu.height < 2 * (positionY - screenBounds.y)) {
+        if (y + popupSize.height >= screenBounds.y + screenBounds.height) {
             y = positionY + submenu.y + submenu.height - popupSize.height - yOffset
         }
 

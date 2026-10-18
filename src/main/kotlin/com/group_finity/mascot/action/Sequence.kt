@@ -56,6 +56,9 @@ class Sequence(
     }
 
     companion object {
+        /**
+         * The key for the name of the [isLoop] parameter in the schema.
+         */
         const val PARAMETER_LOOP = "Loop"
         private const val DEFAULT_LOOP = false
     }

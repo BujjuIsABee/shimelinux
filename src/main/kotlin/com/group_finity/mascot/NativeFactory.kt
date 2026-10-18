@@ -49,11 +49,14 @@ abstract class NativeFactory {
     abstract fun newTranslucentWindow(): TranslucentWindow
 
     /**
-     * Gets a platform-specific [NativeImage].
+     * Gets a platform-specific [NativeImage] from the given [src] image.
      */
     abstract fun newNativeImage(src: BufferedImage): NativeImage
 
     companion object {
+        /**
+         * The current native factory instance.
+         */
         lateinit var instance: NativeFactory
 
         /**

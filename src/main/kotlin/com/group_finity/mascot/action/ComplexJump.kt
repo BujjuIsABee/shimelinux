@@ -65,13 +65,13 @@ class ComplexJump(
      * The behavior to set for [mascot] if another mascot with the [affordance] is found.
      */
     private val behavior: String
-        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), DEFAULT_BEHAVIOUR)
 
     /**
      * The behavior to set for the other mascot.
      */
     private val targetBehavior: String
-        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
 
     /**
      * Whether the mascots should face each other.
@@ -80,21 +80,21 @@ class ComplexJump(
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
-     * The velocity of the [mascot] as it jumps toward the target position.
+     * The velocity of the [mascot] as it jumps towards the target position.
      */
     private val velocity: Double
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
 
     /**
-     * The Y position that the [mascot] jumps toward. The X position of [target] will be used instead if [isScanEnabled]
-     * is true.
+     * The X position that the [mascot] jumps towards. If [characteristics] includes "Scan," then the [target]'s X
+     * position will be used instead.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y position that the [mascot] jumps toward. The Y position of [target] will be used instead if [isScanEnabled]
-     * is true.
+     * The Y position that the [mascot] jumps towards. If [characteristics] includes "Scan," then the [target]'s Y
+     * position will be used instead.
      */
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
@@ -219,30 +219,66 @@ class ComplexJump(
     }
 
     companion object {
+        /**
+         * The key for the name of the [characteristics] parameter in the schema.
+         */
         const val PARAMETER_CHARACTERISTICS = "Characteristics"
         private const val DEFAULT_CHARACTERISTICS = ""
 
-        const val PARAMETER_BEHAVIOR = "Behavior"
-        private const val DEFAULT_BEHAVIOR = ""
+        /**
+         * The key for the name of the [behavior] parameter in the schema.
+         */
+        const val PARAMETER_BEHAVIOUR = "Behavior"
+        private const val DEFAULT_BEHAVIOUR = ""
 
-        const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
-        private const val DEFAULT_TARGETBEHAVIOR = ""
+        /**
+         * The key for the name of the [targetBehavior] parameter in the schema.
+         */
+        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehavior"
+        private const val DEFAULT_TARGETBEHAVIOUR = ""
 
+        /**
+         * The key for the name of the [targetLook] parameter in the schema.
+         */
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false
 
+        /**
+         * The key for the name of the [velocity] parameter in the schema.
+         */
         const val PARAMETER_VELOCITY = "VelocityParam"
         private const val DEFAULT_VELOCITY = 20.0
 
+        /**
+         * The key for the name of the [targetX] parameter in the schema.
+         */
         const val PARAMETER_TARGETX = "TargetX"
         private const val DEFAULT_TARGETX = 0
 
+        /**
+         * The key for the name of the [targetY] parameter in the schema.
+         */
         const val PARAMETER_TARGETY = "TargetY"
         private const val DEFAULT_TARGETY = 0
 
+        /**
+         * The key for the name of the `VelocityX` variable in the schema.
+         */
         const val VARIABLE_VELOCITYX = "VelocityX"
+
+        /**
+         * The key for the name of the `VelocityY` variable in the schema.
+         */
         const val VARIABLE_VELOCITYY = "VelocityY"
+
+        /**
+         * The key for the name of the `TargetX` variable in the schema.
+         */
         const val VARIABLE_TARGETX = "TargetX"
+
+        /**
+         * The key for the name of the `TargetY` variable in the schema.
+         */
         const val VARIABLE_TARGETY = "TargetY"
     }
 }

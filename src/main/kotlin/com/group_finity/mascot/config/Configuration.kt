@@ -25,7 +25,7 @@ package com.group_finity.mascot.config
 import com.group_finity.mascot.Mascot
 import com.group_finity.mascot.action.Action
 import com.group_finity.mascot.behavior.Behavior
-import com.group_finity.mascot.behavior.UserBehavior.Companion.BEHAVIORNAME_FALL
+import com.group_finity.mascot.behavior.UserBehavior
 import com.group_finity.mascot.exception.ActionInstantiationException
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.ConfigurationException
@@ -187,7 +187,7 @@ class Configuration {
             factory.buildBehavior()
         } else {
             mascot.resetAnchor()
-            buildBehavior(schema.getString(BEHAVIORNAME_FALL))
+            buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
         }
     }
 
@@ -197,7 +197,7 @@ class Configuration {
     fun buildBehavior(name: String): Behavior = behaviorBuilders[name]?.buildBehavior() ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
     /**
-     * Builds the next behavior for the given [mascot]. Returns null if no behavior can be selected.
+     * Builds the next behavior for the given [mascot]. Returns `null` if no behavior can be selected.
      */
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
@@ -238,7 +238,7 @@ class Configuration {
 
         if (totalFrequency == 0L) {
             mascot.resetAnchor()
-            return buildBehavior(schema.getString(BEHAVIORNAME_FALL))
+            return buildBehavior(schema.getString(UserBehavior.BEHAVIOURNAME_FALL))
         }
 
         // Randomly pick behavior from candidates
@@ -288,7 +288,7 @@ class Configuration {
     fun containsInformationKey(key: String?): Boolean = information.containsKey(key)
 
     /**
-     * Gets the value associated with the specified [key] in [information], or null if the key does not exist.
+     * Returns the value associated with the specified [key] in [information], or `null` if the key does not exist.
      */
     fun getInformation(key: String): String? = information[key]
 }

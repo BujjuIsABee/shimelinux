@@ -37,8 +37,7 @@ class Look(
     params: VariableMap
 ) : InstantAction(schema, params) {
     /**
-     * The direction that the [mascot] will look toward. The direction opposite of its current direction will be used if
-     * a direction is not provided.
+     * The direction that the [mascot] will look towards.
      */
     private val isLookRight: Boolean
         get() = eval(schema.getString(PARAMETER_LOOKRIGHT), !mascot.isLookRight)
@@ -48,6 +47,9 @@ class Look(
     }
 
     companion object {
+        /**
+         * The key for the name of the [isLookRight] parameter in the schema.
+         */
         const val PARAMETER_LOOKRIGHT = "LookRight"
     }
 }

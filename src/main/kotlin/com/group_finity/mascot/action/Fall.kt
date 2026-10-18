@@ -138,22 +138,44 @@ open class Fall(
     }
 
     companion object {
+        /**
+         * The key for the name of the [initialVx] parameter in the schema.
+         */
         const val PARAMETER_INITIALVX = "InitialVX"
         private const val DEFAULT_INITIALVX = 0
 
+        /**
+         * The key for the name of the [initialVy] parameter in the schema.
+         */
         const val PARAMETER_INITIALVY = "InitialVY"
         private const val DEFAULT_INITIALVY = 0
 
+        /**
+         * The key for the name of the [resistanceX] parameter in the schema.
+         */
         const val PARAMETER_RESISTANCEX = "ResistanceX"
         private const val DEFAULT_RESISTANCEX = 0.05
 
+        /**
+         * The key for the name of the [resistanceY] parameter in the schema.
+         */
         const val PARAMETER_RESISTANCEY = "ResistanceY"
         private const val DEFAULT_RESISTANCEY = 0.1
 
+        /**
+         * The key for the name of the [gravity] parameter in the schema.
+         */
         const val PARAMETER_GRAVITY = "Gravity"
         private const val DEFAULT_GRAVITY = 2.0
 
+        /**
+         * The key for the name of the `VelocityX` variable in the schema.
+         */
         const val VARIABLE_VELOCITYX = "VelocityX"
+
+        /**
+         * The key for the name of the `VelocityY` variable in the schema.
+         */
         const val VARIABLE_VELOCITYY = "VelocityY"
     }
 }

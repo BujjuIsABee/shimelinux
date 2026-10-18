@@ -49,5 +49,8 @@ abstract class InstantAction(
 
     override fun tick() {}
 
+    /**
+     * Called once when the action is initialized.
+     */
     internal abstract fun apply()
 }

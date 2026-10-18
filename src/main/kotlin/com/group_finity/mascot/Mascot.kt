@@ -69,7 +69,7 @@ class Mascot(var imageSet: String) {
     var manager: Manager? = null
 
     /**
-     * The mascot's ground coordinates.
+     * The mascot's coordinates.
      */
     var anchor = Point(0, 0)
 
@@ -84,7 +84,7 @@ class Mascot(var imageSet: String) {
     var isLookRight = false
 
     /**
-     * Handles the mascot's long-term behavior by triggering short-term actions.
+     * Handles the mascot's long-term behavior by triggering actions.
      */
     var behavior: Behavior? = null
         set(value) {
@@ -109,13 +109,12 @@ class Mascot(var imageSet: String) {
     var isPaused = false
 
     /**
-     * Whether the mascot is being dragged with the cursor.
+     * Whether the mascot is being dragged with the mouse.
      */
     var isDragging = false
 
     /**
-     * Stores information about the bounds of the screen, the location of the cursor, and the active interactive
-     * window.
+     * Stores information about the bounds of the screen, the location of the cursor, and the active interactive window.
      */
     val environment = MascotEnvironment(this)
 
@@ -125,7 +124,7 @@ class Mascot(var imageSet: String) {
     var sound: String? = null
 
     /**
-     * A list of variables. Variables can be accessed in scripts.
+     * A list of variables that can be accessed from parameters in the [imageSet]'s configuration.
      */
     val variables = VariableMap()
 
@@ -140,7 +139,7 @@ class Mascot(var imageSet: String) {
     val hotspots = mutableListOf<Hotspot>()
 
     /**
-     * Whether a hotspot is currently clicked.
+     * Whether a hotspot is being clicked.
      */
     val isHotspotClicked: Boolean
         get() = cursorPosition != null
@@ -376,6 +375,9 @@ class Mascot(var imageSet: String) {
         popup.show(window.asComponent(), x, y)
     }
 
+    /**
+     * Triggers the next frame of the mascot's [behavior].
+     */
     fun tick() {
         if (isAnimating) {
             try {
@@ -408,6 +410,9 @@ class Mascot(var imageSet: String) {
         )
     }
 
+    /**
+     * Displays the [image], updates the [bounds], and plays the [sound].
+     */
     fun apply() {
         if (isAnimating) {
             val image = image
@@ -438,7 +443,7 @@ class Mascot(var imageSet: String) {
     }
 
     /**
-     * Resets the mascot's position.
+     * Resets the mascot's [anchor].
      */
     fun resetAnchor() {
         if (getProperty("Multiscreen", true)) {

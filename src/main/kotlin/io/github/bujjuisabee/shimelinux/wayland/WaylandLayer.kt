@@ -23,9 +23,10 @@
 package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.getProperty
+import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
+import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
 import java.awt.Component
 import java.awt.Cursor
 import java.awt.Point
@@ -35,12 +36,13 @@ import javax.swing.JDialog
 import kotlin.system.exitProcess
 
 /**
- * Creates a Wayland layer surface with [WaylandLib]. Mouse events will be sent to [mouseEventReceiver]. If [useMask] is
- * true, the surface's input region will be updated whenever [setImage] is called.
+ * Creates a Wayland layer surface. Mouse events will be sent to [mouseEventReceiver].
+ *
+ * @param useMask Whether the surface's input region should be updated whenever [setImage] is called.
  *
  * @author Bujju
  */
-class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private val useMask: Boolean) : Component() {
+class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: Boolean) : Component() {
     private val senderPtr: Long = try {
         WaylandLib.createLayer(getProperty("MascotLayerWayland", 3), mouseEventReceiver)
     } catch (e: Throwable) {
@@ -85,7 +87,7 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     }
 
     /**
-     * Displays the given [rgb] pixel data on the layer surface. If [useMask] is true, the surface's input region will
+     * Displays the given [rgb] pixel data on the layer surface. If [useMask] is `true`, the surface's input region will
      * be updated as well.
      */
     fun setImage(rgb: IntArray) {
@@ -118,10 +120,9 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
     /**
      * Sends mouse events to the event listeners attached to [component].
      *
-     * If [leftPressed] or [rightPressed] is true, a `MOUSE_PRESSED` event will be sent. If [leftReleased] or
-     * [rightReleased] is true, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] indicates that the
-     * cursor has moved, a `MOUSE_MOVED` (or `MOUSE_DRAGGED` if [leftPressed] or [rightPressed] is true) event will be
-     * sent.
+     * If [leftPressed] or [rightPressed] is `true`, a `MOUSE_PRESSED` event will be sent. If [leftReleased] or
+     * [rightReleased] is `true`, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] has changed since
+     * the last time the function was called, a `MOUSE_MOVED` event will be sent.
      */
     fun dispatchEvents(
         component: Component,
@@ -151,8 +152,6 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
             absoluteLocation = location
         }
 
-        val absoluteCursorPosition = NativeFactory.instance.environment.cursor
-
         if (leftPressed || rightPressed) {
             component.dispatchEvent(
                 MouseEvent(
@@ -160,16 +159,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     MouseEvent.MOUSE_PRESSED,
                     System.currentTimeMillis(),
                     modifiers,
-                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        absoluteCursorPosition.x - location.x
-                    } else {
-                        positionX
-                    },
-                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        absoluteCursorPosition.y - location.y
-                    } else {
-                        positionY
-                    },
+                    absoluteCursorPosition.x - absoluteLocation.x,
+                    absoluteCursorPosition.y - absoluteLocation.y,
                     1,
                     rightPressed,
                     button
@@ -184,16 +175,8 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
                     MouseEvent.MOUSE_RELEASED,
                     System.currentTimeMillis(),
                     modifiers,
-                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        absoluteCursorPosition.x - location.x
-                    } else {
-                        positionX
-                    },
-                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        absoluteCursorPosition.y - location.y
-                    } else {
-                        positionY
-                    },
+                    absoluteCursorPosition.x - absoluteLocation.x,
+                    absoluteCursorPosition.y - absoluteLocation.y,
                     1,
                     false,
                     button
@@ -201,26 +184,21 @@ class WaylandLayer(mouseEventReceiver: WaylandLib.MouseEventReceiver, private va
             )
         }
 
-        val newCursorPosition = Point(positionX + absoluteLocation.x, positionY + absoluteLocation.y)
-        if (WaylandEnvironment.absoluteCursorPosition != newCursorPosition) {
-            WaylandEnvironment.absoluteCursorPosition = newCursorPosition
+        if (relativeCursorPosition.x != positionX || relativeCursorPosition.y != positionY) {
+            relativeCursorPosition = Point(positionX, positionY)
+
+            if (!Platform.providesAbsoluteCursorPosition) {
+                absoluteCursorPosition = Point(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
+            }
 
             component.dispatchEvent(
                 MouseEvent(
                     component,
-                    if (leftPressed || rightPressed) MouseEvent.MOUSE_DRAGGED else MouseEvent.MOUSE_MOVED,
+                    MouseEvent.MOUSE_MOVED,
                     System.currentTimeMillis(),
                     modifiers,
-                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        absoluteCursorPosition.x - location.x
-                    } else {
-                        positionX
-                    },
-                    if (component is WaylandLayer && Platform.providesAbsoluteCursorPosition) {
-                        absoluteCursorPosition.y - location.y
-                    } else {
-                        positionY
-                    },
+                    absoluteCursorPosition.x - absoluteLocation.x,
+                    absoluteCursorPosition.y - absoluteLocation.y,
                     0,
                     false,
                     button

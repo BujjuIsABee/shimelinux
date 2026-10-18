@@ -32,6 +32,10 @@ import java.util.ResourceBundle
 /**
  * The base implementation of an action.
  *
+ * @param schema The schema used for the [mascot]'s configuration.
+ * @param animations The animations that the action plays.
+ * @param variables A collection of variables from the [mascot]'s configuration.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju
@@ -100,7 +104,7 @@ abstract class ActionBase(
 
     override fun init(mascot: Mascot) {
         this.mascot = mascot
-        this.time = 0
+        time = 0
 
         variables["mascot"] = mascot
         variables["action"] = this
@@ -136,6 +140,9 @@ abstract class ActionBase(
         }
     }
 
+    /**
+     * Replaces the [mascot]'s hotspots with the hotspots from the current [animation].
+     */
     internal open fun refreshHotspots() {
         mascot.hotspots.clear()
         try {
@@ -145,10 +152,13 @@ abstract class ActionBase(
         }
     }
 
+    /**
+     * Progresses the action.
+     */
     internal abstract fun tick()
 
     /**
-     * Puts a variable with the given [key] and [value] in [variables].
+     * Puts a variable in [variables] with the given [key] and [value].
      */
     internal fun putVariable(key: String, value: Any?) {
         synchronized(variables) {
@@ -171,18 +181,33 @@ abstract class ActionBase(
     }
 
     companion object {
+        /**
+         * The key for the name of the [isDraggable] parameter in the [schema].
+         */
         const val PARAMETER_DRAGGABLE = "Draggable"
         private const val DEFAULT_DRAGGABLE = true
 
+        /**
+         * The key for the name of the [isEffective] parameter in the [schema].
+         */
         const val PARAMETER_CONDITION = "Condition"
         private const val DEFAULT_CONDITION = true
 
+        /**
+         * The key for the name of the [duration] parameter in the [schema].
+         */
         const val PARAMETER_DURATION = "Duration"
         private const val DEFAULT_DURATION = Int.MAX_VALUE
 
+        /**
+         * The key for the name of the [affordance] parameter in the [schema].
+         */
         const val PARAMETER_AFFORDANCE = "Affordance"
         private const val DEFAULT_AFFORDANCE = ""
 
+        /**
+         * The key for the name of the [name] parameter in the [schema].
+         */
         const val PARAMETER_NAME = "Name"
         private val DEFAULT_NAME: String? = null
     }

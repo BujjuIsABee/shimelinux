@@ -82,12 +82,21 @@ class ThrowIE(
     }
 
     companion object {
+        /**
+         * The key for the name of the [initialVx] parameter in the schema.
+         */
         const val PARAMETER_INITIALVX = "InitialVX"
         private const val DEFAULT_INITIALVX = 32
 
+        /**
+         * The key for the name of the [initialVy] parameter in the schema.
+         */
         const val PARAMETER_INITIALVY = "InitialVY"
         private const val DEFAULT_INITIALVY = -10
 
+        /**
+         * The key for the name of the [gravity] parameter in the schema.
+         */
         const val PARAMETER_GRAVITY = "Gravity"
         private const val DEFAULT_GRAVITY = 0.5
     }

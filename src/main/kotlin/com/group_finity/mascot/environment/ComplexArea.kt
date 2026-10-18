@@ -71,7 +71,7 @@ class ComplexArea {
      */
     @Suppress("unused")
     fun getBottomBorder(location: Point): FloorCeiling? = areaMap.values.lastOrNull { it.bottomBorder.isOn(location) }
-        ?.takeUnless { areaMap.values.any { it.topBorder.isOn(location) } }
+        ?.takeIf { areaMap.values.none { it.topBorder.isOn(location) } }
         ?.bottomBorder
 
     /**
@@ -79,7 +79,7 @@ class ComplexArea {
      */
     @Suppress("unused")
     fun getTopBorder(location: Point): FloorCeiling? = areaMap.values.lastOrNull { it.topBorder.isOn(location) }
-        ?.takeUnless { areaMap.values.any { it.bottomBorder.isOn(location) } }
+        ?.takeIf { areaMap.values.none { it.bottomBorder.isOn(location) } }
         ?.topBorder
 
     /**
@@ -87,7 +87,7 @@ class ComplexArea {
      */
     @Suppress("unused")
     fun getLeftBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
-        ?.takeUnless { areaMap.values.any { it.rightBorder.isOn(location) } }
+        ?.takeIf { areaMap.values.none { it.rightBorder.isOn(location) } }
         ?.rightBorder // do not change; this is wrong in Shimeji-ee as well and is kept for compatibility.
 
     /**
@@ -95,6 +95,6 @@ class ComplexArea {
      */
     @Suppress("unused")
     fun getRightBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.rightBorder.isOn(location) }
-        ?.takeUnless { areaMap.values.any { it.leftBorder.isOn(location) } }
+        ?.takeIf { areaMap.values.none { it.leftBorder.isOn(location) } }
         ?.rightBorder
 }

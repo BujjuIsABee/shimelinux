@@ -69,13 +69,13 @@ class ScanInteract(
      * The behavior to set for [mascot] if another mascot with the [affordance] is found.
      */
     private val behavior: String
-        get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
+        get() = eval(schema.getString(PARAMETER_BEHAVIOUR), DEFAULT_BEHAVIOUR)
 
     /**
      * The behavior to set for the other mascot.
      */
     private val targetBehavior: String
-        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOR), DEFAULT_TARGETBEHAVIOR)
+        get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
 
     /**
      * Whether the mascots should face each other.
@@ -156,16 +156,32 @@ class ScanInteract(
     }
 
     companion object {
-        const val PARAMETER_BEHAVIOR = "Behavior"
-        private const val DEFAULT_BEHAVIOR = ""
+        /**
+         * The key for the name of the [behavior] parameter in the schema.
+         */
+        const val PARAMETER_BEHAVIOUR = "Behavior"
+        private const val DEFAULT_BEHAVIOUR = ""
 
-        const val PARAMETER_TARGETBEHAVIOR = "TargetBehavior"
-        private const val DEFAULT_TARGETBEHAVIOR = ""
+        /**
+         * The key for the name of the [targetBehavior] parameter in the schema.
+         */
+        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehavior"
+        private const val DEFAULT_TARGETBEHAVIOUR = ""
 
+        /**
+         * The key for the name of the [targetLook] parameter in the schema.
+         */
         const val PARAMETER_TARGETLOOK = "TargetLook"
         private const val DEFAULT_TARGETLOOK = false
 
+        /**
+         * The key for the name of the `TargetX` variable in the schema.
+         */
         const val VARIABLE_TARGETX = "TargetX"
+
+        /**
+         * The key for the name of the `TargetY` variable in the schema.
+         */
         const val VARIABLE_TARGETY = "TargetY"
     }
 }

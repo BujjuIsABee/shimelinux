@@ -122,16 +122,32 @@ class Dragged(
     }
 
     companion object {
+        /**
+         * The key for the name of the [offsetX] parameter in the schema.
+         */
         const val PARAMETER_OFFSETX = "OffsetX"
         private const val DEFAULT_OFFSETX = 0
 
+        /**
+         * The key for the name of the [offsetY] parameter in the schema.
+         */
         const val PARAMETER_OFFSETY = "OffsetY"
         private const val DEFAULT_OFFSETY = 120
 
+        /**
+         * The key for the name of the [offsetType] parameter in the schema.
+         */
         const val PARAMETER_OFFSETTYPE = "OffsetType"
         private const val DEFAULT_OFFSETTYPE = "ImageAnchor"
 
+        /**
+         * The key for the name of the `FootX` variable in the schema.
+         */
         const val VARIABLE_FOOTX = "FootX"
+
+        /**
+         * The key for the name of the `FootDX` variable in the schema.
+         */
         const val VARIABLE_FOOTDX = "FootDX"
     }
 }
