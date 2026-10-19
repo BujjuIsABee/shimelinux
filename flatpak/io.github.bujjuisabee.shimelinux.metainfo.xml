@@ -25,7 +25,7 @@
     </keywords>
     <branding>
         <color type="primary" scheme_preference="light">#9cbfe2</color>
-        <color type="primary" scheme_preference="dark">#3c83c5</color>
+        <color type="primary" scheme_preference="dark">#00417f</color>
     </branding>
     <content_rating type="oars-1.1"/>
     <url type="homepage">https://github.com/BujjuIsABee/shimelinux</url>
