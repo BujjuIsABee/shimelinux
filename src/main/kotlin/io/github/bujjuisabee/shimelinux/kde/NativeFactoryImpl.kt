@@ -44,14 +44,14 @@ class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = KdeEnvironment()
 
     override fun newNativeImage(src: BufferedImage): NativeImage =
-        if (Platform.sessionType == "wayland" && getProperty("UseWaylandLayersKde", true)) {
+        if (Platform.supportsWaylandLayerSurfaces && getProperty("UseWaylandLayersKde", true)) {
             WaylandNativeImage(src)
         } else {
             GenericNativeImage(src)
         }
 
     override fun newTranslucentWindow(): TranslucentWindow =
-        if (Platform.sessionType == "wayland" && getProperty("UseWaylandLayersKde", true)) {
+        if (Platform.supportsWaylandLayerSurfaces && getProperty("UseWaylandLayersKde", true)) {
             WaylandTranslucentLayer()
         } else {
             GenericTranslucentWindow()

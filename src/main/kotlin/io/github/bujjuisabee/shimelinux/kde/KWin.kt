@@ -80,7 +80,7 @@ object KWin {
             // Copy the script to temp file
             val scriptFile = File.createTempFile("shimelinux-kwin-script", ".js")
             scriptFile.deleteOnExit()
-            loadResource("scripts/shimelinux-kwin-script.js")?.use { input ->
+            checkNotNull(loadResource("scripts/shimelinux-kwin-script.js")).use { input ->
                 scriptFile.outputStream().use { output ->
                     input.copyTo(output)
                 }

@@ -13,7 +13,7 @@ files=(
   'shimelinux.sh'
   'shimelinux.desktop'
   'icon.svg'
-  "build/libs/*.jar"
+  "*.jar"
   'LICENSE'
   'LICENSE-ORIGINAL'
 )
@@ -39,7 +39,7 @@ cp shimelinux.desktop ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share
 mkdir -p ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/icons/hicolor/scalable/apps
 cp icon.svg ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/icons/hicolor/scalable/apps/shimelinux.svg
 mkdir -p ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/java
-cp build/libs/*.jar ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/java/shimelinux.jar
+cp *.jar ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/java/shimelinux.jar
 mkdir -p ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/licenses/shimelinux
 cp LICENSE ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/licenses/shimelinux/LICENSE
 cp LICENSE-ORIGINAL ~/debbuild/${PACKAGE}_${VERSION}_${ARCHITECTURE}/usr/share/licenses/shimelinux/LICENSE-ORIGINAL

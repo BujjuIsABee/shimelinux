@@ -35,22 +35,17 @@ import kotlin.system.exitProcess
  */
 object WaylandLib {
     init {
-        // Copy the library to temp file
-        val libFile = File.createTempFile("libshimelinux_wayland", ".so")
-        libFile.deleteOnExit()
-
-        val resource = loadResource("lib/libshimelinux_wayland.so")
-            ?: loadResource("lib/${System.getProperty("os.arch")}/libshimelinux_wayland.so")
-            ?: error("Fatal error in libshimelinux_wayland: Unsupported OS")
-
-        resource.use { input ->
-            libFile.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
-
-        // Load the library
         try {
+            // Copy the library to temp file
+            val libFile = File.createTempFile("libshimelinux_wayland", ".so")
+            libFile.deleteOnExit()
+            checkNotNull(loadResource("lib/libshimelinux_wayland.so")).use { input ->
+                libFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            // Load the library
             System.load(libFile.absolutePath)
         } catch (e: Throwable) {
             Main.showError("Fatal error in libshimelinux_wayland.", e)

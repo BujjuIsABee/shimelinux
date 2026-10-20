@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-./gradlew build -PmultiArch
-cp build/libs/*.jar .
+./gradlew build
+mv build/libs/*.jar .

@@ -11,6 +11,4 @@ JVM_ARGS="-XX:+UseSerialGC \
 -XX:MinHeapFreeRatio=10 \
 -XX:MaxHeapFreeRatio=40"
 
-export IS_FLATPAK=true
-
-exec /app/jre/bin/java $JVM_ARGS -Dflatpak="true" -Duser.home="$HOME/.var/app/io.github.bujjuisabee.shimelinux/config" -Djava.io.tmpdir="$HOME/.var/app/io.github.bujjuisabee.shimelinux/cache/tmp" -jar "/app/share/java/shimelinux.jar" "$@"
+exec /app/jre/bin/java $JVM_ARGS -Duser.home="$HOME/.var/app/io.github.bujjuisabee.shimelinux/config" -Djava.io.tmpdir="$HOME/.var/app/io.github.bujjuisabee.shimelinux/cache/tmp" -jar "/app/share/java/shimelinux.jar" "$@"

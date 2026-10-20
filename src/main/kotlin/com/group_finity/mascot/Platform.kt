@@ -22,6 +22,8 @@
 
 package com.group_finity.mascot
 
+import io.github.bujjuisabee.shimelinux.BuildConfig
+
 /**
  * Provides information about the current desktop environment.
  *
@@ -29,39 +31,48 @@ package com.group_finity.mascot
  */
 object Platform {
     /**
+     * The operating system's name.
+     */
+    val osName: String = System.getProperty("os.name").orEmpty().lowercase()
+
+    /**
+     * The operating system's architecture.
+     */
+    val osArch: String = System.getProperty("os.arch").orEmpty().lowercase()
+
+    /**
      * The name of the current desktop environment.
      */
-    val currentDesktop: String by lazy {
-        val currentDesktop = System.getenv("XDG_CURRENT_DESKTOP").takeIf { !it.isNullOrBlank() }
-        val desktopSession = System.getenv("DESKTOP_SESSION").takeIf { !it.isNullOrBlank() }
-        (currentDesktop ?: desktopSession ?: "").lowercase()
-    }
+    val currentDesktop: String = (System.getenv("XDG_CURRENT_DESKTOP") ?: System.getenv("DESKTOP_SESSION")).orEmpty().lowercase()
 
     /**
      * The name of the current display server protocol.
      */
-    val sessionType: String by lazy {
-        val sessionType = System.getenv("XDG_SESSION_TYPE").takeIf { !it.isNullOrBlank() }
-        (sessionType ?: "").lowercase()
-    }
+    val sessionType: String = System.getenv("XDG_SESSION_TYPE").orEmpty().lowercase()
 
     /**
      * Whether [currentDesktop] is a tiling window manager.
      */
-    val isTilingWindowManager: Boolean =
-        currentDesktop.containsAny("awesome", "cosmic", "dwm", "hyprland", "i3", "mango", "niri", "river", "sway", "xmonad")
+    val isTilingWindowManager: Boolean by lazy {
+        val tilingWMs = listOf("awesome", "cosmic", "dwm", "hyprland", "i3", "mango", "niri", "river", "sway", "xmonad")
+        tilingWMs.any { currentDesktop.contains(it) }
+    }
 
     /**
      * Whether [currentDesktop] should be assumed to support the wlr-layer-shell protocol.
      */
-    val supportsWaylandLayerSurfaces: Boolean =
-        sessionType == "wayland" && !currentDesktop.containsAny("gnome", "cinnamon") && System.getProperty("flatpak") != "true"
+    val supportsWaylandLayerSurfaces: Boolean by lazy {
+        val unsupportedDE = listOf("cinnamon", "gnome").any { currentDesktop.contains(it) }
+        val unsupportedOS = osName != BuildConfig.TARGET_OS || osArch != BuildConfig.TARGET_ARCH
+        val isSandboxed = System.getenv("container") == "flatpak" && !currentDesktop.contains("kde")
+        sessionType == "wayland" && !unsupportedDE && !unsupportedOS && !isSandboxed
+    }
 
     /**
-     * Whether [currentDesktop] provides the absolute position of the cursor.
+     * Whether [currentDesktop] provides the absolute cursor position.
      */
-    val providesAbsoluteCursorPosition: Boolean =
-        sessionType != "wayland" || currentDesktop.containsAny("hyprland", "kde", "mango")
-
-    private fun String.containsAny(vararg others: String): Boolean = others.any { contains(it) }
+    val providesAbsoluteCursorPosition: Boolean by lazy {
+        val supportedDesktops = listOf("hyprland", "kde", "mango")
+        sessionType != "wayland" || supportedDesktops.any { currentDesktop.contains(it) }
+    }
 }

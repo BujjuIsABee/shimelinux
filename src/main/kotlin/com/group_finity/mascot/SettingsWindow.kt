@@ -772,7 +772,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         environmentPanel.add(environmentHelpButton)
 
         useWaylandLayersCheckBoxKde = JCheckBox("Use Wayland Layers")
-        useWaylandLayersCheckBoxKde.isVisible = Platform.sessionType == "wayland"
+        useWaylandLayersCheckBoxKde.isVisible = Platform.supportsWaylandLayerSurfaces
         useWaylandLayersCheckBoxKde.isSelected = getProperty("UseWaylandLayersKde", true) && useWaylandLayersCheckBoxKde.isVisible
         useWaylandLayersCheckBoxKde.horizontalAlignment = SwingConstants.LEFT
         useWaylandLayersCheckBoxKde.addActionListener {
