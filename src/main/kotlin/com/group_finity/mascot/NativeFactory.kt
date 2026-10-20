@@ -64,7 +64,7 @@ abstract class NativeFactory {
          */
         val default: String = when {
             Platform.currentDesktop.contains("kde") -> "kde"
-            Platform.isTilingWindowManager -> "wayland"
+            Platform.isTilingWindowManager && Platform.supportsWaylandLayerSurfaces -> "wayland"
             else -> "generic"
         }
 

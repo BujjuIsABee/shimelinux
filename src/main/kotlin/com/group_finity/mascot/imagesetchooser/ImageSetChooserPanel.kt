@@ -50,6 +50,10 @@ class ImageSetChooserPanel(
     captionText: String
 ) : JPanel() {
     private val checkbox: JCheckBox
+    private val imageLabel: JLabel
+    private val textPanel: JPanel
+    private val captionLabel: JLabel
+
     private val activeBorder: Border = BorderFactory.createLineBorder(UIManager.getColor("textHighlight"), 1)
     private val inactiveBorder: Border = BorderFactory.createEmptyBorder(1, 1, 1, 1)
 
@@ -61,20 +65,19 @@ class ImageSetChooserPanel(
         checkbox = JCheckBox()
         checkbox.isOpaque = false
 
-        val imageLabel = JLabel()
+        imageLabel = JLabel()
         imageLabel.icon = runCatching {
             ImageIO.read(File(imageLocation))
         }.getOrNull()?.let {
             ImageIcon(it.getScaledInstance(60, 60, Image.SCALE_DEFAULT))
         }
 
-        val textPanel = JPanel()
-        textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
-        textPanel.isOpaque = false
-
-        val captionLabel = JLabel(captionText)
+        captionLabel = JLabel(captionText)
         captionLabel.font = captionLabel.font.deriveFont(Font.BOLD)
 
+        textPanel = JPanel()
+        textPanel.layout = BoxLayout(textPanel, BoxLayout.Y_AXIS)
+        textPanel.isOpaque = false
         textPanel.add(captionLabel)
         textPanel.add(JLabel(actions))
         textPanel.add(JLabel(behaviors))
