@@ -29,6 +29,7 @@ import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
+import io.github.bujjuisabee.shimelinux.wayland.absoluteCursorPosition
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
@@ -78,7 +79,8 @@ class KdeEnvironment : Environment() {
         screen.set(screenRect)
 
         // Update cursor position
-        cursor.set(KWin.cursorPosition ?: Point(0, 0))
+        absoluteCursorPosition = KWin.cursorPosition ?: Point(0, 0)
+        cursor.set(absoluteCursorPosition)
 
         // Update active window
         val activeWindow = KWin.activeWindow

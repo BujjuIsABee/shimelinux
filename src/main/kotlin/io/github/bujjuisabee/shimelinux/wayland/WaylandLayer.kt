@@ -159,8 +159,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
                     MouseEvent.MOUSE_PRESSED,
                     System.currentTimeMillis(),
                     modifiers,
-                    absoluteCursorPosition.x - absoluteLocation.x,
-                    absoluteCursorPosition.y - absoluteLocation.y,
+                    if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
+                    if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
                     1,
                     rightPressed,
                     button
@@ -175,8 +175,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
                     MouseEvent.MOUSE_RELEASED,
                     System.currentTimeMillis(),
                     modifiers,
-                    absoluteCursorPosition.x - absoluteLocation.x,
-                    absoluteCursorPosition.y - absoluteLocation.y,
+                    if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
+                    if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
                     1,
                     false,
                     button
@@ -197,8 +197,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
                     MouseEvent.MOUSE_MOVED,
                     System.currentTimeMillis(),
                     modifiers,
-                    absoluteCursorPosition.x - absoluteLocation.x,
-                    absoluteCursorPosition.y - absoluteLocation.y,
+                    if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
+                    if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
                     0,
                     false,
                     button
