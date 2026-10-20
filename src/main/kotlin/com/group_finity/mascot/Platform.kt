@@ -72,7 +72,7 @@ object Platform {
      * Whether [currentDesktop] provides the absolute cursor position.
      */
     val providesAbsoluteCursorPosition: Boolean by lazy {
-        val supportedDesktops = listOf("hyprland", "kde", "mango")
-        sessionType != "wayland" || supportedDesktops.any { currentDesktop.contains(it) }
+        val supportedDE = listOf("hyprland", "kde", "mango").any { currentDesktop.contains(it) }
+        sessionType != "wayland" || supportedDE
     }
 }

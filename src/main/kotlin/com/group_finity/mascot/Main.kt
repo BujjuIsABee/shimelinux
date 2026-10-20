@@ -367,7 +367,7 @@ object Main {
         logger.info { "Creating the tray icon" }
 
         try {
-            if (System.getProperty("flatpak") == "true") {
+            if (System.getenv("container") == "flatpak") {
                 SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator
             }
 
