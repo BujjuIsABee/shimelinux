@@ -34,7 +34,12 @@ tasks.register("buildWaylandLib", Exec::class) {
     description = "Builds the Wayland library"
 
     workingDir = File("$projectDir/shimelinux_wayland")
-    commandLine("cargo", "build", "--release")
+    if (project.hasProperty("multiArch")) {
+        commandLine("cargo", "build", "--release", "--target", "x86_64-unknown-linux-gnu")
+        commandLine("cargo", "build", "--release", "--target", "aarch64-unknown-linux-gnu")
+    } else {
+        commandLine("cargo", "build", "--release")
+    }
 }
 
 tasks.register("copyWaylandLib", Copy::class) {
@@ -42,8 +47,18 @@ tasks.register("copyWaylandLib", Copy::class) {
 
     description = "Copies the Wayland library to resources"
 
-    from("$projectDir/shimelinux_wayland/target/release/libshimelinux_wayland.so")
     into(layout.buildDirectory.dir("wayland-lib"))
+
+    if (project.hasProperty("multiArch")) {
+        from("$projectDir/shimelinux_wayland/target/x86_64-unknown-linux-gnu/release/libshimelinux_wayland.so") {
+            into { "amd64" }
+        }
+        from("$projectDir/shimelinux_wayland/target/aarch64-unknown-linux-gnu/release/libshimelinux_wayland.so") {
+            into { "aarch64" }
+        }
+    } else {
+        from("$projectDir/shimelinux_wayland/target/release/libshimelinux_wayland.so")
+    }
 }
 
 tasks.register("cleanWaylandLib", Exec::class) {
@@ -74,10 +89,6 @@ tasks.jar {
     })
 
     exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
-
-    if (project.hasProperty("appendArch")) {
-        archiveClassifier.set(System.getProperty("os.arch"))
-    }
 }
 
 tasks.test {

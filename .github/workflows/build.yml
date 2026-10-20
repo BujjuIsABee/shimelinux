@@ -3,8 +3,10 @@ name: Build
 on: workflow_dispatch
 
 jobs:
-  build-amd:
+  build:
     runs-on: ubuntu-latest
+    env:
+      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -16,7 +18,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Install Build Dependencies
-        run: sudo apt-get install -y libxkbcommon-dev rpm
+        run: sudo apt-get install -y libxkbcommon-dev rpm gcc-aarch64-linux-gnu
       - name: Build .jar
         run: .github/scripts/package_jar.sh
       - name: Build .deb
@@ -26,35 +28,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: shimelinux-amd-build
-          path: |
-            ./*.jar
-            ./*.deb
-            ./*.rpm
-  build-arm:
-    runs-on: ubuntu-26.04-arm
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: 21
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-      - name: Install Build Dependencies
-        run: sudo apt-get install -y libxkbcommon-dev rpm
-      - name: Build .jar
-        run: .github/scripts/package_jar.sh
-      - name: Build .deb
-        run: .github/scripts/package_deb.sh
-      - name: Build .rpm
-        run: .github/scripts/package_rpm.sh
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: shimelinux-arm-build
+          name: shimelinux-build
           path: |
             ./*.jar
             ./*.deb

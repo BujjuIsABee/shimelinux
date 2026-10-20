@@ -758,7 +758,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 "kde" -> "The KDE environment allows Shimeji to interact with windows on KDE Plasma."
                 "wayland" -> "The Wayland environment displays Shimeji on Wayland layer surfaces. It only works on Wayland compositors that implement the wlr-layer-shell protocol."
                 "generic" -> "The cross-platform environment should work on any operating system and desktop environment."
-                "virtual" -> "The windowed environment displays all Shimeji in a single window."
+                "virtual" -> "The windowed environment displays all Shimeji within a single window."
                 else -> ""
             }
 
