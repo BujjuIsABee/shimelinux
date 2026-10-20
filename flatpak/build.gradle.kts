@@ -37,7 +37,7 @@ tasks.register("buildWaylandLib", Exec::class) {
     description = "Builds the Wayland library"
 
     workingDir = File("$projectDir/shimelinux_wayland")
-    commandLine("cargo", "build", "--release")
+    commandLine("cargo", "build", "--offline", "--release")
 }
 
 tasks.register("copyWaylandLib", Copy::class) {
