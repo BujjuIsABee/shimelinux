@@ -33,8 +33,6 @@ buildConfig {
 tasks.register("buildWaylandLib", Exec::class) {
     description = "Builds the Wayland library"
 
-    isIgnoreExitValue = true
-
     workingDir = File("$projectDir/shimelinux_wayland")
     commandLine("cargo", "build", "--release")
 }
@@ -50,8 +48,6 @@ tasks.register("copyWaylandLib", Copy::class) {
 
 tasks.register("cleanWaylandLib", Exec::class) {
     description = "Cleans the Wayland library project"
-
-    isIgnoreExitValue = true
 
     workingDir = File("$projectDir/shimelinux_wayland")
     commandLine("cargo", "clean")
@@ -78,6 +74,10 @@ tasks.jar {
     })
 
     exclude("META-INF/*.RSA", "META-INF/*.DSA", "META-INF/*.SF")
+
+    if (project.hasProperty("appendArch")) {
+        archiveClassifier.set(System.getProperty("os.arch"))
+    }
 }
 
 tasks.test {

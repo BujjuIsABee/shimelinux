@@ -756,13 +756,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
             val message = when (environment) {
                 "kde" -> "The KDE environment allows Shimeji to interact with windows on KDE Plasma."
-                "wayland" -> "The Wayland environment displays Shimeji on Wayland layer surfaces.\n\nIt only works on Wayland compositors that implement the wlr-layer-shell protocol."
+                "wayland" -> "The Wayland environment displays Shimeji on Wayland layer surfaces. It only works on Wayland compositors that implement the wlr-layer-shell protocol."
                 "generic" -> "The cross-platform environment should work on any operating system and desktop environment."
                 "virtual" -> "The windowed environment displays all Shimeji in a single window."
                 else -> ""
             }
 
-            JOptionPane.showMessageDialog(this, message, localize("Environment"), JOptionPane.INFORMATION_MESSAGE)
+            JOptionPane.showMessageDialog(this, message, localize("About"), JOptionPane.INFORMATION_MESSAGE)
         }
 
         environmentPanel = JPanel()
