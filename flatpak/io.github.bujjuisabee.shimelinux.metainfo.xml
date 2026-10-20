@@ -46,6 +46,22 @@
         </screenshot>
     </screenshots>
     <releases>
+        <release version="1.4.1" date="2026-10-20">
+            <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.1</url>
+            <description>
+                <p>Changelog:</p>
+                <ul>
+                    <li>Added a button in the environment tab that shows a description of the current environment.</li>
+                    <li>Improved the settings menu layout.</li>
+                    <li>Fixed issues with the system tray icon on the Flatpak app.</li>
+                    <li>Fixed a bug where Shimeji could not play sounds on the Flatpak app.</li>
+                    <li>Fixed a bug where the Wayland environment would be enabled by default on X11 tiling window managers.</li>
+                    <li>Fixed a bug where thrown windows would keep moving after restoring them on the KDE environment.</li>
+                    <li>The windowed environment window will now be centered.</li>
+                    <li>The Wayland environment is now disabled on unsupported operating systems and on the Flatpak app (except on KDE).</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.4.0" date="2026-10-13">
             <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.0</url>
             <description>
