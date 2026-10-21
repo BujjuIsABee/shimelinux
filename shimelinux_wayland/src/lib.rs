@@ -145,6 +145,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
 
             layer,
             configured: false,
+            scale_factor: 1,
             pool,
             image_rgb: Vec::new(),
             image_bounds: Rect::default(),
@@ -207,10 +208,10 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
             .send(Event::SetBounds(Rect {
-                x: x.max(-width + 1),
-                y: y.max(-height + 1),
-                width: width.max(1),
-                height: height.max(1),
+                x,
+                y,
+                width,
+                height,
             }))
             .expect("Failed to send SetBounds event");
 

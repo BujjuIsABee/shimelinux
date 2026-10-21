@@ -48,20 +48,13 @@ function resetActiveWindow() {
 }
 
 function tick() {
-    // Move windows
+    // Set cursor position
     callDBus(
         busName, clientPath, interfaceName,
-        "getWindowPosition",
-        (windowPosition) => {
-            if (!windowPosition.hasValue || !activeWindow) return;
-
-            activeWindow.frameGeometry = {
-                x: windowPosition.x,
-                y: windowPosition.y,
-                width: activeWindow.width,
-                height: activeWindow.height
-            };
-        }
+        "setCursorPosition",
+        workspace.cursorPos.x * workspace.activeScreen.devicePixelRatio,
+        workspace.cursorPos.y * workspace.activeScreen.devicePixelRatio,
+        () => {}
     );
 
     // Restore windows
@@ -87,17 +80,25 @@ function tick() {
                 };
 
                 resetActiveWindow();
+                return;
             }
         }
     );
 
-    // Set cursor position
+    // Move windows
     callDBus(
         busName, clientPath, interfaceName,
-        "setCursorPosition",
-        workspace.cursorPos.x,
-        workspace.cursorPos.y,
-        () => {}
+        "getWindowPosition",
+        (windowPosition) => {
+            if (!windowPosition.hasValue || !activeWindow) return;
+
+            activeWindow.frameGeometry = {
+                x: windowPosition.x,
+                y: windowPosition.y,
+                width: activeWindow.width,
+                height: activeWindow.height
+            };
+        }
     );
 }
 
