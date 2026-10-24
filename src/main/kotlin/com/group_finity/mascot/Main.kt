@@ -37,6 +37,7 @@ import dorkbox.systemTray.SystemTray
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
+import java.io.IOException
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -66,6 +67,9 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  * @author Bujju
  */
 object Main {
+    /**
+     * Allows Shimeji to access the Main instance through scripts.
+     */
     @JvmStatic
     val instance = this
 
@@ -87,6 +91,8 @@ object Main {
     private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
 
     init {
+        setupConfigDirectory()
+
         try {
             loadResource("conf/logging.properties").use { LogManager.getLogManager().readConfiguration(it) }
         } catch (e: Exception) {
@@ -95,7 +101,7 @@ object Main {
     }
 
     /**
-     * Shows an error message with the [message].
+     * Shows an error message.
      */
     @JvmStatic
     fun showError(message: String) {
@@ -103,7 +109,7 @@ object Main {
     }
 
     /**
-     * Shows an error message with the [message] combined with the message of the [exception].
+     * Shows an error message for the given [exception].
      */
     @JvmStatic
     fun showError(message: String, exception: Throwable) {
@@ -134,7 +140,95 @@ object Main {
     }
 
     fun run() {
-        // Set up config directory
+        // Load properties
+        try {
+            properties = Properties()
+            getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
+        } catch (_: IOException) {
+        }
+
+        // Load languages
+        try {
+            val locale = Locale.forLanguageTag(getProperty("Language", Locale.getDefault().toLanguageTag()))
+            languageBundle = ResourceBundle.getBundle("conf.language", locale)
+        } catch (e: Exception) {
+            showError("The default language file could not be loaded.", e)
+            exit()
+        }
+
+        // Load theme
+        try {
+            System.setProperty("sun.java2d.uiScale",
+                getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1")
+            )
+
+            FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
+
+            UIManager.setLookAndFeel(
+                when (getProperty("Theme", "FlatDark")) {
+                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
+                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
+                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+                    else -> "com.formdev.flatlaf.FlatDarkLaf"
+                }
+            )
+        } catch (e: Exception) {
+            logger.log(Level.WARNING, e) { "Failed to set theme." }
+        }
+
+        // Get the image sets to use
+        if (!getProperty("AlwaysShowShimejiChooser", false)) {
+            imageSets.addAll(getProperty("ActiveShimeji", "").split('/').map { it.trim() }.filter { it.isNotEmpty() })
+        }
+
+        // If no image sets are selected, show the image set chooser
+        while (imageSets.isEmpty()) {
+            val chooser = ImageSetChooser(null, true)
+            chooser.isVisible = true
+
+            if (!chooser.wasCancelled) {
+                imageSets = chooser.imageSets
+            } else {
+                exit()
+            }
+        }
+
+        // Load mascots
+        var index = 0
+        while (index < imageSets.size) {
+            if (!loadConfiguration(imageSets[index])) {
+                configurations.remove(imageSets[index])
+                imageSets.remove(imageSets[index])
+                index--
+            }
+            index++
+        }
+
+        // Create the tray icon
+        createTrayIcon()
+
+        // Create the first mascot
+        for (imageSet in imageSets) {
+            val infoAlreadySeen = getProperty("InformationDismissed", "").contains(imageSet)
+            val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
+            configurations[imageSet]?.let { config ->
+                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen)) {
+                    val info = InformationWindow(imageSet, config)
+                    info.isVisible = true
+                    setMascotInformationDismissed(imageSet)
+                    updateConfigFile()
+                }
+            }
+            createMascot(imageSet)
+        }
+
+        manager.start()
+    }
+
+    /**
+     * Puts resources in the config directory if they are missing.
+     */
+    private fun setupConfigDirectory() {
         try {
             val resources = mutableListOf(
                 "conf/actions.xml",
@@ -164,89 +258,10 @@ object Main {
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             showError("Failed to create the config directory.", e)
             exit()
         }
-
-        // Load properties
-        try {
-            properties = Properties()
-            getPath("conf", "settings.properties").inputStream().use { properties.load(it) }
-        } catch (_: Exception) {
-        }
-
-        // Load languages
-        try {
-            val defaultLocale = Locale.getDefault().toLanguageTag()
-            val locale = Locale.forLanguageTag(getProperty("Language", defaultLocale))
-            languageBundle = ResourceBundle.getBundle("conf.language", locale)
-        } catch (e: Exception) {
-            showError("The default language file could not be loaded.", e)
-            exit()
-        }
-
-        // Set theme
-        try {
-            FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
-
-            UIManager.setLookAndFeel(
-                when (getProperty("Theme", "FlatDark")) {
-                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                    else -> "com.formdev.flatlaf.FlatDarkLaf"
-                }
-            )
-        } catch (e: Exception) {
-            logger.log(Level.WARNING, e) { "Failed to set theme." }
-        }
-
-        // Get the image sets to use
-        if (!getProperty("AlwaysShowShimejiChooser", false)) {
-            imageSets.addAll(getProperty("ActiveShimeji", "").split('/').map { it.trim() }.filter { it.isNotEmpty() })
-        }
-
-        // If no image sets are selected, show the image set chooser
-        while (imageSets.isEmpty()) {
-            val chooser = ImageSetChooser(null, true)
-            chooser.isVisible = true
-
-            imageSets = chooser.imageSets.takeIf { !chooser.wasCancelled } ?: exit()
-        }
-
-        // Load mascots
-        var index = 0
-        while (index < imageSets.size) {
-            if (!loadConfiguration(imageSets[index])) {
-                configurations.remove(imageSets[index])
-                imageSets.remove(imageSets[index])
-                index--
-            }
-            index++
-        }
-
-        // Create the tray icon
-        createTrayIcon()
-
-        // Create the first mascot
-        for (imageSet in imageSets) {
-            val infoAlreadySeen = getProperty("InformationDismissed", "")
-            val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
-            configurations[imageSet]?.let { config ->
-                if (config.containsInformationKey("SplashImage")
-                    && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
-                ) {
-                    val info = InformationWindow(imageSet, config)
-                    info.isVisible = true
-                    setMascotInformationDismissed(imageSet)
-                    updateConfigFile()
-                }
-            }
-            createMascot(imageSet)
-        }
-
-        manager.start()
     }
 
     /**
@@ -367,7 +382,7 @@ object Main {
         logger.info { "Creating the tray icon" }
 
         try {
-            if (System.getenv("container") == "flatpak") {
+            if (Platform.isFlatpak) {
                 SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator
             }
 
@@ -906,12 +921,10 @@ object Main {
             if (loadConfiguration(imageSet)) {
                 imageSets.add(imageSet)
 
-                val infoAlreadySeen = getProperty("InformationDismissed", "")
+                val infoAlreadySeen = getProperty("InformationDismissed", "").contains(imageSet)
                 val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
                 configurations[imageSet]?.let { config ->
-                    if (config.containsInformationKey("SplashImage")
-                        && (alwaysShowInfo || !infoAlreadySeen.contains(imageSet))
-                    ) {
+                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen)) {
                         val info = InformationWindow(imageSet, config)
                         info.isVisible = true
                         setMascotInformationDismissed(imageSet)
@@ -939,7 +952,7 @@ object Main {
     /**
      * Dismisses all mascots and closes the program.
      */
-    fun exit(): Nothing {
+    fun exit() {
         manager.disposeAll()
         manager.stop()
         exitProcess(0)

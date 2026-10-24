@@ -98,7 +98,7 @@ class Configuration {
         }
 
         // Load behaviors
-        for (list in configurationNode.selectChildren(schema.getString("BehaviorList"))) {
+        for (list in configurationNode.selectChildren(schema.getString("BehaviourList"))) {
             logger.info { "Reading behavior list" }
 
             loadBehaviors(list, mutableListOf())
@@ -125,7 +125,7 @@ class Configuration {
                 val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(schema.getString("Condition")))
                 loadBehaviors(node, newConditions)
-            } else if (node.name == schema.getString("Behavior")) {
+            } else if (node.name == schema.getString("Behaviour")) {
                 val behavior = BehaviorBuilder(this, node, conditions)
                 behaviorBuilders[behavior.name] = behavior
             }

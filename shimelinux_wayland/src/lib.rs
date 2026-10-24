@@ -20,6 +20,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#![allow(deprecated)]
+
 use std::{sync::mpsc, thread};
 
 use jni::{
@@ -145,7 +147,6 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
 
             layer,
             configured: false,
-            scale_factor: 1,
             pool,
             image_rgb: Vec::new(),
             image_bounds: Rect::default(),
@@ -208,10 +209,10 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
             .send(Event::SetBounds(Rect {
-                x,
-                y,
-                width,
-                height,
+                x: x.max(-width + 1),
+                y: y.max(-height + 1),
+                width: width.max(1),
+                height: height.max(1),
             }))
             .expect("Failed to send SetBounds event");
 

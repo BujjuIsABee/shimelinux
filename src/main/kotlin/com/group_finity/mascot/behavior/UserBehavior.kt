@@ -42,6 +42,10 @@ private val logger: Logger = Logger.getLogger(UserBehavior::class.java.name)
 /**
  * The base implementation of a behavior.
  *
+ * @param name The name of the behavior.
+ * @param action The action that the behavior will trigger.
+ * @param configuration The configuration that defines the behavior.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju

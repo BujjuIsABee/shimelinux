@@ -24,6 +24,7 @@ package io.github.bujjuisabee.shimelinux.wayland.lib
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.loadResource
+import com.group_finity.mascot.localize
 import java.io.File
 import kotlin.io.outputStream
 import kotlin.system.exitProcess
@@ -48,7 +49,7 @@ object WaylandLib {
             // Load the library
             System.load(libFile.absolutePath)
         } catch (e: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland.", e)
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
     }

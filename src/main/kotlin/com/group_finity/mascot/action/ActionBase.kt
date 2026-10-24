@@ -79,7 +79,7 @@ abstract class ActionBase(
         get() = eval(schema.getString(PARAMETER_DRAGGABLE), DEFAULT_DRAGGABLE)
 
     /**
-     * Whether the conditions for the action to continue are currently met.
+     * Whether the condition for the action to continue is currently met.
      */
     private val isEffective: Boolean
         get() = eval(schema.getString(PARAMETER_CONDITION), DEFAULT_CONDITION)

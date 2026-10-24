@@ -43,13 +43,9 @@ import javax.swing.UIManager
  * @author Bujju
  */
 object WaylandPopupFactory : PopupFactory() {
-    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int): Popup =
-        WaylandPopup(owner, contents, x, y)
+    override fun getPopup(owner: Component?, contents: Component, x: Int, y: Int): Popup = WaylandPopup(owner, contents, x, y)
 
-    /**
-     * Displays a popup menu on a Wayland layer surface.
-     */
-    class WaylandPopup(
+    private class WaylandPopup(
         private val owner: Component?,
         private val contents: Component,
         private val x: Int,
@@ -113,7 +109,7 @@ object WaylandPopupFactory : PopupFactory() {
         }
 
         private fun updateImage() {
-            // Draw the popup to an image buffer
+            // Draw the popup on an image buffer
             val buffer = BufferedImage(contents.width, contents.height, BufferedImage.TYPE_INT_ARGB)
             val g2d = buffer.createGraphics()
             contents.paint(g2d)

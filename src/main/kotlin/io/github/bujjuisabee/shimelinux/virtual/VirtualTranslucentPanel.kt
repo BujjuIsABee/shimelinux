@@ -42,7 +42,7 @@ class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     }
 
     override fun contains(x: Int, y: Int): Boolean = super.contains(x, y) && image?.let {
-        (it.managedImage.getRGB(x, y) shr 24) and 0xFF > 0 // check if pixel at (x, y) has alpha greater than 0
+        (it.managedImage.getRGB(x, y) shr 24) and 0xFF > 0 // check if pixel has alpha greater than 0
     } == true
 
     override fun asComponent(): Component = this

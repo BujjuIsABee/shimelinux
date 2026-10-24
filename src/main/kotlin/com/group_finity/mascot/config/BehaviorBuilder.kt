@@ -81,7 +81,7 @@ class BehaviorBuilder(
 
         var isNextAdditive = true
 
-        for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviorList"))) {
+        for (nextList in behaviorNode.selectChildren(configuration.schema.getString("NextBehaviourList"))) {
             logger.info { "Lists the following behaviors..." }
 
             isNextAdditive = nextList.getAttribute(configuration.schema.getString("Add")).toBoolean()
@@ -99,7 +99,7 @@ class BehaviorBuilder(
                 val newConditions = conditions.toMutableList()
                 newConditions.add(node.getAttribute(configuration.schema.getString("Condition")))
                 loadBehaviors(node, newConditions)
-            } else if (node.name == configuration.schema.getString("BehaviorReference")) {
+            } else if (node.name == configuration.schema.getString("BehaviourReference")) {
                 val behavior = BehaviorBuilder(configuration, node, conditions)
                 nextBehaviorBuilders.add(behavior)
             }

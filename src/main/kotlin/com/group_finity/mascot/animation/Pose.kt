@@ -30,6 +30,13 @@ import java.nio.file.Path
 /**
  * A frame of an animation.
  *
+ * @param leftImage The image that will be displayed if the mascot is facing left.
+ * @param rightImage The image that will be displayed if the mascot is facing right.
+ * @param dx The horizontal distance that the mascot will be moved.
+ * @param dy The vertical distance that the mascot will be moved.
+ * @param duration The number of frames until the next pose will be applied.
+ * @param soundName The sound that will be played when the pose is applied.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju

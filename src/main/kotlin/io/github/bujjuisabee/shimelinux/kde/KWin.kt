@@ -26,6 +26,7 @@ import com.group_finity.mascot.loadResource
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
+import org.freedesktop.dbus.exceptions.DBusException
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.types.Variant
 import java.awt.Point
@@ -38,9 +39,9 @@ import java.io.File
  * @author Bujju
  */
 object KWin {
-    private var dbus: DBusConnection
-    private var scripting: KWinScripting
-    private var script: KWinScript
+    private var dbus: DBusConnection? = null
+    private var scripting: KWinScripting? = null
+    private var script: KWinScript? = null
     private val client = KWinClientImpl()
 
     /**
@@ -68,10 +69,10 @@ object KWin {
     init {
         try {
             dbus = DBusConnectionBuilder.forSessionBus().build()
-            dbus.requestBusName("io.github.bujjuisabee.shimelinux")
-            dbus.exportObject(client)
+            dbus?.requestBusName("io.github.bujjuisabee.shimelinux")
+            dbus?.exportObject(client)
 
-            scripting = dbus.getRemoteObject(
+            scripting = dbus?.getRemoteObject(
                 "org.kde.KWin",
                 "/Scripting",
                 KWinScripting::class.java
@@ -87,18 +88,19 @@ object KWin {
             }
 
             // Load the script
-            val id = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
-            script = dbus.getRemoteObject(
+            val id = scripting?.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
+            script = dbus?.getRemoteObject(
                 "org.kde.KWin",
                 "/Scripting/Script$id",
                 KWinScript::class.java
             )
-            script.run()
+            script?.run()
+        } catch (_: DBusException) {
         } finally {
             Runtime.getRuntime().addShutdownHook(Thread {
-                script.stop()
-                scripting.unloadScript("shimelinux-kwin-script")
-                dbus.disconnect()
+                script?.stop()
+                scripting?.unloadScript("shimelinux-kwin-script")
+                dbus?.disconnect()
             })
         }
     }

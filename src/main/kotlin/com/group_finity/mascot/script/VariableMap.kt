@@ -76,11 +76,7 @@ class VariableMap : Bindings {
         rawMap.clear()
     }
 
-    override fun put(key: String, value: Any?): Variable? = if (value is Variable) {
-        rawMap.put(key, value)
-    } else {
-        rawMap.put(key, Constant(value))
-    }
+    override fun put(key: String, value: Any?): Variable? = rawMap.put(key, value as? Variable ?: Constant(value))
 
     override fun putAll(entries: Map<out String, Any?>) {
         for ((key, value) in entries) {

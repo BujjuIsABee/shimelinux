@@ -61,7 +61,6 @@ pub struct LayerState {
 
     pub layer: LayerSurface,
     pub configured: bool,
-    pub scale_factor: i32,
     pub pool: SlotPool,
     pub image_rgb: Vec<i32>,
     pub image_bounds: Rect,
@@ -78,11 +77,9 @@ impl CompositorHandler for LayerState {
         &mut self,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-        surface: &WlSurface,
-        new_factor: i32,
+        _surface: &WlSurface,
+        _new_factor: i32,
     ) {
-        surface.set_buffer_scale(new_factor);
-        self.scale_factor = new_factor;
     }
 
     fn transform_changed(
@@ -247,8 +244,8 @@ impl PointerHandler for LayerState {
                     right_pressed,
                     left_released,
                     right_released,
-                    position_x * self.scale_factor,
-                    position_y * self.scale_factor,
+                    position_x,
+                    position_y,
                 )
             });
         }
@@ -266,9 +263,7 @@ delegate_noop!(LayerState: ignore WlRegion);
 impl LayerState {
     pub fn set_bounds(&mut self, bounds: Rect) {
         self.image_bounds = bounds.clone();
-        let x = (bounds.x / self.scale_factor).max(-(bounds.width / self.scale_factor) + 1);
-        let y = (bounds.y / self.scale_factor).max(-(bounds.height / self.scale_factor) + 1);
-        self.layer.set_margin(y, 0, 0, x);
+        self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
     pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
@@ -334,11 +329,7 @@ impl LayerState {
                 if !self.layer_mask.is_empty() {
                     let region = self.compositor_state.wl_compositor().create_region(qh, ());
                     for rect in &self.layer_mask {
-                        let x = rect.x / self.scale_factor;
-                        let y = rect.y / self.scale_factor;
-                        let width = ((rect.x + rect.width) / self.scale_factor) - x;
-                        let height = ((rect.y + rect.height) / self.scale_factor) - y;
-                        region.add(x, y, width, height);
+                        region.add(rect.x, rect.y, rect.width, rect.height);
                     }
                     self.layer.set_input_region(Some(&region));
                 }
@@ -357,8 +348,8 @@ impl LayerState {
 
     fn update_layer_mask(&mut self) {
         let mut rects: Vec<Rect> = Vec::new();
-        let width = self.image_bounds.width.max(1);
-        let height = self.image_bounds.height.max(1);
+        let width = self.image_bounds.width;
+        let height = self.image_bounds.height;
 
         for y in 0..height as u32 {
             let mut start: Option<u32> = None;

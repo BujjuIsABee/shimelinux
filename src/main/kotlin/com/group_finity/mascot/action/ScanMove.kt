@@ -171,13 +171,13 @@ class ScanMove(
         /**
          * The key for the name of the [behavior] parameter in the schema.
          */
-        const val PARAMETER_BEHAVIOR = "Behavior"
+        const val PARAMETER_BEHAVIOR = "Behaviour"
         private const val DEFAULT_BEHAVIOR = ""
 
         /**
          * The key for the name of the [targetBehavior] parameter in the schema.
          */
-        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehavior"
+        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour"
         private const val DEFAULT_TARGETBEHAVIOUR = ""
 
         /**

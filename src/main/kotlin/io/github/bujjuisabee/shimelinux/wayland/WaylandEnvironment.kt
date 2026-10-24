@@ -36,18 +36,7 @@ import javax.swing.PopupFactory
 import kotlin.collections.map
 
 /**
- * The absolute cursor position, or an approximation of it based on the [relativeCursorPosition] if
- * [Platform.providesAbsoluteCursorPosition] is `false`
- */
-var absoluteCursorPosition = Point(0, 0)
-
-/**
- * The relative cursor position reported by the compositor.
- */
-var relativeCursorPosition = Point(0, 0)
-
-/**
- * An environment that works properly when mascots are not displayed via X11 or XWayland windows.
+ * An environment that works properly when mascots are not displayed with X11 or XWayland.
  *
  * @author Bujju
  */

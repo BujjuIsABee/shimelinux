@@ -96,7 +96,7 @@ class Transform(
         /**
          * The key for the name of the [transformBehavior] parameter in the schema.
          */
-        const val PARAMETER_TRANSFORMBEHAVIOUR = "TransformBehavior"
+        const val PARAMETER_TRANSFORMBEHAVIOUR = "TransformBehaviour"
         private const val DEFAULT_TRANSFORMBEHAVIOUR = ""
 
         /**

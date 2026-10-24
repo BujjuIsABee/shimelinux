@@ -213,7 +213,7 @@ class Breed(
             /**
              * The key for the name of the [bornBehavior] parameter in the schema.
              */
-            const val PARAMETER_BORNBEHAVIOUR = "BornBehavior"
+            const val PARAMETER_BORNBEHAVIOUR = "BornBehaviour"
             private const val DEFAULT_BORNBEHAVIOUR = ""
 
             /**

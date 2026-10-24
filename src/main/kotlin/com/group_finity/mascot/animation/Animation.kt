@@ -30,10 +30,10 @@ import com.group_finity.mascot.script.VariableMap
 /**
  * An animation that can be played by an action.
  *
- * @param condition A condition that must be met for the animation to play.
- * @param poses The animation's frames.
+ * @param condition A variable that must evaluate to `true` for the animation to play.
+ * @param poses The frames of the animation.
  * @param hotspots The hotspots that can be interacted with while the animation is playing.
- * @param isTurn Whether it is a turning animation.
+ * @param isTurn Whether the animation plays while a mascot's facing direction changes.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

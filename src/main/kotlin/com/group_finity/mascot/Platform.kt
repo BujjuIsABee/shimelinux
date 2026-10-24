@@ -51,6 +51,11 @@ object Platform {
     val sessionType: String = System.getenv("XDG_SESSION_TYPE").orEmpty().lowercase()
 
     /**
+     * Whether the app is running within the Flatpak sandbox.
+     */
+    val isFlatpak: Boolean = System.getenv("container") == "flatpak"
+
+    /**
      * Whether [currentDesktop] is a tiling window manager.
      */
     val isTilingWindowManager: Boolean by lazy {
@@ -64,7 +69,7 @@ object Platform {
     val supportsWaylandLayerSurfaces: Boolean by lazy {
         val unsupportedDE = listOf("cinnamon", "gnome").any { currentDesktop.contains(it) }
         val unsupportedOS = osName != BuildConfig.TARGET_OS || osArch != BuildConfig.TARGET_ARCH
-        val isSandboxed = System.getenv("container") == "flatpak" && !currentDesktop.contains("kde")
+        val isSandboxed = isFlatpak && !currentDesktop.contains("kde")
         sessionType == "wayland" && !unsupportedDE && !unsupportedOS && !isSandboxed
     }
 

@@ -153,7 +153,7 @@ class AnimationBuilder(
         val shapeText = requireNotNull(frameNode.getAttribute(schema.getString("Shape"))) { "Hotspot requires Shape attribute." }
         val originText = requireNotNull(frameNode.getAttribute(schema.getString("Origin"))) { "Hotspot requires Origin attribute." }
         val sizeText = requireNotNull(frameNode.getAttribute(schema.getString("Size"))) { "Hotspot requires Size attribute." }
-        val behaviorText = frameNode.getAttribute(schema.getString("Behavior"))
+        val behaviorText = frameNode.getAttribute(schema.getString("Behaviour"))
 
         val scaling = getProperty("Scaling", 1.0)
 

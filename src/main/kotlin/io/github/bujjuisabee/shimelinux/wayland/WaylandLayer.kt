@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.wayland
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
 import java.awt.Component
@@ -36,6 +37,17 @@ import javax.swing.JDialog
 import kotlin.system.exitProcess
 
 /**
+ * The absolute cursor position, or an approximation of it based on the [relativeCursorPosition] if
+ * [Platform.providesAbsoluteCursorPosition] is `false`
+ */
+var absoluteCursorPosition = Point(0, 0)
+
+/**
+ * The relative cursor position reported by the compositor.
+ */
+var relativeCursorPosition = Point(0, 0)
+
+/**
  * Creates a Wayland layer surface. Mouse events will be sent to [mouseEventReceiver].
  *
  * @param useMask Whether the surface's input region should be updated whenever [setImage] is called.
@@ -43,16 +55,19 @@ import kotlin.system.exitProcess
  * @author Bujju
  */
 class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: Boolean) : Component() {
-    private val senderPtr: Long = try {
-        WaylandLib.createLayer(getProperty("MascotLayerWayland", 3), mouseEventReceiver)
-    } catch (e: Throwable) {
-        Main.showError("Fatal error in libshimelinux_wayland.", e)
-        exitProcess(0)
-    }
-
+    private val senderPtr: Long
     private var absoluteLocation: Point = location
-    private var isDragging = false
+    private var leftHeld = false
     private var isDisposed = false
+
+    init {
+        try {
+            senderPtr = WaylandLib.createLayer(getProperty("MascotLayerWayland", 3), mouseEventReceiver)
+        } catch (e: Throwable) {
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            exitProcess(0)
+        }
+    }
 
     override fun isVisible() = true
 
@@ -65,12 +80,12 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
         if (isDisposed) return
 
-        super.setBounds(x, y, width, height) // update super.bounds
+        super.setBounds(x, y, width, height)
 
         try {
             WaylandLib.setBounds(senderPtr, x, y, width, height)
         } catch (e: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland.", e)
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
     }
@@ -81,7 +96,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
         try {
             WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
         } catch (e: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland.", e)
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
     }
@@ -96,7 +111,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
         try {
             WaylandLib.setImage(senderPtr, rgb, useMask)
         } catch (e: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland.", e)
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
     }
@@ -110,11 +125,11 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
         try {
             WaylandLib.dispose(senderPtr)
         } catch (e: Throwable) {
-            Main.showError("Fatal error in libshimelinux_wayland.", e)
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
 
-        isDisposed = true // prevents segmentation fault
+        isDisposed = true // prevents segfault
     }
 
     /**
@@ -133,7 +148,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
         positionX: Int,
         positionY: Int
     ) {
-        // Block mouse events when dialog windows are open
+        // Block mouse events when modal JDialog menus are open
         if (Window.getWindows().any { it is JDialog && it.isModal && it.isVisible }) return
 
         var modifiers = MouseEvent.NOBUTTON
@@ -147,8 +162,10 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
             button = button or MouseEvent.BUTTON3
         }
 
-        isDragging = leftPressed || (isDragging && !leftReleased)
-        if (!isDragging || Platform.providesAbsoluteCursorPosition) {
+        // If the compositor does not provide the absolute cursor position, stop updating absoluteLocation when the left
+        // mouse button is being held down.
+        leftHeld = leftPressed || (leftHeld && !leftReleased)
+        if (!leftHeld || Platform.providesAbsoluteCursorPosition) {
             absoluteLocation = location
         }
 
@@ -187,6 +204,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
         if (relativeCursorPosition.x != positionX || relativeCursorPosition.y != positionY) {
             relativeCursorPosition = Point(positionX, positionY)
 
+            // If the compositor does not provide the absolute cursor position, estimate it by adding the relative
+            // cursor position to the absolute position of the layer.
             if (!Platform.providesAbsoluteCursorPosition) {
                 absoluteCursorPosition = Point(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
             }

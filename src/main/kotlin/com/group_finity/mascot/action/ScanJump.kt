@@ -159,13 +159,13 @@ class ScanJump(
         /**
          * The key for the name of the [behavior] parameter in the schema.
          */
-        const val PARAMETER_BEHAVIOUR = "Behavior"
+        const val PARAMETER_BEHAVIOUR = "Behaviour"
         private const val DEFAULT_BEHAVIOUR = ""
 
         /**
          * The key for the name of the [targetBehavior] parameter in the schema.
          */
-        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehavior"
+        const val PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour"
         private const val DEFAULT_TARGETBEHAVIOUR = ""
 
         /**

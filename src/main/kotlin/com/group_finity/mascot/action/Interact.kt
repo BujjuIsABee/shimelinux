@@ -82,7 +82,7 @@ class Interact(
         /**
          * The key for the name of the [behavior] parameter in the schema.
          */
-        const val PARAMETER_BEHAVIOUR = "Behavior"
+        const val PARAMETER_BEHAVIOUR = "Behaviour"
         private const val DEFAULT_BEHAVIOUR = ""
     }
 }
