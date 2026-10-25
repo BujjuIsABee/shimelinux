@@ -67,9 +67,6 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  * @author Bujju
  */
 object Main {
-    /**
-     * Allows Shimeji to access the Main instance through scripts.
-     */
     @JvmStatic
     val instance = this
 
@@ -158,9 +155,8 @@ object Main {
 
         // Load theme
         try {
-            System.setProperty("sun.java2d.uiScale",
-                getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1")
-            )
+            System.setProperty("sun.java2d.uiScale", getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1"))
+            System.setProperty("flatlaf.uiScale.enabled", "false")
 
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
 
