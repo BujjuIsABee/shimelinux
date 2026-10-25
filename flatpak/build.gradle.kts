@@ -18,6 +18,7 @@ dependencies {
     implementation("com.github.hypfvieh:dbus-java-core:5.2.2")
     implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.2")
     implementation("org.openjdk.nashorn:nashorn-core:15.7")
+    implementation(files("libs/nimrodlf-1.2d.jar"))
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.14.11")

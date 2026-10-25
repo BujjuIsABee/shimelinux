@@ -30,12 +30,15 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import com.group_finity.mascot.image.ImagePairs
 import com.group_finity.mascot.imagesetchooser.ImageSetChooser
+import com.nilo.plaf.nimrod.NimRODLookAndFeel
+import com.nilo.plaf.nimrod.NimRODTheme
 import dorkbox.systemTray.Checkbox
 import dorkbox.systemTray.Menu
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
+import java.awt.Color
 import java.awt.Point
 import java.io.IOException
 import java.util.Locale
@@ -159,15 +162,32 @@ object Main {
             System.setProperty("flatlaf.uiScale.enabled", "false")
 
             FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
+            when (getProperty("Theme", "FlatDark")) {
+                "NimROD" -> {
+                    val laf = NimRODLookAndFeel()
+                    val theme = NimRODTheme()
+                    val colors = Properties()
+                    getPath("conf", "theme", "NimRODLaf.properties").inputStream().use { colors.load(it) }
 
-            UIManager.setLookAndFeel(
-                when (getProperty("Theme", "FlatDark")) {
-                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                    else -> "com.formdev.flatlaf.FlatDarkLaf"
+                    theme.setPrimary1(Color.decode(colors.getProperty("Primary1", "#1EA6EB")))
+                    theme.setPrimary2(Color.decode(colors.getProperty("Primary2", "#28B0F5")))
+                    theme.setPrimary3(Color.decode(colors.getProperty("Primary3", "#32BAFF")))
+                    theme.setSecondary1(Color.decode(colors.getProperty("Secondary1", "#BCBCBE")))
+                    theme.setSecondary2(Color.decode(colors.getProperty("Secondary2", "#C6C6C8")))
+                    theme.setSecondary3(Color.decode(colors.getProperty("Secondary3", "#D0D0D2")))
+                    theme.setBlack(Color.decode(colors.getProperty("Black", "#000000")))
+                    theme.setWhite(Color.decode(colors.getProperty("White", "#FFFFFF")))
+
+                    NimRODLookAndFeel.setCurrentTheme(theme)
+                    UIManager.setLookAndFeel(laf)
+                    UIManager.put("PopupMenuUI", "javax.swing.plaf.basic.BasicPopupMenuUI")
                 }
-            )
+
+                "FlatDark" -> UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarkLaf")
+                "FlatLight" -> UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf")
+                "Gtk" -> UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+                else -> UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarkLaf")
+            }
         } catch (e: Exception) {
             logger.log(Level.WARNING, e) { "Failed to set theme." }
         }
@@ -232,6 +252,7 @@ object Main {
                 "conf/settings.properties",
                 "conf/theme/FlatDarkLaf.properties",
                 "conf/theme/FlatLightLaf.properties",
+                "conf/theme/NimRODLaf.properties",
                 "img/unused/",
             )
 

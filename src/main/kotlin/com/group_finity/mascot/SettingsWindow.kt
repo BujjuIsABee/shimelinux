@@ -23,6 +23,8 @@
 package com.group_finity.mascot
 
 import com.formdev.flatlaf.FlatLaf
+import com.nilo.plaf.nimrod.NimRODLookAndFeel
+import com.nilo.plaf.nimrod.NimRODTheme
 import io.github.bujjuisabee.shimelinux.BuildConfig
 import java.awt.BorderLayout
 import java.awt.CardLayout
@@ -74,6 +76,14 @@ private const val DEFAULT_DARK_TEXT_COLOR = "#ffffff"
 private const val DEFAULT_LIGHT_BACKGROUND_COLOR = "#ffffff"
 private const val DEFAULT_LIGHT_TEXT_COLOR = "#000000"
 private const val DEFAULT_ACCENT_COLOR = "#3c83c5"
+private const val DEFAULT_PRIMARY_1 = "#1EA6EB"
+private const val DEFAULT_PRIMARY_2 = "#28B0F5"
+private const val DEFAULT_PRIMARY_3 = "#32BAFF"
+private const val DEFAULT_SECONDARY_1 = "#BCBCBE"
+private const val DEFAULT_SECONDARY_2 = "#C6C6C8"
+private const val DEFAULT_SECONDARY_3 = "#D0D0D2"
+private const val DEFAULT_BLACK = "#000000"
+private const val DEFAULT_WHITE = "#FFFFFF"
 
 /**
  * The settings menu.
@@ -108,18 +118,18 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val flatThemeBackgroundColorPanel: JPanel
     private val flatThemeBackgroundColorRightPanel: JPanel
     private val flatThemeBackgroundColorTextField: JTextField
-    private val flatThemeBackgroundColorButton: JButton
     private val flatThemeBackgroundColorPreview: JPanel
+    private val flatThemeBackgroundColorButton: JButton
     private val flatThemeTextColorPanel: JPanel
     private val flatThemeTextColorRightPanel: JPanel
     private val flatThemeTextColorTextField: JTextField
-    private val flatThemeTextColorButton: JButton
     private val flatThemeTextColorPreview: JPanel
+    private val flatThemeTextColorButton: JButton
     private val flatThemeAccentColorPanel: JPanel
     private val flatThemeAccentColorRightPanel: JPanel
     private val flatThemeAccentColorTextField: JTextField
-    private val flatThemeAccentColorButton: JButton
     private val flatThemeAccentColorPreview: JPanel
+    private val flatThemeAccentColorButton: JButton
     private val flatThemeMenuScalingPanel: MenuScalingPanel
     private val flatThemeButtonsPanel: JPanel
     private val matchGtkThemeButton: JButton
@@ -127,6 +137,51 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val gtkThemeCard: JPanel
     private val gtkThemeSettingsPanel: JPanel
     private val gtkThemeMenuScalingPanel: MenuScalingPanel
+    private val nimRODThemeCard: JPanel
+    private val nimRODThemeSettingsPanel: JPanel
+    private val primaryColor1Panel: JPanel
+    private val primaryColor1RightPanel: JPanel
+    private val primaryColor1TextField: JTextField
+    private val primaryColor1Preview: JPanel
+    private val primaryColor1Button: JButton
+    private val primaryColor2Panel: JPanel
+    private val primaryColor2RightPanel: JPanel
+    private val primaryColor2TextField: JTextField
+    private val primaryColor2Preview: JPanel
+    private val primaryColor2Button: JButton
+    private val primaryColor3Panel: JPanel
+    private val primaryColor3RightPanel: JPanel
+    private val primaryColor3TextField: JTextField
+    private val primaryColor3Preview: JPanel
+    private val primaryColor3Button: JButton
+    private val secondaryColor1Panel: JPanel
+    private val secondaryColor1RightPanel: JPanel
+    private val secondaryColor1TextField: JTextField
+    private val secondaryColor1Preview: JPanel
+    private val secondaryColor1Button: JButton
+    private val secondaryColor2Panel: JPanel
+    private val secondaryColor2RightPanel: JPanel
+    private val secondaryColor2TextField: JTextField
+    private val secondaryColor2Preview: JPanel
+    private val secondaryColor2Button: JButton
+    private val secondaryColor3Panel: JPanel
+    private val secondaryColor3RightPanel: JPanel
+    private val secondaryColor3TextField: JTextField
+    private val secondaryColor3Preview: JPanel
+    private val secondaryColor3Button: JButton
+    private val blackColorPanel: JPanel
+    private val blackColorRightPanel: JPanel
+    private val blackColorTextField: JTextField
+    private val blackColorPreview: JPanel
+    private val blackColorButton: JButton
+    private val whiteColorPanel: JPanel
+    private val whiteColorRightPanel: JPanel
+    private val whiteColorTextField: JTextField
+    private val whiteColorPreview: JPanel
+    private val whiteColorButton: JButton
+    private val nimRODThemeMenuScalingPanel: MenuScalingPanel
+    private val nimRODThemeButtonsPanel: JPanel
+    private val resetNimRODThemeButton: JButton
     private val environmentTab: JPanel
     private val environmentPanel: JPanel
     private val environmentComboBox: JComboBox<String>
@@ -149,6 +204,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val oldLightTheme = Properties()
     private val newDarkTheme = Properties()
     private val newLightTheme = Properties()
+    private val nimRODTheme = Properties()
     private val newProperties = Properties()
 
     /**
@@ -176,6 +232,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         try {
             getPath("conf", "theme", "FlatDarkLaf.properties").inputStream().use { oldDarkTheme.load(it) }
             getPath("conf", "theme", "FlatLightLaf.properties").inputStream().use { oldLightTheme.load(it) }
+            getPath("conf", "theme", "NimRODLaf.properties").inputStream().use { nimRODTheme.load(it) }
         } catch (_: Exception) {
         }
 
@@ -336,24 +393,35 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         if (!Platform.isFlatpak) {
             themeComboBox.addItem(localize("GtkTheme"))
         }
+        themeComboBox.addItem(localize("NimRODTheme"))
         themeComboBox.addActionListener {
             setNewProperty(
                 "Theme", when (themeComboBox.selectedIndex) {
                     0 -> "FlatDark"
                     1 -> "FlatLight"
                     2 -> "Gtk"
+                    3 -> "NimROD"
                     else -> "FlatDark"
                 }
             )
 
             refreshTheme()
 
-            if (themeComboBox.selectedIndex == 2) {
-                themeCardLayout.show(themeCardsPanel, "Gtk")
-                gtkThemeMenuScalingPanel.update()
-            } else {
-                themeCardLayout.show(themeCardsPanel, "Flat")
-                flatThemeMenuScalingPanel.update()
+            when (themeComboBox.selectedIndex) {
+                2 -> {
+                    themeCardLayout.show(themeCardsPanel, "Gtk")
+                    gtkThemeMenuScalingPanel.update()
+                }
+
+                3 -> {
+                    themeCardLayout.show(themeCardsPanel, "NimROD")
+                    nimRODThemeMenuScalingPanel.update()
+                }
+
+                else -> {
+                    themeCardLayout.show(themeCardsPanel, "Flat")
+                    flatThemeMenuScalingPanel.update()
+                }
             }
         }
 
@@ -650,15 +718,475 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         gtkThemeCard = JPanel(BorderLayout())
         gtkThemeCard.add(gtkThemeSettingsPanel, BorderLayout.NORTH)
 
+        primaryColor1TextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        primaryColor1TextField.addActionListener {
+            val color = runCatching { Color.decode(primaryColor1TextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Primary1", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        primaryColor1Preview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                primaryColor1Button.preferredSize.height,
+                primaryColor1Button.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Primary1", DEFAULT_PRIMARY_1))
+        }
+
+        primaryColor1Button = JButton(localize("Change"))
+        primaryColor1Button.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Primary1", DEFAULT_PRIMARY_1)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Primary1", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        primaryColor1RightPanel = JPanel()
+        primaryColor1RightPanel.layout = BoxLayout(primaryColor1RightPanel, BoxLayout.X_AXIS)
+        primaryColor1RightPanel.add(primaryColor1TextField)
+        primaryColor1RightPanel.add(Box.createHorizontalStrut(3))
+        primaryColor1RightPanel.add(primaryColor1Preview)
+        primaryColor1RightPanel.add(Box.createHorizontalStrut(3))
+        primaryColor1RightPanel.add(primaryColor1Button)
+
+        primaryColor1Panel = JPanel(BorderLayout())
+        primaryColor1Panel.add(JLabel(localize("PrimaryColor1")), BorderLayout.WEST)
+        primaryColor1Panel.add(primaryColor1RightPanel, BorderLayout.EAST)
+
+        primaryColor2TextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        primaryColor2TextField.addActionListener {
+            val color = runCatching { Color.decode(primaryColor2TextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Primary2", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        primaryColor2Preview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                primaryColor2Button.preferredSize.height,
+                primaryColor2Button.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Primary2", DEFAULT_PRIMARY_2))
+        }
+
+        primaryColor2Button = JButton(localize("Change"))
+        primaryColor2Button.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Primary2", DEFAULT_PRIMARY_2)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Primary2", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        primaryColor2RightPanel = JPanel()
+        primaryColor2RightPanel.layout = BoxLayout(primaryColor2RightPanel, BoxLayout.X_AXIS)
+        primaryColor2RightPanel.add(primaryColor2TextField)
+        primaryColor2RightPanel.add(Box.createHorizontalStrut(3))
+        primaryColor2RightPanel.add(primaryColor2Preview)
+        primaryColor2RightPanel.add(Box.createHorizontalStrut(3))
+        primaryColor2RightPanel.add(primaryColor2Button)
+
+        primaryColor2Panel = JPanel(BorderLayout())
+        primaryColor2Panel.add(JLabel(localize("PrimaryColor2")), BorderLayout.WEST)
+        primaryColor2Panel.add(primaryColor2RightPanel, BorderLayout.EAST)
+
+        primaryColor3TextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        primaryColor3TextField.addActionListener {
+            val color = runCatching { Color.decode(primaryColor3TextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Primary3", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        primaryColor3Preview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                primaryColor3Button.preferredSize.height,
+                primaryColor3Button.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Primary3", DEFAULT_PRIMARY_3))
+        }
+
+        primaryColor3Button = JButton(localize("Change"))
+        primaryColor3Button.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Primary3", DEFAULT_PRIMARY_3)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Primary3", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        primaryColor3RightPanel = JPanel()
+        primaryColor3RightPanel.layout = BoxLayout(primaryColor3RightPanel, BoxLayout.X_AXIS)
+        primaryColor3RightPanel.add(primaryColor3TextField)
+        primaryColor3RightPanel.add(Box.createHorizontalStrut(3))
+        primaryColor3RightPanel.add(primaryColor3Preview)
+        primaryColor3RightPanel.add(Box.createHorizontalStrut(3))
+        primaryColor3RightPanel.add(primaryColor3Button)
+
+        primaryColor3Panel = JPanel(BorderLayout())
+        primaryColor3Panel.add(JLabel(localize("PrimaryColor3")), BorderLayout.WEST)
+        primaryColor3Panel.add(primaryColor3RightPanel, BorderLayout.EAST)
+
+        secondaryColor1TextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        secondaryColor1TextField.addActionListener {
+            val color = runCatching { Color.decode(secondaryColor1TextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Secondary1", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        secondaryColor1Preview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                secondaryColor1Button.preferredSize.height,
+                secondaryColor1Button.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Secondary1", DEFAULT_SECONDARY_1))
+        }
+
+        secondaryColor1Button = JButton(localize("Change"))
+        secondaryColor1Button.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Secondary1", DEFAULT_SECONDARY_1)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Secondary1", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        secondaryColor1RightPanel = JPanel()
+        secondaryColor1RightPanel.layout = BoxLayout(secondaryColor1RightPanel, BoxLayout.X_AXIS)
+        secondaryColor1RightPanel.add(secondaryColor1TextField)
+        secondaryColor1RightPanel.add(Box.createHorizontalStrut(3))
+        secondaryColor1RightPanel.add(secondaryColor1Preview)
+        secondaryColor1RightPanel.add(Box.createHorizontalStrut(3))
+        secondaryColor1RightPanel.add(secondaryColor1Button)
+
+        secondaryColor1Panel = JPanel(BorderLayout())
+        secondaryColor1Panel.add(JLabel(localize("SecondaryColor1")), BorderLayout.WEST)
+        secondaryColor1Panel.add(secondaryColor1RightPanel, BorderLayout.EAST)
+
+        secondaryColor2TextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        secondaryColor2TextField.addActionListener {
+            val color = runCatching { Color.decode(secondaryColor2TextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Secondary2", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        secondaryColor2Preview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                secondaryColor2Button.preferredSize.height,
+                secondaryColor2Button.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Secondary2", DEFAULT_SECONDARY_2))
+        }
+
+        secondaryColor2Button = JButton(localize("Change"))
+        secondaryColor2Button.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Secondary2", DEFAULT_SECONDARY_2)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Secondary2", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        secondaryColor2RightPanel = JPanel()
+        secondaryColor2RightPanel.layout = BoxLayout(secondaryColor2RightPanel, BoxLayout.X_AXIS)
+        secondaryColor2RightPanel.add(secondaryColor2TextField)
+        secondaryColor2RightPanel.add(Box.createHorizontalStrut(3))
+        secondaryColor2RightPanel.add(secondaryColor2Preview)
+        secondaryColor2RightPanel.add(Box.createHorizontalStrut(3))
+        secondaryColor2RightPanel.add(secondaryColor2Button)
+
+        secondaryColor2Panel = JPanel(BorderLayout())
+        secondaryColor2Panel.add(JLabel(localize("SecondaryColor2")), BorderLayout.WEST)
+        secondaryColor2Panel.add(secondaryColor2RightPanel, BorderLayout.EAST)
+
+        secondaryColor3TextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        secondaryColor3TextField.addActionListener {
+            val color = runCatching { Color.decode(secondaryColor3TextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Secondary3", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        secondaryColor3Preview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                secondaryColor3Button.preferredSize.height,
+                secondaryColor3Button.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Secondary3", DEFAULT_SECONDARY_3))
+        }
+
+        secondaryColor3Button = JButton(localize("Change"))
+        secondaryColor3Button.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Secondary3", DEFAULT_SECONDARY_3)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Secondary3", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        secondaryColor3RightPanel = JPanel()
+        secondaryColor3RightPanel.layout = BoxLayout(secondaryColor3RightPanel, BoxLayout.X_AXIS)
+        secondaryColor3RightPanel.add(secondaryColor3TextField)
+        secondaryColor3RightPanel.add(Box.createHorizontalStrut(3))
+        secondaryColor3RightPanel.add(secondaryColor3Preview)
+        secondaryColor3RightPanel.add(Box.createHorizontalStrut(3))
+        secondaryColor3RightPanel.add(secondaryColor3Button)
+
+        secondaryColor3Panel = JPanel(BorderLayout())
+        secondaryColor3Panel.add(JLabel(localize("SecondaryColor3")), BorderLayout.WEST)
+        secondaryColor3Panel.add(secondaryColor3RightPanel, BorderLayout.EAST)
+
+        blackColorTextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        blackColorTextField.addActionListener {
+            val color = runCatching { Color.decode(blackColorTextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("Black", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        blackColorPreview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                blackColorButton.preferredSize.height,
+                blackColorButton.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("Black", DEFAULT_BLACK))
+        }
+
+        blackColorButton = JButton(localize("Change"))
+        blackColorButton.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("Black", DEFAULT_BLACK)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("Black", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        blackColorRightPanel = JPanel()
+        blackColorRightPanel.layout = BoxLayout(blackColorRightPanel, BoxLayout.X_AXIS)
+        blackColorRightPanel.add(blackColorTextField)
+        blackColorRightPanel.add(Box.createHorizontalStrut(3))
+        blackColorRightPanel.add(blackColorPreview)
+        blackColorRightPanel.add(Box.createHorizontalStrut(3))
+        blackColorRightPanel.add(blackColorButton)
+
+        blackColorPanel = JPanel(BorderLayout())
+        blackColorPanel.add(JLabel(localize("BlackColor")), BorderLayout.WEST)
+        blackColorPanel.add(blackColorRightPanel, BorderLayout.EAST)
+
+        whiteColorTextField = object : JTextField() {
+            override fun getPreferredSize() = super.preferredSize.apply { width = 69 }
+        }
+        whiteColorTextField.addActionListener {
+            val color = runCatching { Color.decode(whiteColorTextField.text) }.getOrNull()
+
+            if (color != null) {
+                nimRODTheme.setProperty("White", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        whiteColorPreview = object : JPanel() {
+            init {
+                border = BorderFactory.createSoftBevelBorder(BevelBorder.LOWERED)
+            }
+
+            override fun getPreferredSize() = Dimension(
+                whiteColorButton.preferredSize.height,
+                whiteColorButton.preferredSize.height
+            )
+
+            override fun getBackground() = Color.decode(nimRODTheme.getProperty("White", DEFAULT_WHITE))
+        }
+
+        whiteColorButton = JButton(localize("Change"))
+        whiteColorButton.addActionListener {
+            val color = JColorChooser.showDialog(
+                this,
+                localize("ChooseColor"),
+                Color.decode(nimRODTheme.getProperty("White", DEFAULT_WHITE)),
+                false
+            )
+
+            if (color != null) {
+                nimRODTheme.setProperty("White", String.format("#%06X", color.rgb and 0xFFFFFF))
+                refreshTheme()
+            }
+        }
+
+        whiteColorRightPanel = JPanel()
+        whiteColorRightPanel.layout = BoxLayout(whiteColorRightPanel, BoxLayout.X_AXIS)
+        whiteColorRightPanel.add(whiteColorTextField)
+        whiteColorRightPanel.add(Box.createHorizontalStrut(3))
+        whiteColorRightPanel.add(whiteColorPreview)
+        whiteColorRightPanel.add(Box.createHorizontalStrut(3))
+        whiteColorRightPanel.add(whiteColorButton)
+
+        whiteColorPanel = JPanel(BorderLayout())
+        whiteColorPanel.add(JLabel(localize("WhiteColor")), BorderLayout.WEST)
+        whiteColorPanel.add(whiteColorRightPanel, BorderLayout.EAST)
+
+        nimRODThemeMenuScalingPanel = MenuScalingPanel()
+
+        nimRODThemeSettingsPanel = JPanel()
+        nimRODThemeSettingsPanel.layout = BoxLayout(nimRODThemeSettingsPanel, BoxLayout.Y_AXIS)
+        nimRODThemeSettingsPanel.add(primaryColor1Panel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(primaryColor2Panel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(primaryColor3Panel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(secondaryColor1Panel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(secondaryColor2Panel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(secondaryColor3Panel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(blackColorPanel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(whiteColorPanel)
+        nimRODThemeSettingsPanel.add(Box.createVerticalStrut(3))
+        nimRODThemeSettingsPanel.add(nimRODThemeMenuScalingPanel)
+
+        resetNimRODThemeButton = JButton(localize("Reset"))
+        resetNimRODThemeButton.addActionListener {
+            nimRODTheme.setProperty("Primary1", DEFAULT_PRIMARY_1)
+            nimRODTheme.setProperty("Primary2", DEFAULT_PRIMARY_2)
+            nimRODTheme.setProperty("Primary3", DEFAULT_PRIMARY_3)
+            nimRODTheme.setProperty("Secondary1", DEFAULT_SECONDARY_1)
+            nimRODTheme.setProperty("Secondary2", DEFAULT_SECONDARY_2)
+            nimRODTheme.setProperty("Secondary3", DEFAULT_SECONDARY_3)
+            nimRODTheme.setProperty("White", DEFAULT_WHITE)
+            nimRODTheme.setProperty("Black", DEFAULT_BLACK)
+            refreshTheme()
+        }
+
+        nimRODThemeButtonsPanel = JPanel(FlowLayout())
+        nimRODThemeButtonsPanel.add(resetNimRODThemeButton)
+
+        nimRODThemeCard = JPanel(BorderLayout())
+        nimRODThemeCard.add(nimRODThemeSettingsPanel, BorderLayout.NORTH)
+        nimRODThemeCard.add(nimRODThemeButtonsPanel, BorderLayout.SOUTH)
+
         themeCardLayout = CardLayout()
         themeCardsPanel = JPanel(themeCardLayout)
         themeCardsPanel.add(flatThemeCard, "Flat")
         themeCardsPanel.add(gtkThemeCard, "Gtk")
+        themeCardsPanel.add(nimRODThemeCard, "NimROD")
 
         themeComboBox.selectedIndex = when (getProperty("Theme", "FlatDark")) {
             "FlatDark" -> 0
             "FlatLight" -> 1
             "Gtk" -> 2
+            "NimROD" -> 3
             else -> 0
         }
 
@@ -883,6 +1411,10 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
 
         Main.properties.putAll(newProperties)
         Main.updateConfigFile()
+
+        getPath("conf", "theme", "NimRODLaf.properties").outputStream().use {
+            nimRODTheme.store(it, "Shimeji-ee Theme")
+        }
     }
 
     private fun cancelChanges() {
@@ -896,7 +1428,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         try {
             val theme = getNewProperty("Theme", "FlatDark")
 
-            if (theme != "Gtk") {
+            if (theme.startsWith("Flat")) {
                 FlatLaf.setGlobalExtraDefaults(mapOf())
 
                 if (themeComboBox.selectedIndex == 0) {
@@ -917,14 +1449,54 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 }
             }
 
-            UIManager.setLookAndFeel(
-                when (theme) {
-                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
-                    else -> "com.formdev.flatlaf.FlatDarkLaf"
+            when (theme) {
+                "NimROD" -> {
+                    val laf = NimRODLookAndFeel()
+                    val theme = NimRODTheme()
+
+                    nimRODTheme.getProperty("Primary1", DEFAULT_PRIMARY_1).let {
+                        theme.setPrimary1(Color.decode(it))
+                        primaryColor1TextField.text = it
+                    }
+                    nimRODTheme.getProperty("Primary2", DEFAULT_PRIMARY_2).let {
+                        theme.setPrimary2(Color.decode(it))
+                        primaryColor2TextField.text = it
+                    }
+                    nimRODTheme.getProperty("Primary3", DEFAULT_PRIMARY_3).let {
+                        theme.setPrimary3(Color.decode(it))
+                        primaryColor3TextField.text = it
+                    }
+                    nimRODTheme.getProperty("Secondary1", DEFAULT_SECONDARY_1).let {
+                        theme.setSecondary1(Color.decode(it))
+                        secondaryColor1TextField.text = it
+                    }
+                    nimRODTheme.getProperty("Secondary2", DEFAULT_SECONDARY_2).let {
+                        theme.setSecondary2(Color.decode(it))
+                        secondaryColor2TextField.text = it
+                    }
+                    nimRODTheme.getProperty("Secondary3", DEFAULT_SECONDARY_3).let {
+                        theme.setSecondary3(Color.decode(it))
+                        secondaryColor3TextField.text = it
+                    }
+                    nimRODTheme.getProperty("Black", DEFAULT_BLACK).let {
+                        theme.setBlack(Color.decode(it))
+                        blackColorTextField.text = it
+                    }
+                    nimRODTheme.getProperty("White", DEFAULT_WHITE).let {
+                        theme.setWhite(Color.decode(it))
+                        whiteColorTextField.text = it
+                    }
+
+                    NimRODLookAndFeel.setCurrentTheme(theme)
+                    UIManager.setLookAndFeel(laf)
+                    UIManager.put("PopupMenuUI", "javax.swing.plaf.basic.BasicPopupMenuUI")
                 }
-            )
+
+                "FlatDark" -> UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarkLaf")
+                "FlatLight" -> UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf")
+                "Gtk" -> UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+                else -> UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarkLaf")
+            }
 
             for (window in getWindows()) {
                 SwingUtilities.updateComponentTreeUI(window)
@@ -1193,8 +1765,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         private val windowBackgroundColorPanel: JPanel
         private val windowBackgroundColorRightPanel: JPanel
         private val windowBackgroundColorTextField: JTextField
-        private val windowBackgroundColorButton: JButton
         private val windowBackgroundColorPreview: JPanel
+        private val windowBackgroundColorButton: JButton
         private val windowBackgroundImagePanel: JPanel
         private val windowBackgroundImageLabel: JLabel
         private val windowBackgroundImageRightPanel: JPanel
