@@ -58,7 +58,7 @@ class Entry(private val element: Element) {
         get() = element.textContent
 
     /**
-     * The attributes of the node.
+     * The node's attributes.
      *
      * @return A [Map] where the key "name" corresponds to the value "value" for the following XML node:
      *
@@ -74,15 +74,7 @@ class Entry(private val element: Element) {
     }
 
     /**
-     * The child nodes inside the node.
-     *
-     * @return A [List] with an [Entry] for the "Child" node for the following XML node:
-     *
-     * ```xml
-     * <Node>
-     *     <Child />
-     * </Node>
-     * ```
+     * The node's children.
      */
     val children = buildList {
         val children = element.childNodes
@@ -91,7 +83,10 @@ class Entry(private val element: Element) {
         }
     }
 
-    private val childMap: Map<String, List<Entry>> = children.groupBy { it.name }
+    /**
+     * The node's children, grouped by their [name].
+     */
+    private val selected: Map<String, List<Entry>> = children.groupBy { it.name }
 
     /**
      * Gets the value of an attribute with the specified [name], or `null` if it does not exist.
@@ -106,5 +101,5 @@ class Entry(private val element: Element) {
     /**
      * Gets all nodes in [children] with the specified [name].
      */
-    fun selectChildren(name: String): List<Entry> = childMap[name].orEmpty()
+    fun selectChildren(name: String): List<Entry> = selected[name].orEmpty()
 }

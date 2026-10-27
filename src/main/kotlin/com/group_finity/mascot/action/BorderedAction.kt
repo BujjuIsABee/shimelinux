@@ -48,6 +48,10 @@ abstract class BorderedAction(
 
     /**
      * The type of border that the [mascot] will be placed on.
+     *
+     * @see BORDERTYPE_CEILING
+     * @see BORDERTYPE_WALL
+     * @see BORDERTYPE_FLOOR
      */
     private val borderType: String?
         get() = eval(schema.getString(PARAMETER_BORDERTYPE), DEFAULT_BORDERTYPE)

@@ -47,7 +47,7 @@ class Dragged(
     private var scaling = 0.0
 
     /**
-     * The minimum amount of time until the [Regist] action is triggered.
+     * The minimum number of ticks until the [Regist] action is triggered.
      */
     var timeToRegist = 0
 
@@ -64,8 +64,9 @@ class Dragged(
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETY), DEFAULT_OFFSETY).toInt()
 
     /**
-     * Defines how the offset will be calculated. "ImageAnchor" is relative to left corner of the [mascot] and "Origin"
-     * is relative to the center of the [mascot].
+     * Defines how the offset will be calculated. Options include:
+     * - ImageAnchor (relative to the top left corner of the [mascot])
+     * - Origin (relative to the center of the [mascot])
      */
     private val offsetType: String
         get() = eval(schema.getString(PARAMETER_OFFSETTYPE), DEFAULT_OFFSETTYPE)

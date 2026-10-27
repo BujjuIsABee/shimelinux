@@ -36,7 +36,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 
 /**
- * Builds a behavior from the given [behaviorNode].
+ * Builds the behavior defined by the given [behaviorNode].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -47,13 +47,46 @@ class BehaviorBuilder(
     behaviorNode: Entry,
     private var conditions: MutableList<String?>
 ) {
+    /**
+     * The name of the behavior.
+     */
     val name: String = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name"))) { "Behavior requires Name attribute." }
+
+    /**
+     * The name of the action that the behavior triggers. If the Action attribute is missing, [name] will be used
+     * instead.
+     */
     private val actionName: String = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
+
+    /**
+     * The likelihood that the behavior will be chosen when selecting the next behavior for a mascot.
+     */
     val frequency: Int = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Frequency"))) { "Behavior requires Frequency attribute." }.toInt()
+
+    /**
+     * Whether the behavior should appear in the Set Behavior menu.
+     */
     val isHidden: Boolean = behaviorNode.getAttribute(configuration.schema.getString("Hidden")).toBoolean()
+
+    /**
+     * Whether the behavior should appear in the Allowed Behaviors menu.
+     */
     val isToggleable: Boolean
+
+    /**
+     * If `true`, [nextBehaviorBuilders] will be added to the list of candidates when selecting the next behavior for a
+     * mascot. Otherwise, [nextBehaviorBuilders] will replace the list of candidates.
+     */
     val isNextAdditive: Boolean
+
+    /**
+     * A list of behavior builders that may be chosen when selecting the next behavior for a mascot.
+     */
     val nextBehaviorBuilders = mutableListOf<BehaviorBuilder>()
+
+    /**
+     * A list of the behavior's attributes.
+     */
     private val params = linkedMapOf<String, String>()
 
     init {
@@ -62,6 +95,7 @@ class BehaviorBuilder(
         conditions = conditions.toMutableList()
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
+        // Ignore Toggleable attribute for required behaviors
         isToggleable = when (name) {
             UserBehavior.BEHAVIOURNAME_FALL, UserBehavior.BEHAVIOURNAME_DRAGGED, UserBehavior.BEHAVIOURNAME_THROWN -> false
             else -> behaviorNode.getAttribute(configuration.schema.getString("Toggleable")).toBoolean()
@@ -117,7 +151,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Builds the behavior and the associated action.
+     * Returns the behavior.
      */
     fun buildBehavior(): Behavior {
         try {

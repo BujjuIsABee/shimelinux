@@ -48,7 +48,7 @@ import kotlin.math.roundToInt
 private val logger: Logger = Logger.getLogger(AnimationBuilder::class.java.name)
 
 /**
- * Creates an animation from the given [animationNode]
+ * Builds the animation defined by the given [animationNode].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -184,7 +184,7 @@ class AnimationBuilder(
     }
 
     /**
-     * Builds the animation.
+     * Returns the animation.
      */
     fun buildAnimation(): Animation {
         try {

@@ -213,7 +213,7 @@ object KWin {
     }
 
     /**
-     * Represents a window from the KWin compositor.
+     * A window from the KWin compositor.
      *
      * @property caption The window's title.
      * @property bounds The window's frame geometry.

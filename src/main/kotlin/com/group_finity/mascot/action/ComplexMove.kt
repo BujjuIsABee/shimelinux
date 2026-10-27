@@ -38,7 +38,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ComplexMove::class.java.name)
 
 /**
- * An action that creates a new mascot and/or scans for an affordance while [mascot] moves.
+ * An action that causes the [mascot] to move along a border towards a target position or mascot and breed or interact.
  *
  * @author Kilkakon
  * @author Bujju
@@ -69,19 +69,21 @@ class ComplexMove(
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning != it.isTurn }
 
     /**
-     * The characteristics of the action ("Breed" and/or "Scan"), separated by a forward slash.
+     * The characteristics of the action, separated by a forward slash. Options include:
+     * - Breed
+     * - Scan
      */
     private val characteristics: String
         get() = eval(schema.getString(PARAMETER_CHARACTERISTICS), DEFAULT_CHARACTERISTICS)
 
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
+     * The behavior to set for [mascot].
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), DEFAULT_BEHAVIOUR)
 
     /**
-     * The behavior to set for the other mascot.
+     * The behavior to set for the [target] mascot.
      */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)

@@ -43,7 +43,7 @@ import javax.swing.JWindow
 private val gc: GraphicsConfiguration? = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
 
 /**
- * Displays a mascot on a cross-platform [JWindow].
+ * Displays a mascot on a [JWindow].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -54,8 +54,9 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
     private var offset = Point(0, 0)
 
     init {
-        System.setProperty("sun.awt.noerasebackground", "true") // Reduces flickering
+        System.setProperty("sun.awt.noerasebackground", "true") // fixes flickering
 
+        // Force floating window on tiling window managers
         if (Platform.isTilingWindowManager) {
             type = Type.POPUP
         }

@@ -38,7 +38,7 @@ interface IActionBuilder {
     fun validate()
 
     /**
-     * Builds the action, passing the given [params].
+     * Returns the action.
      */
     fun buildAction(params: Map<String, String>): Action
 }

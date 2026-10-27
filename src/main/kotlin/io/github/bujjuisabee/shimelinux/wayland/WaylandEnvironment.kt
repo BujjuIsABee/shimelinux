@@ -36,7 +36,7 @@ import javax.swing.PopupFactory
 import kotlin.collections.map
 
 /**
- * An environment that works properly when mascots are not displayed with X11 or XWayland.
+ * An environment that displays mascots on native Wayland surfaces.
  *
  * @author Bujju
  */

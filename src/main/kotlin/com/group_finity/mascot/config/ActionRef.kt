@@ -30,7 +30,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ActionRef::class.java.name)
 
 /**
- * Creates an action from the given [refNode].
+ * Builds the action defined by the given [refNode].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

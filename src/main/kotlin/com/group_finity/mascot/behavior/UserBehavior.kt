@@ -43,7 +43,7 @@ private val logger: Logger = Logger.getLogger(UserBehavior::class.java.name)
  * The base implementation of a behavior.
  *
  * @param name The name of the behavior.
- * @param action The action that the behavior will trigger.
+ * @param action The action that the behavior triggers.
  * @param configuration The configuration that defines the behavior.
  *
  * @author Yuki Yamada
@@ -55,6 +55,9 @@ class UserBehavior(
     private val action: Action,
     private val configuration: Configuration
 ) : Behavior {
+    /**
+     * The mascot affected by the behavior.
+     */
     private lateinit var mascot: Mascot
 
     /**
@@ -92,6 +95,7 @@ class UserBehavior(
 
             var hotspotResult = HotspotResult.INACTIVE
             if (mascot.isHotspotClicked) {
+                // Active any hotspots that emerge while left mouse button is held down
                 val cursorPosition = checkNotNull(mascot.cursorPosition)
                 for (hotspot in mascot.hotspots.filter { it.contains(mascot, cursorPosition) }) {
                     hotspotResult = if (hotspot.behavior == null) HotspotResult.ACTIVE else HotspotResult.ACTIVE_NULL
@@ -157,6 +161,7 @@ class UserBehavior(
         if (SwingUtilities.isLeftMouseButton(e)) {
             var handled = false
 
+            // Check for hotspots
             for (hotspot in mascot.hotspots) {
                 val behaviorEnabled = Main.getConfiguration(mascot.imageSet).isBehaviorEnabled(hotspot.behavior, mascot)
                 if (hotspot.contains(mascot, e.point) && behaviorEnabled) {
@@ -175,6 +180,7 @@ class UserBehavior(
                 }
             }
 
+            // Check if dragging is enabled
             if (!handled && action is ActionBase) {
                 try {
                     handled = !action.isDraggable
@@ -184,6 +190,7 @@ class UserBehavior(
             }
 
             if (!handled) {
+                // Begin dragging
                 try {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {
@@ -214,7 +221,7 @@ class UserBehavior(
 
     override fun toString() = "Behavior[name=$name]"
 
-    enum class HotspotResult { INACTIVE, ACTIVE_NULL, ACTIVE }
+    private enum class HotspotResult { INACTIVE, ACTIVE_NULL, ACTIVE }
 
     companion object {
         /**

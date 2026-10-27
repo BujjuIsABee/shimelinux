@@ -31,7 +31,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(Move::class.java.name)
 
 /**
- * An action that causes the [mascot] to move.
+ * An action that causes the [mascot] to move along a border towards a target position.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

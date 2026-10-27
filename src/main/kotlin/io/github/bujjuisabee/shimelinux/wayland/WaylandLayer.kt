@@ -38,7 +38,7 @@ import kotlin.system.exitProcess
 
 /**
  * The absolute cursor position, or an approximation of it based on the [relativeCursorPosition] if
- * [Platform.providesAbsoluteCursorPosition] is `false`
+ * [Platform.providesAbsoluteCursorPosition] is `false`.
  */
 var absoluteCursorPosition = Point(0, 0)
 
@@ -48,9 +48,7 @@ var absoluteCursorPosition = Point(0, 0)
 var relativeCursorPosition = Point(0, 0)
 
 /**
- * Creates a Wayland layer surface. Mouse events will be sent to [mouseEventReceiver].
- *
- * @param useMask Whether the surface's input region should be updated whenever [setImage] is called.
+ * Creates a Wayland layer surface.
  *
  * @author Bujju
  */
@@ -103,7 +101,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
 
     /**
      * Displays the given [rgb] pixel data on the layer surface. If [useMask] is `true`, the surface's input region will
-     * be updated as well.
+     * be updated.
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
@@ -136,8 +134,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
      * Sends mouse events to the event listeners attached to [component].
      *
      * If [leftPressed] or [rightPressed] is `true`, a `MOUSE_PRESSED` event will be sent. If [leftReleased] or
-     * [rightReleased] is `true`, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] has changed since
-     * the last time the function was called, a `MOUSE_MOVED` event will be sent.
+     * [rightReleased] is `true`, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] is different from
+     * [relativeCursorPosition], a `MOUSE_MOVED` event will be sent.
      */
     fun dispatchEvents(
         component: Component,
@@ -162,8 +160,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
             button = button or MouseEvent.BUTTON3
         }
 
-        // If the compositor does not provide the absolute cursor position, stop updating absoluteLocation when the left
-        // mouse button is being held down.
+        // If the compositor does not provide the absolute cursor position, stop updating absoluteLocation while the
+        // left mouse button is held down.
         leftHeld = leftPressed || (leftHeld && !leftReleased)
         if (!leftHeld || Platform.providesAbsoluteCursorPosition) {
             absoluteLocation = location
@@ -205,7 +203,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
             relativeCursorPosition = Point(positionX, positionY)
 
             // If the compositor does not provide the absolute cursor position, estimate it by adding the relative
-            // cursor position to the absolute position of the layer.
+            // cursor position to the absolute position of the layer surface.
             if (!Platform.providesAbsoluteCursorPosition) {
                 absoluteCursorPosition = Point(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
             }

@@ -55,7 +55,7 @@ abstract class NativeFactory {
 
     companion object {
         /**
-         * The current native factory instance.
+         * The shared native factory instance.
          */
         lateinit var instance: NativeFactory
 

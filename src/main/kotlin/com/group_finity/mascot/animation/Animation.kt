@@ -32,8 +32,8 @@ import com.group_finity.mascot.script.VariableMap
  *
  * @param condition A variable that must evaluate to `true` for the animation to play.
  * @param poses The frames of the animation.
- * @param hotspots The hotspots that can be interacted with while the animation is playing.
- * @param isTurn Whether the animation plays while a mascot's facing direction changes.
+ * @param hotspots The hotspots that will be active while the animation is playing.
+ * @param isTurn Whether the animation changes the mascot's facing direction.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -46,7 +46,7 @@ class Animation(
     val isTurn: Boolean
 ) {
     /**
-     * The total duration of all the animation's poses.
+     * The total duration of the animation's poses.
      */
     val duration: Int = poses.sumOf { it.duration }
 
@@ -55,7 +55,7 @@ class Animation(
     }
 
     /**
-     * Returns whether the conditions for the animation to play are currently met.
+     * Returns whether the [condition] for the animation to play is currently met.
      */
     fun isEffective(variables: VariableMap): Boolean = condition.get(variables) as Boolean
 
@@ -81,7 +81,8 @@ class Animation(
     }
 
     /**
-     * Gets which pose should be displayed at the given [time].
+     * Returns the pose that should be displayed at the given [time], or `null` if [time] exceeds the animation's
+     * [duration].
      */
     fun getPoseAt(time: Int): Pose? {
         var t = time % duration

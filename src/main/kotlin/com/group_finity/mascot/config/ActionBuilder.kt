@@ -42,7 +42,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ActionBuilder::class.java.name)
 
 /**
- * Builds an action from the given [actionNode].
+ * Builds the action defined by the given [actionNode].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -51,8 +51,22 @@ private val logger: Logger = Logger.getLogger(ActionBuilder::class.java.name)
 class ActionBuilder(configuration: Configuration, actionNode: Entry, imageSet: String) : IActionBuilder {
     private val schema = configuration.schema
 
-    val type: String = requireNotNull(actionNode.getAttribute(schema.getString("Type"))) { "Action requires Type attribute." }
+    /**
+     * The name of the action.
+     */
     val name: String? = actionNode.getAttribute(schema.getString("Name"))
+
+    /**
+     * The action's type. Options include:
+     * - [Move]
+     * - [Stay]
+     * - [Animate]
+     * - [Sequence]
+     * - [Select]
+     * - Embedded ([className] must not be `null`)
+     */
+    val type: String = requireNotNull(actionNode.getAttribute(schema.getString("Type"))) { "Action requires Type attribute." }
+
     private val className: String? = actionNode.getAttribute(schema.getString("Class"))
     private val params = linkedMapOf<String, String>()
     private val animationBuilders = mutableListOf<AnimationBuilder>()

@@ -27,7 +27,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * An action that acts immediately and lasts a single frame.
+ * An action that is applied immediately.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -50,7 +50,7 @@ abstract class InstantAction(
     override fun tick() {}
 
     /**
-     * Called once when the action is initialized.
+     * Applies the action. Called once when the action is initialized.
      */
     internal abstract fun apply()
 }

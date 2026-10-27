@@ -29,7 +29,7 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
- * An action that causes the [mascot] to jump.
+ * An action that causes the [mascot] to jump towards a target position.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

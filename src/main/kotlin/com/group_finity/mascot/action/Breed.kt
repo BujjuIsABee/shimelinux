@@ -69,6 +69,8 @@ class Breed(
     /**
      * Handles the shared functionality of breeding actions.
      *
+     * @param action The breeding action.
+     *
      * @author LavenderSnek
      * @author Bujju
      */

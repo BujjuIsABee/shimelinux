@@ -35,7 +35,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(Interact::class.java.name)
 
 /**
- * An action that sets the behavior of [mascot] if another mascot with the [affordance] is found.
+ * An action that sets the [mascot]'s behavior to [behavior] if it is overlapping another mascot with the [affordance].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -48,7 +48,7 @@ class Interact(
     context: VariableMap
 ) : Animate(schema, animations, context) {
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
+     * The behavior to set for [mascot].
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), DEFAULT_BEHAVIOUR)
