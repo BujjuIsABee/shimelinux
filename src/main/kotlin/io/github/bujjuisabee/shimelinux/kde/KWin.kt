@@ -32,6 +32,10 @@ import org.freedesktop.dbus.types.Variant
 import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
+import java.util.logging.Level
+import java.util.logging.Logger
+
+private val logger: Logger = Logger.getLogger(KWin::class.java.name)
 
 /**
  * Manages a script used to interact with the KWin compositor.
@@ -95,7 +99,8 @@ object KWin {
                 KWinScript::class.java
             )
             script?.run()
-        } catch (_: DBusException) {
+        } catch (e: DBusException) {
+            logger.log(Level.WARNING, e) { "Failed to start the KWin script. Try restarting KDE Plasma." }
         } finally {
             Runtime.getRuntime().addShutdownHook(Thread {
                 script?.stop()

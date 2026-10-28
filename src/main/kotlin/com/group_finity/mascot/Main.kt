@@ -384,12 +384,7 @@ object Main {
                 SystemTray.FORCE_TRAY_TYPE = SystemTray.TrayType.AppIndicator
             }
 
-            val icon = SystemTray.get()
-
-            if (icon == null) {
-                logger.warning { "System tray not available" }
-                return
-            }
+            val icon = checkNotNull(SystemTray.get())
 
             loadResource("img/icon.png").use { icon.setImage(it) }
             icon.setStatus("ShimeLinux")
@@ -709,7 +704,7 @@ object Main {
             icon.menu.add(dismissAllMenu)
         } catch (e: Exception) {
             logger.log(Level.SEVERE, e) { "Failed to create tray icon" }
-            showError(localize("FailedDisplaySystemTrayErrorMessage"), e)
+            showError(localize("FailedDisplaySystemTrayErrorMessage"))
         }
     }
 

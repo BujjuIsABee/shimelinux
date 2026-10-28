@@ -22,6 +22,7 @@
 
 #![allow(deprecated)]
 
+use core::slice;
 use std::{sync::mpsc, thread};
 
 use jni::{
@@ -63,7 +64,7 @@ pub struct Rect {
 
 enum Event {
     SetBounds(Rect),
-    SetImage(Vec<i32>, bool),
+    SetImage(&'static [i32], bool),
     SetCursor(bool),
     Dispose(),
 }
@@ -148,7 +149,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
             layer,
             configured: false,
             pool,
-            image_rgb: Vec::new(),
+            image_rgb: &[],
             image_bounds: Rect::default(),
             image_changed: true,
             layer_mask: Vec::new(),
@@ -226,11 +227,12 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         rgb: JIntArray,
         update_input_region: jboolean,
     ) -> jni::errors::Result<()> {
-        let elements = unsafe { rgb.get_elements(env, ReleaseMode::NoCopyBack)? };
+        let elements = unsafe { rgb.get_elements_critical(env, ReleaseMode::NoCopyBack)? };
+        let slice = unsafe { slice::from_raw_parts(elements.as_ptr(), elements.len()) };
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
-            .send(Event::SetImage(elements.to_vec(), update_input_region))
+            .send(Event::SetImage(slice, update_input_region))
             .expect("Failed to send SetImage event");
 
         Ok(())

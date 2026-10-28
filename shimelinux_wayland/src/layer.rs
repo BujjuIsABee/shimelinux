@@ -62,7 +62,7 @@ pub struct LayerState {
     pub layer: LayerSurface,
     pub configured: bool,
     pub pool: SlotPool,
-    pub image_rgb: Vec<i32>,
+    pub image_rgb: &'static [i32],
     pub image_bounds: Rect,
     pub image_changed: bool,
     pub layer_mask: Vec<Rect>,
@@ -266,7 +266,7 @@ impl LayerState {
         self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
-    pub fn set_image(&mut self, rgb: Vec<i32>, update_input_region: bool) {
+    pub fn set_image(&mut self, rgb: &'static [i32], update_input_region: bool) {
         self.image_changed = true;
         self.image_rgb = rgb;
 
