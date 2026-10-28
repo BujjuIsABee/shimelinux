@@ -38,6 +38,7 @@ import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.IOException
+import java.lang.management.ManagementFactory
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -499,14 +500,25 @@ object Main {
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                if (manager.isPaused) {
-                    manager.togglePauseAll()
-                }
-
                 if (usingWaylandPopups) {
                     PopupFactory.setSharedInstance(WaylandPopupFactory)
                 }
 
+                if (settings.isRestartRequired) {
+                    val response = JOptionPane.showConfirmDialog(
+                        null,
+                        localize("RestartRequiredMessage"),
+                        localize("RestartRequired"),
+                        JOptionPane.YES_NO_OPTION
+                    )
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        val jarPath = this::class.java.protectionDomain.codeSource.location.path
+                        val jvmArgs = ManagementFactory.getRuntimeMXBean().inputArguments.toTypedArray()
+                        ProcessBuilder("java", *jvmArgs, "-jar", jarPath).start()
+                        exit()
+                    }
+                }
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()
                     NativeFactory.resetInstance()
@@ -537,6 +549,10 @@ object Main {
                 }
                 if (settings.isInteractiveWindowReloadRequired) {
                     NativeFactory.instance.environment.refreshCache()
+                }
+
+                if (manager.isPaused) {
+                    manager.togglePauseAll()
                 }
             }
 

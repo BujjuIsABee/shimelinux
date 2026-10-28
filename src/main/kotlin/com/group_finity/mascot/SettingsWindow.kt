@@ -147,6 +147,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val newProperties = Properties()
 
     /**
+     * Whether a restart is required to apply the changes.
+     */
+    var isRestartRequired = false
+
+    /**
      * Whether [NativeFactory.instance] needs to be reset to apply the changes.
      */
     var isEnvironmentReloadRequired = false
@@ -165,6 +170,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("Settings")
+        minimumSize = Dimension(450, 350)
         isResizable = !Platform.isTilingWindowManager
         layout = BorderLayout()
 
@@ -673,7 +679,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             append(localize("AutomaticEnvironment"))
             append(" (")
             append(
-                when (NativeFactory.default) {
+                when (defaultEnvironment) {
                     "kde" -> kdeEnvironmentName
                     "wayland" -> waylandEnvironmentName
                     else -> genericEnvironmentName
@@ -715,7 +721,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 "wayland" -> "wayland"
                 "generic" -> "generic"
                 "virtual" -> "virtual"
-                else -> NativeFactory.default
+                else -> defaultEnvironment
             }
 
             when (environment) {
@@ -744,7 +750,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 "wayland" -> "wayland"
                 "generic" -> "generic"
                 "virtual" -> "virtual"
-                else -> NativeFactory.default
+                else -> defaultEnvironment
             }
 
             val message = when (environment) {
@@ -783,7 +789,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         environmentCardsPanel.add(genericEnvironmentCard, "generic")
         environmentCardsPanel.add(virtualEnvironmentCard, "virtual")
 
-        environmentCardLayout.show(environmentCardsPanel, NativeFactory.current)
+        environmentCardLayout.show(environmentCardsPanel, currentEnvironment)
 
         environmentTab = JPanel()
         environmentTab.layout = BoxLayout(environmentTab, BoxLayout.Y_AXIS)
@@ -811,11 +817,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         aboutTab.add(versionLabel)
         aboutTab.add(Box.createVerticalGlue())
 
-        tabbedPane = object : JTabbedPane() {
-            override fun getPreferredSize() = super.preferredSize.apply { width = 450 }
-        }
+        tabbedPane = JTabbedPane()
         tabbedPane.addTab(localize("General"), generalTab)
-        if (NativeFactory.current == "kde") {
+        if (currentEnvironment == "kde") {
             tabbedPane.addTab(localize("InteractiveWindows"), interactiveWindowsTab)
         }
         tabbedPane.addTab(localize("Theme"), themeTab)
@@ -870,12 +874,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         }
 
         if (getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1") != getNewProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1")) {
-            JOptionPane.showMessageDialog(
-                this,
-                localize("RestartRequiredMessage"),
-                localize("RestartRequired"),
-                JOptionPane.INFORMATION_MESSAGE
-            )
+            isRestartRequired = true
         }
 
         Main.properties.putAll(newProperties)
