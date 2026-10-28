@@ -91,7 +91,7 @@ bind_java_type! {
     native_methods {
         extern fn create_layer(mascot_layer: jint, mouse_event_receiver: MouseEventReceiver) -> jlong,
         extern fn set_bounds(sender_ptr: jlong, x: jint, y: jint, width: jint, height: jint),
-        extern fn set_image(sender_ptr: jlong, rgb: [jint], update_mask: jboolean),
+        extern fn set_image(sender_ptr: jlong, rgb: [jint], update_input_region: jboolean),
         extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
         extern fn dispose(sender_ptr: jlong),
     },
@@ -174,8 +174,8 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
                             Event::SetBounds(bounds) => {
                                 layer_state.set_bounds(bounds);
                             }
-                            Event::SetImage(rgb, update_mask) => {
-                                layer_state.set_image(rgb, update_mask);
+                            Event::SetImage(rgb, update_input_region) => {
+                                layer_state.set_image(rgb, update_input_region);
                             }
                             Event::SetCursor(use_hand) => {
                                 layer_state.set_cursor(&conn, &qh, use_hand);
@@ -224,13 +224,13 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         _this: WaylandLib<'local>,
         sender_ptr: jlong,
         rgb: JIntArray,
-        update_mask: jboolean,
+        update_input_region: jboolean,
     ) -> jni::errors::Result<()> {
         let elements = unsafe { rgb.get_elements(env, ReleaseMode::NoCopyBack)? };
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
-            .send(Event::SetImage(elements.to_vec(), update_mask))
+            .send(Event::SetImage(elements.to_vec(), update_input_region))
             .expect("Failed to send SetImage event");
 
         Ok(())

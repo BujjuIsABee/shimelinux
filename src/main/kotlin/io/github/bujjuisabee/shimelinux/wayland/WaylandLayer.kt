@@ -43,16 +43,19 @@ import kotlin.system.exitProcess
 var absoluteCursorPosition = Point(0, 0)
 
 /**
- * The relative cursor position reported by the compositor.
+ * The relative cursor position provided by the compositor.
  */
 var relativeCursorPosition = Point(0, 0)
 
 /**
  * Creates a Wayland layer surface.
  *
+ * Mouse events will be sent to [mouseEventReceiver]. If [useInputRegion] is `true`, the surface's input region will be
+ * updated whenever [setImage] is called so mouse events on fully transparent pixels will be ignored.
+ *
  * @author Bujju
  */
-class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: Boolean) : Component() {
+class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputRegion: Boolean) : Component() {
     private val senderPtr: Long
     private var absoluteLocation: Point = location
     private var leftHeld = false
@@ -100,14 +103,14 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
     }
 
     /**
-     * Displays the given [rgb] pixel data on the layer surface. If [useMask] is `true`, the surface's input region will
-     * be updated.
+     * Displays the given [rgb] pixel data on the layer surface. If [useInputRegion] is `true`, the surface's input
+     * region will be updated to exclude any fully transparent pixel in [rgb].
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
 
         try {
-            WaylandLib.setImage(senderPtr, rgb, useMask)
+            WaylandLib.setImage(senderPtr, rgb, useInputRegion)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -214,6 +217,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useMask: 
                     MouseEvent.MOUSE_MOVED,
                     System.currentTimeMillis(),
                     modifiers,
+                    // If component is a mascot, use the cursor position relative to absoluteLocation. If component is a
+                    // popup menu element, use the relative cursor position from the compositor.
                     if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
                     if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
                     0,

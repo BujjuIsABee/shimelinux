@@ -33,6 +33,27 @@ import io.github.bujjuisabee.shimelinux.wayland.NativeFactoryImpl as WaylandNati
 import io.github.bujjuisabee.shimelinux.virtual.NativeFactoryImpl as VirtualNativeFactory
 
 /**
+ * The name of the environment chosen automatically based on [Platform.currentDesktop].
+ */
+val defaultEnvironment: String = when {
+    Platform.currentDesktop.contains("kde") -> "kde"
+    Platform.isTilingWindowManager && Platform.supportsWaylandLayerSurfaces -> "wayland"
+    else -> "generic"
+}
+
+/**
+ * The name of the current environment.
+ */
+val currentEnvironment: String
+    get() = when (getProperty("Environment", "")) {
+        "kde" if (Platform.currentDesktop.contains("kde")) -> "kde"
+        "wayland" if (Platform.supportsWaylandLayerSurfaces) -> "wayland"
+        "generic" -> "generic"
+        "virtual" -> "virtual"
+        else -> defaultEnvironment
+    }
+
+/**
  * A factory for platform-specific objects.
  *
  * @author Bujju
@@ -57,38 +78,19 @@ abstract class NativeFactory {
         /**
          * The shared native factory instance.
          */
+        @JvmStatic
         lateinit var instance: NativeFactory
-
-        /**
-         * The name of the environment chosen automatically based on [Platform.currentDesktop].
-         */
-        val default: String = when {
-            Platform.currentDesktop.contains("kde") -> "kde"
-            Platform.isTilingWindowManager && Platform.supportsWaylandLayerSurfaces -> "wayland"
-            else -> "generic"
-        }
-
-        /**
-         * The name of the current environment.
-         */
-        val current: String
-            get() = when (getProperty("Environment", "")) {
-                "kde" if (Platform.currentDesktop.contains("kde")) -> "kde"
-                "wayland" if (Platform.supportsWaylandLayerSurfaces) -> "wayland"
-                "generic" -> "generic"
-                "virtual" -> "virtual"
-                else -> default
-            }
 
         init {
             resetInstance()
         }
 
         /**
-         * Updates [instance] to match the [current] environment.
+         * Updates [instance] to match the [currentEnvironment] environment.
          */
+        @JvmStatic
         fun resetInstance() {
-            instance = when (current) {
+            instance = when (currentEnvironment) {
                 "kde" -> KdeNativeFactory()
                 "wayland" -> WaylandNativeFactory()
                 "virtual" -> VirtualNativeFactory()

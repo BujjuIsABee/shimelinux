@@ -95,7 +95,7 @@ class UserBehavior(
 
             var hotspotResult = HotspotResult.INACTIVE
             if (mascot.isHotspotClicked) {
-                // Active any hotspots that emerge while left mouse button is held down
+                // Activate any hotspots that emerge while left mouse button is held down
                 val cursorPosition = checkNotNull(mascot.cursorPosition)
                 for (hotspot in mascot.hotspots.filter { it.contains(mascot, cursorPosition) }) {
                     hotspotResult = if (hotspot.behavior == null) HotspotResult.ACTIVE else HotspotResult.ACTIVE_NULL

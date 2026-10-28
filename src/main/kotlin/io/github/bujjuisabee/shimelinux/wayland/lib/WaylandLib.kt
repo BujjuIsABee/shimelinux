@@ -66,10 +66,11 @@ object WaylandLib {
     external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
 
     /**
-     * Uses [senderPtr] to send a SetImage event with the given [rgb] pixel data to a layer surface. If [updateMask] is
-     * `true`, the surface's input region will be updated as well.
+     * Uses [senderPtr] to send a SetImage event with the given [rgb] pixel data to a layer surface. If
+     * [updateInputRegion] is `true`, the surface's input region will be updated to exclude any fully transparent pixel
+     * in [rgb].
      */
-    external fun setImage(senderPtr: Long, rgb: IntArray, updateMask: Boolean)
+    external fun setImage(senderPtr: Long, rgb: IntArray, updateInputRegion: Boolean)
 
     /**
      * Uses [senderPtr] to send a SetCursor event to a layer surface. The cursor will be set to a hand if [useHand] is

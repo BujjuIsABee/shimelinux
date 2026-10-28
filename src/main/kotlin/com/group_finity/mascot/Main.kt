@@ -69,12 +69,6 @@ private val logger: Logger = Logger.getLogger(Main::class.java.name)
  */
 object Main {
     /**
-     * The shared instance of [Main].
-     */
-    @JvmStatic
-    val instance = this
-
-    /**
      * Stores the user's settings.
      */
     lateinit var properties: Properties
@@ -461,11 +455,11 @@ object Main {
             allowedBehaviorsSubmenu.add(breedingMenu)
             allowedBehaviorsSubmenu.add(transientMenu)
             allowedBehaviorsSubmenu.add(transformationMenu)
-            if (NativeFactory.current == "kde") {
+            if (currentEnvironment == "kde") {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
-            if (NativeFactory.current != "wayland") {
+            if (currentEnvironment != "wayland") {
                 allowedBehaviorsSubmenu.add(multiscreenMenu)
             }
 
@@ -703,7 +697,7 @@ object Main {
             icon.menu.add(callShimejiMenu)
             icon.menu.add(followCursorMenu)
             icon.menu.add(reduceToOneMenu)
-            if (NativeFactory.current == "kde") {
+            if (currentEnvironment == "kde") {
                 icon.menu.add(restoreWindowsMenu)
             }
             icon.menu.add(JSeparator())
@@ -983,4 +977,12 @@ object Main {
         manager.stop()
         exitProcess(0)
     }
+
+    /**
+     * Main is a singleton object. This property only exists so variables that try to access the `getInstance()`
+     * function from Shimeji-ee will not fail.
+     */
+    @JvmStatic
+    @Deprecated("Main is a singleton object.", ReplaceWith("Main"), DeprecationLevel.ERROR)
+    val instance = this
 }

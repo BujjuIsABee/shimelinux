@@ -51,7 +51,7 @@ object Platform {
     val sessionType: String = System.getenv("XDG_SESSION_TYPE").orEmpty().lowercase()
 
     /**
-     * Whether the app is running within the Flatpak sandbox.
+     * Whether the program is running inside the Flatpak sandbox.
      */
     val isFlatpak: Boolean = System.getenv("container") == "flatpak"
 

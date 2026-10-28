@@ -93,8 +93,7 @@ class VirtualEnvironment : Environment() {
         screen.set(screenRect)
 
         // Update cursor position
-        val info = MouseInfo.getPointerInfo()
-        val point = info?.location ?: Point(0, 0)
+        val point = MouseInfo.getPointerInfo()?.location ?: Point(0, 0)
         SwingUtilities.convertPointFromScreen(point, display.contentPane)
         cursor.set(point)
     }

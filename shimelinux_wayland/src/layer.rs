@@ -266,11 +266,11 @@ impl LayerState {
         self.layer.set_margin(bounds.y, 0, 0, bounds.x);
     }
 
-    pub fn set_image(&mut self, rgb: Vec<i32>, update_mask: bool) {
+    pub fn set_image(&mut self, rgb: Vec<i32>, update_input_region: bool) {
         self.image_changed = true;
         self.image_rgb = rgb;
 
-        if update_mask {
+        if update_input_region {
             self.update_layer_mask();
         }
     }

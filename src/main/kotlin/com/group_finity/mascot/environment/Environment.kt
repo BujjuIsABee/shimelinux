@@ -136,7 +136,7 @@ abstract class Environment {
         /**
          * Updates [screenRect] and [screenRects].
          */
-        fun updateScreenRect() {
+        private fun updateScreenRect() {
             var screenRect = Rectangle()
             val screenRects = hashMapOf<String, Rectangle>()
 

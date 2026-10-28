@@ -90,6 +90,7 @@ object WaylandPopupFactory : PopupFactory() {
                     closeSubmenu()
                 }
 
+                // Update menu selection
                 MenuSelectionManager.defaultManager().selectedPath =
                     listOf(owner, contents, target.takeIf { it is JMenuItem }).filterIsInstance<MenuElement>()
                         .toTypedArray()
@@ -97,8 +98,10 @@ object WaylandPopupFactory : PopupFactory() {
                 updateImage()
             }
 
+            // Dispatch mouse events to the selected menu element
             layer.dispatchEvents(
                 target,
+                // Ignore pressed/released events if the selected menu element opens a submenu
                 leftPressed && target !is JMenu,
                 rightPressed && target !is JMenu,
                 leftReleased && target !is JMenu,
