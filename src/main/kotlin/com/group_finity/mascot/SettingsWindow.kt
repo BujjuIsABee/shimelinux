@@ -96,9 +96,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val removeInteractiveWindowButton: JButton
     private val themeTab: JPanel
     private val themeComboBox: JComboBox<String>
-    private val themeCardLayout: CardLayout
-    private val themeCardsPanel: JPanel
-    private val flatThemeCard: JPanel
+    private val flatThemePanel: JPanel
     private val flatThemeSettingsPanel: JPanel
     private val flatThemeBackgroundColorPanel: JPanel
     private val flatThemeBackgroundColorRightPanel: JPanel
@@ -115,13 +113,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     private val flatThemeAccentColorTextField: JTextField
     private val flatThemeAccentColorPreview: JPanel
     private val flatThemeAccentColorButton: JButton
-    private val flatThemeMenuScalingPanel: MenuScalingPanel
+    private val menuScalingPanel: JPanel
+    private val menuScalingSpinner: JSpinner
     private val flatThemeButtonsPanel: JPanel
     private val useGtkColorsButton: JButton
     private val resetFlatThemeButton: JButton
-    private val gtkThemeCard: JPanel
-    private val gtkThemeSettingsPanel: JPanel
-    private val gtkThemeMenuScalingPanel: MenuScalingPanel
     private val environmentTab: JPanel
     private val environmentPanel: JPanel
     private val environmentComboBox: JComboBox<String>
@@ -170,7 +166,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
         setIconImage(icon)
         title = localize("Settings")
-        minimumSize = Dimension(450, 350)
+        minimumSize = Dimension(450, 373)
         isResizable = !Platform.isTilingWindowManager
         layout = BorderLayout()
 
@@ -334,30 +330,9 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         themeComboBox = JComboBox()
         themeComboBox.addItem(localize("FlatDarkTheme"))
         themeComboBox.addItem(localize("FlatLightTheme"))
-        themeComboBox.addItem(localize("GtkTheme"))
         themeComboBox.addActionListener {
-            setNewProperty(
-                "Theme", when (themeComboBox.selectedIndex) {
-                    0 -> "FlatDark"
-                    1 -> "FlatLight"
-                    2 -> "Gtk"
-                    else -> "FlatDark"
-                }
-            )
-
+            setNewProperty("Theme", if (themeComboBox.selectedIndex == 0) "FlatDark" else "FlatLight")
             refreshTheme()
-
-            when (themeComboBox.selectedIndex) {
-                2 -> {
-                    themeCardLayout.show(themeCardsPanel, "Gtk")
-                    gtkThemeMenuScalingPanel.update()
-                }
-
-                else -> {
-                    themeCardLayout.show(themeCardsPanel, "Flat")
-                    flatThemeMenuScalingPanel.update()
-                }
-            }
         }
 
         flatThemeBackgroundColorTextField = object : JTextField() {
@@ -582,7 +557,20 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeAccentColorPanel.add(JLabel(localize("AccentColor")), BorderLayout.WEST)
         flatThemeAccentColorPanel.add(flatThemeAccentColorRightPanel, BorderLayout.EAST)
 
-        flatThemeMenuScalingPanel = MenuScalingPanel()
+        menuScalingSpinner = object : JSpinner(SpinnerNumberModel(1.0, 1.0, 3.0, 1.0)) {
+            override fun getPreferredSize(): Dimension = super.preferredSize.apply { width = flatThemeBackgroundColorButton.preferredSize.width }
+        }
+        menuScalingSpinner.value = getNewProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1").toInt().toDouble()
+        menuScalingSpinner.editor = JSpinner.NumberEditor(menuScalingSpinner, "0%")
+        menuScalingSpinner.addChangeListener {
+            val newValue = round(menuScalingSpinner.value as Double)
+            menuScalingSpinner.value = newValue
+            setNewProperty("MenuScaling", newValue.toInt())
+        }
+
+        menuScalingPanel = JPanel(BorderLayout())
+        menuScalingPanel.add(JLabel(localize("MenuScaling")), BorderLayout.WEST)
+        menuScalingPanel.add(menuScalingSpinner, BorderLayout.EAST)
 
         flatThemeSettingsPanel = JPanel()
         flatThemeSettingsPanel.layout = BoxLayout(flatThemeSettingsPanel, BoxLayout.Y_AXIS)
@@ -593,7 +581,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         flatThemeSettingsPanel.add(Box.createVerticalStrut(3))
         flatThemeSettingsPanel.add(flatThemeAccentColorPanel)
         flatThemeSettingsPanel.add(Box.createVerticalStrut(3))
-        flatThemeSettingsPanel.add(flatThemeMenuScalingPanel)
+        flatThemeSettingsPanel.add(menuScalingPanel)
 
         resetFlatThemeButton = JButton(localize("Reset"))
         resetFlatThemeButton.addActionListener {
@@ -640,28 +628,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             flatThemeButtonsPanel.add(useGtkColorsButton)
         }
 
-        flatThemeCard = JPanel(BorderLayout())
-        flatThemeCard.add(flatThemeSettingsPanel, BorderLayout.NORTH)
-        flatThemeCard.add(flatThemeButtonsPanel, BorderLayout.SOUTH)
-
-        gtkThemeMenuScalingPanel = MenuScalingPanel()
-
-        gtkThemeSettingsPanel = JPanel()
-        gtkThemeSettingsPanel.layout = BoxLayout(gtkThemeSettingsPanel, BoxLayout.Y_AXIS)
-        gtkThemeSettingsPanel.add(gtkThemeMenuScalingPanel)
-
-        gtkThemeCard = JPanel(BorderLayout())
-        gtkThemeCard.add(gtkThemeSettingsPanel, BorderLayout.NORTH)
-
-        themeCardLayout = CardLayout()
-        themeCardsPanel = JPanel(themeCardLayout)
-        themeCardsPanel.add(flatThemeCard, "Flat")
-        themeCardsPanel.add(gtkThemeCard, "Gtk")
+        flatThemePanel = JPanel(BorderLayout())
+        flatThemePanel.add(flatThemeSettingsPanel, BorderLayout.NORTH)
+        flatThemePanel.add(flatThemeButtonsPanel, BorderLayout.SOUTH)
 
         themeComboBox.selectedIndex = when (getProperty("Theme", "FlatDark")) {
             "FlatDark" -> 0
             "FlatLight" -> 1
-            "Gtk" -> 2
             else -> 0
         }
 
@@ -669,7 +642,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         themeTab.layout = BoxLayout(themeTab, BoxLayout.Y_AXIS)
         themeTab.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         themeTab.add(themeComboBox)
-        themeTab.add(themeCardsPanel)
+        themeTab.add(flatThemePanel)
 
         val kdeEnvironmentName = localize("KdeEnvironment")
         val waylandEnvironmentName = localize("WaylandEnvironment")
@@ -742,7 +715,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             }
         }
 
-        environmentHelpButton = JButton("?")
+        environmentHelpButton = JButton()
         environmentHelpButton.putClientProperty("JButton.buttonType", "help")
         environmentHelpButton.addActionListener {
             val environment = when (getNewProperty("Environment", "")) {
@@ -892,20 +865,20 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         try {
             val theme = getNewProperty("Theme", "FlatDark")
 
-            if (theme.startsWith("Flat")) {
-                FlatLaf.setGlobalExtraDefaults(mapOf())
+            FlatLaf.setGlobalExtraDefaults(mapOf())
 
-                if (themeComboBox.selectedIndex == 0) {
-                    flatThemeBackgroundColorTextField.text = newDarkTheme.getProperty("@background", "#202020")
-                    flatThemeTextColorTextField.text = newDarkTheme.getProperty("@foreground", "#ffffff")
-                    flatThemeAccentColorTextField.text = newDarkTheme.getProperty("@accentColor", "#3c83c5")
-                } else if (themeComboBox.selectedIndex == 1) {
-                    flatThemeBackgroundColorTextField.text = newLightTheme.getProperty("@background", "#ffffff")
-                    flatThemeTextColorTextField.text = newLightTheme.getProperty("@foreground", "#000000")
-                    flatThemeAccentColorTextField.text = newLightTheme.getProperty("@accentColor", "#3c83c5")
-                }
+            // Update text fields
+            if (theme == "FlatDark") {
+                flatThemeBackgroundColorTextField.text = newDarkTheme.getProperty("@background", "#202020")
+                flatThemeTextColorTextField.text = newDarkTheme.getProperty("@foreground", "#ffffff")
+                flatThemeAccentColorTextField.text = newDarkTheme.getProperty("@accentColor", "#3c83c5")
+            } else {
+                flatThemeBackgroundColorTextField.text = newLightTheme.getProperty("@background", "#ffffff")
+                flatThemeTextColorTextField.text = newLightTheme.getProperty("@foreground", "#000000")
+                flatThemeAccentColorTextField.text = newLightTheme.getProperty("@accentColor", "#3c83c5")
             }
 
+            // Save theme properties
             getPath("conf", "theme", "FlatDarkLaf.properties").outputStream().use {
                 newDarkTheme.store(it, "Flat Dark Theme")
             }
@@ -917,7 +890,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 when (theme) {
                     "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
                     "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
                     else -> "com.formdev.flatlaf.FlatDarkLaf"
                 }
             )
@@ -944,32 +916,6 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 else -> value
             } as? T ?: defaultValue
         }
-
-    private inner class MenuScalingPanel : JPanel() {
-        private val menuScalingSpinner: JSpinner
-
-        init {
-            layout = BorderLayout()
-
-            menuScalingSpinner = object : JSpinner(SpinnerNumberModel(1.0, 1.0, 3.0, 1.0)) {
-                override fun getPreferredSize(): Dimension = super.preferredSize.apply { width = flatThemeBackgroundColorButton.preferredSize.width }
-            }
-            menuScalingSpinner.editor = JSpinner.NumberEditor(menuScalingSpinner, "0%")
-            menuScalingSpinner.addChangeListener {
-                val newValue = round(menuScalingSpinner.value as Double)
-                menuScalingSpinner.value = newValue
-                setNewProperty("MenuScaling", newValue.toInt())
-            }
-
-            add(JLabel(localize("MenuScaling")), BorderLayout.WEST)
-            add(menuScalingSpinner, BorderLayout.EAST)
-        }
-
-        fun update() {
-            val defaultMenuScaling = System.getProperty("sun.java2d.uiScale") ?: "1"
-            menuScalingSpinner.value = getNewProperty("MenuScaling", defaultMenuScaling).toInt().toDouble()
-        }
-    }
 
     private inner class ScreenDimensionsPanel : JPanel() {
         private val overrideScreenDimensionsCheckBox: JCheckBox

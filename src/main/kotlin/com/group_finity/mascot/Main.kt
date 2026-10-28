@@ -167,7 +167,6 @@ object Main {
                 when (getProperty("Theme", "FlatDark")) {
                     "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
                     "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    "Gtk" -> "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
                     else -> "com.formdev.flatlaf.FlatDarkLaf"
                 }
             )
