@@ -46,6 +46,21 @@
         </screenshot>
     </screenshots>
     <releases>
+        <release version="1.4.2" date="2026-10-28">
+            <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.2</url>
+            <description>
+                <p>Changelog:</p>
+                <ul>
+                    <li>Re-added the menu scaling option in the Theme tab.</li>
+                    <li>Disabled the Use GTK Colors button on the Flatpak app.</li>
+                    <li>Reduced the memory usage of the Wayland environment.</li>
+                    <li>Removed the GTK theme.</li>
+                    <li>The error message that appears when the system tray icon cannot be created has been re-added.</li>
+                    <li>Fixed a bug where the app would fail to start if the KWin script could not be started on the KDE environment.</li>
+                    <li>Fixed a bug where the settings menu would be improperly scaled on HiDPI monitors on some desktop environments.</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.4.1" date="2026-10-20">
             <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.1</url>
             <description>
