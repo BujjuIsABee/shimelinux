@@ -493,19 +493,12 @@ object Main {
                 }
 
                 if (settings.isRestartRequired) {
-                    val response = JOptionPane.showConfirmDialog(
+                    JOptionPane.showMessageDialog(
                         null,
                         localize("RestartRequiredMessage"),
                         localize("RestartRequired"),
-                        JOptionPane.YES_NO_OPTION
+                        JOptionPane.INFORMATION_MESSAGE
                     )
-
-                    if (response == JOptionPane.YES_OPTION) {
-                        val jarPath = this::class.java.protectionDomain.codeSource.location.path
-                        val jvmArgs = ManagementFactory.getRuntimeMXBean().inputArguments.toTypedArray()
-                        ProcessBuilder("java", *jvmArgs, "-jar", jarPath).start()
-                        exit()
-                    }
                 }
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()

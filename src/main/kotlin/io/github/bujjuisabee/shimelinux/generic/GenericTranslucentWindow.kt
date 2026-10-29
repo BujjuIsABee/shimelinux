@@ -105,9 +105,9 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
                 if (alpha > 0 && start == -1) {
                     start = x
                 } else if (alpha == 0 && start != -1) {
-                    start = -1
                     rect.setBounds(start, y, x - start, 1)
                     path.append(rect, false)
+                    start = -1
                 }
             }
         }
