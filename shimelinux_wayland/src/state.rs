@@ -53,7 +53,6 @@ use wayland_client::{
         wl_surface::WlSurface,
     },
 };
-use wayland_cursor::Cursor;
 
 use crate::ffi::MouseEventReceiver;
 
@@ -147,18 +146,21 @@ impl CompositorHandler for State {
         _surface: &WlSurface,
         output: &WlOutput,
     ) {
-        self.output.get_or_insert(output.clone());
-        if let Some(info) = self.output_state.info(output) {
-            let (x, y) = info.logical_position.unwrap_or_default();
-            let (width, height) = info.logical_size.unwrap_or_default();
-            let mut screen_rect = SCREEN_RECT.lock().unwrap();
-            *screen_rect = Rect {
-                x,
-                y,
-                width,
-                height,
-            };
-        }
+        self.output.get_or_insert_with(|| {
+            if let Some(info) = self.output_state.info(output) {
+                let (x, y) = info.logical_position.unwrap_or_default();
+                let (width, height) = info.logical_size.unwrap_or_default();
+                let mut screen_rect = SCREEN_RECT.lock().unwrap();
+                *screen_rect = Rect {
+                    x,
+                    y,
+                    width,
+                    height,
+                };
+            }
+
+            output.clone()
+        });
     }
 
     fn surface_leave(

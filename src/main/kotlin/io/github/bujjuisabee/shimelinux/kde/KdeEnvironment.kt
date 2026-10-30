@@ -34,7 +34,6 @@ import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
-import java.awt.Toolkit
 import javax.swing.PopupFactory
 import javax.swing.UIManager
 
@@ -78,7 +77,7 @@ class KdeEnvironment : Environment() {
             activeIE.isVisible = true
         } else {
             activeIE.isVisible = false
-            activeIE.set(Rectangle(0, 0, 0, 0))
+            activeIE.set(Rectangle())
             activeIETitle = ""
         }
     }
@@ -102,23 +101,22 @@ class KdeEnvironment : Environment() {
         val (screenX, screenY, screenWidth, screenHeight) = WaylandLib.getScreenRect()
 
         if (getProperty("OverrideScreenDimensions", false)) {
-            screenRect = Rectangle(
+            screenRect.setBounds(
                 getProperty("ScreenX", screen.left),
                 getProperty("ScreenY", screen.top),
                 getProperty("ScreenWidth", screen.width),
                 getProperty("ScreenHeight", screen.height)
             )
         } else {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect = Rectangle(0, 0, screenWidth, screenHeight)
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+            screenRect.setBounds(0, 0, screenWidth, screenHeight)
+            applyInsets()
         }
 
         screen.set(screenRect)
 
         // Update cursor position
         val cursorPos = KWin.cursorPosition ?: Point(0, 0)
-        absoluteCursorPosition = Point(cursorPos.x - screenX, cursorPos.y - screenY)
+        absoluteCursorPosition.setLocation(cursorPos.x - screenX, cursorPos.y - screenY)
         cursor.set(absoluteCursorPosition)
     }
 
@@ -127,7 +125,7 @@ class KdeEnvironment : Environment() {
 
         // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
-            screenRect = Rectangle(
+            screenRect.setBounds(
                 getProperty("ScreenX", screen.left),
                 getProperty("ScreenY", screen.top),
                 getProperty("ScreenWidth", screen.width),
@@ -135,15 +133,14 @@ class KdeEnvironment : Environment() {
             )
         } else if (!getProperty("Multiscreen", true)) {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect = gc.bounds
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+            screenRect.bounds = gc.bounds
+            applyInsets()
         }
 
         screen.set(screenRect)
 
         // Update cursor position
-        absoluteCursorPosition = KWin.cursorPosition ?: Point(0, 0)
-        cursor.set(absoluteCursorPosition)
+        cursor.set(KWin.cursorPosition ?: Point(0, 0))
     }
 
     private fun isIE(caption: String) = windowCache.getOrPut(caption) {

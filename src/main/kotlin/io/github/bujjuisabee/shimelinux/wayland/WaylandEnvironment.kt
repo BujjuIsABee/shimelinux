@@ -29,10 +29,7 @@ import com.group_finity.mascot.execute
 import com.group_finity.mascot.getProperty
 import io.github.bujjuisabee.shimelinux.kde.KWin
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
-import java.awt.GraphicsEnvironment
 import java.awt.Point
-import java.awt.Rectangle
-import java.awt.Toolkit
 import javax.swing.PopupFactory
 import kotlin.collections.map
 
@@ -58,16 +55,15 @@ class WaylandEnvironment : Environment() {
         val (screenX, screenY, screenWidth, screenHeight) = WaylandLib.getScreenRect()
 
         if (getProperty("OverrideScreenDimensions", false)) {
-            screenRect = Rectangle(
+            screenRect.setBounds(
                 getProperty("ScreenX", screen.left),
                 getProperty("ScreenY", screen.top),
                 getProperty("ScreenWidth", screen.width),
                 getProperty("ScreenHeight", screen.height)
             )
         } else {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect = Rectangle(0, 0, screenWidth, screenHeight)
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+            screenRect.setBounds(0, 0, screenWidth, screenHeight)
+            applyInsets()
         }
 
         screen.set(screenRect)
@@ -76,17 +72,17 @@ class WaylandEnvironment : Environment() {
         when (Platform.currentDesktop) {
             "hyprland" -> runCatching {
                 val (x, y) = execute("hyprctl", "cursorpos").split(", ").map { it.toInt() }
-                absoluteCursorPosition = Point(x - screenX, y - screenY)
+                absoluteCursorPosition.setLocation(x - screenX, y - screenY)
             }
 
             "mango" -> runCatching {
                 val (x, y) = execute("mmsg", "get", "cursorpos").split(',').map { it.substringAfter(':') }.take(2).map { it.toDouble().toInt() }
-                absoluteCursorPosition = Point(x - screenX, y - screenY)
+                absoluteCursorPosition.setLocation(x - screenX, y - screenY)
             }
 
             "kde" -> runCatching {
                 val cursorPos = checkNotNull(KWin.cursorPosition)
-                absoluteCursorPosition = Point(cursorPos.x - screenX, cursorPos.y - screenY)
+                absoluteCursorPosition.setLocation(cursorPos.x - screenX, cursorPos.y - screenY)
             }
         }
 

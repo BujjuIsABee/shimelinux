@@ -23,7 +23,6 @@
 package com.group_finity.mascot.environment
 
 import java.awt.GraphicsEnvironment
-import java.awt.Insets
 import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.Rectangle
@@ -142,7 +141,13 @@ abstract class Environment {
 
             for (device in GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices) {
                 val rect = device.defaultConfiguration.bounds
-                rect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(device.defaultConfiguration))
+                val insets = Toolkit.getDefaultToolkit().getScreenInsets(device.defaultConfiguration)
+                rect.apply {
+                    x += insets.left
+                    y += insets.top
+                    width -= (insets.left + insets.right)
+                    height -= (insets.top + insets.bottom)
+                }
 
                 screenRects[device.iDstring] = rect
                 screenRect = screenRect.union(rect)
@@ -153,13 +158,18 @@ abstract class Environment {
         }
 
         /**
-         * Applies the given [insets] to the rectangle.
+         * Applies the screen insets to [screenRect].
          */
-        fun Rectangle.applyInsets(insets: Insets) {
-            x += insets.left
-            y += insets.top
-            width -= (insets.left + insets.right)
-            height -= (insets.top + insets.bottom)
+        fun applyInsets() {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            val insets = Toolkit.getDefaultToolkit().getScreenInsets(gc)
+
+            screenRect.apply {
+                x += insets.left
+                y += insets.top
+                width -= (insets.left + insets.right)
+                height -= (insets.top + insets.bottom)
+            }
         }
     }
 }

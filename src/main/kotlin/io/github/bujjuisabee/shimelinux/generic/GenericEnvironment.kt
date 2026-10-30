@@ -29,8 +29,6 @@ import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
 import java.awt.GraphicsEnvironment
 import java.awt.Point
-import java.awt.Rectangle
-import java.awt.Toolkit
 import javax.swing.PopupFactory
 import javax.swing.UIManager
 
@@ -58,7 +56,7 @@ class GenericEnvironment : Environment() {
 
         // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
-            screenRect = Rectangle(
+            screenRect.setBounds(
                 getProperty("ScreenX", screen.left),
                 getProperty("ScreenY", screen.top),
                 getProperty("ScreenWidth", screen.width),
@@ -66,8 +64,8 @@ class GenericEnvironment : Environment() {
             )
         } else if (!getProperty("Multiscreen", true)) {
             val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect = gc.bounds
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+            screenRect.bounds = gc.bounds
+            applyInsets()
         }
 
         screen.set(screenRect)

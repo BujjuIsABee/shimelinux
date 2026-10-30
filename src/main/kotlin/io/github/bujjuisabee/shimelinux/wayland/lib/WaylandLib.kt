@@ -72,7 +72,7 @@ object WaylandLib {
     external fun setBounds(id: Int, x: Int, y: Int, width: Int, height: Int)
 
     /**
-     * Displays the given [rgb] pixel data on the layer surface with the given [id].
+     * Displays the [rgb] pixel data on the layer surface with the given [id].
      */
     external fun setImage(id: Int, rgb: IntArray)
 

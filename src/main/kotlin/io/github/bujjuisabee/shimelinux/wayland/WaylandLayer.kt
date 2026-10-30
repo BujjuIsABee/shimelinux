@@ -41,14 +41,14 @@ import kotlin.system.exitProcess
  * The absolute cursor position, or an approximation of it based on the [relativeCursorPosition] if
  * [Platform.providesAbsoluteCursorPosition] is `false`.
  */
-var absoluteCursorPosition = Point(0, 0)
+val absoluteCursorPosition = Point(0, 0)
 
 /**
  * The relative cursor position provided by the compositor.
  */
-var relativeCursorPosition = Point(0, 0)
+val relativeCursorPosition = Point(0, 0)
 
-private var nextId = AtomicInteger()
+private val nextId = AtomicInteger()
 
 /**
  * Creates a Wayland layer surface.
@@ -206,12 +206,12 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         }
 
         if (relativeCursorPosition.x != positionX || relativeCursorPosition.y != positionY) {
-            relativeCursorPosition = Point(positionX, positionY)
+            relativeCursorPosition.setLocation(positionX, positionY)
 
             // If the compositor does not provide the absolute cursor position, estimate it by adding the relative
             // cursor position to the absolute position of the layer surface.
             if (!Platform.providesAbsoluteCursorPosition) {
-                absoluteCursorPosition = Point(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
+                absoluteCursorPosition.setLocation(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
             }
 
             component.dispatchEvent(
