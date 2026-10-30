@@ -61,13 +61,13 @@ object WaylandLib {
 
     external fun init(mascotLayer: Int): Long
 
-    external fun createLayer(senderPtr: Long, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean): Int
+    external fun createLayer(senderPtr: Long, id: Int, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean)
 
-    external fun setBounds(senderPtr: Long, layerIndex: Int, x: Int, y: Int, width: Int, height: Int)
+    external fun setBounds(senderPtr: Long, id: Int, x: Int, y: Int, width: Int, height: Int)
 
-    external fun setImage(senderPtr: Long, layerIndex: Int, rgb: IntArray)
+    external fun setImage(senderPtr: Long, id: Int, rgb: IntArray)
 
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
-    external fun dispose(senderPtr: Long, layerIndex: Int)
+    external fun dispose(senderPtr: Long, id: Int)
 }

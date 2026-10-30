@@ -23,7 +23,7 @@
 #![allow(deprecated, clippy::too_many_arguments)]
 
 use core::slice;
-use std::{sync::mpsc, thread};
+use std::{collections::HashMap, sync::mpsc, thread};
 
 use jni::{
     Env, bind_java_type,
@@ -51,7 +51,6 @@ use smithay_client_toolkit::{
     },
     shm::{Shm, ShmHandler, slot::SlotPool},
 };
-use tokio::sync::oneshot;
 use wayland_client::{
     Connection, QueueHandle, delegate_noop,
     globals::registry_queue_init,
@@ -90,7 +89,7 @@ struct State {
     seat_state: SeatState,
     shm: Shm,
     pool: SlotPool,
-    layers: Vec<LayerState>,
+    layers: HashMap<i32, LayerState>,
     output: Option<WlOutput>,
     pointer: Option<WlPointer>,
     pointer_surface: Option<WlSurface>,
@@ -110,11 +109,7 @@ struct LayerState {
 }
 
 enum Event {
-    CreateLayer(
-        oneshot::Sender<i32>,
-        Global<MouseEventReceiver<'static>>,
-        bool,
-    ),
+    CreateLayer(i32, Global<MouseEventReceiver<'static>>, bool),
     SetBounds(i32, i32, i32, i32, i32),
     SetImage(i32, &'static [i32]),
     SetCursor(bool),
@@ -149,7 +144,7 @@ impl CompositorHandler for State {
     ) {
         if let Some(layer) = self
             .layers
-            .iter_mut()
+            .values_mut()
             .find(|l| l.layer_surface.wl_surface() == surface)
         {
             layer.draw(&mut self.pool, &self.compositor_state, qh);
@@ -200,7 +195,7 @@ impl LayerShellHandler for State {
         _configure: LayerSurfaceConfigure,
         _serial: u32,
     ) {
-        if let Some(layer) = self.layers.iter_mut().find(|l| l.layer_surface == *layer)
+        if let Some(layer) = self.layers.values_mut().find(|l| l.layer_surface == *layer)
             && !layer.configured
         {
             layer.configured = true;
@@ -259,7 +254,7 @@ impl PointerHandler for State {
         for event in events {
             if let Some(layer) = self
                 .layers
-                .iter_mut()
+                .values_mut()
                 .find(|l| *l.layer_surface.wl_surface() == event.surface)
             {
                 (position_x, position_y) = event.position;
@@ -426,11 +421,11 @@ bind_java_type! {
     },
     native_methods {
         extern fn init(mascot_layer: jint) -> jlong,
-        extern fn create_layer(sender_ptr: jlong, mouse_event_receiver: MouseEventReceiver, use_input_region: jboolean) -> jint,
-        extern fn set_bounds(sender_ptr: jlong, layer_index: jint, x: jint, y: jint, width: jint, height: jint),
-        extern fn set_image(sender_ptr: jlong, layer_index: jint, rgb: [jint]),
+        extern fn create_layer(sender_ptr: jlong, id: jint, mouse_event_receiver: MouseEventReceiver, use_input_region: jboolean),
+        extern fn set_bounds(sender_ptr: jlong, id: jint, x: jint, y: jint, width: jint, height: jint),
+        extern fn set_image(sender_ptr: jlong, id: jint, rgb: [jint]),
         extern fn set_cursor(sender_ptr: jlong, use_hand: jboolean),
-        extern fn dispose(sender_ptr: jlong, layer_index: jint),
+        extern fn dispose(sender_ptr: jlong, id: jint),
     },
 }
 
@@ -460,7 +455,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
             seat_state: SeatState::new(&globals, &qh),
             shm,
             pool,
-            layers: Vec::new(),
+            layers: HashMap::new(),
             output: None,
             pointer: None,
             pointer_surface: None,
@@ -474,7 +469,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
                 // Handle events
                 while let Ok(event) = receiver.try_recv() {
                     match event {
-                        Event::CreateLayer(sender, mouse_event_receiver, use_input_region) => {
+                        Event::CreateLayer(id, mouse_event_receiver, use_input_region) => {
                             let surface = state.compositor_state.create_surface(&qh);
                             let output = state.output.as_ref();
                             let layer_surface = state.layer_shell.create_layer_surface(
@@ -495,42 +490,45 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
                             layer_surface.set_size(1, 1);
                             layer_surface.commit();
 
-                            let index = state.layers.len();
-                            state.layers.push(LayerState {
-                                layer_surface,
-                                configured: false,
-                                rgb: &[],
-                                bounds: Rect::default(),
-                                image_changed: false,
-                                cursor_state: CursorState::default(),
-                                mouse_event_receiver,
-                                use_input_region,
-                                input_region: Vec::new(),
-                            });
-
-                            sender
-                                .send(index as i32)
-                                .expect("Failed to send layer index");
+                            state.layers.insert(
+                                id,
+                                LayerState {
+                                    layer_surface,
+                                    configured: false,
+                                    rgb: &[],
+                                    bounds: Rect::default(),
+                                    image_changed: false,
+                                    cursor_state: CursorState::default(),
+                                    mouse_event_receiver,
+                                    use_input_region,
+                                    input_region: Vec::new(),
+                                },
+                            );
                         }
-                        Event::SetBounds(layer_index, x, y, width, height) => {
-                            let layer = &mut state.layers[layer_index as usize];
-                            layer.bounds = Rect {
-                                x: x.max(-width + 1),
-                                y: y.max(-height + 1),
-                                width: width.max(1),
-                                height: height.max(1),
-                            };
-                            layer
-                                .layer_surface
-                                .set_margin(layer.bounds.y, 0, 0, layer.bounds.x);
+                        Event::SetBounds(id, x, y, width, height) => {
+                            if let Some(layer) = state.layers.get_mut(&id) {
+                                layer.bounds = Rect {
+                                    x: x.max(-width + 1),
+                                    y: y.max(-height + 1),
+                                    width: width.max(1),
+                                    height: height.max(1),
+                                };
+                                layer.layer_surface.set_margin(
+                                    layer.bounds.y,
+                                    0,
+                                    0,
+                                    layer.bounds.x,
+                                );
+                            }
                         }
-                        Event::SetImage(layer_index, rgb) => {
-                            let layer = &mut state.layers[layer_index as usize];
-                            layer.image_changed = true;
-                            layer.rgb = rgb;
+                        Event::SetImage(id, rgb) => {
+                            if let Some(layer) = state.layers.get_mut(&id) {
+                                layer.image_changed = true;
+                                layer.rgb = rgb;
 
-                            if layer.use_input_region {
-                                layer.update_input_region();
+                                if layer.use_input_region {
+                                    layer.update_input_region();
+                                }
                             }
                         }
                         Event::SetCursor(use_hand) => {
@@ -542,16 +540,21 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
                                 let surface = state
                                     .pointer_surface
                                     .get_or_insert(state.compositor_state.create_surface(&qh));
+
                                 surface.attach(None, 0, 0);
                                 surface.commit();
+
                                 surface.attach(Some(&cursor[0]), 0, 0);
                                 surface.commit();
+
                                 state.pointer_surface = Some(surface.clone());
                             }
                         }
-                        Event::Dispose(layer_index) => {
-                            let layer = &mut state.layers[layer_index as usize];
-                            layer.layer_surface.wl_surface().destroy();
+                        Event::Dispose(id) => {
+                            if let Some(layer) = state.layers.get_mut(&id) {
+                                layer.layer_surface.wl_surface().destroy();
+                            }
+                            state.layers.remove(&id);
                         }
                     }
                 }
@@ -565,26 +568,25 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
         sender_ptr: jlong,
+        id: jint,
         mouse_event_receiver: MouseEventReceiver<'local>,
         use_input_region: jboolean,
-    ) -> jni::errors::Result<jint> {
-        let (tx, rx) = oneshot::channel::<i32>();
+    ) -> jni::errors::Result<()> {
         let global = env.new_global_ref(mouse_event_receiver).unwrap();
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
-            .send(Event::CreateLayer(tx, global, use_input_region))
+            .send(Event::CreateLayer(id, global, use_input_region))
             .expect("Failed to send CreateLayer event");
 
-        rx.blocking_recv()
-            .map_err(|_| jni::errors::Error::JavaException)
+        Ok(())
     }
 
     fn set_bounds<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
         sender_ptr: jlong,
-        layer_index: jint,
+        id: jint,
         x: jint,
         y: jint,
         width: jint,
@@ -592,7 +594,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
     ) -> jni::errors::Result<()> {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
-            .send(Event::SetBounds(layer_index, x, y, width, height))
+            .send(Event::SetBounds(id, x, y, width, height))
             .expect("Failed to send SetBounds event");
 
         Ok(())
@@ -602,7 +604,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         env: &mut ::jni::Env<'local>,
         _this: WaylandLib<'local>,
         sender_ptr: jlong,
-        layer_index: jint,
+        id: jint,
         rgb: JIntArray,
     ) -> jni::errors::Result<()> {
         let elements = unsafe { rgb.get_elements_critical(env, ReleaseMode::NoCopyBack)? };
@@ -610,7 +612,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
 
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
-            .send(Event::SetImage(layer_index, slice))
+            .send(Event::SetImage(id, slice))
             .expect("Failed to send SetImage event");
 
         Ok(())
@@ -634,11 +636,11 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         _env: &mut ::jni::Env<'local>,
         _this: WaylandLib<'local>,
         sender_ptr: jlong,
-        layer_index: jint,
+        id: jint,
     ) -> jni::errors::Result<()> {
         let sender = unsafe { &*(sender_ptr as *const mpsc::Sender<Event>) };
         sender
-            .send(Event::Dispose(layer_index))
+            .send(Event::Dispose(id))
             .expect("Failed to send Dispose event");
 
         Ok(())
