@@ -23,7 +23,6 @@
 package io.github.bujjuisabee.shimelinux.wayland.lib
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import java.io.File
@@ -36,8 +35,6 @@ import kotlin.system.exitProcess
  * @author Bujju
  */
 object WaylandLib {
-    val senderPtr: Long
-
     init {
         try {
             // Copy the library to temp file
@@ -51,23 +48,19 @@ object WaylandLib {
 
             // Load the library
             System.load(libFile.absolutePath)
-
-            senderPtr = init(getProperty("MascotLayerWayland", 3))
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
     }
 
-    external fun init(mascotLayer: Int): Long
+    external fun createLayer(id: Int, mascotLayer: Int, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean)
 
-    external fun createLayer(senderPtr: Long, id: Int, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean)
+    external fun setBounds(id: Int, x: Int, y: Int, width: Int, height: Int)
 
-    external fun setBounds(senderPtr: Long, id: Int, x: Int, y: Int, width: Int, height: Int)
+    external fun setImage(id: Int, rgb: IntArray)
 
-    external fun setImage(senderPtr: Long, id: Int, rgb: IntArray)
+    external fun setCursor(useHand: Boolean)
 
-    external fun setCursor(senderPtr: Long, useHand: Boolean)
-
-    external fun dispose(senderPtr: Long, id: Int)
+    external fun dispose(id: Int)
 }

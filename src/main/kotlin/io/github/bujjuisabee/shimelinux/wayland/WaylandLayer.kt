@@ -24,6 +24,7 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.Platform
+import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
@@ -66,7 +67,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
     init {
         try {
             id = nextId.getAndIncrement()
-            WaylandLib.createLayer(WaylandLib.senderPtr, id, mouseEventReceiver, useInputRegion)
+            WaylandLib.createLayer(id, getProperty("MascotLayerWayland", 3), mouseEventReceiver, useInputRegion)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -87,7 +88,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         super.setBounds(x, y, width, height)
 
         try {
-            WaylandLib.setBounds(WaylandLib.senderPtr, id, x, y, width, height)
+            WaylandLib.setBounds(id, x, y, width, height)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -98,7 +99,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         if (isDisposed) return
 
         try {
-            WaylandLib.setCursor(WaylandLib.senderPtr, cursor.type == Cursor.HAND_CURSOR)
+            WaylandLib.setCursor(cursor.type == Cursor.HAND_CURSOR)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -112,7 +113,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         if (isDisposed) return
 
         try {
-            WaylandLib.setImage(WaylandLib.senderPtr, id, rgb)
+            WaylandLib.setImage(id, rgb)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -126,7 +127,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         if (isDisposed) return
 
         try {
-            WaylandLib.dispose(WaylandLib.senderPtr, id)
+            WaylandLib.dispose(id)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
