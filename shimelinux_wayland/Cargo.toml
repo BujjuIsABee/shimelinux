@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 jni = { version = "0.22.4", features = ["invocation"] }
 smithay-client-toolkit = "0.21.1"
+tokio = { version = "1.54.1", features = ["sync"] }
 wayland-client = "0.31.15"
 wayland-cursor = "0.31.14"
 

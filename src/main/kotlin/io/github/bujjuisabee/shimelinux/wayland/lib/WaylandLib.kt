@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland.lib
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import java.io.File
@@ -35,6 +36,8 @@ import kotlin.system.exitProcess
  * @author Bujju
  */
 object WaylandLib {
+    val senderPtr: Long
+
     init {
         try {
             // Copy the library to temp file
@@ -48,38 +51,23 @@ object WaylandLib {
 
             // Load the library
             System.load(libFile.absolutePath)
+
+            senderPtr = init(getProperty("MascotLayerWayland", 3))
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
         }
     }
 
-    /**
-     * Creates a Wayland layer surface and returns a pointer to the event sender. Mouse events will be sent to
-     * [mouseEventReceiver].
-     */
-    external fun createLayer(mascotLayer: Int, mouseEventReceiver: MouseEventReceiver): Long
+    external fun init(mascotLayer: Int): Long
 
-    /**
-     * Uses [senderPtr] to send a SetBounds event with the given [x], [y], [width], and [height] to a layer surface.
-     */
-    external fun setBounds(senderPtr: Long, x: Int, y: Int, width: Int, height: Int)
+    external fun createLayer(senderPtr: Long, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean): Int
 
-    /**
-     * Uses [senderPtr] to send a SetImage event with the given [rgb] pixel data to a layer surface. If
-     * [updateInputRegion] is `true`, the surface's input region will be updated to exclude any fully transparent pixel
-     * in [rgb].
-     */
-    external fun setImage(senderPtr: Long, rgb: IntArray, updateInputRegion: Boolean)
+    external fun setBounds(senderPtr: Long, layerIndex: Int, x: Int, y: Int, width: Int, height: Int)
 
-    /**
-     * Uses [senderPtr] to send a SetCursor event to a layer surface. The cursor will be set to a hand if [useHand] is
-     * `true`, or the regular pointer if it is `false`.
-     */
+    external fun setImage(senderPtr: Long, layerIndex: Int, rgb: IntArray)
+
     external fun setCursor(senderPtr: Long, useHand: Boolean)
 
-    /**
-     * Uses [senderPtr] to send a Dispose event to a layer surface.
-     */
-    external fun dispose(senderPtr: Long)
+    external fun dispose(senderPtr: Long, layerIndex: Int)
 }

@@ -24,7 +24,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.Platform
-import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
@@ -50,20 +49,20 @@ var relativeCursorPosition = Point(0, 0)
 /**
  * Creates a Wayland layer surface.
  *
- * Mouse events will be sent to [mouseEventReceiver]. If [useInputRegion] is `true`, the surface's input region will be
- * updated whenever [setImage] is called so mouse events on fully transparent pixels will be ignored.
+ * Mouse events will be sent to [mouseEventReceiver]. If [useInputRegion] is `true`, mouse events on fully transparent
+ * pixels will be ignored.
  *
  * @author Bujju
  */
 class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputRegion: Boolean) : Component() {
-    private val senderPtr: Long
+    private val layerIndex: Int
     private var absoluteLocation: Point = location
     private var leftHeld = false
     private var isDisposed = false
 
     init {
         try {
-            senderPtr = WaylandLib.createLayer(getProperty("MascotLayerWayland", 3), mouseEventReceiver)
+            layerIndex = WaylandLib.createLayer(WaylandLib.senderPtr, mouseEventReceiver, useInputRegion)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -84,7 +83,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         super.setBounds(x, y, width, height)
 
         try {
-            WaylandLib.setBounds(senderPtr, x, y, width, height)
+            WaylandLib.setBounds(WaylandLib.senderPtr, layerIndex, x, y, width, height)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -95,7 +94,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         if (isDisposed) return
 
         try {
-            WaylandLib.setCursor(senderPtr, cursor.type == Cursor.HAND_CURSOR)
+            WaylandLib.setCursor(WaylandLib.senderPtr, cursor.type == Cursor.HAND_CURSOR)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -103,14 +102,13 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
     }
 
     /**
-     * Displays the given [rgb] pixel data on the layer surface. If [useInputRegion] is `true`, the surface's input
-     * region will be updated to exclude any fully transparent pixel in [rgb].
+     * Displays the given [rgb] pixel data on the layer surface.
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
 
         try {
-            WaylandLib.setImage(senderPtr, rgb, useInputRegion)
+            WaylandLib.setImage(WaylandLib.senderPtr, layerIndex, rgb)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
@@ -124,7 +122,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         if (isDisposed) return
 
         try {
-            WaylandLib.dispose(senderPtr)
+            WaylandLib.dispose(WaylandLib.senderPtr, layerIndex)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
             exitProcess(0)
