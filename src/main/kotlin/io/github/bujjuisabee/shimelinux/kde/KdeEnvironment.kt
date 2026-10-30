@@ -24,12 +24,13 @@ package io.github.bujjuisabee.shimelinux.kde
 
 import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
-import com.group_finity.mascot.Platform
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.usingWaylandLayerSurfaces
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import io.github.bujjuisabee.shimelinux.wayland.absoluteCursorPosition
+import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
@@ -52,7 +53,7 @@ class KdeEnvironment : Environment() {
     private val windowCache = mutableMapOf<String, Boolean>()
 
     init {
-        if (Platform.supportsWaylandLayerSurfaces && getProperty("UseWaylandLayersKde", true)) {
+        if (usingWaylandLayerSurfaces) {
             PopupFactory.setSharedInstance(WaylandPopupFactory)
         } else if (UIManager.getLookAndFeel() is FlatLaf) {
             PopupFactory.setSharedInstance(FlatPopupFactory())
@@ -62,25 +63,12 @@ class KdeEnvironment : Environment() {
     }
 
     override fun tick() {
-        // Update screen bounds
-        if (getProperty("OverrideScreenDimensions", false)) {
-            screenRect = Rectangle(
-                getProperty("ScreenX", screen.left),
-                getProperty("ScreenY", screen.top),
-                getProperty("ScreenWidth", screen.width),
-                getProperty("ScreenHeight", screen.height)
-            )
-        } else if (!getProperty("Multiscreen", true)) {
-            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-            screenRect = gc.bounds
-            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+        // Update screen bounds and cursor position
+        if (usingWaylandLayerSurfaces) {
+            waylandTick()
+        } else {
+            genericTick()
         }
-
-        screen.set(screenRect)
-
-        // Update cursor position
-        absoluteCursorPosition = KWin.cursorPosition ?: Point(0, 0)
-        cursor.set(absoluteCursorPosition)
 
         // Update active window
         val activeWindow = KWin.activeWindow
@@ -108,6 +96,55 @@ class KdeEnvironment : Environment() {
     }
 
     override fun dispose() {}
+
+    private fun waylandTick() {
+        // Update screen bounds
+        val (screenX, screenY, screenWidth, screenHeight) = WaylandLib.getScreenRect()
+
+        if (getProperty("OverrideScreenDimensions", false)) {
+            screenRect = Rectangle(
+                getProperty("ScreenX", screen.left),
+                getProperty("ScreenY", screen.top),
+                getProperty("ScreenWidth", screen.width),
+                getProperty("ScreenHeight", screen.height)
+            )
+        } else {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screenRect = Rectangle(0, 0, screenWidth, screenHeight)
+            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+        }
+
+        screen.set(screenRect)
+
+        // Update cursor position
+        val cursorPos = KWin.cursorPosition ?: Point(0, 0)
+        absoluteCursorPosition = Point(cursorPos.x - screenX, cursorPos.y - screenY)
+        cursor.set(absoluteCursorPosition)
+    }
+
+    private fun genericTick() {
+        super.tick()
+
+        // Update screen bounds
+        if (getProperty("OverrideScreenDimensions", false)) {
+            screenRect = Rectangle(
+                getProperty("ScreenX", screen.left),
+                getProperty("ScreenY", screen.top),
+                getProperty("ScreenWidth", screen.width),
+                getProperty("ScreenHeight", screen.height)
+            )
+        } else if (!getProperty("Multiscreen", true)) {
+            val gc = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+            screenRect = gc.bounds
+            screenRect.applyInsets(Toolkit.getDefaultToolkit().getScreenInsets(gc))
+        }
+
+        screen.set(screenRect)
+
+        // Update cursor position
+        absoluteCursorPosition = KWin.cursorPosition ?: Point(0, 0)
+        cursor.set(absoluteCursorPosition)
+    }
 
     private fun isIE(caption: String) = windowCache.getOrPut(caption) {
         val blacklist = getProperty("InteractiveWindowsBlacklist", "").split('/').filter { it.isNotBlank() }

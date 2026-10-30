@@ -38,7 +38,6 @@ import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.IOException
-import java.lang.management.ManagementFactory
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -453,7 +452,7 @@ object Main {
                 allowedBehaviorsSubmenu.add(throwingMenu)
             }
             allowedBehaviorsSubmenu.add(soundsMenu)
-            if (currentEnvironment != "wayland") {
+            if (!usingWaylandLayerSurfaces) {
                 allowedBehaviorsSubmenu.add(multiscreenMenu)
             }
 
@@ -475,8 +474,7 @@ object Main {
 
             val settingsMenu = MenuItem(localize("Settings")) {
                 // Disable Wayland popup factory so dropdown menus will be displayed correctly
-                val usingWaylandPopups = PopupFactory.getSharedInstance() is WaylandPopupFactory
-                if (usingWaylandPopups) {
+                if (usingWaylandLayerSurfaces) {
                     PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
                 }
 
@@ -488,7 +486,7 @@ object Main {
                 val settings = SettingsWindow(null, true)
                 settings.isVisible = true
 
-                if (usingWaylandPopups) {
+                if (usingWaylandLayerSurfaces) {
                     PopupFactory.setSharedInstance(WaylandPopupFactory)
                 }
 

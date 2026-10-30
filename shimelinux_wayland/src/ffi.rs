@@ -50,43 +50,7 @@ use smithay_client_toolkit::{
 use wayland_client::{Connection, globals::registry_queue_init};
 use wayland_cursor::CursorTheme;
 
-use crate::state::{CursorState, LayerState, Rect, State};
-
-enum Event {
-    CreateLayer(i32, i32, Global<MouseEventReceiver<'static>>, bool),
-    SetBounds(i32, i32, i32, i32, i32),
-    SetImage(i32, &'static [i32]),
-    SetCursor(bool),
-    Dispose(i32),
-}
-
-bind_java_type! {
-    pub MouseEventReceiver => io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver,
-    methods {
-        fn update_cursor(
-            left_pressed: jboolean,
-            right_pressed: jboolean,
-            left_released: jboolean,
-            right_released: jboolean,
-            position_x: jint,
-            position_y: jint,
-        )
-    }
-}
-
-bind_java_type! {
-    WaylandLib => io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib,
-    type_map {
-        MouseEventReceiver => io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver,
-    },
-    native_methods {
-        extern fn create_layer(mascot_layer: jint, id: jint, mouse_event_receiver: MouseEventReceiver, use_input_region: jboolean),
-        extern fn set_bounds(id: jint, x: jint, y: jint, width: jint, height: jint),
-        extern fn set_image(id: jint, rgb: [jint]),
-        extern fn set_cursor(use_hand: jboolean),
-        extern fn dispose(id: jint),
-    },
-}
+use crate::state::{CursorState, LayerState, Rect, SCREEN_RECT, State};
 
 static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
     // Get the event sender and receiver
@@ -109,11 +73,11 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
         seat_state: SeatState::new(&globals, &qh),
         shm,
         pool,
-        layers: HashMap::new(),
         output: None,
         pointer: None,
         pointer_surface: None,
         serial: None,
+        layers: HashMap::new(),
     };
 
     // Spawn a thread for the event loop
@@ -168,20 +132,19 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
                     Event::SetBounds(id, x, y, width, height) => {
                         if let Some(layer) = state.layers.get_mut(&id) {
                             layer.bounds = Rect {
-                                x: x.max(-width + 1),
-                                y: y.max(-height + 1),
-                                width: width.max(1),
-                                height: height.max(1),
+                                x,
+                                y,
+                                width,
+                                height,
                             };
-                            layer
-                                .layer_surface
-                                .set_margin(layer.bounds.y, 0, 0, layer.bounds.x);
+
+                            layer.layer_surface.set_margin(y, 0, 0, x);
                         }
                     }
                     Event::SetImage(id, rgb) => {
                         if let Some(layer) = state.layers.get_mut(&id) {
-                            layer.image_changed = true;
                             layer.rgb = rgb;
+                            layer.image_changed = true;
 
                             if layer.use_input_region {
                                 layer.update_input_region();
@@ -189,25 +152,27 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
                         }
                     }
                     Event::SetCursor(use_hand) => {
-                        if let Ok(mut theme) =
-                            CursorTheme::load(&conn, state.shm.wl_shm().clone(), 24)
-                            && let Some(cursor) =
-                                theme.get_cursor(if use_hand { "pointer" } else { "left_ptr" })
-                        {
-                            let surface = state
-                                .pointer_surface
-                                .get_or_insert(state.compositor_state.create_surface(&qh));
+                        let shm = state.shm.wl_shm().clone();
+                        let Ok(mut theme) = CursorTheme::load(&conn, shm, 32) else {
+                            continue;
+                        };
 
-                            // Attach None to clear the previous buffer
-                            surface.attach(None, 0, 0);
-                            surface.commit();
+                        let name = if use_hand { "pointer" } else { "left_ptr" };
+                        let Some(cursor) = theme.get_cursor(name) else {
+                            continue;
+                        };
 
-                            // Attach the new buffer
-                            surface.attach(Some(&cursor[0]), 0, 0);
-                            surface.commit();
+                        let cursor_surface = state
+                            .pointer_surface
+                            .get_or_insert(state.compositor_state.create_surface(&qh));
 
-                            state.pointer_surface = Some(surface.clone());
-                        }
+                        // Attach None to clear the previous buffer
+                        cursor_surface.attach(None, 0, 0);
+                        cursor_surface.commit();
+
+                        // Attach the new buffer
+                        cursor_surface.attach(Some(&cursor[0]), 0, 0);
+                        cursor_surface.commit();
                     }
                     Event::Dispose(id) => {
                         state.layers.remove(&id);
@@ -219,6 +184,43 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
 
     sender
 });
+
+enum Event {
+    CreateLayer(i32, i32, Global<MouseEventReceiver<'static>>, bool),
+    SetBounds(i32, i32, i32, i32, i32),
+    SetImage(i32, &'static [i32]),
+    SetCursor(bool),
+    Dispose(i32),
+}
+
+bind_java_type! {
+    pub MouseEventReceiver => io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver,
+    methods {
+        fn update_cursor(
+            left_pressed: jboolean,
+            right_pressed: jboolean,
+            left_released: jboolean,
+            right_released: jboolean,
+            position_x: jint,
+            position_y: jint,
+        )
+    }
+}
+
+bind_java_type! {
+    WaylandLib => io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib,
+    type_map {
+        MouseEventReceiver => io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver,
+    },
+    native_methods {
+        extern fn create_layer(mascot_layer: jint, id: jint, mouse_event_receiver: MouseEventReceiver, use_input_region: jboolean),
+        extern fn set_bounds(id: jint, x: jint, y: jint, width: jint, height: jint),
+        extern fn set_image(id: jint, rgb: [jint]),
+        extern fn set_cursor(use_hand: jboolean),
+        extern fn get_screen_rect() -> [jint],
+        extern fn dispose(id: jint),
+    },
+}
 
 impl WaylandLibNativeInterface for WaylandLibAPI {
     type Error = jni::errors::Error;
@@ -253,7 +255,13 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         height: jint,
     ) -> jni::errors::Result<()> {
         EVENT_SENDER
-            .send(Event::SetBounds(id, x, y, width, height))
+            .send(Event::SetBounds(
+                id,
+                x.max(-width + 1),
+                y.max(-height + 1),
+                width.max(1),
+                height.max(1),
+            ))
             .expect("Failed to send SetBounds event");
 
         Ok(())
@@ -285,6 +293,26 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
             .expect("Failed to send SetCursor event");
 
         Ok(())
+    }
+
+    fn get_screen_rect<'local>(
+        env: &mut Env<'local>,
+        _this: WaylandLib<'local>,
+    ) -> jni::errors::Result<JIntArray<'local>> {
+        let array = env.new_int_array(4)?;
+        let screen_rect = SCREEN_RECT.lock().unwrap();
+        array.set_region(
+            env,
+            0,
+            &[
+                screen_rect.x,
+                screen_rect.y,
+                screen_rect.width,
+                screen_rect.height,
+            ],
+        )?;
+
+        Ok(array)
     }
 
     fn dispose<'local>(

@@ -20,7 +20,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    sync::{LazyLock, Mutex},
+};
 
 use jni::{refs::Global, vm::JavaVM};
 use smithay_client_toolkit::{
@@ -50,8 +53,11 @@ use wayland_client::{
         wl_surface::WlSurface,
     },
 };
+use wayland_cursor::Cursor;
 
 use crate::ffi::MouseEventReceiver;
+
+pub static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
 
 #[derive(Default)]
 pub struct Rect {
@@ -79,11 +85,11 @@ pub struct State {
     pub seat_state: SeatState,
     pub shm: Shm,
     pub pool: SlotPool,
-    pub layers: HashMap<i32, LayerState>,
     pub output: Option<WlOutput>,
     pub pointer: Option<WlPointer>,
     pub pointer_surface: Option<WlSurface>,
     pub serial: Option<u32>,
+    pub layers: HashMap<i32, LayerState>,
 }
 
 pub struct LayerState {
@@ -142,6 +148,17 @@ impl CompositorHandler for State {
         output: &WlOutput,
     ) {
         self.output.get_or_insert(output.clone());
+        if let Some(info) = self.output_state.info(output) {
+            let (x, y) = info.logical_position.unwrap_or_default();
+            let (width, height) = info.logical_size.unwrap_or_default();
+            let mut screen_rect = SCREEN_RECT.lock().unwrap();
+            *screen_rect = Rect {
+                x,
+                y,
+                width,
+                height,
+            };
+        }
     }
 
     fn surface_leave(
@@ -161,7 +178,23 @@ impl OutputHandler for State {
 
     fn new_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
 
-    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {}
+    fn update_output(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, output: WlOutput) {
+        if let Some(old_output) = &self.output
+            && let Some(old_info) = self.output_state.info(old_output)
+            && let Some(new_info) = self.output_state.info(&output)
+            && old_info.id == new_info.id
+        {
+            let (x, y) = new_info.logical_position.unwrap_or_default();
+            let (width, height) = new_info.logical_size.unwrap_or_default();
+            let mut screen_rect = SCREEN_RECT.lock().unwrap();
+            *screen_rect = Rect {
+                x,
+                y,
+                width,
+                height,
+            };
+        }
+    }
 
     fn output_destroyed(&mut self, _conn: &Connection, _qh: &QueueHandle<Self>, _output: WlOutput) {
     }
@@ -337,6 +370,8 @@ impl LayerState {
                     }
                     surface.set_input_region(Some(&region));
                 }
+            } else {
+                canvas.fill(0);
             }
 
             surface.damage_buffer(0, 0, width, height);
@@ -347,9 +382,7 @@ impl LayerState {
         surface.frame(qh, FrameCallbackData(surface.clone()));
         surface.commit();
     }
-}
 
-impl LayerState {
     pub fn update_input_region(&mut self) {
         let mut rects: Vec<Rect> = Vec::new();
         let width = self.bounds.width;

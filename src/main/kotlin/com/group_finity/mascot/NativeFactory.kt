@@ -54,6 +54,15 @@ val currentEnvironment: String
     }
 
 /**
+ * Whether mascots and popup menus are being displayed on Wayland layer surfaces.
+ */
+val usingWaylandLayerSurfaces: Boolean
+    get() = currentEnvironment == "wayland" ||
+            currentEnvironment == "kde" &&
+            Platform.supportsWaylandLayerSurfaces &&
+            getProperty("UseWaylandLayersKde", true)
+
+/**
  * A factory for platform-specific objects.
  *
  * @author Bujju
