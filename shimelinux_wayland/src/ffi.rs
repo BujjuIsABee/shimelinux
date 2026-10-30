@@ -210,9 +210,6 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
                         }
                     }
                     Event::Dispose(id) => {
-                        if let Some(layer) = state.layers.get_mut(&id) {
-                            layer.layer_surface.wl_surface().destroy();
-                        }
                         state.layers.remove(&id);
                     }
                 }

@@ -67,6 +67,8 @@ pub struct CursorState {
     right_pressed: bool,
     left_released: bool,
     right_released: bool,
+    position_x: i32,
+    position_y: i32,
 }
 
 pub struct State {
@@ -119,10 +121,17 @@ impl CompositorHandler for State {
         &mut self,
         _conn: &Connection,
         qh: &QueueHandle<Self>,
-        _surface: &WlSurface,
+        surface: &WlSurface,
         _time: u32,
     ) {
-        self.draw(qh);
+        if let Some(layer) = self
+            .layers
+            .values_mut()
+            .find(|l| l.layer_surface.wl_surface() == surface)
+            && layer.configured
+        {
+            layer.draw(&mut self.pool, &self.compositor_state, qh);
+        }
     }
 
     fn surface_enter(
@@ -173,7 +182,7 @@ impl LayerShellHandler for State {
             && !layer.configured
         {
             layer.configured = true;
-            self.draw(qh);
+            layer.draw(&mut self.pool, &self.compositor_state, qh);
         }
     }
 }
@@ -223,7 +232,6 @@ impl PointerHandler for State {
         use PointerEventKind::*;
 
         let mut layers = Vec::<*mut LayerState>::new();
-        let (mut position_x, mut position_y) = (0.0, 0.0);
 
         for event in events {
             if let Some(layer) = self
@@ -231,8 +239,6 @@ impl PointerHandler for State {
                 .values_mut()
                 .find(|l| *l.layer_surface.wl_surface() == event.surface)
             {
-                (position_x, position_y) = event.position;
-
                 match event.kind {
                     Enter { serial } => {
                         self.serial = Some(serial);
@@ -258,6 +264,11 @@ impl PointerHandler for State {
                     Axis { .. } => {}
                 }
 
+                // Update cursor position
+                let (position_x, position_y) = event.position;
+                layer.cursor_state.position_x = position_x as i32;
+                layer.cursor_state.position_y = position_y as i32;
+
                 layers.push(layer as *mut LayerState);
             }
         }
@@ -273,8 +284,8 @@ impl PointerHandler for State {
                         std::mem::replace(&mut layer.cursor_state.right_pressed, false),
                         std::mem::replace(&mut layer.cursor_state.left_released, false),
                         std::mem::replace(&mut layer.cursor_state.right_released, false),
-                        position_x as i32,
-                        position_y as i32,
+                        layer.cursor_state.position_x,
+                        layer.cursor_state.position_y,
                     )?;
                 }
 
@@ -292,61 +303,49 @@ impl ShmHandler for State {
 
 delegate_noop!(State: ignore WlRegion);
 
-impl State {
-    fn draw(&mut self, qh: &QueueHandle<State>) {
-        let len = self.layers.len();
-        for (index, layer) in self
-            .layers
-            .values_mut()
-            .filter(|l| l.configured)
-            .enumerate()
-        {
-            let width = layer.bounds.width.max(1);
-            let height = layer.bounds.height.max(1);
-            let stride = width * 4;
+impl LayerState {
+    fn draw(&mut self, pool: &mut SlotPool, compositor: &CompositorState, qh: &QueueHandle<State>) {
+        let width = self.bounds.width.max(1);
+        let height = self.bounds.height.max(1);
+        let stride = width * 4;
 
-            layer.layer_surface.set_size(width as u32, height as u32);
+        self.layer_surface.set_size(width as u32, height as u32);
 
-            let surface = layer.layer_surface.wl_surface();
+        let surface = self.layer_surface.wl_surface();
 
-            if layer.image_changed {
-                let (buffer, canvas) = self
-                    .pool
-                    .create_buffer(width, height, stride, Format::Argb8888)
-                    .expect("Failed to create buffer");
+        if self.image_changed {
+            let (buffer, canvas) = pool
+                .create_buffer(width, height, stride, Format::Argb8888)
+                .expect("Failed to create buffer");
 
-                if !layer.rgb.is_empty() {
-                    // Update image
-                    for y in 0..height {
-                        for x in 0..width {
-                            let canvas_index =
-                                (((y * width + x) * 4) as usize).min(canvas.len() - 1);
-                            let image_index = ((y * width + x) as usize).min(layer.rgb.len() - 1);
-                            let slice = &layer.rgb[image_index].to_le_bytes();
-                            canvas[canvas_index..canvas_index + 4].copy_from_slice(slice);
-                        }
-                    }
-
-                    // Update input region
-                    if !layer.input_region.is_empty() {
-                        let region = self.compositor_state.wl_compositor().create_region(qh, ());
-                        for rect in &layer.input_region {
-                            region.add(rect.x, rect.y, rect.width, rect.height);
-                        }
-                        surface.set_input_region(Some(&region));
+            if !self.rgb.is_empty() {
+                // Update image
+                for y in 0..height {
+                    for x in 0..width {
+                        let canvas_index = (((y * width + x) * 4) as usize).min(canvas.len() - 1);
+                        let image_index = ((y * width + x) as usize).min(self.rgb.len() - 1);
+                        let slice = &self.rgb[image_index].to_le_bytes();
+                        canvas[canvas_index..canvas_index + 4].copy_from_slice(slice);
                     }
                 }
 
-                surface.damage_buffer(0, 0, width, height);
-                let _ = buffer.attach_to(surface);
-                layer.image_changed = false;
+                // Update input region
+                if !self.input_region.is_empty() {
+                    let region = compositor.wl_compositor().create_region(qh, ());
+                    for rect in &self.input_region {
+                        region.add(rect.x, rect.y, rect.width, rect.height);
+                    }
+                    surface.set_input_region(Some(&region));
+                }
             }
 
-            if index == len - 1 {
-                surface.frame(qh, FrameCallbackData(surface.clone()));
-            }
-            surface.commit();
+            surface.damage_buffer(0, 0, width, height);
+            let _ = buffer.attach_to(surface);
+            self.image_changed = false;
         }
+
+        surface.frame(qh, FrameCallbackData(surface.clone()));
+        surface.commit();
     }
 }
 
