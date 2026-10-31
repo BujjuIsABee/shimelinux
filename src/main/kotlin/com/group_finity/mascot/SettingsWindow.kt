@@ -167,8 +167,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         setIconImage(
             BaseMultiResolutionImage(
                 loadResource("img/icon64.png").use { ImageIO.read(it) },
-                loadResource("img/icon32.png").use { ImageIO.read(it) },
-                loadResource("img/icon16.png").use { ImageIO.read(it) }
+                loadResource("img/icon128.png").use { ImageIO.read(it) },
+                loadResource("img/icon256.png").use { ImageIO.read(it) },
             )
         )
         title = localize("Settings")
@@ -1356,8 +1356,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             if (mode == "Stretch") {
                 image = image.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH)
             } else if (mode != "Center") {
-                val widthRatio = (size.width / image.getWidth(null)).toDouble()
-                val heightRatio = (size.height / image.getHeight(null)).toDouble()
+                val widthRatio = size.width / image.getWidth(null).toDouble()
+                val heightRatio = size.height / image.getHeight(null).toDouble()
                 val factor = if (mode == "Fit") {
                     widthRatio.coerceAtMost(heightRatio)
                 } else {

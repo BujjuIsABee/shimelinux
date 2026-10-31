@@ -67,8 +67,8 @@ class DebugWindow(val imageSet: String) : JFrame() {
     init {
         iconImage = BaseMultiResolutionImage(
             loadResource("img/icon64.png").use { ImageIO.read(it) },
-            loadResource("img/icon32.png").use { ImageIO.read(it) },
-            loadResource("img/icon16.png").use { ImageIO.read(it) }
+            loadResource("img/icon128.png").use { ImageIO.read(it) },
+            loadResource("img/icon256.png").use { ImageIO.read(it) },
         )
         title = imageSet
         isResizable = false

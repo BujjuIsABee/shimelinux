@@ -63,8 +63,8 @@ class VirtualContentPanel(
                     if (mode == Mode.STRETCH) {
                         resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
                     } else if (mode != Mode.CENTER) {
-                        val widthRatio = (width / image.getWidth(null)).toDouble()
-                        val heightRatio = (height / image.getHeight(null)).toDouble()
+                        val widthRatio = size.width / image.getWidth(null).toDouble()
+                        val heightRatio = size.height / image.getHeight(null).toDouble()
                         val factor = if (mode == Mode.FIT) {
                             widthRatio.coerceAtMost(heightRatio)
                         } else {
