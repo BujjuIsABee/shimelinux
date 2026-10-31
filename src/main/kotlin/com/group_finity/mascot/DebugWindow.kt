@@ -24,6 +24,7 @@ package com.group_finity.mascot
 
 import java.awt.Font
 import java.awt.GridLayout
+import java.awt.image.BaseMultiResolutionImage
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
 import javax.swing.JFrame
@@ -64,8 +65,11 @@ class DebugWindow(val imageSet: String) : JFrame() {
     private val environmentHeightValue: JLabel
 
     init {
-        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
-        iconImage = icon
+        iconImage = BaseMultiResolutionImage(
+            loadResource("img/icon64.png").use { ImageIO.read(it) },
+            loadResource("img/icon32.png").use { ImageIO.read(it) },
+            loadResource("img/icon16.png").use { ImageIO.read(it) }
+        )
         title = imageSet
         isResizable = false
 

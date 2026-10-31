@@ -39,6 +39,7 @@ import java.awt.Frame
 import java.awt.GridLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.awt.image.BaseMultiResolutionImage
 import java.io.IOException
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
@@ -89,8 +90,13 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     var wasCancelled = true
 
     init {
-        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
-        setIconImage(icon)
+        setIconImage(
+            BaseMultiResolutionImage(
+                loadResource("img/icon64.png").use { ImageIO.read(it) },
+                loadResource("img/icon32.png").use { ImageIO.read(it) },
+                loadResource("img/icon16.png").use { ImageIO.read(it) }
+            )
+        )
         title = localize("ShimejiImageSetChooser")
         minimumSize = Dimension(670, 495)
         isResizable = !Platform.isTilingWindowManager

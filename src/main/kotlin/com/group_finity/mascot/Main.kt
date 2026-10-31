@@ -385,7 +385,7 @@ object Main {
 
             val icon = checkNotNull(SystemTray.get())
 
-            loadResource("img/icon.png").use { icon.setImage(it) }
+            loadResource("img/icon256.png").use { icon.setImage(it) }
             icon.setStatus("ShimeLinux")
             icon.setTooltip("ShimeLinux")
             icon.menu.callback = {
@@ -492,7 +492,7 @@ object Main {
 
                 if (settings.isRestartRequired) {
                     JOptionPane.showMessageDialog(
-                        null,
+                        settings,
                         localize("RestartRequiredMessage"),
                         localize("RestartRequired"),
                         JOptionPane.INFORMATION_MESSAGE

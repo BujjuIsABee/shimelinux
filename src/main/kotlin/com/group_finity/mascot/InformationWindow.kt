@@ -27,6 +27,7 @@ import dorkbox.desktop.Desktop
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Font
+import java.awt.image.BaseMultiResolutionImage
 import java.io.IOException
 import java.net.URI
 import java.util.StringTokenizer
@@ -57,8 +58,11 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
     private val closeButton: JButton
 
     init {
-        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
-        iconImage = icon
+        iconImage = BaseMultiResolutionImage(
+            loadResource("img/icon64.png").use { ImageIO.read(it) },
+            loadResource("img/icon32.png").use { ImageIO.read(it) },
+            loadResource("img/icon16.png").use { ImageIO.read(it) }
+        )
         title = if (config.containsInformationKey("Name")) config.getInformation("Name") else localize("Information")
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE

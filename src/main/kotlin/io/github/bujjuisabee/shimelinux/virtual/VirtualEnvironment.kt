@@ -35,6 +35,7 @@ import java.awt.MouseInfo
 import java.awt.Point
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.awt.image.BaseMultiResolutionImage
 import java.io.File
 import javax.imageio.ImageIO
 import javax.swing.JFrame
@@ -62,8 +63,11 @@ class VirtualEnvironment : Environment() {
         PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
         activeIE.isVisible = false
 
-        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
-        display.iconImage = icon
+        display.iconImage = BaseMultiResolutionImage(
+            loadResource("img/icon64.png").use { ImageIO.read(it) },
+            loadResource("img/icon32.png").use { ImageIO.read(it) },
+            loadResource("img/icon16.png").use { ImageIO.read(it) }
+        )
         display.title = "ShimeLinux"
         display.isAutoRequestFocus = false
         display.addWindowListener(object : WindowAdapter() {

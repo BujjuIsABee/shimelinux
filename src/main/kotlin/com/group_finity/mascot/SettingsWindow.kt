@@ -35,6 +35,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Image
 import java.awt.Insets
+import java.awt.image.BaseMultiResolutionImage
 import java.io.IOException
 import java.util.Properties
 import javax.imageio.ImageIO
@@ -163,8 +164,13 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
     var isInteractiveWindowReloadRequired = false
 
     init {
-        val icon = loadResource("img/icon.png").use { ImageIO.read(it) }
-        setIconImage(icon)
+        setIconImage(
+            BaseMultiResolutionImage(
+                loadResource("img/icon64.png").use { ImageIO.read(it) },
+                loadResource("img/icon32.png").use { ImageIO.read(it) },
+                loadResource("img/icon16.png").use { ImageIO.read(it) }
+            )
+        )
         title = localize("Settings")
         minimumSize = Dimension(450, 373)
         isResizable = !Platform.isTilingWindowManager
@@ -770,6 +776,8 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
         environmentTab.add(environmentPanel)
         environmentTab.add(Box.createVerticalStrut(3))
         environmentTab.add(environmentCardsPanel)
+
+        val icon = loadResource("img/icon256.png").use { ImageIO.read(it) }
 
         aboutIcon = JLabel()
         aboutIcon.icon = ImageIcon(icon.getScaledInstance(96, 96, Image.SCALE_DEFAULT))
