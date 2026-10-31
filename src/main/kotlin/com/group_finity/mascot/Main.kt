@@ -38,6 +38,7 @@ import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import org.xml.sax.SAXParseException
 import java.awt.Point
 import java.io.IOException
+import java.lang.management.ManagementFactory
 import java.util.Locale
 import java.util.Properties
 import java.util.ResourceBundle
@@ -50,6 +51,7 @@ import javax.swing.JSeparator
 import javax.swing.PopupFactory
 import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -491,12 +493,21 @@ object Main {
                 }
 
                 if (settings.isRestartRequired) {
-                    JOptionPane.showMessageDialog(
+                    val response = JOptionPane.showConfirmDialog(
                         settings,
                         localize("RestartRequiredMessage"),
                         localize("RestartRequired"),
-                        JOptionPane.INFORMATION_MESSAGE
+                        JOptionPane.YES_NO_OPTION
                     )
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        val jvmPath = Path(System.getProperty("java.home"), "bin", "java").toString()
+                        val jvmArgs = ManagementFactory.getRuntimeMXBean().inputArguments.toTypedArray()
+                        val jarPath = this::class.java.protectionDomain.codeSource.location.path
+
+                        ProcessBuilder(jvmPath, *jvmArgs, "-jar", jarPath).start()
+                        exit()
+                    }
                 }
                 if (settings.isEnvironmentReloadRequired) {
                     NativeFactory.instance.environment.dispose()

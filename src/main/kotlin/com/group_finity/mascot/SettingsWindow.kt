@@ -172,7 +172,7 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
             )
         )
         title = localize("Settings")
-        minimumSize = Dimension(450, 373)
+        minimumSize = Dimension(460, 380)
         isResizable = !Platform.isTilingWindowManager
         layout = BorderLayout()
 

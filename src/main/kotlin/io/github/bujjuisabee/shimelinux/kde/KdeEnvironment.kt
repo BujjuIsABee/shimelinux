@@ -121,8 +121,6 @@ class KdeEnvironment : Environment() {
     }
 
     private fun genericTick() {
-        super.tick()
-
         // Update screen bounds
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect.setBounds(

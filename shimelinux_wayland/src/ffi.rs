@@ -153,7 +153,7 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
                     }
                     Event::SetCursor(use_hand) => {
                         let shm = state.shm.wl_shm().clone();
-                        let Ok(mut theme) = CursorTheme::load(&conn, shm, 32) else {
+                        let Ok(mut theme) = CursorTheme::load(&conn, shm, 24) else {
                             continue;
                         };
 
