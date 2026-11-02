@@ -38,7 +38,8 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ComplexMove::class.java.name)
 
 /**
- * An action that causes the [mascot] to move along a border towards a target position or mascot and breed or interact.
+ * An action that causes the [mascot] to move along a border towards a mascot or a target position and breed or
+ * interact.
  *
  * @author Kilkakon
  * @author Bujju
@@ -95,14 +96,14 @@ class ComplexMove(
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
-     * The X position that the [mascot] moves towards. If [characteristics] includes "Scan," then the [target]'s X
+     * The X position that the [mascot] moves towards. If [characteristics] includes Scan, then the [target]'s X
      * position will be used instead.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y position that the [mascot] moves towards. If [characteristics] includes "Scan," then the [target]'s Y
+     * The Y position that the [mascot] moves towards. If [characteristics] includes Scan, then the [target]'s Y
      * position will be used instead.
      */
     private val targetY: Int

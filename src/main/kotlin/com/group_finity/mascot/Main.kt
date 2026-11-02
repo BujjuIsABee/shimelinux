@@ -22,7 +22,9 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.FlatLightLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.config.Configuration
 import com.group_finity.mascot.config.Entry
@@ -49,7 +51,6 @@ import java.util.logging.Logger
 import javax.swing.JOptionPane
 import javax.swing.JSeparator
 import javax.swing.PopupFactory
-import javax.swing.UIManager
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -159,20 +160,15 @@ object Main {
         }
 
         // Load theme
-        try {
-            System.setProperty("sun.java2d.uiScale", getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1"))
-            System.setProperty("flatlaf.uiScale.enabled", "false")
+        System.setProperty("sun.java2d.uiScale", getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1"))
+        System.setProperty("flatlaf.uiScale.enabled", "false")
 
-            FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
-            UIManager.setLookAndFeel(
-                when (getProperty("Theme", "FlatDark")) {
-                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    else -> "com.formdev.flatlaf.FlatDarkLaf"
-                }
-            )
-        } catch (e: Exception) {
-            logger.log(Level.WARNING, e) { "Failed to set theme." }
+        FlatLaf.registerCustomDefaultsSource(getPath("conf", "theme").toFile())
+
+        if (getProperty("Theme", "FlatDark") == "FlatLight") {
+            FlatLightLaf.setup()
+        } else {
+            FlatDarkLaf.setup()
         }
 
         // Get the image sets to use
@@ -192,7 +188,7 @@ object Main {
             }
         }
 
-        // Load mascots
+        // Load image sets
         var index = 0
         while (index < imageSets.size) {
             if (!loadConfiguration(imageSets[index])) {
@@ -477,7 +473,7 @@ object Main {
             val settingsMenu = MenuItem(localize("Settings")) {
                 // Disable Wayland popup factory so dropdown menus will be displayed correctly
                 if (usingWaylandLayerSurfaces) {
-                    PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+                    PopupFactory.setSharedInstance(FlatPopupFactory())
                 }
 
                 // Pause all mascots so they don't throw the window offscreen

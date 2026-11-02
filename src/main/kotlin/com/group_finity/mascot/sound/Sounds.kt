@@ -84,6 +84,9 @@ object Sounds {
 
     /**
      * Stores a sound clip and a function to open it.
+     *
+     * @param clip The sound clip.
+     * @param open A function that opens the [clip].
      */
     data class Sound(val clip: Clip, val open: () -> Unit)
 }

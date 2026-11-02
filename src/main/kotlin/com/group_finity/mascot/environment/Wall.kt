@@ -26,7 +26,7 @@ import java.awt.Point
 import kotlin.math.abs
 
 /**
- * A horizontal border.
+ * A vertical border.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

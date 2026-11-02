@@ -25,7 +25,7 @@ package com.group_finity.mascot.environment
 import java.awt.Point
 
 /**
- * Used when the mascot is not on a border.
+ * A [Border] object for when the mascot is not on a border.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

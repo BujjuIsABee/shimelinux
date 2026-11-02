@@ -22,7 +22,6 @@
 
 package io.github.bujjuisabee.shimelinux.kde
 
-import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
@@ -35,10 +34,9 @@ import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 import javax.swing.PopupFactory
-import javax.swing.UIManager
 
 /**
- * An environment that supports interactive windows via [KWin].
+ * An environment that supports interactive windows on KDE Plasma.
  *
  * @author Bujju
  */
@@ -54,10 +52,8 @@ class KdeEnvironment : Environment() {
     init {
         if (usingWaylandLayerSurfaces) {
             PopupFactory.setSharedInstance(WaylandPopupFactory)
-        } else if (UIManager.getLookAndFeel() is FlatLaf) {
-            PopupFactory.setSharedInstance(FlatPopupFactory())
         } else {
-            PopupFactory.setSharedInstance(PopupFactory())
+            PopupFactory.setSharedInstance(FlatPopupFactory())
         }
     }
 

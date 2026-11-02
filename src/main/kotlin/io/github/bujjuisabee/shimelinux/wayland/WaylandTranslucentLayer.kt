@@ -28,7 +28,7 @@ import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import java.awt.Component
 
 /**
- * Displays a mascot on a Wayland layer surface.
+ * A Wayland layer surface that displays a mascot.
  *
  * @author Bujju
  */

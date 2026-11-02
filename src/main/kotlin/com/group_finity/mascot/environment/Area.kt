@@ -33,7 +33,8 @@ import java.awt.Rectangle
  */
 class Area {
     /**
-     * Whether the interactive window that the area represents is active.
+     * Whether the interactive window that the area represents is active, or `true` if the area does not represent an
+     * interactive window.
      */
     var isVisible = true
 

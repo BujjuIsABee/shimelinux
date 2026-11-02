@@ -33,7 +33,7 @@ import com.group_finity.mascot.Mascot
  */
 interface Action {
     /**
-     * Initializes the action for the given [mascot]. Called once when the action is triggered by a behavior.
+     * Initializes the action for the given [mascot].
      */
     fun init(mascot: Mascot)
 

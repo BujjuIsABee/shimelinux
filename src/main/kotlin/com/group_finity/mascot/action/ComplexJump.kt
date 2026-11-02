@@ -39,7 +39,7 @@ import kotlin.math.sqrt
 private val logger: Logger = Logger.getLogger(ComplexJump::class.java.name)
 
 /**
- * An action that causes the [mascot] to jump towards a target position or mascot and breed or interact.
+ * An action that causes the [mascot] to jump towards a mascot or a target position and breed or interact.
  *
  * @author Kilkakon
  * @author Bujju
@@ -88,14 +88,14 @@ class ComplexJump(
         get() = eval<Number>(schema.getString(PARAMETER_VELOCITY), DEFAULT_VELOCITY).toDouble()
 
     /**
-     * The X position that the [mascot] jumps towards. If [characteristics] includes "Scan," then the [target]'s X
+     * The X position that the [mascot] jumps towards. If [characteristics] includes Scan, then the [target]'s X
      * position will be used instead.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y position that the [mascot] jumps towards. If [characteristics] includes "Scan," then the [target]'s Y
+     * The Y position that the [mascot] jumps towards. If [characteristics] includes Scan, then the [target]'s Y
      * position will be used instead.
      */
     private val targetY: Int

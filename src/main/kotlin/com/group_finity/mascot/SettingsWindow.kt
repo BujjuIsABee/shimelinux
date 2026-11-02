@@ -22,7 +22,9 @@
 
 package com.group_finity.mascot
 
+import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLaf
+import com.formdev.flatlaf.FlatLightLaf
 import io.github.bujjuisabee.shimelinux.BuildConfig
 import java.awt.BorderLayout
 import java.awt.CardLayout
@@ -894,13 +896,11 @@ class SettingsWindow(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 newLightTheme.store(it, "Flat Light Theme")
             }
 
-            UIManager.setLookAndFeel(
-                when (theme) {
-                    "FlatDark" -> "com.formdev.flatlaf.FlatDarkLaf"
-                    "FlatLight" -> "com.formdev.flatlaf.FlatLightLaf"
-                    else -> "com.formdev.flatlaf.FlatDarkLaf"
-                }
-            )
+            if (theme == "FlatLight") {
+                FlatLightLaf.setup()
+            } else {
+                FlatDarkLaf.setup()
+            }
 
             for (window in getWindows()) {
                 SwingUtilities.updateComponentTreeUI(window)

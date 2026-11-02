@@ -41,6 +41,7 @@ import java.awt.geom.Path2D
 import javax.swing.JWindow
 
 private val gc: GraphicsConfiguration? = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.configurations.firstOrNull { it.isTranslucencyCapable }
+private val maskCache = mutableMapOf<GenericNativeImage, Area>()
 
 /**
  * Displays a mascot on a [JWindow].
@@ -95,20 +96,23 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
 
     private fun updateWindowMask() {
         val image = image ?: return
-        val path = Path2D.Float()
-        val rect = Rectangle(1, 1)
 
-        for (y in 0 until image.height) {
-            for (x in 0 until image.width) {
-                val alpha = (image.rgb[y * image.width + x] shr 24) and 0xFF
-                if (alpha > 0) {
-                    rect.setLocation(x, y)
-                    path.append(rect, false)
+        val mask = maskCache.getOrPut(image) {
+            val path = Path2D.Float()
+            val rect = Rectangle(1, 1)
+
+            for (y in 0 until image.height) {
+                for (x in 0 until image.width) {
+                    val alpha = (image.rgb[y * image.width + x] shr 24) and 0xFF
+                    if (alpha > 0) {
+                        rect.setLocation(x, y)
+                        path.append(rect, false)
+                    }
                 }
             }
-        }
 
-        val mask = Area(path)
+            Area(path)
+        }
 
         if (!mask.isEmpty) {
             shape = mask.createTransformedArea(

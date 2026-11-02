@@ -29,7 +29,7 @@ import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
 /**
- * A native factory for windowed mode, where mascots are all displayed within a single window.
+ * A native factory implementation for windowed mode, where all mascots are displayed within a single window.
  *
  * @author Kilkakon
  * @author Bujju

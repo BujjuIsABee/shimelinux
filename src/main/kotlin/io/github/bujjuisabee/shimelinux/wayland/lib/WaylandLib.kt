@@ -56,9 +56,9 @@ object WaylandLib {
 
     /**
      * Creates a Wayland layer surface with the given [id]. Mouse events will be sent to [mouseEventReceiver]. If
-     * [useInputRegion] is true, mouse events on fully transparent pixels will be ignored.
+     * [useInputRegion] is `true`, mouse events on fully transparent pixels will be ignored.
      *
-     * @param mascotLayer Options include:
+     * @param mascotLayer The layer that the surface will be displayed on. Options include:
      * - Background (`0`)
      * - Bottom (`1`)
      * - Top (`2`)
@@ -67,7 +67,7 @@ object WaylandLib {
     external fun createLayer(id: Int, mascotLayer: Int, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean)
 
     /**
-     * Sets the bounds of the layer surface with the given [id] to the specified [x], [y], [width], and [height].
+     * Sets the bounds of the layer surface with the given [id].
      */
     external fun setBounds(id: Int, x: Int, y: Int, width: Int, height: Int)
 
@@ -77,13 +77,13 @@ object WaylandLib {
     external fun setImage(id: Int, rgb: IntArray)
 
     /**
-     * Sets the cursor to a hand if [useHand] is `true`, or the regular cursor if it is `false`.
+     * Sets the cursor to a hand if [useHand] is `true`, or to the regular cursor if it is `false`.
      */
     external fun setCursor(useHand: Boolean)
 
     /**
-     * Gets an [IntArray] with four elements corresponding to the logical position and size of the screen that layer
-     * surfaces are displayed on.
+     * Returns an [IntArray] containing the logical position and size of the screen that layer surfaces are displayed
+     * on.
      */
     external fun getScreenRect(): IntArray
 

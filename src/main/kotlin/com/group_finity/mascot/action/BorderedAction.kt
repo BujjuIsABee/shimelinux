@@ -47,11 +47,10 @@ abstract class BorderedAction(
         private set
 
     /**
-     * The type of border that the [mascot] will be placed on.
-     *
-     * @see BORDERTYPE_CEILING
-     * @see BORDERTYPE_WALL
-     * @see BORDERTYPE_FLOOR
+     * The type of border that the [mascot] will be placed on. Options include:
+     * - Ceiling
+     * - Wall
+     * - Floor
      */
     private val borderType: String?
         get() = eval(schema.getString(PARAMETER_BORDERTYPE), DEFAULT_BORDERTYPE)

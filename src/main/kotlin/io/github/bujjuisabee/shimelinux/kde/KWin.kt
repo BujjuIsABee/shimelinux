@@ -26,19 +26,14 @@ import com.group_finity.mascot.loadResource
 import org.freedesktop.dbus.annotations.DBusInterfaceName
 import org.freedesktop.dbus.connections.impl.DBusConnection
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
-import org.freedesktop.dbus.exceptions.DBusException
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.types.Variant
 import java.awt.Point
 import java.awt.Rectangle
 import java.io.File
-import java.util.logging.Level
-import java.util.logging.Logger
-
-private val logger: Logger = Logger.getLogger(KWin::class.java.name)
 
 /**
- * Manages a script used to interact with the KWin compositor.
+ * Manages a KWin script.
  *
  * @author Bujju
  */
@@ -72,11 +67,11 @@ object KWin {
 
     init {
         try {
-            dbus = DBusConnectionBuilder.forSessionBus().build()
-            dbus?.requestBusName("io.github.bujjuisabee.shimelinux")
-            dbus?.exportObject(client)
+            val dbus = DBusConnectionBuilder.forSessionBus().build()
+            dbus.requestBusName("io.github.bujjuisabee.shimelinux")
+            dbus.exportObject(client)
 
-            scripting = dbus?.getRemoteObject(
+            val scripting = dbus.getRemoteObject(
                 "org.kde.KWin",
                 "/Scripting",
                 KWinScripting::class.java
@@ -92,15 +87,18 @@ object KWin {
             }
 
             // Load the script
-            val id = scripting?.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
-            script = dbus?.getRemoteObject(
+            val id = scripting.loadScript(scriptFile.absolutePath, "shimelinux-kwin-script")
+            val script = dbus.getRemoteObject(
                 "org.kde.KWin",
                 "/Scripting/Script$id",
                 KWinScript::class.java
             )
-            script?.run()
-        } catch (e: DBusException) {
-            logger.log(Level.WARNING, e) { "Failed to start the KWin script. Try restarting KDE Plasma." }
+            script.run()
+
+            this.dbus = dbus
+            this.scripting = scripting
+            this.script = script
+        } catch(_: Exception) {
         } finally {
             Runtime.getRuntime().addShutdownHook(Thread {
                 script?.stop()

@@ -38,7 +38,10 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 
 /**
- * A popup factory that displays popup menus on Wayland layer surfaces.
+ * A popup factory that displays popups on Wayland layer surfaces.
+ *
+ * This ensures that popup menus don't get displayed on standalone windows when there are no Java Swing windows to
+ * attach to.
  *
  * @author Bujju
  */

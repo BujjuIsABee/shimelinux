@@ -33,7 +33,7 @@ import java.awt.Component
  */
 interface TranslucentWindow {
     /**
-     * Gets the window as an AWT component.
+     * Returns the window as an AWT component.
      */
     fun asComponent(): Component
 

@@ -34,7 +34,7 @@ import java.nio.file.Path
  * @param rightImage The image that the pose displays if the mascot is facing right.
  * @param dx The horizontal distance that the mascot will be moved.
  * @param dy The vertical distance that the mascot will be moved.
- * @param duration The number of ticks that the pose will last.
+ * @param duration The duration of the pose in 40 millisecond ticks.
  * @param soundName The name of the sound the pose plays, combined with its volume.
  *
  * @author Yuki Yamada

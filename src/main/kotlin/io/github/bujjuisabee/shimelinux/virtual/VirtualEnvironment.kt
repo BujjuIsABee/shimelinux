@@ -22,7 +22,6 @@
 
 package io.github.bujjuisabee.shimelinux.virtual
 
-import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
@@ -42,7 +41,6 @@ import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.PopupFactory
 import javax.swing.SwingUtilities
-import javax.swing.UIManager
 
 /**
  * An environment that displays mascots within a single window.
@@ -60,7 +58,7 @@ class VirtualEnvironment : Environment() {
     private val display = JFrame()
 
     init {
-        PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+        PopupFactory.setSharedInstance(FlatPopupFactory())
         activeIE.isVisible = false
 
         display.iconImage = BaseMultiResolutionImage(

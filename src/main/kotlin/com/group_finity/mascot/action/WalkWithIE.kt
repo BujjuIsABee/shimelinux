@@ -34,7 +34,7 @@ import kotlin.math.abs
 private val logger: Logger = Logger.getLogger(WalkWithIE::class.java.name)
 
 /**
- * An action that causes the [mascot] to walk while holding a window.
+ * An action that causes the [mascot] to move along a border while holding a window.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

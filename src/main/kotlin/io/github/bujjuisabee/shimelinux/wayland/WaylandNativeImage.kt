@@ -26,7 +26,7 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
 /**
- * Stores pixel data from [managedImage] so it can be displayed on a Wayland layer surface.
+ * Stores [managedImage] so it can be displayed on a [WaylandLayer].
  *
  * @author Bujju
  */

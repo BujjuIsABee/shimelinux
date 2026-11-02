@@ -53,7 +53,7 @@ class BehaviorBuilder(
     val name: String = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name"))) { "Behavior requires Name attribute." }
 
     /**
-     * The name of the action that the behavior triggers. If the Action attribute is missing, [name] will be used
+     * The name of the action that the behavior triggers. If the Action attribute is missing, [name] will be used.
      * instead.
      */
     private val actionName: String = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
@@ -163,7 +163,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Evaluates whether the conditions for the behavior are currently met using the given [context].
+     * Evaluates whether the conditions for the behavior are currently met.
      */
     fun isEffective(context: VariableMap): Boolean {
         return frequency != 0 && conditions.filterNotNull().none {

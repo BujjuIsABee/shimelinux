@@ -30,7 +30,9 @@ import java.awt.Toolkit
 import kotlin.concurrent.timer
 
 /**
- * Tracks the screen bounds, cursor position, and interactive windows.
+ * A platform-specific environment.
+ *
+ * Stores the screen bounds, cursor position, and interactive windows.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -63,7 +65,7 @@ abstract class Environment {
     var screen = Area()
 
     /**
-     * Represents the position of the cursor on the screen.
+     * A location representing the absolute cursor position.
      */
     var cursor = Location()
 
@@ -91,7 +93,7 @@ abstract class Environment {
     }
 
     /**
-     * Gets whether the given [location] is on one of the screen's vertical borders.
+     * Returns whether the given [location] is on one of the screen's vertical borders.
      */
     fun isScreenTopBottom(location: Point): Boolean {
         val count = screens.count { it.topBorder.isOn(location) } + screens.count { it.bottomBorder.isOn(location) }
@@ -99,7 +101,7 @@ abstract class Environment {
     }
 
     /**
-     * Gets whether the given [location] is on one of the screen's horizontal borders.
+     * Returns whether the given [location] is on one of the screen's horizontal borders.
      */
     fun isScreenLeftRight(location: Point): Boolean {
         val count = screens.count { it.leftBorder.isOn(location) } + screens.count { it.rightBorder.isOn(location) }

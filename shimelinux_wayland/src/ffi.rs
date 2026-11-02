@@ -52,6 +52,8 @@ use wayland_cursor::CursorTheme;
 
 use crate::state::{CursorState, LayerState, Rect, SCREEN_RECT, State};
 
+/// An `mpsc::Sender::<Event>` used to create and manage layer surfaces. When first accessed, it
+/// connects to the Wayland server and starts the event loop.
 static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
     // Get the event sender and receiver
     let (sender, receiver) = mpsc::channel::<Event>();
@@ -225,6 +227,16 @@ bind_java_type! {
 impl WaylandLibNativeInterface for WaylandLibAPI {
     type Error = jni::errors::Error;
 
+    /// Creates a Wayland layer surface with the given `id`. Mouse events will be sent to
+    /// `mouse_event_receiver`. If `use_input_region` is true, mouse events on fully transparent
+    /// pixels will be ignored.
+    ///
+    /// `mascot_layer` is a number corresponding to the layer that the surface will be displayed on.
+    /// Options include:
+    /// - Background (0)
+    /// - Bottom (1)
+    /// - Top (2)
+    /// - Overlay (3)
     fn create_layer<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -245,6 +257,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
+    /// Sets the bounds of the layer surface with the given `id`.
     fn set_bounds<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -267,6 +280,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
+    /// Displays the `rgb` pixel data on the layer surface with the given `id`.
     fn set_image<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -283,6 +297,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
+    /// Sets the cursor to a hand if `use_hand` is true, or to the regular cursor if it is false.
     fn set_cursor<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -295,6 +310,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(())
     }
 
+    /// Gets the `x`, `y`, `width`, and `height` of `SCREEN_RECT` as a `JIntArray`.
     fn get_screen_rect<'local>(
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
@@ -315,6 +331,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(array)
     }
 
+    // Destroys the layer surface with the given `id`.
     fn dispose<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,

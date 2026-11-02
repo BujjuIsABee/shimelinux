@@ -34,6 +34,8 @@ import javax.swing.JPanel
 /**
  * A menu that shows statistics about a mascot.
  *
+ * @param imageSet The name of the mascot, which is used as the title of the window.
+ *
  * @author Kilkakon
  * @author Bujju
  */

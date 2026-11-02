@@ -56,6 +56,8 @@ use wayland_client::{
 
 use crate::ffi::MouseEventReceiver;
 
+/// A `Rect` that stores the logical position and size of the screen that layer surfaces are
+/// displayed on.
 pub static SCREEN_RECT: LazyLock<Mutex<Rect>> = LazyLock::new(|| Mutex::new(Rect::default()));
 
 #[derive(Default)]
@@ -281,13 +283,6 @@ impl PointerHandler for State {
                     Leave { serial } => {
                         self.serial = Some(serial);
                     }
-                    Motion { .. } => {
-                        if let (Some(pointer), Some(serial), Some(surface)) =
-                            (&self.pointer, self.serial, &self.pointer_surface)
-                        {
-                            pointer.set_cursor(serial, Some(surface), 0, 0);
-                        }
-                    }
                     Press { button, .. } => {
                         layer.cursor_state.left_pressed = button == BTN_LEFT;
                         layer.cursor_state.right_pressed = button == BTN_RIGHT;
@@ -296,7 +291,15 @@ impl PointerHandler for State {
                         layer.cursor_state.left_released = button == BTN_LEFT;
                         layer.cursor_state.right_released = button == BTN_RIGHT;
                     }
+                    Motion { .. } => {}
                     Axis { .. } => {}
+                }
+
+                // Update cursor surface
+                if let (Some(pointer), Some(serial), Some(surface)) =
+                    (&self.pointer, self.serial, &self.pointer_surface)
+                {
+                    pointer.set_cursor(serial, Some(surface), 0, 0);
                 }
 
                 // Update cursor position

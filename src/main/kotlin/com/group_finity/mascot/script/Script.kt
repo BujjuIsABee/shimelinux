@@ -35,6 +35,9 @@ private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(
 /**
  * A variable with a value determined by evaluating JavaScript code.
  *
+ * @param source The JavaScript code to evaluate.
+ * @param isClearAtInitFrame Whether the [value] should be set to `null` when [initFrame] is called.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju

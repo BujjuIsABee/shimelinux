@@ -33,6 +33,9 @@ import javax.script.Bindings
  * @author Bujju
  */
 class VariableMap : Bindings {
+    /**
+     * The collection variables.
+     */
     val rawMap = linkedMapOf<String, Variable>()
 
     override val keys: MutableSet<String>
@@ -45,7 +48,7 @@ class VariableMap : Bindings {
         get() = rawMap.size
 
     /**
-     * Initializes every variable.
+     * Initializes every variable in the [rawMap].
      */
     fun init() {
         for (variable in rawMap.values) {
@@ -54,7 +57,7 @@ class VariableMap : Bindings {
     }
 
     /**
-     * Calls [Variable.initFrame] on every variable.
+     * Calls [Variable.initFrame] on every variable in the [rawMap].
      */
     fun initFrame() {
         for (variable in rawMap.values) {

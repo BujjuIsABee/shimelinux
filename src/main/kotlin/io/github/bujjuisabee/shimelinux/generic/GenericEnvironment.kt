@@ -22,7 +22,6 @@
 
 package io.github.bujjuisabee.shimelinux.generic
 
-import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.ui.FlatPopupFactory
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
@@ -30,7 +29,6 @@ import com.group_finity.mascot.getProperty
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import javax.swing.PopupFactory
-import javax.swing.UIManager
 
 /**
  * A cross-platform environment.
@@ -47,7 +45,7 @@ class GenericEnvironment : Environment() {
     override val activeIETitle = ""
 
     init {
-        PopupFactory.setSharedInstance(if (UIManager.getLookAndFeel() is FlatLaf) FlatPopupFactory() else PopupFactory())
+        PopupFactory.setSharedInstance(FlatPopupFactory())
         activeIE.isVisible = false
     }
 

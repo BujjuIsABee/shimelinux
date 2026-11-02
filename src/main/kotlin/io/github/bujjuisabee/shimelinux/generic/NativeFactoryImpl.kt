@@ -29,7 +29,9 @@ import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
 /**
- * A cross-platform native factory.
+ * A cross-platform native factory implementation.
+ *
+ * It uses Java Swing to display mascots and popup menus, which can lead to visual issues on some Wayland compositors.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

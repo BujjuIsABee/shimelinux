@@ -35,7 +35,7 @@ import javax.sound.sampled.LineEvent
  */
 object SoundLoader {
     /**
-     * Loads a sound at [filename] with the given [volume].
+     * Puts the sound at [filename] in [Sounds] with the given [volume].
      */
     @JvmStatic
     fun load(filename: String, volume: Float) {

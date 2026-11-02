@@ -38,7 +38,7 @@ interface Border {
     fun isOn(location: Point): Boolean
 
     /**
-     * Moves the given [location] to the border.
+     * Returns the given [location], moved to be on the border.
      */
     fun move(location: Point): Point
 }

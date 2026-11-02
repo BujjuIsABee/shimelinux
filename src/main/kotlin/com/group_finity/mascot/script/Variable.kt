@@ -47,7 +47,8 @@ abstract class Variable {
 
     companion object {
         /**
-         * Gets a variable from [source].
+         * Returns a [Script] if [source] starts with "${" or "#{", a [Constant] if it does not, or `null` if it is
+         * `null`.
          */
         fun parse(source: String?): Variable? = if (source == null) {
             null

@@ -30,6 +30,10 @@ import java.awt.image.BufferedImage
 /**
  * Stores an [image] so it can be displayed on a [TranslucentWindow].
  *
+ * @param image A platform-specific image.
+ * @param center The center of the image.
+ * @param size The size of the image.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju

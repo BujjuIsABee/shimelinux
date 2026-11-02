@@ -32,7 +32,7 @@ import java.awt.event.ComponentEvent
 import javax.swing.JPanel
 
 /**
- * Displays the background of the [VirtualEnvironment].
+ * A panel that displays the background of the [VirtualEnvironment].
  *
  * @author Kilkakon
  * @author Bujju

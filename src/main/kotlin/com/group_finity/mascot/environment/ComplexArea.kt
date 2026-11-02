@@ -26,7 +26,7 @@ import java.awt.Point
 import java.awt.Rectangle
 
 /**
- * An area made of multiple areas.
+ * Stores a collection of areas.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -36,21 +36,23 @@ class ComplexArea {
     private val areaMap = hashMapOf<String, Area>()
 
     /**
-     * The areas that make up the complex area.
+     * The areas in the [areaMap].
      */
     val areas: Collection<Area>
         get() = areaMap.values
 
     /**
-     * Sets the areas that make up the complex area.
+     * Replaces the areas in the [areaMap] with the given [rectangles].
      */
     fun set(rectangles: Map<String, Rectangle>) {
         retain(rectangles.keys)
-        rectangles.forEach { (key, value) -> set(key, value) }
+        for ((key, value) in rectangles) {
+            set(key, value)
+        }
     }
 
     /**
-     * Sets the bounds of the area with the specified [name].
+     * Sets the bounds of the area with the specified [name] in the [areaMap].
      */
     fun set(name: String, value: Rectangle) {
         if (areaMap.values.any { it.toRectangle() == value }) return
@@ -60,7 +62,7 @@ class ComplexArea {
     }
 
     /**
-     * Removes all areas that does not have its name in [deviceNames].
+     * Removes all areas from the [areaMap] that does not have its key present in the given [deviceNames] collection.
      */
     fun retain(deviceNames: Collection<String>) {
         areaMap.entries.removeIf { !deviceNames.contains(it.key) }
@@ -88,7 +90,7 @@ class ComplexArea {
     @Suppress("unused")
     fun getLeftBorder(location: Point): Wall? = areaMap.values.lastOrNull { it.leftBorder.isOn(location) }
         ?.takeIf { areaMap.values.none { it.rightBorder.isOn(location) } }
-        ?.rightBorder // do not change; this is wrong in Shimeji-ee as well and is kept for compatibility.
+        ?.rightBorder // this should be left border, but it's wrong in shimeji-ee, so i won't change it
 
     /**
      * Gets the interactable border on the complex area's right wall.

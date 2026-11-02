@@ -34,7 +34,7 @@ import javax.swing.PopupFactory
 import kotlin.collections.map
 
 /**
- * An environment that displays mascots on native Wayland surfaces.
+ * An environment that gets the screen bounds and cursor position directly from the Wayland compositor.
  *
  * @author Bujju
  */

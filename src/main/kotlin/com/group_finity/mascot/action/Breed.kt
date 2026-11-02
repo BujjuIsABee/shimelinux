@@ -69,8 +69,6 @@ class Breed(
     /**
      * Handles the shared functionality of breeding actions.
      *
-     * @param action The breeding action.
-     *
      * @author LavenderSnek
      * @author Bujju
      */
@@ -88,7 +86,7 @@ class Breed(
             get() = action.time % bornInterval == 0
 
         /**
-         * Whether the current frame is the penultimate frame of the action's [animation].
+         * Whether the current frame is the penultimate frame of the [action]'s [animation].
          */
         val isPenultimateFrame: Boolean
             get() = action.time == checkNotNull(action.animation).duration - 1
@@ -125,7 +123,7 @@ class Breed(
             get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
 
         /**
-         * The number of ticks that must pass before a new mascot can be spawned.
+         * The current frame must be a multiple of this number for a new mascot to be spawned.
          */
         private val bornInterval: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNINTERVAL), DEFAULT_BORNINTERVAL).toInt()

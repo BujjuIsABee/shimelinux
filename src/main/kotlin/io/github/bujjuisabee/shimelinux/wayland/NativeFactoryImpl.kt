@@ -29,7 +29,7 @@ import com.group_finity.mascot.image.TranslucentWindow
 import java.awt.image.BufferedImage
 
 /**
- * A native factory that displays mascots on native Wayland surfaces.
+ * A native factory implementation for Wayland compositors that support the wlr-layer-shell protocol.
  *
  * @author Bujju
  */

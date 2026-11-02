@@ -48,10 +48,10 @@ val absoluteCursorPosition = Point(0, 0)
  */
 val relativeCursorPosition = Point(0, 0)
 
-private val nextId = AtomicInteger()
+private val lastId = AtomicInteger()
 
 /**
- * Creates a Wayland layer surface.
+ * A Wayland layer surface.
  *
  * Mouse events will be sent to [mouseEventReceiver]. If [useInputRegion] is `true`, mouse events on fully transparent
  * pixels will be ignored.
@@ -59,14 +59,13 @@ private val nextId = AtomicInteger()
  * @author Bujju
  */
 class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputRegion: Boolean) : Component() {
-    private val id: Int
+    private val id: Int = lastId.incrementAndGet()
     private var absoluteLocation: Point = location
     private var leftHeld = false
     private var isDisposed = false
 
     init {
         try {
-            id = nextId.getAndIncrement()
             WaylandLib.createLayer(id, getProperty("MascotLayerWayland", 3), mouseEventReceiver, useInputRegion)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
@@ -107,7 +106,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
     }
 
     /**
-     * Displays the given [rgb] pixel data on the layer surface.
+     * Displays the [rgb] pixel data on the layer surface.
      */
     fun setImage(rgb: IntArray) {
         if (isDisposed) return
@@ -133,15 +132,11 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             exitProcess(0)
         }
 
-        isDisposed = true // prevents segfault
+        isDisposed = true
     }
 
     /**
-     * Sends mouse events to the event listeners attached to [component].
-     *
-     * If [leftPressed] or [rightPressed] is `true`, a `MOUSE_PRESSED` event will be sent. If [leftReleased] or
-     * [rightReleased] is `true`, a `MOUSE_RELEASED` event will be sent. If [positionX] or [positionY] is different from
-     * [relativeCursorPosition], a `MOUSE_MOVED` event will be sent.
+     * Sends mouse events to the event listeners attached to the given [component].
      */
     fun dispatchEvents(
         component: Component,
@@ -166,8 +161,8 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             button = button or MouseEvent.BUTTON3
         }
 
-        // If the compositor does not provide the absolute cursor position, stop updating absoluteLocation while the
-        // left mouse button is held down.
+        // If the absolute cursor position has to be estimated, stop updating absoluteLocation while the left mouse
+        // button is held so mascots don't fly offscreen when dragged
         leftHeld = leftPressed || (leftHeld && !leftReleased)
         if (!leftHeld || Platform.providesAbsoluteCursorPosition) {
             absoluteLocation = location
@@ -208,8 +203,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
         if (relativeCursorPosition.x != positionX || relativeCursorPosition.y != positionY) {
             relativeCursorPosition.setLocation(positionX, positionY)
 
-            // If the compositor does not provide the absolute cursor position, estimate it by adding the relative
-            // cursor position to the absolute position of the layer surface.
+            // Estimate the absolute cursor position if the compositor does not provide it
             if (!Platform.providesAbsoluteCursorPosition) {
                 absoluteCursorPosition.setLocation(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
             }
@@ -220,8 +214,6 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
                     MouseEvent.MOUSE_MOVED,
                     System.currentTimeMillis(),
                     modifiers,
-                    // If component is a mascot, use the cursor position relative to absoluteLocation. If component is a
-                    // popup menu element, use the relative cursor position from the compositor.
                     if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
                     if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
                     0,
