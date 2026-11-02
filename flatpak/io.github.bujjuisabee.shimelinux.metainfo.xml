@@ -52,6 +52,7 @@
                 <p>Changelog:</p>
                 <ul>
                     <li>Improved performance in the cross-platform environment for image sets with large images.</li>
+                    <li>Fixed a bug where the window shape in the generic environment included the entire left side of the Shimeji.</li>
                     <li>Shimeji can no longer move between screens on KDE Plasma when "Use Wayland Layers" is enabled.</li>
                     <li>All Shimeji will now spawn on the same screen on the Wayland environment.</li>
                     <li>Fixed a bug where Shimeji would sometimes be moved offscreen when trying to drag them with the mouse when there are multiple screens.</li>
