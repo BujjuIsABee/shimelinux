@@ -46,6 +46,21 @@
         </screenshot>
     </screenshots>
     <releases>
+        <release version="1.4.3" date="2026-11-01">
+            <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.3</url>
+            <description>
+                <p>Changelog:</p>
+                <ul>
+                    <li>Improved performance in the cross-platform environment for image sets with large images.</li>
+                    <li>Shimeji can no longer move between screens on KDE Plasma when "Use Wayland Layers" is enabled.</li>
+                    <li>All Shimeji will now spawn on the same screen on the Wayland environment.</li>
+                    <li>Fixed a bug where Shimeji would sometimes be moved offscreen when trying to drag them with the mouse when there are multiple screens.</li>
+                    <li>Fixed a bug where the default Java icon would be used for menus when menu scaling is greater than 100%.</li>
+                    <li>Fixed a bug where the program would freeze instead of restarting after changing the menu scaling setting in the Flatpak app.</li>
+                    <li>Fixed a bug where selecting the "Fit" or "Fill" option for the background of the windowed environment would freeze the settings menu.</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.4.2" date="2026-10-28">
             <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.2</url>
             <description>
