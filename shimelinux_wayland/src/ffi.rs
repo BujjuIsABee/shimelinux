@@ -85,7 +85,9 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
     // Spawn a thread for the event loop
     thread::spawn(move || {
         loop {
-            let _ = event_queue.blocking_dispatch(&mut state);
+            if !state.layers.is_empty() {
+                let _ = event_queue.blocking_dispatch(&mut state);
+            }
 
             // Handle events
             while let Ok(event) = receiver.try_recv() {
@@ -178,6 +180,10 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
                     }
                     Event::Dispose(id) => {
                         state.layers.remove(&id);
+
+                        if state.layers.is_empty() {
+                            let _ = event_queue.blocking_dispatch(&mut state);
+                        }
                     }
                 }
             }
