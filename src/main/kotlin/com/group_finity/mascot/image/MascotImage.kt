@@ -39,8 +39,8 @@ import java.awt.image.BufferedImage
  * @author Bujju
  */
 class MascotImage(val image: NativeImage, val center: Point, val size: Dimension) {
-    constructor(image: BufferedImage, center: Point) : this(
-        NativeFactory.instance.newNativeImage(image),
+    constructor(image: BufferedImage, center: Point, mirror: Boolean) : this(
+        NativeFactory.instance.newNativeImage(image, mirror),
         center,
         Dimension(image.width, image.height)
     )

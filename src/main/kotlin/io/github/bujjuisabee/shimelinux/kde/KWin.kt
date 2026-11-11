@@ -65,6 +65,11 @@ object KWin {
      */
     var restoreWindows = false
 
+    /**
+     * If `true`, the active interactive window will be minimized.
+     */
+    var minimizeWindow = false
+
     init {
         try {
             val dbus = DBusConnectionBuilder.forSessionBus().build()
@@ -177,6 +182,11 @@ object KWin {
          * Returns [restoreWindows].
          */
         fun getRestoreWindows(): Boolean
+
+        /**
+         * Returns [minimizeWindow].
+         */
+        fun getMinimizeWindow(): Boolean
     }
 
     /**
@@ -211,6 +221,8 @@ object KWin {
         ).also { windowPosition = null }
 
         override fun getRestoreWindows(): Boolean = restoreWindows.also { restoreWindows = false }
+
+        override fun getMinimizeWindow(): Boolean = minimizeWindow.also { minimizeWindow = false }
 
         override fun getObjectPath() = "/KWinClient"
     }

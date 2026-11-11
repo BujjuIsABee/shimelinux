@@ -26,13 +26,27 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
 /**
- * Stores [managedImage] so it can be displayed on a [WaylandLayer].
+ * Stores [image] so it can be displayed on a [WaylandLayer].
  *
  * @author Bujju
  */
-class WaylandNativeImage(managedImage: BufferedImage) : NativeImage {
+class WaylandNativeImage(image: BufferedImage, mirror: Boolean) : NativeImage {
     /**
      * The image's pixel data.
      */
-    val rgb: IntArray = managedImage.getRGB(0, 0, managedImage.width, managedImage.height, null, 0, managedImage.width)
+    val rgb: IntArray = if (mirror) {
+        val rgb = IntArray(image.width * image.height)
+
+        for (y in 0 until image.height) {
+            for (x in 0 until image.width) {
+                rgb[y * image.width + (image.width - x - 1)] = image.getRGB(x, y)
+            }
+        }
+
+        rgb
+    } else {
+        image.getRGB(0, 0, image.width, image.height, null, 0, image.width)
+    }
+
+    override fun dispose() {}
 }

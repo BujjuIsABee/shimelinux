@@ -81,7 +81,7 @@ abstract class NativeFactory {
     /**
      * Gets a platform-specific [NativeImage] from the given [src] image.
      */
-    abstract fun newNativeImage(src: BufferedImage): NativeImage
+    abstract fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage
 
     companion object {
         /**

@@ -94,6 +94,10 @@ class GenericTranslucentWindow : TranslucentWindow, JWindow(gc) {
         repaint()
     }
 
+    override fun bringToFront() {
+        super.toFront()
+    }
+
     private fun updateWindowMask() {
         val image = image ?: return
 

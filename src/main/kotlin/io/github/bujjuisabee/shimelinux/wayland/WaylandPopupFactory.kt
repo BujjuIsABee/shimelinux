@@ -88,6 +88,7 @@ object WaylandPopupFactory : PopupFactory() {
                 this.target = target
 
                 if (target is JMenu) {
+                    closeSubmenu()
                     openSubmenu(target)
                 } else {
                     closeSubmenu()

@@ -36,7 +36,7 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = WaylandEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = WaylandNativeImage(src)
+    override fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage = WaylandNativeImage(src, mirror)
 
     override fun newTranslucentWindow(): TranslucentWindow = WaylandTranslucentLayer()
 }

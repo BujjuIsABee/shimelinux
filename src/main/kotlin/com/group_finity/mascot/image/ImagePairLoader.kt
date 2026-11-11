@@ -57,31 +57,23 @@ object ImagePairLoader {
         // Load right image
         val rightImage = rightPath?.inputStream()?.use {
             scale(premultiply(ImageIO.read(it), opacity), scaling, filter)
-        } ?: flip(leftImage)
+        } ?: leftImage
 
-        val leftCenter = Point((center.x * scaling).roundToInt(), (center.y * scaling).roundToInt())
-        val rightCenter = Point(rightImage.width - (center.x * scaling).roundToInt(), (center.y * scaling).roundToInt())
-        val imagePair = ImagePair(MascotImage(leftImage, leftCenter), MascotImage(rightImage, rightCenter))
-        ImagePairs.load(leftPath.toString() + (rightPath?.toString() ?: ""), imagePair)
-    }
-
-    private fun flip(source: BufferedImage): BufferedImage {
-        val result = BufferedImage(
-            source.width, source.height,
-            if (source.type == BufferedImage.TYPE_CUSTOM) {
-                BufferedImage.TYPE_INT_ARGB
-            } else {
-                source.type
-            }
+        val imagePair = ImagePair(
+            MascotImage(
+                leftImage,
+                Point((center.x * scaling).roundToInt(), (center.y * scaling).roundToInt()),
+                false
+            ),
+            MascotImage(
+                rightImage,
+                Point(rightImage.width - (center.x * scaling).roundToInt(),
+                    (center.y * scaling).roundToInt()),
+                rightPath == null
+            )
         )
 
-        for (y in 0 until source.height) {
-            for (x in 0 until source.width) {
-                result.setRGB(result.width - x - 1, y, source.getRGB(x, y))
-            }
-        }
-
-        return result
+        ImagePairs.load(leftPath.toString() + (rightPath?.toString() ?: ""), imagePair)
     }
 
     private fun premultiply(source: BufferedImage, opacity: Double): BufferedImage {

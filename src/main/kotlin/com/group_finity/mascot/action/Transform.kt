@@ -26,7 +26,6 @@ import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
 import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
-import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.localize
 import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
@@ -65,10 +64,8 @@ class Transform(
         super.tick()
 
         val animation = checkNotNull(animation)
-        if (time == animation.duration - 1 || animation.duration == 1) {
-            if (getProperty("Transformation", true)) {
-                transform()
-            }
+        if (Main.getMascotBooleanSetting("Transformation", mascot) && (time == animation.duration - 1 || animation.duration == 1)) {
+            transform()
         }
     }
 

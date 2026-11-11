@@ -72,6 +72,13 @@ class ScanJump(
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
+     * Whether half of the distance between the [mascot] and the target position should be subtracted from the vertical
+     * distance every frame.
+     */
+    private val arc: Boolean
+        get() = eval(schema.getString(PARAMETER_ARC), DEFAULT_ARC)
+
+    /**
      * The velocity of the [mascot] as it jumps.
      */
     private val velocity: Double
@@ -114,22 +121,10 @@ class ScanJump(
         }
 
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - if (arc) abs(distanceX) / 2.0 else 0.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
         val velocity = velocity
-
-        if (distance != 0.0) {
-            val velocityX = (velocity * distanceX / distance).toInt()
-            val velocityY = (velocity * distanceY / distance).toInt()
-
-            putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
-            putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
-
-            mascot.anchor.translate(velocityX, velocityY)
-
-            checkNotNull(animation).next(mascot, time)
-        }
 
         if (distance <= velocity) {
             mascot.anchor.setLocation(targetX, targetY)
@@ -152,6 +147,16 @@ class ScanJump(
                     else -> throw e
                 }
             }
+        } else {
+            val velocityX = (velocity * distanceX / distance).toInt()
+            val velocityY = (velocity * distanceY / distance).toInt()
+
+            putVariable(schema.getString(VARIABLE_VELOCITYX), velocity * distanceX / distance)
+            putVariable(schema.getString(VARIABLE_VELOCITYY), velocity * distanceY / distance)
+
+            mascot.anchor.translate(velocityX, velocityY)
+
+            checkNotNull(animation).next(mascot, time)
         }
     }
 
@@ -179,6 +184,12 @@ class ScanJump(
          */
         const val PARAMETER_VELOCITY = "VelocityParam"
         private const val DEFAULT_VELOCITY = 20.0
+
+        /**
+         * The key for the name of the [arc] parameter in the schema.
+         */
+        const val PARAMETER_ARC = "Arc"
+        private const val DEFAULT_ARC = true
 
         /**
          * The key for the name of the `VelocityX` variable in the schema.

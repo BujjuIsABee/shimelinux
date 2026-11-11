@@ -27,13 +27,34 @@ import java.awt.image.BufferedImage
 import java.util.Objects
 
 /**
- * Stores [managedImage].
+ * Stores [image].
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju
  */
-class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
+class GenericNativeImage(image: BufferedImage, mirror: Boolean) : NativeImage {
+    /**
+     * The stored image.
+     */
+    val managedImage: BufferedImage = if (mirror) {
+        val copy = BufferedImage(
+            image.width,
+            image.height,
+            if (image.type == BufferedImage.TYPE_CUSTOM) BufferedImage.TYPE_INT_ARGB else image.type
+        )
+
+        for (y in 0 until image.height) {
+            for (x in 0 until image.width) {
+                copy.setRGB(copy.width - x - 1, y, image.getRGB(x, y))
+            }
+        }
+
+        copy
+    } else {
+        image
+    }
+
     /**
      * The image's width.
      */
@@ -52,4 +73,6 @@ class GenericNativeImage(val managedImage: BufferedImage) : NativeImage {
     override fun hashCode(): Int = Objects.hash(rgb)
 
     override fun equals(other: Any?): Boolean = other === this || rgb.contentEquals((other as? GenericNativeImage)?.rgb)
+
+    override fun dispose() {}
 }

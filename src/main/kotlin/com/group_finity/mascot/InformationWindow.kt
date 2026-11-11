@@ -50,12 +50,17 @@ import javax.swing.event.HyperlinkEvent
  * @author Kilkakon
  * @author Bujju
  */
-class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
+class InformationWindow(private val imageSet: String, config: Configuration) : JFrame() {
     private val imagePanel: JPanel
     private val splashImageLabel: JLabel
     private val editorPane: JEditorPane
     private val buttonsPanel: JPanel
+    private val previousButton: JButton
     private val closeButton: JButton
+    private val nextButton: JButton
+
+    private var images = arrayOf<String>()
+    private var imageIndex = 0
 
     init {
         iconImage = BaseMultiResolutionImage(
@@ -63,19 +68,22 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
             loadResource("img/icon128.png").use { ImageIO.read(it) },
             loadResource("img/icon256.png").use { ImageIO.read(it) },
         )
-        title = if (config.containsInformationKey("Name")) config.getInformation("Name") else localize("Information")
+        title = if (config.containsInformationKey("Name")) config.getInformation("Name").toString() else localize("Information")
         isResizable = false
         defaultCloseOperation = DISPOSE_ON_CLOSE
         layout = BoxLayout(contentPane, BoxLayout.Y_AXIS)
 
-        val splashImage = checkNotNull(config.getInformation("SplashImage"))
-        splashImageLabel = JLabel()
-        splashImageLabel.alignmentX = CENTER_ALIGNMENT
-        splashImageLabel.icon = ImageIcon(getPath("img", imageSet, splashImage).toString())
-
-        imagePanel = JPanel()
-        imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
-        imagePanel.add(splashImageLabel)
+        previousButton = JButton("\u25c4")
+        previousButton.isEnabled = imageIndex > 0
+        previousButton.minimumSize = Dimension(95, 23)
+        previousButton.maximumSize = Dimension(130, 26)
+        previousButton.preferredSize = Dimension(130, 26)
+        previousButton.addActionListener {
+            imageIndex--
+            splashImageLabel.icon = ImageIcon(getPath("img", imageSet, images[imageIndex]).toString())
+            previousButton.isEnabled = imageIndex > 0
+            nextButton.isEnabled = imageIndex < images.size - 1
+        }
 
         closeButton = JButton(localize("Close"))
         closeButton.minimumSize = Dimension(95, 23)
@@ -83,9 +91,41 @@ class InformationWindow(imageSet: String, config: Configuration) : JFrame() {
         closeButton.preferredSize = Dimension(130, 26)
         closeButton.addActionListener { dispose() }
 
+        nextButton = JButton("\u25ba")
+        nextButton.isEnabled = imageIndex < images.size - 1
+        nextButton.minimumSize = Dimension(95, 23)
+        nextButton.maximumSize = Dimension(130, 26)
+        nextButton.preferredSize = Dimension(130, 26)
+        nextButton.addActionListener {
+            imageIndex++
+            splashImageLabel.icon = ImageIcon(getPath("img", imageSet, images[imageIndex]).toString())
+            previousButton.isEnabled = imageIndex > 0
+            nextButton.isEnabled = imageIndex < images.size - 1
+        }
+
         buttonsPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 5))
         buttonsPanel.preferredSize = Dimension(380, 36)
+        buttonsPanel.add(previousButton)
         buttonsPanel.add(closeButton)
+        buttonsPanel.add(nextButton)
+
+        val image = if (config.containsInformationKey("SplashImage")) {
+            previousButton.isVisible = false
+            nextButton.isVisible = false
+            ImageIcon(getPath("img", imageSet, config.getInformation("SplashImage").toString()).toString())
+        } else {
+            @Suppress("UNCHECKED_CAST")
+            images = runCatching { config.getInformation("SplashImages") as Array<String> }.getOrDefault(arrayOf())
+            ImageIcon(getPath("img", imageSet, images[0]).toString())
+        }
+
+        splashImageLabel = JLabel()
+        splashImageLabel.alignmentX = CENTER_ALIGNMENT
+        splashImageLabel.icon = image
+
+        imagePanel = JPanel()
+        imagePanel.layout = BoxLayout(imagePanel, BoxLayout.Y_AXIS)
+        imagePanel.add(splashImageLabel)
 
         val textColor = UIManager.getColor("Label.foreground")
         val linkColor = UIManager.getColor("textHighlight")

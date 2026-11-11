@@ -306,8 +306,51 @@ class Mascot(var imageSet: String) {
             isPaused = !isPaused
         }
 
-        val behaviorsSubmenu = JMenu(localize("SetBehavior"))
         val allowedSubmenu = JMenu(localize("AllowedBehaviors"))
+
+        val breedingMenu = JCheckBoxMenuItem(localize("BreedingCloning"), Main.getMascotBooleanSetting("Breeding", this))
+        breedingMenu.addItemListener {
+            Main.toggleMascotBooleanSetting("Breeding", this)
+        }
+
+        val transientMenu = JCheckBoxMenuItem(localize("BreedingTransient"), Main.getMascotBooleanSetting("Transients", this))
+        transientMenu.addItemListener {
+            Main.toggleMascotBooleanSetting("Transients", this)
+        }
+
+        val transformationMenu = JCheckBoxMenuItem(localize("Transformation"), Main.getMascotBooleanSetting("Transformation", this))
+        transformationMenu.addItemListener {
+            Main.toggleMascotBooleanSetting("Transformation", this)
+        }
+
+        val throwingMenu = JCheckBoxMenuItem(localize("ThrowingWindows"), Main.getMascotBooleanSetting("Throwing", this))
+        throwingMenu.addItemListener {
+            Main.toggleMascotBooleanSetting("Throwing", this)
+        }
+
+        val soundsMenu = JCheckBoxMenuItem(localize("SoundEffects"), Main.getMascotBooleanSetting("Sounds", this))
+        soundsMenu.addItemListener {
+            Main.toggleMascotBooleanSetting("Sounds", this)
+        }
+
+        val multiscreenMenu = JCheckBoxMenuItem(localize("Multiscreen"), Main.getMascotBooleanSetting("Multiscreen", this))
+        multiscreenMenu.addItemListener {
+            Main.toggleMascotBooleanSetting("Multiscreen", this)
+        }
+
+        allowedSubmenu.add(breedingMenu)
+        allowedSubmenu.add(transientMenu)
+        allowedSubmenu.add(transformationMenu)
+        if (currentEnvironment == "kde") {
+            allowedSubmenu.add(throwingMenu)
+        }
+        allowedSubmenu.add(soundsMenu)
+        if (!usingWaylandLayerSurfaces) {
+            allowedSubmenu.add(multiscreenMenu)
+        }
+
+        val behaviorsSubmenu = JMenu(localize("SetBehavior"))
+        var hasToggleableBehaviors = false
         val config = Main.getConfiguration(imageSet)
         for (behaviorName in config.behaviorNames.filter { !it.contains('/') }) {
             try {
@@ -333,6 +376,11 @@ class Mascot(var imageSet: String) {
                         behaviorsSubmenu.add(item)
                     }
                     if (config.isBehaviorToggleable(behaviorName)) {
+                        if (!hasToggleableBehaviors) {
+                            hasToggleableBehaviors = true
+                            allowedSubmenu.addSeparator()
+                        }
+
                         val toggleItem = JCheckBoxMenuItem(caption, config.isBehaviorEnabled(behaviorName, this))
                         toggleItem.addActionListener {
                             Main.setMascotBehaviorEnabled(
@@ -348,6 +396,14 @@ class Mascot(var imageSet: String) {
             }
         }
 
+        val resetMenu = JMenuItem(localize("Reset"))
+        resetMenu.addActionListener {
+            Main.resetMascotSettings(this)
+        }
+
+        allowedSubmenu.addSeparator()
+        allowedSubmenu.add(resetMenu)
+
         popup.add(callAnotherMenu)
         popup.addSeparator()
         popup.add(followCursorMenu)
@@ -359,9 +415,7 @@ class Mascot(var imageSet: String) {
         if (behaviorsSubmenu.menuComponentCount > 0) {
             popup.add(behaviorsSubmenu)
         }
-        if (allowedSubmenu.menuComponentCount > 0) {
-            popup.add(allowedSubmenu)
-        }
+        popup.add(allowedSubmenu)
         popup.addSeparator()
         popup.add(pauseMenu)
         popup.addSeparator()
@@ -395,7 +449,6 @@ class Mascot(var imageSet: String) {
             .replace("  ", " ")
 
         debugWindow?.set(
-            behaviorName,
             anchor.x,
             anchor.y,
             environment.activeIETitle,
@@ -406,7 +459,9 @@ class Mascot(var imageSet: String) {
             environment.workArea.left,
             environment.workArea.top,
             environment.workArea.width,
-            environment.workArea.height
+            environment.workArea.height,
+            behaviorName,
+            variables.rawMap
         )
     }
 
@@ -430,7 +485,7 @@ class Mascot(var imageSet: String) {
 
             // Play the sound
             val sound = sound
-            if (!Sounds.isMuted && sound != null && Sounds.contains(sound)) {
+            if (!Main.getMascotBooleanSetting("Sounds", this) && sound != null && Sounds.contains(sound)) {
                 Sounds.getSound(sound)?.let { clip ->
                     if (!clip.isRunning) {
                         clip.stop()
@@ -440,6 +495,13 @@ class Mascot(var imageSet: String) {
                 }
             }
         }
+    }
+
+    /**
+     * Brings the mascot above all other windows.
+     */
+    fun bringToFront() {
+        window.bringToFront()
     }
 
     /**

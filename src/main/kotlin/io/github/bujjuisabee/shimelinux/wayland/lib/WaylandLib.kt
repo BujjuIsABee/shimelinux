@@ -23,6 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland.lib
 
 import com.group_finity.mascot.Main
+import com.group_finity.mascot.image.ImagePairs
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import java.io.File
@@ -50,6 +51,7 @@ object WaylandLib {
             System.load(libFile.absolutePath)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            ImagePairs.clear()
             exitProcess(0)
         }
     }

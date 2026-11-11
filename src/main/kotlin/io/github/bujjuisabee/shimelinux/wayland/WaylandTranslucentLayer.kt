@@ -55,6 +55,8 @@ class WaylandTranslucentLayer : TranslucentWindow, MouseEventReceiver {
 
     override fun setAlwaysOnTop(value: Boolean) {}
 
+    override fun bringToFront() {}
+
     override fun dispose() {
         layer.dispose()
     }

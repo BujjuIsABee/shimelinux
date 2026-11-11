@@ -20,15 +20,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.github.bujjuisabee.shimelinux.virtual
+package com.group_finity.mascot.action
 
-import com.group_finity.mascot.image.NativeImage
-import java.awt.image.BufferedImage
+import com.group_finity.mascot.Mascot
+import com.group_finity.mascot.animation.Animation
+import com.group_finity.mascot.script.VariableMap
+import java.util.ResourceBundle
 
 /**
- * Stores [managedImage] so it can be displayed on a [VirtualTranslucentPanel].
+ * An action that creates a new mascot while [mascot] falls.
  *
  * @author Kilkakon
  * @author Bujju
  */
-class VirtualNativeImage(val managedImage: BufferedImage) : NativeImage
+@Suppress("unused")
+class BreedFall(
+    schema: ResourceBundle,
+    animations: List<Animation>,
+    context: VariableMap
+) : Fall(schema, animations, context) {
+    private val delegate = Breed.Delegate(this)
+
+    override fun init(mascot: Mascot) {
+        super.init(mascot)
+
+        delegate.validateBornCount()
+        delegate.validateBornInterval()
+    }
+
+    override fun tick() {
+        super.tick()
+
+        if (delegate.isIntervalFrame && delegate.isEnabled) {
+            delegate.breed()
+        }
+    }
+}

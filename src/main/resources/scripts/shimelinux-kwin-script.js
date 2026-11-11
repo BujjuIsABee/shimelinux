@@ -85,6 +85,20 @@ function tick() {
         }
     );
 
+    // Minimize window
+    callDBus(
+        busName, clientPath, interfaceName,
+        "getMinimizeWindow",
+        (minimizeWindows) => {
+            if (minimizeWindows && activeWindow && activeWindow.minimizable) {
+                activeWindow.minimized = true;
+                onWindowDeactivated(activeWindow);
+                return;
+            }
+        }
+    );
+
+
     // Move windows
     callDBus(
         busName, clientPath, interfaceName,

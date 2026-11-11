@@ -82,6 +82,8 @@ class KdeEnvironment : Environment() {
         KWin.windowPosition = point
     }
 
+    override fun minimizeActiveIE() {}
+
     override fun restoreIE() {
         KWin.restoreWindows = true
     }

@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2026, Bujju
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ *     1. Redistributions of source code must retain the above copyright notice, this list of conditions and the
+ *        following disclaimer.
+ *     2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+ *        following disclaimer in the documentation and/or other materials provided with the distribution.
+ *     3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote
+ *        products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package com.group_finity.mascot.action
+
+import com.group_finity.mascot.Main
+import com.group_finity.mascot.animation.Animation
+import com.group_finity.mascot.exception.LostGroundException
+import com.group_finity.mascot.script.VariableMap
+import java.awt.Point
+import java.util.ResourceBundle
+import java.util.logging.Logger
+
+private val logger: Logger = Logger.getLogger(JumpWithIE::class.java.name)
+
+/**
+ * An action that causes the [mascot] to jump while holding a window.
+ *
+ * @author Yuki Yamada
+ * @author Shimeji-ee Group
+ * @author Bujju
+ */
+@Suppress("unused")
+class JumpWithIE(
+    schema: ResourceBundle,
+    animations: List<Animation>,
+    params: VariableMap
+) : Jump(schema, animations, params) {
+    /**
+     * The horizontal distance between the [mascot] and the window.
+     */
+    private val offsetX: Int
+        get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETX), DEFAULT_IEOFFSETX).toInt()
+
+    /**
+     * The vertical distance between the [mascot] and the window.
+     */
+    private val offsetY: Int
+        get() = eval<Number>(schema.getString(PARAMETER_IEOFFSETY), DEFAULT_IEOFFSETY).toInt()
+
+    override fun hasNext(): Boolean = super.hasNext() && Main.getMascotBooleanSetting("Throwing", mascot)
+
+    override fun tick() {
+        val activeIE = environment.activeIE
+
+        if (!activeIE.isVisible) {
+            logger.info { "IE not visible ($mascot, $this)" }
+            throw LostGroundException()
+        }
+
+        val offsetX = offsetX
+        val offsetY = offsetY
+
+        if (mascot.isLookRight) {
+            if (mascot.anchor.x - offsetX != activeIE.left || mascot.anchor.y + offsetY != activeIE.bottom) {
+                logger.info { "Lost ground ($mascot, $this)" }
+                throw LostGroundException()
+            }
+        } else {
+            if (mascot.anchor.x + offsetX != activeIE.right || mascot.anchor.y + offsetY != activeIE.bottom) {
+                logger.info { "Lost ground ($mascot, $this)" }
+                throw LostGroundException()
+            }
+        }
+
+        super.tick()
+
+        if (activeIE.isVisible) {
+            environment.moveActiveIE(
+                if (mascot.isLookRight) {
+                    Point(
+                        mascot.anchor.x - offsetX,
+                        mascot.anchor.y + offsetY - activeIE.height
+                    )
+                } else {
+                    Point(
+                        mascot.anchor.x + offsetX - activeIE.width,
+                        mascot.anchor.y + offsetY - activeIE.height
+                    )
+                }
+            )
+        }
+    }
+
+    companion object {
+        /**
+         * The key for the name of the [offsetX] parameter in the schema.
+         */
+        const val PARAMETER_IEOFFSETX = "IeOffsetX"
+        private const val DEFAULT_IEOFFSETX = 0
+
+        /**
+         * The key for the name of the [offsetY] parameter in the schema.
+         */
+        const val PARAMETER_IEOFFSETY = "IeOffsetY"
+        private const val DEFAULT_IEOFFSETY = 0
+    }
+}

@@ -53,6 +53,11 @@ interface TranslucentWindow {
     fun setAlwaysOnTop(value: Boolean)
 
     /**
+     * Brings the window above all others.
+     */
+    fun bringToFront()
+
+    /**
      * Closes the window.
      */
     fun dispose()

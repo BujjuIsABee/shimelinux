@@ -79,7 +79,10 @@ object ImagePairs {
      */
     @JvmStatic
     fun clear() {
-        imagePairs.clear()
+        for (key in imagePairs.keys()) {
+            imagePairs[key]?.dispose()
+            imagePairs.remove(key)
+        }
     }
 
     /**
@@ -87,6 +90,11 @@ object ImagePairs {
      */
     @JvmStatic
     fun removeAll(searchTerm: String) {
-        imagePairs.entries.removeIf { searchTerm == Path(it.key).getName(2).toString() }
+        for (key in imagePairs.keys()) {
+            if (searchTerm == Path(key).getName(2).toString()) {
+                imagePairs[key]?.dispose()
+                imagePairs.remove(key)
+            }
+        }
     }
 }

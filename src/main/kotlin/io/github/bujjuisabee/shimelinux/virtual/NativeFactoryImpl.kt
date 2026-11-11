@@ -26,6 +26,7 @@ import com.group_finity.mascot.NativeFactory
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
+import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
@@ -37,7 +38,7 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = VirtualEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = VirtualNativeImage(src)
+    override fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage = GenericNativeImage(src, mirror)
 
     override fun newTranslucentWindow(): TranslucentWindow = VirtualTranslucentPanel()
         .also { (environment as VirtualEnvironment).addShimeji(it) } // add the mascot to environment

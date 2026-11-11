@@ -29,4 +29,9 @@ package com.group_finity.mascot.image
  * @author Shimeji-ee Group
  * @author Bujju
  */
-interface NativeImage
+interface NativeImage {
+    /**
+     * Disposes the native image.
+     */
+    fun dispose()
+}

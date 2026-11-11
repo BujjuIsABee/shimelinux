@@ -40,7 +40,7 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = GenericEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage = GenericNativeImage(src)
+    override fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage = GenericNativeImage(src, mirror)
 
     override fun newTranslucentWindow(): TranslucentWindow = GenericTranslucentWindow()
 }

@@ -24,6 +24,7 @@ package io.github.bujjuisabee.shimelinux.virtual
 
 import com.group_finity.mascot.image.NativeImage
 import com.group_finity.mascot.image.TranslucentWindow
+import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.Component
 import java.awt.Graphics
 import javax.swing.JPanel
@@ -35,7 +36,7 @@ import javax.swing.JPanel
  * @author Bujju
  */
 class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
-    private var image: VirtualNativeImage? = null
+    private var image: GenericNativeImage? = null
 
     override fun paintComponent(g: Graphics) {
         image?.let { g.drawImage(it.managedImage, 0, 0, null) }
@@ -48,7 +49,7 @@ class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     override fun asComponent(): Component = this
 
     override fun setImage(image: NativeImage) {
-        this.image = image as VirtualNativeImage
+        this.image = image as GenericNativeImage
     }
 
     override fun updateImage() {
@@ -56,6 +57,8 @@ class VirtualTranslucentPanel : JPanel(), TranslucentWindow {
     }
 
     override fun setAlwaysOnTop(value: Boolean) {}
+
+    override fun bringToFront() {}
 
     override fun dispose() {
         parent?.let {

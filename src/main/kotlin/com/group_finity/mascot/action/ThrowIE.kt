@@ -22,8 +22,8 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.animation.Animation
-import com.group_finity.mascot.getProperty
 import com.group_finity.mascot.script.VariableMap
 import java.awt.Point
 import java.util.ResourceBundle
@@ -58,7 +58,7 @@ class ThrowIE(
     private val gravity: Double
         get() = eval<Number>(schema.getString(PARAMETER_GRAVITY), DEFAULT_GRAVITY).toDouble()
 
-    override fun hasNext(): Boolean = super.hasNext() && environment.activeIE.isVisible && getProperty("Throwing", true)
+    override fun hasNext(): Boolean = super.hasNext() && Main.getMascotBooleanSetting("Throwing", mascot) && environment.activeIE.isVisible
 
     override fun tick() {
         super.tick()

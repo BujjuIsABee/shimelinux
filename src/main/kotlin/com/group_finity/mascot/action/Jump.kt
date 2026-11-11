@@ -58,9 +58,16 @@ open class Jump(
     private val targetY: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETY), DEFAULT_TARGETY).toInt()
 
+    /**
+     * Whether half of the distance between the [mascot] and the target position should be subtracted from the vertical
+     * distance every frame.
+     */
+    private val arc: Boolean
+        get() = eval(schema.getString(PARAMETER_ARC), DEFAULT_ARC)
+
     override fun hasNext(): Boolean {
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - if (arc) abs(distanceX) / 2.0 else 0.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
         return super.hasNext() && distance != 0.0
@@ -73,12 +80,14 @@ open class Jump(
         mascot.isLookRight = mascot.anchor.x < targetX
 
         val distanceX = (targetX - mascot.anchor.x).toDouble()
-        val distanceY = (targetY - mascot.anchor.y).toDouble() - abs(distanceX) / 2.0
+        val distanceY = (targetY - mascot.anchor.y).toDouble() - if (arc) abs(distanceX) / 2.0 else 0.0
         val distance = sqrt(distanceX * distanceX + distanceY * distanceY)
 
         val velocity = velocity
 
-        if (distance != 0.0) {
+        if (distance <= velocity) {
+            mascot.anchor.setLocation(targetX, targetY)
+        } else {
             val velocityX = (velocity * distanceX / distance).toInt()
             val velocityY = (velocity * distanceY / distance).toInt()
 
@@ -88,10 +97,6 @@ open class Jump(
             mascot.anchor.translate(velocityX, velocityY)
 
             checkNotNull(animation).next(mascot, time)
-        }
-
-        if (distance <= velocity) {
-            mascot.anchor.setLocation(targetX, targetY)
         }
     }
 
@@ -113,6 +118,12 @@ open class Jump(
          */
         const val PARAMETER_TARGETY = "TargetY"
         private const val DEFAULT_TARGETY = 0
+
+        /**
+         * The key for the name of the [arc] parameter in the schema.
+         */
+        const val PARAMETER_ARC = "Arc"
+        private const val DEFAULT_ARC = true
 
         /**
          * The key for the name of the `VelocityX` variable in the schema.

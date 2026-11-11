@@ -78,7 +78,13 @@ class ScanInteract(
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
 
     /**
-     * Whether the mascots should face each other.
+     * Whether the [mascot] should face the other mascot.
+     */
+    private val look: Boolean
+        get() = eval(schema.getString(PARAMETER_LOOK), DEFAULT_LOOK)
+
+    /**
+     * Whether the other mascot should face the [mascot].
      */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
@@ -115,17 +121,20 @@ class ScanInteract(
 
         if (target?.get()?.affordances?.contains(affordance) == true) {
             val target = checkNotNull(target?.get())
-
-            if (mascot.anchor.x != target.anchor.x) {
-                isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
-                mascot.isLookRight = mascot.anchor.x < target.anchor.x
-            }
-
             val animation = checkNotNull(animation)
 
-            if (isTurning && time >= animation.duration) {
-                time -= animation.duration
-                isTurning = false
+            if (look) {
+                // Activate the turn animation if we change directions
+                if (mascot.anchor.x != target.anchor.x) {
+                    isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < target.anchor.x != mascot.isLookRight)
+                    mascot.isLookRight = mascot.anchor.x < target.anchor.x
+                }
+
+                // Check if the turning animation has finished
+                if (isTurning && time >= animation.duration) {
+                    time -= animation.duration
+                    isTurning = false
+                }
             }
 
             animation.next(mascot, time)
@@ -167,6 +176,12 @@ class ScanInteract(
          */
         const val PARAMETER_TARGETBEHAVIOUR = "TargetBehaviour"
         private const val DEFAULT_TARGETBEHAVIOUR = ""
+
+        /**
+         * The key for the name of the [look] parameter in the schema.
+         */
+        const val PARAMETER_LOOK = "Look"
+        private const val DEFAULT_LOOK = true
 
         /**
          * The key for the name of the [targetLook] parameter in the schema.

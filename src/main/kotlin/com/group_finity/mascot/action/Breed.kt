@@ -77,7 +77,7 @@ class Breed(
          * Whether breeding/transient behaviors are allowed.
          */
         val isEnabled: Boolean
-            get() = getProperty(if (bornTransient) "Transients" else "Breeding", true)
+            get() = Main.getMascotBooleanSetting(if (bornTransient) "Transients" else "Breeding", action.mascot)
 
         /**
          * Whether the current frame is a multiple of the [bornInterval].

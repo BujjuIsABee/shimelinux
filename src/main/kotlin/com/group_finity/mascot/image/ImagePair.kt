@@ -37,4 +37,12 @@ class ImagePair(val leftImage: MascotImage, val rightImage: MascotImage) {
      * Returns [rightImage] if [isLookRight] is `true` or [leftImage] if it is `false`.
      */
     fun getImage(isLookRight: Boolean): MascotImage = if (isLookRight) rightImage else leftImage
+
+    /**
+     * Disposes both images.
+     */
+    fun dispose() {
+        leftImage.image.dispose()
+        rightImage.image.dispose()
+    }
 }

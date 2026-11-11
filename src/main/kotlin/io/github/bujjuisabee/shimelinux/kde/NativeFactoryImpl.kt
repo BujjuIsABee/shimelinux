@@ -43,11 +43,11 @@ import java.awt.image.BufferedImage
 class NativeFactoryImpl : NativeFactory() {
     override val environment: Environment = KdeEnvironment()
 
-    override fun newNativeImage(src: BufferedImage): NativeImage =
+    override fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage =
         if (usingWaylandLayerSurfaces) {
-            WaylandNativeImage(src)
+            WaylandNativeImage(src, mirror)
         } else {
-            GenericNativeImage(src)
+            GenericNativeImage(src, mirror)
         }
 
     override fun newTranslucentWindow(): TranslucentWindow =

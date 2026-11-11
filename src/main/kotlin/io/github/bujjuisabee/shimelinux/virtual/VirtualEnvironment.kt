@@ -102,6 +102,8 @@ class VirtualEnvironment : Environment() {
 
     override fun moveActiveIE(point: Point) {}
 
+    override fun minimizeActiveIE() {}
+
     override fun restoreIE() {}
 
     override fun refreshCache() {

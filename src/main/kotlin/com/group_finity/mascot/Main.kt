@@ -91,9 +91,13 @@ object Main {
         setupConfigDirectory()
 
         try {
-            loadResource("conf/logging.properties").use { LogManager.getLogManager().readConfiguration(it) }
-        } catch (e: Exception) {
+            loadResource("conf/logging.properties")?.use { LogManager.getLogManager().readConfiguration(it) }
+        } catch (e: IOException) {
             e.printStackTrace()
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        } catch (_: OutOfMemoryError) {
+            showMemoryError()
         }
     }
 
@@ -119,6 +123,27 @@ object Main {
         showError("$message\n${localize("SeeLogForDetails")}")
     }
 
+    @JvmStatic
+    fun showMemoryError() {
+        ImagePairs.clear()
+        properties.setProperty("Scaling", "1.0")
+        updateConfigFile()
+
+        val memory = String.format("%.2f MB", ManagementFactory.getMemoryMXBean().heapMemoryUsage.max / 1048576.0)
+        showError(
+            """
+            Out of memory. There are probably too many
+            Shimeji mascots for your computer to handle.
+            Select fewer image sets or move some to the
+            img/unused folder and try again. Your scaling
+            setting has been reset to default.
+            
+            Memory currently available to Shimeji: $memory
+            """.trimIndent()
+        )
+        exitProcess(0)
+    }
+
     /**
      * The entry point of the program.
      */
@@ -127,15 +152,7 @@ object Main {
         try {
             run()
         } catch (_: OutOfMemoryError) {
-            showError(
-                """
-                Out of memory. There are probably too many
-                Shimeji mascots for your computer to handle.
-                Select fewer image sets or move some to the
-                img/unused folder and try again.
-                """.trimIndent()
-            )
-            exitProcess(0)
+            showMemoryError()
         }
     }
 
@@ -207,11 +224,13 @@ object Main {
             val infoAlreadySeen = getProperty("InformationDismissed", "").contains(imageSet)
             val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
             configurations[imageSet]?.let { config ->
-                if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen)) {
+                if (config.containsInformationKey("SplashImage") ||
+                    config.containsInformationKey("SplashImages") &&
+                    (alwaysShowInfo || !infoAlreadySeen)
+                ) {
                     val info = InformationWindow(imageSet, config)
                     info.isVisible = true
                     setMascotInformationDismissed(imageSet)
-                    updateConfigFile()
                 }
             }
             createMascot(imageSet)
@@ -276,7 +295,8 @@ object Main {
             )
 
             var filePath = getPath("conf")
-            var actionsPath = filePath.resolve("\u52D5\u4F5C.xml").takeIf { it.exists() } ?: filePath.resolve("actions.xml")
+            var actionsPath =
+                filePath.resolve("\u52D5\u4F5C.xml").takeIf { it.exists() } ?: filePath.resolve("actions.xml")
 
             filePath = getPath("conf", imageSet)
             actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
@@ -286,7 +306,8 @@ object Main {
 
             logger.info { "Reading action file ($actionsPath)" }
 
-            val actions = actionsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+            val actions =
+                actionsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
             val configuration = Configuration()
             configuration.load(Entry(actions.documentElement), imageSet)
 
@@ -302,7 +323,8 @@ object Main {
             )
 
             filePath = getPath("conf")
-            var behaviorsPath = filePath.resolve("\u884C\u52D5.xml").takeIf { it.exists() } ?: filePath.resolve("behaviors.xml")
+            var behaviorsPath =
+                filePath.resolve("\u884C\u52D5.xml").takeIf { it.exists() } ?: filePath.resolve("behaviors.xml")
 
             filePath = getPath("conf", imageSet)
             behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
@@ -312,7 +334,8 @@ object Main {
 
             logger.info { "Reading behavior file ($behaviorsPath)" }
 
-            val behaviors = behaviorsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+            val behaviors =
+                behaviorsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
             configuration.load(Entry(behaviors.documentElement), imageSet)
 
             // Load info
@@ -328,7 +351,8 @@ object Main {
             if (infoPath.exists()) {
                 logger.info { "Reading information file ($infoPath)" }
 
-                val information = infoPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+                val information =
+                    infoPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
                 configuration.load(Entry(information.documentElement), imageSet)
             }
 
@@ -362,6 +386,8 @@ object Main {
             childImageSets[imageSet] = childMascots
 
             return true
+        } catch (_: OutOfMemoryError) {
+            showMemoryError()
         } catch (e: Exception) {
             logger.log(Level.SEVERE, e) { "Failed to load configuration files" }
             showError(localize("FailedLoadConfigErrorMessage"), e)
@@ -800,6 +826,28 @@ object Main {
         }
     }
 
+    fun getMascotBooleanSetting(propertyName: String, mascot: Mascot) = getProperty("$propertyName.${mascot.imageSet}", getProperty(propertyName, true))
+
+    fun setMascotBooleanSetting(propertyName: String, mascot: Mascot, value: Boolean) {
+        properties.setProperty("$propertyName.${mascot.imageSet}", value.toString())
+        updateConfigFile()
+    }
+
+    fun toggleMascotBooleanSetting(propertyName: String, mascot: Mascot) {
+        setMascotBooleanSetting(propertyName, mascot, !getMascotBooleanSetting(propertyName, mascot))
+    }
+
+    fun resetMascotSettings(mascot: Mascot) {
+        properties.remove("Breeding.${mascot.imageSet}")
+        properties.remove("Transients.${mascot.imageSet}")
+        properties.remove("Transformation.${mascot.imageSet}")
+        properties.remove("Throwing.${mascot.imageSet}")
+        properties.remove("Sounds.${mascot.imageSet}")
+        properties.remove("Multiscreen.${mascot.imageSet}")
+        properties.remove("DisabledBehaviors.${mascot.imageSet}")
+        updateConfigFile()
+    }
+
     private fun setMascotInformationDismissed(imageSet: String) {
         val list = mutableListOf<String>()
         val data = getProperty("InformationDismissed", "").split('/')
@@ -812,6 +860,7 @@ object Main {
         }
 
         properties.setProperty("InformationDismissed", list.joinToString("/"))
+        updateConfigFile()
     }
 
     /**
@@ -896,8 +945,8 @@ object Main {
         childImageSets[imageSet]?.let {
             for (set in it) {
                 if (!childList.contains(set)) {
-                    populateArrayListWithChildSets(set, childList)
                     childList.add(set)
+                    populateArrayListWithChildSets(set, childList)
                 }
             }
         }
@@ -936,7 +985,10 @@ object Main {
                 val infoAlreadySeen = getProperty("InformationDismissed", "").contains(imageSet)
                 val alwaysShowInfo = getProperty("AlwaysShowInformationScreen", false)
                 configurations[imageSet]?.let { config ->
-                    if (config.containsInformationKey("SplashImage") && (alwaysShowInfo || !infoAlreadySeen)) {
+                    if (config.containsInformationKey("SplashImage") ||
+                        config.containsInformationKey("SplashImages") &&
+                        (alwaysShowInfo || !infoAlreadySeen)
+                    ) {
                         val info = InformationWindow(imageSet, config)
                         info.isVisible = true
                         setMascotInformationDismissed(imageSet)
@@ -967,6 +1019,7 @@ object Main {
     fun exit() {
         manager.disposeAll()
         manager.stop()
+        ImagePairs.clear()
         exitProcess(0)
     }
 

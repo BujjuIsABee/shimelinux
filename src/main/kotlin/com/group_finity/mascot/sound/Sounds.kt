@@ -22,7 +22,6 @@
 
 package com.group_finity.mascot.sound
 
-import com.group_finity.mascot.getProperty
 import javax.sound.sampled.Clip
 
 /**
@@ -33,20 +32,6 @@ import javax.sound.sampled.Clip
  */
 object Sounds {
     private val sounds = mutableMapOf<String, Sound>()
-
-    /**
-     * Whether all sounds are muted.
-     */
-    @JvmStatic
-    var isMuted: Boolean
-        get() = !getProperty("Sounds", true)
-        set(value) {
-            if (value) {
-                for (clip in sounds.values.map { it.clip }) {
-                    clip.stop()
-                }
-            }
-        }
 
     /**
      * Adds a [sound] to [sounds] with [name] as its key.
@@ -81,6 +66,18 @@ object Sounds {
      */
     @JvmStatic
     fun getSoundsIgnoringVolume(name: String): List<Clip> = sounds.filter { it.key.startsWith(name) }.map { it.value.clip }
+
+    /**
+     * Sets whether all sounds are muted.
+     */
+    @JvmStatic
+    fun setMuted(value: Boolean) {
+        if (value) {
+            for (clip in sounds.values.map { it.clip }) {
+                clip.stop()
+            }
+        }
+    }
 
     /**
      * Stores a sound clip and a function to open it.

@@ -22,6 +22,9 @@
 
 package com.group_finity.mascot
 
+import com.group_finity.mascot.script.Variable
+import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.Font
 import java.awt.GridLayout
 import java.awt.image.BaseMultiResolutionImage
@@ -29,7 +32,10 @@ import javax.imageio.ImageIO
 import javax.swing.BorderFactory
 import javax.swing.JFrame
 import javax.swing.JLabel
+import javax.swing.JList
 import javax.swing.JPanel
+import javax.swing.JScrollPane
+import javax.swing.JTabbedPane
 
 /**
  * A menu that shows statistics about a mascot.
@@ -40,9 +46,7 @@ import javax.swing.JPanel
  * @author Bujju
  */
 class DebugWindow(val imageSet: String) : JFrame() {
-    private val panel: JPanel
-    private val behaviorLabel: JLabel
-    private val behaviorValue: JLabel
+    private val statisticsPanel: JPanel
     private val shimejiXLabel: JLabel
     private val shimejiXValue: JLabel
     private val shimejiYLabel: JLabel
@@ -65,6 +69,11 @@ class DebugWindow(val imageSet: String) : JFrame() {
     private val environmentWidthValue: JLabel
     private val environmentHeightLabel: JLabel
     private val environmentHeightValue: JLabel
+    private val tabbedPane: JTabbedPane
+    private val behaviorsPanel: JPanel
+    private val behaviorsList: JList<String>
+    private val variablesPanel: JPanel
+    private val variablesList: JList<String>
 
     init {
         iconImage = BaseMultiResolutionImage(
@@ -74,11 +83,7 @@ class DebugWindow(val imageSet: String) : JFrame() {
         )
         title = imageSet
         isResizable = false
-
-        behaviorLabel = JLabel(localize("Behavior"))
-        behaviorLabel.font = behaviorLabel.font.deriveFont(Font.BOLD)
-        behaviorValue = JLabel("N/A")
-        behaviorValue.alignmentX = LEFT_ALIGNMENT
+        layout = BorderLayout()
 
         shimejiXLabel = JLabel(localize("ShimejiX"))
         shimejiXLabel.font = shimejiXLabel.font.deriveFont(Font.BOLD)
@@ -135,34 +140,47 @@ class DebugWindow(val imageSet: String) : JFrame() {
         environmentHeightValue = JLabel("N/A")
         environmentHeightValue.alignmentX = LEFT_ALIGNMENT
 
-        panel = JPanel(GridLayout(12, 2, 42, 0))
-        panel.border = BorderFactory.createEmptyBorder(0, 0, 0, 42)
-        panel.add(behaviorLabel)
-        panel.add(behaviorValue)
-        panel.add(shimejiXLabel)
-        panel.add(shimejiXValue)
-        panel.add(shimejiYLabel)
-        panel.add(shimejiYValue)
-        panel.add(activeIELabel)
-        panel.add(activeIEValue)
-        panel.add(windowXLabel)
-        panel.add(windowXValue)
-        panel.add(windowYLabel)
-        panel.add(windowYValue)
-        panel.add(windowWidthLabel)
-        panel.add(windowWidthValue)
-        panel.add(windowHeightLabel)
-        panel.add(windowHeightValue)
-        panel.add(environmentXLabel)
-        panel.add(environmentXValue)
-        panel.add(environmentYLabel)
-        panel.add(environmentYValue)
-        panel.add(environmentWidthLabel)
-        panel.add(environmentWidthValue)
-        panel.add(environmentHeightLabel)
-        panel.add(environmentHeightValue)
+        statisticsPanel = JPanel(GridLayout(11, 2, 10, 0))
+        statisticsPanel.border = BorderFactory.createEmptyBorder(10, 10, 10, -30)
+        statisticsPanel.add(shimejiXLabel)
+        statisticsPanel.add(shimejiXValue)
+        statisticsPanel.add(shimejiYLabel)
+        statisticsPanel.add(shimejiYValue)
+        statisticsPanel.add(activeIELabel)
+        statisticsPanel.add(activeIEValue)
+        statisticsPanel.add(windowXLabel)
+        statisticsPanel.add(windowXValue)
+        statisticsPanel.add(windowYLabel)
+        statisticsPanel.add(windowYValue)
+        statisticsPanel.add(windowWidthLabel)
+        statisticsPanel.add(windowWidthValue)
+        statisticsPanel.add(windowHeightLabel)
+        statisticsPanel.add(windowHeightValue)
+        statisticsPanel.add(environmentXLabel)
+        statisticsPanel.add(environmentXValue)
+        statisticsPanel.add(environmentYLabel)
+        statisticsPanel.add(environmentYValue)
+        statisticsPanel.add(environmentWidthLabel)
+        statisticsPanel.add(environmentWidthValue)
+        statisticsPanel.add(environmentHeightLabel)
+        statisticsPanel.add(environmentHeightValue)
 
-        add(panel)
+        behaviorsList = JList()
+
+        behaviorsPanel = JPanel()
+        behaviorsPanel.add(JScrollPane(behaviorsList).apply { preferredSize = Dimension(245, 144) })
+
+        variablesList = JList()
+
+        variablesPanel = JPanel()
+        variablesPanel.add(JScrollPane(variablesList).apply { preferredSize = Dimension(245, 144) })
+
+        tabbedPane = JTabbedPane()
+        tabbedPane.addTab(localize("Behaviors"), behaviorsPanel)
+        tabbedPane.addTab(localize("Variables"), variablesPanel)
+
+        add(statisticsPanel, BorderLayout.WEST)
+        add(tabbedPane, BorderLayout.EAST)
         pack()
         setLocationRelativeTo(null)
     }
@@ -171,7 +189,6 @@ class DebugWindow(val imageSet: String) : JFrame() {
      * Updates the statistics.
      */
     fun set(
-        behavior: String,
         shimejiX: Int,
         shimejiY: Int,
         activeIE: String,
@@ -182,9 +199,10 @@ class DebugWindow(val imageSet: String) : JFrame() {
         environmentX: Int,
         environmentY: Int,
         environmentWidth: Int,
-        environmentHeight: Int
+        environmentHeight: Int,
+        behavior: String,
+        variables: Map<String, Variable>
     ) {
-        behaviorValue.text = behavior
         shimejiXValue.text = shimejiX.toString()
         shimejiYValue.text = shimejiY.toString()
         activeIEValue.text = activeIE
@@ -196,5 +214,8 @@ class DebugWindow(val imageSet: String) : JFrame() {
         environmentYValue.text = environmentY.toString()
         environmentWidthValue.text = environmentWidth.toString()
         environmentHeightValue.text = environmentHeight.toString()
+
+        behaviorsList.setListData(arrayOf(behavior))
+        variablesList.setListData(variables.map { "${it.key}: ${it.value}" }.toTypedArray())
     }
 }

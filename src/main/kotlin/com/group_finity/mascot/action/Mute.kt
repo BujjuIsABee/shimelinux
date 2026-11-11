@@ -22,6 +22,7 @@
 
 package com.group_finity.mascot.action
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.getPath
 import com.group_finity.mascot.script.VariableMap
 import com.group_finity.mascot.sound.Sounds
@@ -55,9 +56,9 @@ class Mute(
                 clips.filter { it.isRunning }.forEach { it.stop() }
             }
         } else {
-            if (!Sounds.isMuted) {
-                Sounds.isMuted = true
-                Sounds.isMuted = false
+            if (Main.getMascotBooleanSetting("Sounds", mascot)) {
+                Sounds.setMuted(true)
+                Sounds.setMuted(false)
             }
         }
     }

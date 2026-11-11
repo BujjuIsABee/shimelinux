@@ -278,10 +278,10 @@ class ImageSetChooser(parent: Frame?, modal: Boolean) : JDialog(parent, modal) {
                 }
 
                 configuration.getInformation(configuration.schema.getString("Name"))?.let {
-                    caption = it
+                    caption = it.toString()
                 }
                 configuration.getInformation(configuration.schema.getString("PreviewImage"))?.let {
-                    imageFile = topDir.resolve(Path(imageSet, it)).toString()
+                    imageFile = topDir.resolve(Path(imageSet, it.toString())).toString()
                 }
             } catch (_: Exception) {
             }

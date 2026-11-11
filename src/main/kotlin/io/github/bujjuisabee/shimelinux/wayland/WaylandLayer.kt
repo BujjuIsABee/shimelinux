@@ -25,6 +25,7 @@ package io.github.bujjuisabee.shimelinux.wayland
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.image.ImagePairs
 import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
@@ -69,6 +70,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             WaylandLib.createLayer(id, getProperty("MascotLayerWayland", 3), mouseEventReceiver, useInputRegion)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -90,6 +92,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             WaylandLib.setBounds(id, x, y, width, height)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -101,6 +104,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             WaylandLib.setCursor(cursor.type == Cursor.HAND_CURSOR)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -115,6 +119,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             WaylandLib.setImage(id, rgb)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -129,6 +134,7 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             WaylandLib.dispose(id)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            ImagePairs.clear()
             exitProcess(0)
         }
 

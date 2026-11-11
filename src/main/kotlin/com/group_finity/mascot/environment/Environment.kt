@@ -114,6 +114,11 @@ abstract class Environment {
     abstract fun moveActiveIE(point: Point)
 
     /**
+     * Minimizes the active interactive window.
+     */
+    abstract fun minimizeActiveIE()
+
+    /**
      * Restores all interactive windows that have been thrown offscreen.
      */
     abstract fun restoreIE()

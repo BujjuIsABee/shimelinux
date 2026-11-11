@@ -56,7 +56,7 @@ class Configuration {
     private val constants = linkedMapOf<String, String>()
     private val actionBuilders = linkedMapOf<String?, ActionBuilder>()
     private val behaviorBuilders = linkedMapOf<String, BehaviorBuilder>()
-    private val information = linkedMapOf<String, String>()
+    private val information = linkedMapOf<String, Any?>()
 
     /**
      * The names of the behaviors defined by the configuration.
@@ -152,6 +152,18 @@ class Configuration {
                     if (linkText != null) {
                         information[node.name + schema.getString("URL")] = linkText
                     }
+                }
+            } else if (node.name == schema.getString("SplashImages")) {
+                val images = mutableListOf<String>()
+
+                for (imageNode in node.children) {
+                    if (imageNode.name == schema.getString("SplashImage")) {
+                        images.add(imageNode.text)
+                    }
+                }
+
+                if (images.isNotEmpty()) {
+                    information[node.name] = images.toTypedArray()
                 }
             }
         }
@@ -290,5 +302,5 @@ class Configuration {
     /**
      * Returns the value associated with the specified [key] in [information], or `null` if the key does not exist.
      */
-    fun getInformation(key: String): String? = information[key]
+    fun getInformation(key: String): Any? = information[key]
 }

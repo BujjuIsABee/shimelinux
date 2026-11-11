@@ -198,6 +198,13 @@ class MascotEnvironment(private val mascot: Mascot) {
     }
 
     /**
+     * Minimizes the active interactive window.
+     */
+    fun minimizeActiveIE() {
+        impl.minimizeActiveIE()
+    }
+
+    /**
      * Restores all interactive windows that have been thrown offscreen.
      */
     @Suppress("unused")
