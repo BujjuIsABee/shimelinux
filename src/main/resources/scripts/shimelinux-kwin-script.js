@@ -89,8 +89,8 @@ function tick() {
     callDBus(
         busName, clientPath, interfaceName,
         "getMinimizeWindow",
-        (minimizeWindows) => {
-            if (minimizeWindows && activeWindow && activeWindow.minimizable) {
+        (minimizeWindow) => {
+            if (minimizeWindow && activeWindow && activeWindow.minimizable) {
                 activeWindow.minimized = true;
                 onWindowDeactivated(activeWindow);
                 return;
