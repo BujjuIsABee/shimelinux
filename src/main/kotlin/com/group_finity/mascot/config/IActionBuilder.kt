@@ -23,6 +23,7 @@
 package com.group_finity.mascot.config
 
 import com.group_finity.mascot.action.Action
+import com.group_finity.mascot.exception.ConfigurationException
 
 /**
  * Builds an action.
@@ -33,7 +34,7 @@ import com.group_finity.mascot.action.Action
  */
 interface IActionBuilder {
     /**
-     * Validates the action builder.
+     * Throws a [ConfigurationException] if there is an [ActionRef] with no corresponding action.
      */
     fun validate()
 

@@ -44,7 +44,7 @@ private val gc: GraphicsConfiguration? = GraphicsEnvironment.getLocalGraphicsEnv
 private val maskCache = mutableMapOf<GenericNativeImage, Area>()
 
 /**
- * Displays a mascot on a [JWindow].
+ * A cross-platform window that displays an image.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

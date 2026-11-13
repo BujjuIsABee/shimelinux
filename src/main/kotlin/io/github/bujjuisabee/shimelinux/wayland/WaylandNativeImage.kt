@@ -26,7 +26,9 @@ import com.group_finity.mascot.image.NativeImage
 import java.awt.image.BufferedImage
 
 /**
- * Stores [image] so it can be displayed on a [WaylandLayer].
+ * Stores an [image] to display on a [WaylandTranslucentLayer].
+ *
+ * If [mirror] is `true`, the image will be flipped horizontally.
  *
  * @author Bujju
  */
@@ -39,7 +41,7 @@ class WaylandNativeImage(image: BufferedImage, mirror: Boolean) : NativeImage {
 
         for (y in 0 until image.height) {
             for (x in 0 until image.width) {
-                rgb[y * image.width + (image.width - x - 1)] = image.getRGB(x, y)
+                rgb[y * image.width + image.width - x - 1] = image.getRGB(x, y)
             }
         }
 

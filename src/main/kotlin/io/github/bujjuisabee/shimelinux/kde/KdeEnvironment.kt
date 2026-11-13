@@ -23,9 +23,11 @@
 package io.github.bujjuisabee.shimelinux.kde
 
 import com.formdev.flatlaf.ui.FlatPopupFactory
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import com.group_finity.mascot.usingWaylandLayerSurfaces
 import io.github.bujjuisabee.shimelinux.wayland.WaylandPopupFactory
 import io.github.bujjuisabee.shimelinux.wayland.absoluteCursorPosition
@@ -34,6 +36,7 @@ import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
 import javax.swing.PopupFactory
+import kotlin.system.exitProcess
 
 /**
  * An environment that supports interactive windows on KDE Plasma.
@@ -98,7 +101,12 @@ class KdeEnvironment : Environment() {
 
     private fun waylandTick() {
         // Update screen bounds
-        val (screenX, screenY, screenWidth, screenHeight) = WaylandLib.getScreenRect()
+        val (screenX, screenY, screenWidth, screenHeight) = runCatching {
+            WaylandLib.getScreenRect()
+        }.getOrElse { e ->
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            exitProcess(0)
+        }
 
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect.setBounds(

@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "2.4.21"
     id("com.github.gmazzo.buildconfig") version "6.1.2"
-    id("io.github.jwharm.flatpak-gradle-generator") version "1.8.0"
+    id("io.github.jwharm.flatpak-gradle-generator") version "1.9.0"
 }
 
 group = "io.github.bujjuisabee"
@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     implementation("com.dorkbox:SystemTray:4.4")
-    implementation("com.formdev:flatlaf:3.7.2")
+    implementation("com.formdev:flatlaf:3.8")
     implementation("com.github.hypfvieh:dbus-java-core:5.2.2")
     implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.2")
     implementation("org.openjdk.nashorn:nashorn-core:15.7")

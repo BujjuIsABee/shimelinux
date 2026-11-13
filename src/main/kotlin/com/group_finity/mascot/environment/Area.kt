@@ -126,7 +126,7 @@ class Area {
     }
 
     /**
-     * Gets whether a point at the given [x] and [y] coordinates is inside the rectangle.
+     * Returns whether a point at the given [x] and [y] coordinates is inside the rectangle.
      */
     fun contains(x: Int, y: Int): Boolean = x in left..right && y in top..bottom
 

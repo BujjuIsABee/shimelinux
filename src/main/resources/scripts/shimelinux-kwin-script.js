@@ -69,12 +69,10 @@ function tick() {
                 if (!window || !window.normalWindow || isWindowOnscreen(window)) continue;
 
                 const screen = workspace.clientArea(KWin.MaximizeArea, window);
-                const centerX = (screen.width / 2) - (window.width / 2);
-                const centerY = (screen.height / 2) - (window.height / 2);
 
                 window.frameGeometry = {
-                    x: centerX,
-                    y: centerY,
+                    x: (screen.width / 2) - (window.width / 2),
+                    y: (screen.height / 2) - (window.height / 2),
                     width: window.width,
                     height: window.height
                 };
@@ -92,12 +90,10 @@ function tick() {
         (minimizeWindow) => {
             if (minimizeWindow && activeWindow && activeWindow.minimizable) {
                 activeWindow.minimized = true;
-                onWindowDeactivated(activeWindow);
                 return;
             }
         }
     );
-
 
     // Move windows
     callDBus(

@@ -44,6 +44,9 @@ private val logger: Logger = Logger.getLogger(ActionBuilder::class.java.name)
 /**
  * Builds the action defined by the given [actionNode].
  *
+ * @throws ConfigurationException if the action cannot be loaded
+ * @throws IllegalArgumentException if the [actionNode] does not have a Type attribute
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju

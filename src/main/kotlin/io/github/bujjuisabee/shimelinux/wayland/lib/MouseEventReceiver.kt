@@ -23,7 +23,7 @@
 package io.github.bujjuisabee.shimelinux.wayland.lib
 
 /**
- * Receives mouse events from a Wayland layer surface.
+ * Classes can implement this interface to receive mouse events from a Wayland layer surface.
  *
  * @author Bujju
  */

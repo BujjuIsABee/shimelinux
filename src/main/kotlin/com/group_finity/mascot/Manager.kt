@@ -27,7 +27,7 @@ import com.group_finity.mascot.exception.BehaviorInstantiationException
 import com.group_finity.mascot.exception.CantBeAliveException
 import java.awt.Point
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.Timer
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.concurrent.timer
@@ -68,7 +68,7 @@ class Manager {
      * Starts dispatching ticks to the mascots in the list.
      */
     fun start() {
-        timer = timer ?: timer(daemon = false, period = 40L) { tick() }
+        timer = timer ?: timer(period = 40L) { tick() }
     }
 
     /**

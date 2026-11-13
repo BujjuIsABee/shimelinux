@@ -29,6 +29,7 @@ import java.awt.Color
 import java.awt.Point
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
+import java.io.IOException
 import java.nio.file.Path
 import javax.imageio.ImageIO
 import kotlin.io.path.inputStream
@@ -43,7 +44,9 @@ import kotlin.math.roundToInt
  */
 object ImagePairLoader {
     /**
-     * Loads an image pair. If [rightPath] is `null`, the right image will be the left image flipped.
+     * Loads an image pair. If [rightPath] is `null`, the right image will be the left image flipped horizontally.
+     *
+     * @throws IOException
      */
     @JvmStatic
     fun load(leftPath: Path, rightPath: Path?, center: Point, scaling: Double, filter: Filter, opacity: Double) {
@@ -67,8 +70,7 @@ object ImagePairLoader {
             ),
             MascotImage(
                 rightImage,
-                Point(rightImage.width - (center.x * scaling).roundToInt(),
-                    (center.y * scaling).roundToInt()),
+                Point(rightImage.width - (center.x * scaling).roundToInt(), (center.y * scaling).roundToInt()),
                 rightPath == null
             )
         )
@@ -110,6 +112,7 @@ object ImagePairLoader {
         var height = source.height
         var workingImage: BufferedImage? = null
 
+        // Apply hqx filter if applicable
         var effectiveScaling = scaling
         if (filter == Filter.HQX && scaling > 1.0) {
             val buffer: IntArray

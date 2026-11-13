@@ -72,7 +72,7 @@ class Breed(
      * @author LavenderSnek
      * @author Bujju
      */
-    class Delegate(private val action: ActionBase) {
+    internal class Delegate(private val action: ActionBase) {
         /**
          * Whether breeding/transient behaviors are allowed.
          */
@@ -110,8 +110,7 @@ class Breed(
             get() = action.eval(action.schema.getString(PARAMETER_BORNBEHAVIOUR), DEFAULT_BORNBEHAVIOUR)
 
         /**
-         * The image set that will be used for the new mascot(s). If a valid image set is not provided, [mascot]'s image
-         * set will be used.
+         * An image set for the new mascot(s). If a valid image set is not provided, [mascot]'s image set will be used.
          */
         private val bornMascot: String
             get() = action.eval(action.schema.getString(PARAMETER_BORNMASCOT), DEFAULT_BORNMASCOT)
@@ -123,7 +122,7 @@ class Breed(
             get() = action.eval(action.schema.getString(PARAMETER_BORNTRANSIENT), DEFAULT_BORNTRANSIENT)
 
         /**
-         * The current frame must be a multiple of this number for a new mascot to be spawned.
+         * A number that [time] must be divisible by for a new mascot to be spawned.
          */
         private val bornInterval: Int
             get() = action.eval<Number>(action.schema.getString(PARAMETER_BORNINTERVAL), DEFAULT_BORNINTERVAL).toInt()
@@ -180,7 +179,7 @@ class Breed(
         }
 
         /**
-         * Throws a [VariableException] if [bornCount] is not greater than zero.
+         * Throws a [VariableException] if [bornCount] is less than 1.
          */
         fun validateBornCount() {
             if (bornCount < 1) {
@@ -189,7 +188,7 @@ class Breed(
         }
 
         /**
-         * Throws a [VariableException] if [bornInterval] is not greater than zero.
+         * Throws a [VariableException] if [bornInterval] is less than 1.
          */
         fun validateBornInterval() {
             if (bornInterval < 1) {

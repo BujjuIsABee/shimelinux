@@ -29,7 +29,7 @@ import com.group_finity.mascot.sound.Sounds
 import java.util.ResourceBundle
 
 /**
- * An action that stops all sounds or stops a specific sound that is currently playing.
+ * An action that mutes sounds played by mascots.
  *
  * @author Kilkakon
  * @author Bujju
@@ -40,7 +40,7 @@ class Mute(
     params: VariableMap
 ) : InstantAction(schema, params) {
     /**
-     * The file name of the sound to mute. All sounds will be muted if a sound is not provided.
+     * The name of the sound to mute. All sounds will be muted if a sound is not provided.
      */
     private val sound: String?
         get() = eval(schema.getString(PARAMETER_SOUND), DEFAULT_SOUND)

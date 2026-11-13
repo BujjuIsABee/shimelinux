@@ -58,7 +58,7 @@ abstract class ActionBase(
         get() = mascot.environment
 
     /**
-     * The animation that is currently being played by the action.
+     * The animation that the action is playing.
      */
     internal open val animation: Animation?
         get() = animations.firstOrNull { it.isEffective(variables) }
@@ -169,6 +169,9 @@ abstract class ActionBase(
     /**
      * Returns the value of the variable in [variables] with the specified [name], cast as [T], or [defaultValue] if the
      * variable does not exist.
+     *
+     * @throws ClassCastException if the value is not [T]
+     * @throws VariableException if the variable's value cannot be evaluated
      */
     internal inline fun <reified T> eval(name: String, defaultValue: T): T = synchronized(variables) {
         variables.rawMap[name]?.let { it.get(variables) as T } ?: defaultValue

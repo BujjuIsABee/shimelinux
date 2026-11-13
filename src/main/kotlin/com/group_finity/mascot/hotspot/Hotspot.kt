@@ -40,6 +40,6 @@ class Hotspot(val behavior: String?, val shape: Shape) {
      * Returns whether [point] is inside the hotspot on the given [mascot].
      */
     fun contains(mascot: Mascot, point: Point): Boolean = shape.contains(
-        if (mascot.isLookRight) Point(mascot.bounds.width - point.x, point.y) else point
+        if (mascot.isLookRight) Point(mascot.bounds.width - point.x, point.y) else point // flip if facing right
     )
 }

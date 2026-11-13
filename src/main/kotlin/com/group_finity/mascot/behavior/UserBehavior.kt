@@ -42,6 +42,9 @@ private val logger: Logger = Logger.getLogger(UserBehavior::class.java.name)
 /**
  * The base implementation of a behavior.
  *
+ * It will trigger the [action]. If the behavior did not list an action in the [configuration], the action with
+ * the same [name] as the behavior will be used.
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju
@@ -185,8 +188,8 @@ class UserBehavior(
                 }
             }
 
+            // Begin dragging
             if (!handled) {
-                // Begin dragging
                 try {
                     mascot.behavior = configuration.buildBehavior(configuration.schema.getString(BEHAVIOURNAME_DRAGGED))
                 } catch (e: BehaviorInstantiationException) {

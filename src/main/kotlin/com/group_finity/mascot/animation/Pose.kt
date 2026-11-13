@@ -35,7 +35,7 @@ import java.nio.file.Path
  * @param dx The horizontal distance that the mascot will be moved.
  * @param dy The vertical distance that the mascot will be moved.
  * @param duration The duration of the pose in 40 millisecond ticks.
- * @param soundName The name of the sound the pose plays, combined with its volume.
+ * @param soundName The name of the sound that the pose plays, combined with its volume.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

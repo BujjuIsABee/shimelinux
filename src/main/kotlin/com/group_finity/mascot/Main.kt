@@ -88,9 +88,9 @@ object Main {
     private val childImageSets = ConcurrentHashMap<String, MutableList<String>>()
 
     init {
-        setupConfigDirectory()
 
         try {
+            setupConfigDirectory()
             loadResource("conf/logging.properties")?.use { LogManager.getLogManager().readConfiguration(it) }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -123,6 +123,9 @@ object Main {
         showError("$message\n${localize("SeeLogForDetails")}")
     }
 
+    /**
+     * Shows an error message for when the program runs out of memory.
+     */
     @JvmStatic
     fun showMemoryError() {
         ImagePairs.clear()
@@ -141,6 +144,7 @@ object Main {
             Memory currently available to Shimeji: $memory
             """.trimIndent()
         )
+
         exitProcess(0)
     }
 
@@ -167,15 +171,6 @@ object Main {
         } catch (_: IOException) {
         }
 
-        // Load languages
-        try {
-            val locale = Locale.forLanguageTag(getProperty("Language", Locale.getDefault().toLanguageTag()))
-            languageBundle = ResourceBundle.getBundle("conf.language", locale)
-        } catch (e: Exception) {
-            showError("The default language file could not be loaded.", e)
-            exit()
-        }
-
         // Load theme
         System.setProperty("sun.java2d.uiScale", getProperty("MenuScaling", System.getProperty("sun.java2d.uiScale") ?: "1"))
         System.setProperty("flatlaf.uiScale.enabled", "false")
@@ -186,6 +181,15 @@ object Main {
             FlatLightLaf.setup()
         } else {
             FlatDarkLaf.setup()
+        }
+
+        // Load languages
+        try {
+            val locale = Locale.forLanguageTag(getProperty("Language", Locale.getDefault().toLanguageTag()))
+            languageBundle = ResourceBundle.getBundle("conf.language", locale)
+        } catch (e: Exception) {
+            showError("The default language file could not be loaded.", e)
+            exit()
         }
 
         // Get the image sets to use
@@ -281,120 +285,112 @@ object Main {
     /**
      * Creates a [Configuration] for the given [imageSet].
      */
-    private fun loadConfiguration(imageSet: String): Boolean {
-        try {
-            // Load actions
-            val actionsNames = listOf(
-                "actions.xml",
-                "\u52D5\u4F5C.xml",
-                "\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml",
-                "\u00A6-\u00BA@.xml",
-                "\u00F4\u00AB\u00EC\u00FD.xml",
-                "one.xml",
-                "1.xml"
-            )
+    private fun loadConfiguration(imageSet: String): Boolean = runCatching {
+        // Load actions
+        val actionsNames = listOf(
+            "actions.xml",
+            "\u52D5\u4F5C.xml",
+            "\u00D5\u00EF\u00F2\u00F5\u00A2\u00A3.xml",
+            "\u00A6-\u00BA@.xml",
+            "\u00F4\u00AB\u00EC\u00FD.xml",
+            "one.xml",
+            "1.xml"
+        )
 
-            var filePath = getPath("conf")
-            var actionsPath =
-                filePath.resolve("\u52D5\u4F5C.xml").takeIf { it.exists() } ?: filePath.resolve("actions.xml")
+        var filePath = getPath("conf")
+        var actionsPath = filePath.resolve("\u52D5\u4F5C.xml").takeIf { it.exists() } ?: filePath.resolve("actions.xml")
 
-            filePath = getPath("conf", imageSet)
-            actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
+        filePath = getPath("conf", imageSet)
+        actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
-            filePath = getPath("img", imageSet, "conf")
-            actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
+        filePath = getPath("img", imageSet, "conf")
+        actionsPath = actionsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: actionsPath
 
-            logger.info { "Reading action file ($actionsPath)" }
+        logger.info { "Reading action file ($actionsPath)" }
 
-            val actions =
-                actionsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
-            val configuration = Configuration()
-            configuration.load(Entry(actions.documentElement), imageSet)
+        val actions = actionsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+        val configuration = Configuration()
+        configuration.load(Entry(actions.documentElement), imageSet)
 
-            // Load behaviors
-            val behaviorsNames = listOf(
-                "behaviors.xml",
-                "\u884C\u52D5.xml",
-                "\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml",
-                "\u00AA\u00B5\u00A6-.xml",
-                "\u00ECs\u00F4\u00AB.xml",
-                "two.xml",
-                "2.xml"
-            )
+        // Load behaviors
+        val behaviorsNames = listOf(
+            "behaviors.xml",
+            "\u884C\u52D5.xml",
+            "\u00DE\u00ED\u00EE\u00D5\u00EF\u00F2.xml",
+            "\u00AA\u00B5\u00A6-.xml",
+            "\u00ECs\u00F4\u00AB.xml",
+            "two.xml",
+            "2.xml"
+        )
 
-            filePath = getPath("conf")
-            var behaviorsPath =
-                filePath.resolve("\u884C\u52D5.xml").takeIf { it.exists() } ?: filePath.resolve("behaviors.xml")
+        filePath = getPath("conf")
+        var behaviorsPath = filePath.resolve("\u884C\u52D5.xml").takeIf { it.exists() } ?: filePath.resolve("behaviors.xml")
 
-            filePath = getPath("conf", imageSet)
-            behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
+        filePath = getPath("conf", imageSet)
+        behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
-            filePath = getPath("img", imageSet, "conf")
-            behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
+        filePath = getPath("img", imageSet, "conf")
+        behaviorsPath = behaviorsNames.map { filePath.resolve(it) }.firstOrNull { it.exists() } ?: behaviorsPath
 
-            logger.info { "Reading behavior file ($behaviorsPath)" }
+        logger.info { "Reading behavior file ($behaviorsPath)" }
 
-            val behaviors =
-                behaviorsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
-            configuration.load(Entry(behaviors.documentElement), imageSet)
+        val behaviors = behaviorsPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+        configuration.load(Entry(behaviors.documentElement), imageSet)
 
-            // Load info
-            filePath = getPath("conf")
-            var infoPath = filePath.resolve("info.xml")
+        // Load info
+        filePath = getPath("conf")
+        var infoPath = filePath.resolve("info.xml")
 
-            filePath = getPath("conf", imageSet)
-            infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
+        filePath = getPath("conf", imageSet)
+        infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
 
-            filePath = getPath("img", imageSet, "conf")
-            infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
+        filePath = getPath("img", imageSet, "conf")
+        infoPath = filePath.resolve("info.xml").takeIf { it.exists() } ?: infoPath
 
-            if (infoPath.exists()) {
-                logger.info { "Reading information file ($infoPath)" }
+        if (infoPath.exists()) {
+            logger.info { "Reading information file ($infoPath)" }
 
-                val information =
-                    infoPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
-                configuration.load(Entry(information.documentElement), imageSet)
-            }
+            val information = infoPath.inputStream().use { DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it) }
+            configuration.load(Entry(information.documentElement), imageSet)
+        }
 
-            configuration.validate()
+        configuration.validate()
+        configurations[imageSet] = configuration
 
-            configurations[imageSet] = configuration
-
-            val childMascots = mutableListOf<String>()
-            for (list in Entry(actions.documentElement).selectChildren("ActionList")) {
-                for (node in list.selectChildren("Action")) {
-                    var set = node.getAttribute("BornMascot")
-                    if (set != null) {
-                        if (!childMascots.contains(set)) {
-                            childMascots.add(set)
-                        }
-                        if (!configurations.containsKey(set)) {
-                            loadConfiguration(set)
-                        }
+        // Load associated image sets
+        val childMascots = mutableListOf<String>()
+        for (list in Entry(actions.documentElement).selectChildren("ActionList")) {
+            for (node in list.selectChildren("Action")) {
+                var set = node.getAttribute("BornMascot")
+                if (set != null) {
+                    if (!childMascots.contains(set)) {
+                        childMascots.add(set)
                     }
-                    set = node.getAttribute("TransformMascot")
-                    if (set != null) {
-                        if (!childMascots.contains(set)) {
-                            childMascots.add(set)
-                        }
-                        if (!configurations.containsKey(set)) {
-                            loadConfiguration(set)
-                        }
+                    if (!configurations.containsKey(set)) {
+                        loadConfiguration(set)
+                    }
+                }
+                set = node.getAttribute("TransformMascot")
+                if (set != null) {
+                    if (!childMascots.contains(set)) {
+                        childMascots.add(set)
+                    }
+                    if (!configurations.containsKey(set)) {
+                        loadConfiguration(set)
                     }
                 }
             }
-            childImageSets[imageSet] = childMascots
-
-            return true
-        } catch (_: OutOfMemoryError) {
-            showMemoryError()
-        } catch (e: Exception) {
-            logger.log(Level.SEVERE, e) { "Failed to load configuration files" }
-            showError(localize("FailedLoadConfigErrorMessage"), e)
         }
-
-        return false
-    }
+        childImageSets[imageSet] = childMascots
+    }.onFailure { e ->
+        when (e) {
+            is OutOfMemoryError -> showMemoryError()
+            else -> {
+                logger.log(Level.SEVERE, e) { "Failed to load configuration files" }
+                showError(localize("FailedLoadConfigErrorMessage"), e)
+            }
+        }
+    }.isSuccess
 
     /**
      * Creates a tray icon.
@@ -410,7 +406,6 @@ object Main {
             val icon = checkNotNull(SystemTray.get())
 
             loadResource("img/icon256.png").use { icon.setImage(it) }
-            icon.setStatus("ShimeLinux")
             icon.setTooltip("ShimeLinux")
             icon.menu.callback = {
                 createMascot()
@@ -804,8 +799,8 @@ object Main {
                 icon.menu.remove(entry)
             }
             createTrayIcon()
-        } catch (_: Exception) {
-            showError("Failed to set the new language.")
+        } catch (e: Exception) {
+            showError("Failed to set the new language.", e)
             exit()
         }
     }
@@ -897,7 +892,7 @@ object Main {
             getPath("conf", "settings.properties").outputStream().use {
                 properties.store(it, "Configuration Options")
             }
-        } catch (_: Exception) {
+        } catch (_: IOException) {
         }
     }
 
@@ -997,19 +992,20 @@ object Main {
                 }
                 createMascot(imageSet)
             } else {
-                // Failed to load
-                configurations.remove(imageSet)
+                configurations.remove(imageSet) // failed to load
             }
         }
     }
 
     /**
-     * Gets whether there is a configuration for the given [imageSet].
+     * Returns whether there is a configuration for the given [imageSet].
      */
     fun hasConfiguration(imageSet: String): Boolean = configurations.containsKey(imageSet)
 
     /**
      * Gets the configuration for the given [imageSet].
+     *
+     * @throws IllegalStateException if the configuration does not exist
      */
     fun getConfiguration(imageSet: String): Configuration = checkNotNull(configurations[imageSet])
 

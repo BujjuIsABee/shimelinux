@@ -29,7 +29,7 @@ import java.util.ResourceBundle
 /**
  * An action that triggers other actions.
  *
- * @param actions The actions that the complex action triggers.
+ * @param actions The actions that the complex action can trigger.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

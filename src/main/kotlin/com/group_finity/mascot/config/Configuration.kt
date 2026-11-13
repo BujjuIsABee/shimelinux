@@ -66,6 +66,9 @@ class Configuration {
 
     /**
      * Loads a configuration for the [imageSet] from the given [configurationNode].
+     *
+     * @throws IllegalStateException if any required attributes are missing
+     * @throws ConfigurationException if a configuration cannot be loaded from the [configurationNode]
      */
     fun load(configurationNode: Entry, imageSet: String) {
         logger.info { "Reading configuration file" }
@@ -170,7 +173,7 @@ class Configuration {
     }
 
     /**
-     * Validates the action and behavior builders.
+     * Validates the [actionBuilders] and [behaviorBuilders].
      */
     fun validate() {
         for (builder in actionBuilders.values) {
@@ -183,6 +186,8 @@ class Configuration {
 
     /**
      * Builds the action with the specified [name], passing the given [params].
+     *
+     * @throws ActionInstantiationException
      */
     fun buildAction(name: String, params: Map<String, String>): Action {
         val factory = actionBuilders[name] ?: throw ActionInstantiationException(localize("NoCorrespondingActionFoundErrorMessage") + ": $name")
@@ -192,6 +197,8 @@ class Configuration {
     /**
      * Builds the behavior with the specified [name]. If the behavior is not enabled for the given [mascot], its
      * position and behavior will be reset.
+     *
+     * @throws BehaviorInstantiationException
      */
     fun buildBehavior(name: String, mascot: Mascot): Behavior {
         val factory = behaviorBuilders[name] ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
@@ -205,15 +212,19 @@ class Configuration {
 
     /**
      * Builds the behavior with the specified [name].
+     *
+     * @throws BehaviorInstantiationException
      */
     fun buildBehavior(name: String): Behavior = behaviorBuilders[name]?.buildBehavior() ?: throw BehaviorInstantiationException(localize("NoBehaviorFoundErrorMessage") + " ($name)")
 
     /**
      * Builds the next behavior for the given [mascot]. Returns `null` if no behavior can be selected.
+     *
+     * @throws BehaviorInstantiationException
      */
     fun buildNextBehavior(previousName: String?, mascot: Mascot): Behavior? {
         val context = VariableMap()
-        context.putAll(constants)
+        context.putAll(constants) // put these first so they can't override mascot
         context["mascot"] = mascot
 
         val candidates = mutableListOf<BehaviorBuilder>()
@@ -270,7 +281,7 @@ class Configuration {
     fun hasAction(name: String): Boolean = actionBuilders.containsKey(name)
 
     /**
-     * Returns whether the given [builder] is enabled for the given [mascot].
+     * Returns whether the given behavior [builder] is enabled for the given [mascot].
      */
     fun isBehaviorEnabled(builder: BehaviorBuilder, mascot: Mascot): Boolean =
         !builder.isToggleable || getProperty("DisabledBehaviors." + mascot.imageSet, "").split('/')
@@ -284,7 +295,7 @@ class Configuration {
 
     /**
      * Returns whether a behavior builder with the specified [name] exists and should be hidden from the Set Behavior
-     * and Allowed Behaviors lists.
+     * list.
      */
     fun isBehaviorHidden(name: String?): Boolean = behaviorBuilders[name]?.isHidden == true
 

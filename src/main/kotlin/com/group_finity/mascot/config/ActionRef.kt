@@ -32,6 +32,8 @@ private val logger: Logger = Logger.getLogger(ActionRef::class.java.name)
 /**
  * Builds the action defined by the given [refNode].
  *
+ * @throws IllegalArgumentException if the [refNode] does not have a Name attribute
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju

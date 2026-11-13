@@ -388,6 +388,8 @@ impl LayerState {
         surface.commit();
     }
 
+    /// Updates the layer surface's input region so mouse events that occur over fully transparent
+    /// pixels will be ignored.
     pub fn update_input_region(&mut self) {
         let mut rects: Vec<Rect> = Vec::new();
         let width = self.bounds.width;

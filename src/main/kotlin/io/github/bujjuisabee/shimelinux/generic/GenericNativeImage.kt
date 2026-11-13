@@ -27,7 +27,9 @@ import java.awt.image.BufferedImage
 import java.util.Objects
 
 /**
- * Stores [image].
+ * Stores an [image].
+ *
+ * If [mirror] is `true`, the image will be flipped horizontally.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

@@ -38,7 +38,7 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ScanMove::class.java.name)
 
 /**
- * An action that scans for a mascot with the [affordance] and causes [mascot] to move toward it if one is found.
+ * An action that scans for a mascot with the [affordance] and causes [mascot] to move towards it if one is found.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -66,13 +66,13 @@ class ScanMove(
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
 
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
+     * The behavior to set for [mascot].
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOR), DEFAULT_BEHAVIOR)
 
     /**
-     * The behavior to set for the other mascot.
+     * The behavior to set for the [target] mascot.
      */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
@@ -123,6 +123,7 @@ class ScanMove(
         putVariable(schema.getString(VARIABLE_TARGETY), targetY)
 
         if (mascot.anchor.x != targetX) {
+            // Activate turning animation if we change directions
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
             mascot.isLookRight = mascot.anchor.x < targetX
         }
@@ -131,6 +132,7 @@ class ScanMove(
 
         val animation = checkNotNull(animation)
 
+        // Check if the turning animation has finished
         if (isTurning && time >= animation.duration) {
             isTurning = false
         }

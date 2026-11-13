@@ -54,8 +54,7 @@ class Transform(
         get() = eval(schema.getString(PARAMETER_TRANSFORMBEHAVIOUR), DEFAULT_TRANSFORMBEHAVIOUR)
 
     /**
-     * The image set that the [mascot] will transform into. If a valid image set is not provided, [mascot]'s image set
-     * will be used.
+     * The new image set for the [mascot]. If a valid image set is not provided, [mascot]'s image set will be used.
      */
     private val transformMascot: String
         get() = eval(schema.getString(PARAMETER_TRANSFORMMASCOT), DEFAULT_TRANSFORMMASCOT)

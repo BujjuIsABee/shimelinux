@@ -44,13 +44,13 @@ object KWin {
     private val client = KWinClientImpl()
 
     /**
-     * The window that is currently focused.
+     * The focused window.
      */
     var activeWindow: Window? = null
         private set
 
     /**
-     * The absolute position of the cursor.
+     * The absolute cursor position.
      */
     var cursorPosition: Point? = null
         private set
@@ -66,7 +66,7 @@ object KWin {
     var restoreWindows = false
 
     /**
-     * If `true`, the active interactive window will be minimized.
+     * If `true`, the active window will be minimized.
      */
     var minimizeWindow = false
 
@@ -103,7 +103,7 @@ object KWin {
             this.dbus = dbus
             this.scripting = scripting
             this.script = script
-        } catch(_: Exception) {
+        } catch (_: Exception) {
         } finally {
             Runtime.getRuntime().addShutdownHook(Thread {
                 script?.stop()
@@ -151,8 +151,7 @@ object KWin {
     @DBusInterfaceName("io.github.bujjuisabee.shimelinux.KWinClient")
     interface KWinClient : DBusInterface {
         /**
-         * Called whenever a window becomes active, providing the window's title via [caption] and bounds via [x], [y],
-         * [width], and [height].
+         * Called whenever a window becomes active.
          */
         fun setActiveWindow(
             caption: String,
@@ -173,8 +172,8 @@ object KWin {
         fun setCursorPosition(x: Int, y: Int)
 
         /**
-         * Returns a map. The key `hasValue` corresponds to a [Boolean] which is `true` if [windowPosition] is not
-         * `null`, or `false` if it is. The keys `x` and `y` correspond to the X and Y values of [windowPosition].
+         * Returns a map. The key `hasValue` will be `true` if [windowPosition] is not `null`, or `false` if it is.
+         * The keys `x` and `y` correspond to the X and Y values of [windowPosition].
          */
         fun getWindowPosition(): Map<String, Variant<*>>
 
@@ -230,8 +229,8 @@ object KWin {
     /**
      * A window from the KWin compositor.
      *
-     * @property caption The window's title.
-     * @property bounds The window's frame geometry.
+     * @param caption The window's title.
+     * @param bounds The window's frame geometry.
      */
     data class Window(val caption: String, val bounds: Rectangle)
 }

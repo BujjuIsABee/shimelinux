@@ -43,7 +43,6 @@ import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.JPopupMenu
-import javax.swing.SwingUtilities
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 import kotlin.text.replace
@@ -85,6 +84,8 @@ class Mascot(var imageSet: String) {
 
     /**
      * Handles the mascot's long-term behavior by triggering actions.
+     *
+     * @throws CantBeAliveException if set to an invalid behavior
      */
     var behavior: Behavior? = null
         set(value) {
@@ -182,13 +183,14 @@ class Mascot(var imageSet: String) {
     init {
         logger.info { "Created a mascot ($this)" }
 
+        // Always show on top
         window.setAlwaysOnTop(true)
+
+        // Register the mouse handler
         window.asComponent().addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
                 if (e.isPopupTrigger) {
-                    SwingUtilities.invokeLater {
-                        showPopup(e.x, e.y)
-                    }
+                    showPopup(e.x, e.y)
                 } else {
                     if (!isPaused) {
                         try {
@@ -204,9 +206,7 @@ class Mascot(var imageSet: String) {
 
             override fun mouseReleased(e: MouseEvent) {
                 if (e.isPopupTrigger) {
-                    SwingUtilities.invokeLater {
-                        showPopup(e.x, e.y)
-                    }
+                    showPopup(e.x, e.y)
                 } else {
                     if (!isPaused) {
                         try {
@@ -247,12 +247,12 @@ class Mascot(var imageSet: String) {
         val popup = JPopupMenu()
 
         popup.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
-                isAnimating = true
-            }
-
             override fun popupMenuWillBecomeVisible(e: PopupMenuEvent) {
                 isAnimating = false
+            }
+
+            override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {
+                isAnimating = true
             }
 
             override fun popupMenuCanceled(e: PopupMenuEvent) {}
@@ -275,10 +275,8 @@ class Mascot(var imageSet: String) {
 
         val debugMenu = JMenuItem(localize("RevealStatistics"))
         debugMenu.addActionListener {
-            SwingUtilities.invokeLater {
-                debugWindow = debugWindow ?: DebugWindow(imageSet)
-                debugWindow?.isVisible = true
-            }
+            debugWindow = debugWindow ?: DebugWindow(imageSet)
+            debugWindow?.isVisible = true
         }
 
         val dismissMenu = JMenuItem(localize("Dismiss"))
@@ -484,15 +482,18 @@ class Mascot(var imageSet: String) {
             }
 
             // Play the sound
-            val sound = sound
-            if (!Main.getMascotBooleanSetting("Sounds", this) && sound != null && Sounds.contains(sound)) {
-                Sounds.getSound(sound)?.let { clip ->
-                    if (!clip.isRunning) {
-                        clip.stop()
-                        clip.microsecondPosition = 0
-                        clip.start()
+            try {
+                val sound = sound
+                if (!Main.getMascotBooleanSetting("Sounds", this) && sound != null && Sounds.contains(sound)) {
+                    Sounds.getSound(sound)?.let { clip ->
+                        if (!clip.isRunning) {
+                            clip.stop()
+                            clip.microsecondPosition = 0
+                            clip.start()
+                        }
                     }
                 }
+            } catch (_: Exception) {
             }
         }
     }

@@ -43,7 +43,7 @@ import javax.swing.PopupFactory
 import javax.swing.SwingUtilities
 
 /**
- * An environment that displays mascots within a single window.
+ * An environment that displays all Shimeji within a single window.
  *
  * @author Kilkakon
  * @author Bujju
@@ -117,10 +117,10 @@ class VirtualEnvironment : Environment() {
     }
 
     /**
-     * Adds [mascot] to the environment.
+     * Adds the [shimeji] to the environment.
      */
-    fun addShimeji(mascot: JPanel) {
-        mascot.isOpaque = false
-        display.add(mascot)
+    fun addShimeji(shimeji: JPanel) {
+        shimeji.isOpaque = false
+        display.add(shimeji)
     }
 }

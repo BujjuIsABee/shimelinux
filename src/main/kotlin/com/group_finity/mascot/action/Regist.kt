@@ -49,7 +49,7 @@ class Regist(
     private var scaling = 0.0
 
     /**
-     * The horizontal offset used when calculating the distance between the [mascot] and the mouse.
+     * The horizontal distance between the [mascot] and the cursor.
      */
     private val offsetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_OFFSETX), DEFAULT_OFFSETX).toInt()

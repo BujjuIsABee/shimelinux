@@ -79,7 +79,8 @@ abstract class NativeFactory {
     abstract fun newTranslucentWindow(): TranslucentWindow
 
     /**
-     * Gets a platform-specific [NativeImage] from the given [src] image.
+     * Gets a platform-specific [NativeImage] from the given [src] image. If [mirror] is `true`, the image will be
+     * flipped horizontally.
      */
     abstract fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage
 

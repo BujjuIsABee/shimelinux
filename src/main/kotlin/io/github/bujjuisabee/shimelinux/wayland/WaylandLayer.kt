@@ -25,7 +25,6 @@ package io.github.bujjuisabee.shimelinux.wayland
 import com.group_finity.mascot.Main
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.getProperty
-import com.group_finity.mascot.image.ImagePairs
 import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
@@ -36,6 +35,7 @@ import java.awt.Window
 import java.awt.event.MouseEvent
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JDialog
+import javax.swing.SwingUtilities
 import kotlin.system.exitProcess
 
 /**
@@ -63,14 +63,12 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
     private val id: Int = lastId.incrementAndGet()
     private var absoluteLocation: Point = location
     private var leftHeld = false
-    private var isDisposed = false
 
     init {
         try {
             WaylandLib.createLayer(id, getProperty("MascotLayerWayland", 3), mouseEventReceiver, useInputRegion)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
-            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -84,27 +82,21 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
     override fun getLocationOnScreen(): Point = absoluteLocation
 
     override fun setBounds(x: Int, y: Int, width: Int, height: Int) {
-        if (isDisposed) return
-
         super.setBounds(x, y, width, height)
 
         try {
             WaylandLib.setBounds(id, x, y, width, height)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
-            ImagePairs.clear()
             exitProcess(0)
         }
     }
 
     override fun setCursor(cursor: Cursor) {
-        if (isDisposed) return
-
         try {
             WaylandLib.setCursor(cursor.type == Cursor.HAND_CURSOR)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
-            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -113,13 +105,10 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
      * Displays the [rgb] pixel data on the layer surface.
      */
     fun setImage(rgb: IntArray) {
-        if (isDisposed) return
-
         try {
             WaylandLib.setImage(id, rgb)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
-            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -128,17 +117,12 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
      * Destroys the layer surface.
      */
     fun dispose() {
-        if (isDisposed) return
-
         try {
             WaylandLib.dispose(id)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
-            ImagePairs.clear()
             exitProcess(0)
         }
-
-        isDisposed = true
     }
 
     /**
@@ -167,43 +151,47 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
             button = button or MouseEvent.BUTTON3
         }
 
-        // If the absolute cursor position has to be estimated, stop updating absoluteLocation while the left mouse
-        // button is held so mascots don't fly offscreen when dragged
+        // If the estimated absolute cursor position is used, don't update absoluteLocation while the left mouse button
+        // is held so Shimeji don't fly offscreen when dragged with the mouse
         leftHeld = leftPressed || (leftHeld && !leftReleased)
         if (!leftHeld || Platform.providesAbsoluteCursorPosition) {
             absoluteLocation = location
         }
 
         if (leftPressed || rightPressed) {
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    MouseEvent.MOUSE_PRESSED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
-                    if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
-                    1,
-                    rightPressed,
-                    button
+            SwingUtilities.invokeLater {
+                component.dispatchEvent(
+                    MouseEvent(
+                        component,
+                        MouseEvent.MOUSE_PRESSED,
+                        System.currentTimeMillis(),
+                        modifiers,
+                        if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
+                        if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
+                        1,
+                        rightPressed,
+                        button
+                    )
                 )
-            )
+            }
         }
 
         if (leftReleased || rightReleased) {
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    MouseEvent.MOUSE_RELEASED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
-                    if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
-                    1,
-                    false,
-                    button
+            SwingUtilities.invokeLater {
+                component.dispatchEvent(
+                    MouseEvent(
+                        component,
+                        MouseEvent.MOUSE_RELEASED,
+                        System.currentTimeMillis(),
+                        modifiers,
+                        if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
+                        if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
+                        1,
+                        false,
+                        button
+                    )
                 )
-            )
+            }
         }
 
         if (relativeCursorPosition.x != positionX || relativeCursorPosition.y != positionY) {
@@ -214,19 +202,21 @@ class WaylandLayer(mouseEventReceiver: MouseEventReceiver, private val useInputR
                 absoluteCursorPosition.setLocation(absoluteLocation.x + positionX, absoluteLocation.y + positionY)
             }
 
-            component.dispatchEvent(
-                MouseEvent(
-                    component,
-                    MouseEvent.MOUSE_MOVED,
-                    System.currentTimeMillis(),
-                    modifiers,
-                    if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
-                    if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
-                    0,
-                    false,
-                    button
+            SwingUtilities.invokeLater {
+                component.dispatchEvent(
+                    MouseEvent(
+                        component,
+                        MouseEvent.MOUSE_MOVED,
+                        System.currentTimeMillis(),
+                        modifiers,
+                        if (component is WaylandLayer) absoluteCursorPosition.x - absoluteLocation.x else relativeCursorPosition.x,
+                        if (component is WaylandLayer) absoluteCursorPosition.y - absoluteLocation.y else relativeCursorPosition.y,
+                        0,
+                        false,
+                        button
+                    )
                 )
-            )
+            }
         }
     }
 }

@@ -36,8 +36,6 @@ import java.awt.image.BufferedImage
 /**
  * A native factory implementation for KDE Plasma that supports interactive windows.
  *
- * If [usingWaylandLayerSurfaces] is `true`, mascots and popup menus will be displayed on Wayland layer surfaces.
- *
  * @author Bujju
  */
 class NativeFactoryImpl : NativeFactory() {

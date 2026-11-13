@@ -22,7 +22,10 @@
 
 package com.group_finity.mascot.sound
 
+import java.io.IOException
 import javax.sound.sampled.Clip
+import javax.sound.sampled.LineUnavailableException
+import javax.sound.sampled.UnsupportedAudioFileException
 
 /**
  * Stores sounds.
@@ -55,6 +58,10 @@ object Sounds {
      * Returns the sound in [sounds] with the given [name].
      *
      * @param name The sound's filename combined with its volume.
+     *
+     * @throws IOException
+     * @throws LineUnavailableException
+     * @throws UnsupportedAudioFileException
      */
     @JvmStatic
     fun getSound(name: String): Clip? = sounds[name]?.also { it.open() }?.clip

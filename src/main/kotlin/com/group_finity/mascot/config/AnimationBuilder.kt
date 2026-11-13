@@ -50,6 +50,8 @@ private val logger: Logger = Logger.getLogger(AnimationBuilder::class.java.name)
 /**
  * Builds the animation defined by the given [animationNode].
  *
+ * @throws ConfigurationException if an animation cannot be loaded
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju
@@ -163,9 +165,9 @@ class AnimationBuilder(
         val (width, height) = sizeText.split(',').map { it.toInt() }
         val size = Dimension((width * scaling).roundToInt(), (height * scaling).roundToInt())
 
-        val shape = when {
-            shapeText.equals("Rectangle", true) -> Rectangle(origin, size)
-            shapeText.equals("Ellipse", true) -> Ellipse2D.Float(
+        val shape = when (shapeText.lowercase()) {
+            "rectangle" -> Rectangle(origin, size)
+            "ellipse" -> Ellipse2D.Float(
                 origin.x.toFloat(),
                 origin.y.toFloat(),
                 size.width.toFloat(),
@@ -185,6 +187,8 @@ class AnimationBuilder(
 
     /**
      * Returns the animation.
+     *
+     * @throws AnimationInstantiationException if the [condition] cannot be parsed
      */
     fun buildAnimation(): Animation {
         try {

@@ -27,7 +27,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * Deprecated in Shimeji-ee; use Scan actions instead.
+ * Deprecated in Shimeji-ee.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

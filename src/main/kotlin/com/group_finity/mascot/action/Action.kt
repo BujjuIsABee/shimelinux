@@ -23,6 +23,8 @@
 package com.group_finity.mascot.action
 
 import com.group_finity.mascot.Mascot
+import com.group_finity.mascot.exception.LostGroundException
+import com.group_finity.mascot.exception.VariableException
 
 /**
  * Handles the short-term behavior of a mascot.
@@ -34,16 +36,23 @@ import com.group_finity.mascot.Mascot
 interface Action {
     /**
      * Initializes the action for the given [mascot].
+     *
+     * @throws VariableException
      */
     fun init(mascot: Mascot)
 
     /**
      * Returns whether the action should continue.
+     *
+     * @throws VariableException
      */
     fun hasNext(): Boolean
 
     /**
      * Triggers the next frame of the action and progresses its animation.
+     *
+     * @throws LostGroundException
+     * @throws VariableException
      */
     fun next()
 }

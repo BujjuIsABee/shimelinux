@@ -33,10 +33,11 @@ import javax.script.ScriptException
 private val engine: ScriptEngine = NashornScriptEngineFactory().getScriptEngine(ScriptFilter)
 
 /**
- * A variable with a value determined by evaluating JavaScript code.
+ * A variable with a value determined by evaluating JavaScript code from [source].
  *
- * @param source The JavaScript code to evaluate.
- * @param isClearAtInitFrame Whether the [value] should be set to `null` when [initFrame] is called.
+ * If [isClearAtInitFrame] is `true`, the [value] will be set to `null` when [initFrame] is called.
+ *
+ * @throws VariableException
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group

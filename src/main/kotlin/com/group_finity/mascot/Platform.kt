@@ -25,7 +25,7 @@ package com.group_finity.mascot
 import io.github.bujjuisabee.shimelinux.BuildConfig
 
 /**
- * Provides information about the current desktop environment.
+ * Provides information about the current operating system and desktop environment.
  *
  * @author Bujju
  */

@@ -23,11 +23,13 @@
 package com.group_finity.mascot
 
 import java.io.InputStream
+import java.io.IOException
 import java.nio.file.Path
+import java.util.MissingResourceException
 import kotlin.io.path.Path
 
 /**
- * Returns the path at [subpaths] relative to the config directory.
+ * Returns the full path relative to the config directory from the given [subpaths].
  */
 fun getPath(vararg subpaths: String): Path = Path(System.getProperty("user.home"), ".config", "shimelinux", *subpaths)
 
@@ -51,13 +53,17 @@ inline fun <reified T> getProperty(key: String, defaultValue: T): T =
     }
 
 /**
- * Returns the localized string corresponding to the specified [key], or throws an exception if the string does not
- * exist in the current language file or the default language file (`language.properties`).
+ * Returns the localized string corresponding to the specified [key].
+ *
+ * @throws MissingResourceException
  */
 fun localize(key: String): String = Main.languageBundle.getString(key)
 
 /**
  * Executes the [command] with the given command line [args] and returns what the process writes to standard output.
+ *
+ * @throws IOException
+ * @throws InterruptedException
  */
 fun execute(command: String, vararg args: String): String {
     val process = ProcessBuilder(command, *args).start()

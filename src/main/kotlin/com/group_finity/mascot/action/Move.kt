@@ -90,7 +90,7 @@ open class Move(
         var isDown = false
 
         if (targetX != DEFAULT_TARGETX && mascot.anchor.x != targetX) {
-            // Activate turn animation when direction changes
+            // Activate turn animation if we change directions
             isTurning = hasTurningAnimation && (isTurning || mascot.anchor.x < targetX != mascot.isLookRight)
             mascot.isLookRight = mascot.anchor.x < targetX
         }
@@ -101,7 +101,7 @@ open class Move(
 
         val animation = checkNotNull(animation)
 
-        // Check if turning animation has finished
+        // Check if the turning animation has finished
         if (isTurning && time >= animation.duration) {
             isTurning = false
         }

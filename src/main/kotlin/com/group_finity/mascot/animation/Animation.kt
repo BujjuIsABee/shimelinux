@@ -23,6 +23,7 @@
 package com.group_finity.mascot.animation
 
 import com.group_finity.mascot.Mascot
+import com.group_finity.mascot.exception.VariableException
 import com.group_finity.mascot.hotspot.Hotspot
 import com.group_finity.mascot.script.Variable
 import com.group_finity.mascot.script.VariableMap
@@ -46,7 +47,7 @@ class Animation(
     val isTurn: Boolean
 ) {
     /**
-     * The total duration of the animation's poses.
+     * The total duration of the animation's poses in 40 millisecond ticks.
      */
     val duration: Int = poses.sumOf { it.duration }
 
@@ -56,6 +57,8 @@ class Animation(
 
     /**
      * Returns whether the [condition] for the animation to play is currently met.
+     *
+     * @throws VariableException if the [condition] cannot be evaluated
      */
     fun isEffective(variables: VariableMap): Boolean = condition.get(variables) as Boolean
 
@@ -67,7 +70,7 @@ class Animation(
     }
 
     /**
-     * Initializes the first frame of the animation.
+     * Called at the start of each frame of the animation.
      */
     fun initFrame() {
         condition.initFrame()
@@ -75,6 +78,8 @@ class Animation(
 
     /**
      * Progresses the animation for the given [mascot] to the frame at [time].
+     *
+     * @throws IllegalStateException if [time] is greater than [duration]
      */
     fun next(mascot: Mascot, time: Int) {
         checkNotNull(getPoseAt(time)).next(mascot)

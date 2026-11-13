@@ -25,7 +25,7 @@ package com.group_finity.mascot.image
 import java.awt.Component
 
 /**
- * A platform-specific window that displays a mascot.
+ * A platform-specific window that displays an image.
  *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
@@ -48,7 +48,7 @@ interface TranslucentWindow {
     fun updateImage()
 
     /**
-     * Sets whether the window should appear above other windows.
+     * Sets whether the window should appear above other translucent windows.
      */
     fun setAlwaysOnTop(value: Boolean)
 

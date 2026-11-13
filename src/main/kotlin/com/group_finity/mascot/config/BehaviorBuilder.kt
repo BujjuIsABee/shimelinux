@@ -38,6 +38,8 @@ private val logger: Logger = Logger.getLogger(BehaviorBuilder::class.java.name)
 /**
  * Builds the behavior defined by the given [behaviorNode].
  *
+ * @throws IllegalArgumentException if the [behaviorNode] does not have a Name and Frequency attribute
+ *
  * @author Yuki Yamada
  * @author Shimeji-ee Group
  * @author Bujju
@@ -53,7 +55,7 @@ class BehaviorBuilder(
     val name: String = requireNotNull(behaviorNode.getAttribute(configuration.schema.getString("Name"))) { "Behavior requires Name attribute." }
 
     /**
-     * The name of the action that the behavior triggers. If the Action attribute is missing, [name] will be used.
+     * The name of the action that the behavior triggers. If the Action attribute is missing, [name] will be used
      * instead.
      */
     private val actionName: String = behaviorNode.getAttribute(configuration.schema.getString("Action")) ?: name
@@ -95,7 +97,7 @@ class BehaviorBuilder(
         conditions = conditions.toMutableList()
         conditions.add(behaviorNode.getAttribute(configuration.schema.getString("Condition")))
 
-        // Ignore Toggleable attribute for required behaviors
+        // The toggleable attribute is ignored for required behaviors
         isToggleable = when (name) {
             UserBehavior.BEHAVIOURNAME_FALL, UserBehavior.BEHAVIOURNAME_DRAGGED, UserBehavior.BEHAVIOURNAME_THROWN -> false
             else -> behaviorNode.getAttribute(configuration.schema.getString("Toggleable")).toBoolean()
@@ -141,7 +143,7 @@ class BehaviorBuilder(
     }
 
     /**
-     * Validates that the action builder associated with the behavior builder exists.
+     * Throws a [ConfigurationException] if there is no action called [actionName].
      */
     fun validate() {
         if (!configuration.hasAction(actionName)) {
@@ -152,6 +154,8 @@ class BehaviorBuilder(
 
     /**
      * Returns the behavior.
+     *
+     * @throws BehaviorInstantiationException if there is no action called [actionName]
      */
     fun buildBehavior(): Behavior {
         try {

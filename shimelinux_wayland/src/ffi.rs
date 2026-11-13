@@ -35,6 +35,7 @@ use jni::{
     objects::JIntArray,
     refs::Global,
     sys::{jboolean, jint},
+    vm::JavaVM,
 };
 use smithay_client_toolkit::{
     compositor::CompositorState,
@@ -52,10 +53,10 @@ use wayland_cursor::CursorTheme;
 
 use crate::state::{CursorState, LayerState, Rect, SCREEN_RECT, State};
 
-/// An `mpsc::Sender::<Event>` used to create and manage layer surfaces. When first accessed, it
-/// connects to the Wayland server and starts the event loop.
+/// Used to create and manage layer surfaces. When first accessed, it creates the sender and
+/// receiver, connects to the Wayland server, and starts the event loop.
 static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
-    // Get the event sender and receiver
+    // Create the event sender and receiver
     let (sender, receiver) = mpsc::channel::<Event>();
 
     // Connect to the Wayland server
@@ -82,112 +83,115 @@ static EVENT_SENDER: LazyLock<mpsc::Sender<Event>> = LazyLock::new(|| {
         layers: HashMap::new(),
     };
 
+    // Get a JavaVM so it can be attached to the thread
+    let jvm = JavaVM::singleton().expect("Failed to get a JavaVM");
+
     // Spawn a thread for the event loop
     thread::spawn(move || {
-        loop {
-            if !state.layers.is_empty() {
-                let _ = event_queue.blocking_dispatch(&mut state);
-            }
+        let _ = jvm.attach_current_thread(|_env| -> jni::errors::Result<()> {
+            loop {
+                if !state.layers.is_empty() {
+                    let _ = event_queue.blocking_dispatch(&mut state);
+                }
 
-            // Handle events
-            while let Ok(event) = receiver.try_recv() {
-                match event {
-                    Event::CreateLayer(
-                        id,
-                        mascot_layer,
-                        mouse_event_receiver,
-                        use_input_region,
-                    ) => {
-                        let surface = state.compositor_state.create_surface(&qh);
-                        let output = state.output.as_ref();
-                        let layer_surface = state.layer_shell.create_layer_surface(
-                            &qh,
-                            surface,
-                            match mascot_layer {
-                                0 => Layer::Background,
-                                1 => Layer::Bottom,
-                                2 => Layer::Top,
-                                _ => Layer::Overlay,
-                            },
-                            Some("shimelinux"),
-                            output,
-                        );
+                // Handle events
+                while let Ok(event) = receiver.try_recv() {
+                    match event {
+                        Event::CreateLayer(id, layer, mouse_event_receiver, use_input_region) => {
+                            let surface = state.compositor_state.create_surface(&qh);
+                            let output = state.output.as_ref();
+                            let layer_surface = state.layer_shell.create_layer_surface(
+                                &qh,
+                                surface,
+                                match layer {
+                                    0 => Layer::Background,
+                                    1 => Layer::Bottom,
+                                    2 => Layer::Top,
+                                    _ => Layer::Overlay,
+                                },
+                                Some("shimelinux"),
+                                output,
+                            );
 
-                        layer_surface.set_exclusive_zone(-1);
-                        layer_surface.set_anchor(Anchor::TOP | Anchor::LEFT);
-                        layer_surface.set_size(1, 1);
-                        layer_surface.commit();
+                            layer_surface.set_exclusive_zone(-1);
+                            layer_surface.set_anchor(Anchor::TOP | Anchor::LEFT);
+                            layer_surface.set_size(1, 1);
+                            layer_surface.commit();
 
-                        state.layers.insert(
-                            id,
-                            LayerState {
-                                layer_surface,
-                                configured: false,
-                                rgb: &[],
-                                bounds: Rect::default(),
-                                image_changed: true,
-                                cursor_state: CursorState::default(),
-                                mouse_event_receiver,
-                                use_input_region,
-                                input_region: Vec::new(),
-                            },
-                        );
-                    }
-                    Event::SetBounds(id, x, y, width, height) => {
-                        if let Some(layer) = state.layers.get_mut(&id) {
-                            layer.bounds = Rect {
-                                x,
-                                y,
-                                width,
-                                height,
-                            };
-
-                            layer.layer_surface.set_margin(y, 0, 0, x);
+                            state.layers.insert(
+                                id,
+                                LayerState {
+                                    layer_surface,
+                                    configured: false,
+                                    rgb: &[],
+                                    bounds: Rect::default(),
+                                    image_changed: true,
+                                    cursor_state: CursorState::default(),
+                                    mouse_event_receiver,
+                                    use_input_region,
+                                    input_region: Vec::new(),
+                                },
+                            );
                         }
-                    }
-                    Event::SetImage(id, rgb) => {
-                        if let Some(layer) = state.layers.get_mut(&id) {
-                            layer.rgb = rgb;
-                            layer.image_changed = true;
+                        Event::SetBounds(id, x, y, width, height) => {
+                            if let Some(layer) = state.layers.get_mut(&id) {
+                                layer.bounds = Rect {
+                                    x,
+                                    y,
+                                    width,
+                                    height,
+                                };
 
-                            if layer.use_input_region {
-                                layer.update_input_region();
+                                layer.layer_surface.set_margin(y, 0, 0, x);
                             }
                         }
-                    }
-                    Event::SetCursor(use_hand) => {
-                        let shm = state.shm.wl_shm().clone();
-                        let Ok(mut theme) = CursorTheme::load(&conn, shm, 24) else {
-                            continue;
-                        };
+                        Event::SetImage(id, rgb) => {
+                            if let Some(layer) = state.layers.get_mut(&id) {
+                                layer.rgb = rgb;
+                                layer.image_changed = true;
 
-                        let name = if use_hand { "pointer" } else { "left_ptr" };
-                        let Some(cursor) = theme.get_cursor(name) else {
-                            continue;
-                        };
+                                if layer.use_input_region {
+                                    layer.update_input_region();
+                                }
+                            }
+                        }
+                        Event::SetCursor(use_hand) => {
+                            let shm = state.shm.wl_shm().clone();
+                            let Ok(mut theme) = CursorTheme::load(&conn, shm, 24) else {
+                                continue;
+                            };
 
-                        let cursor_surface = state
-                            .pointer_surface
-                            .get_or_insert(state.compositor_state.create_surface(&qh));
+                            let name = if use_hand { "pointer" } else { "left_ptr" };
+                            let Some(cursor) = theme.get_cursor(name) else {
+                                continue;
+                            };
 
-                        // Attach None to clear the previous buffer
-                        cursor_surface.attach(None, 0, 0);
-                        cursor_surface.commit();
+                            let cursor_surface = state
+                                .pointer_surface
+                                .get_or_insert(state.compositor_state.create_surface(&qh));
 
-                        // Attach the new buffer
-                        cursor_surface.attach(Some(&cursor[0]), 0, 0);
-                        cursor_surface.commit();
-                    }
-                    Event::Dispose(id) => {
-                        state.layers.remove(&id);
+                            // Attach None to clear the previous buffer
+                            cursor_surface.attach(None, 0, 0);
+                            cursor_surface.commit();
 
-                        if state.layers.is_empty() {
-                            let _ = event_queue.blocking_dispatch(&mut state);
+                            // Attach the new buffer
+                            cursor_surface.attach(Some(&cursor[0]), 0, 0);
+                            cursor_surface.commit();
+                        }
+                        Event::Dispose(id) => {
+                            if let Some(layer) = state.layers.remove(&id) {
+                                layer.mouse_event_receiver.into_raw();
+                            }
+
+                            // Dispatch events to destroy the surface immediately
+                            if state.layers.is_empty() {
+                                let _ = event_queue.blocking_dispatch(&mut state);
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
 
     sender
@@ -221,7 +225,7 @@ bind_java_type! {
         MouseEventReceiver => io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver,
     },
     native_methods {
-        extern fn create_layer(mascot_layer: jint, id: jint, mouse_event_receiver: MouseEventReceiver, use_input_region: jboolean),
+        extern fn create_layer(id: jint, layer: jint, mouse_event_receiver: MouseEventReceiver, use_input_region: jboolean),
         extern fn set_bounds(id: jint, x: jint, y: jint, width: jint, height: jint),
         extern fn set_image(id: jint, rgb: [jint]),
         extern fn set_cursor(use_hand: jboolean),
@@ -237,7 +241,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
     /// `mouse_event_receiver`. If `use_input_region` is true, mouse events on fully transparent
     /// pixels will be ignored.
     ///
-    /// `mascot_layer` is a number corresponding to the layer that the surface will be displayed on.
+    /// `layer` is a number corresponding to the layer that the surface will be displayed on.
     /// Options include:
     /// - Background (0)
     /// - Bottom (1)
@@ -247,14 +251,14 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         env: &mut Env<'local>,
         _this: WaylandLib<'local>,
         id: jint,
-        mascot_layer: jint,
+        layer: jint,
         mouse_event_receiver: MouseEventReceiver<'local>,
         use_input_region: jboolean,
     ) -> jni::errors::Result<()> {
         EVENT_SENDER
             .send(Event::CreateLayer(
                 id,
-                mascot_layer,
+                layer,
                 env.new_global_ref(mouse_event_receiver).unwrap(),
                 use_input_region,
             ))
@@ -337,7 +341,7 @@ impl WaylandLibNativeInterface for WaylandLibAPI {
         Ok(array)
     }
 
-    // Destroys the layer surface with the given `id`.
+    /// Destroys the layer surface with the given `id`.
     fn dispose<'local>(
         _env: &mut Env<'local>,
         _this: WaylandLib<'local>,

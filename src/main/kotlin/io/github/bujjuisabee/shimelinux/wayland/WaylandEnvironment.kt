@@ -22,16 +22,19 @@
 
 package io.github.bujjuisabee.shimelinux.wayland
 
+import com.group_finity.mascot.Main
 import com.group_finity.mascot.Platform
 import com.group_finity.mascot.environment.Area
 import com.group_finity.mascot.environment.Environment
 import com.group_finity.mascot.execute
 import com.group_finity.mascot.getProperty
+import com.group_finity.mascot.localize
 import io.github.bujjuisabee.shimelinux.kde.KWin
 import io.github.bujjuisabee.shimelinux.wayland.lib.WaylandLib
 import java.awt.Point
 import javax.swing.PopupFactory
 import kotlin.collections.map
+import kotlin.system.exitProcess
 
 /**
  * An environment that gets the screen bounds and cursor position directly from the Wayland compositor.
@@ -52,7 +55,12 @@ class WaylandEnvironment : Environment() {
 
     override fun tick() {
         // Update screen bounds
-        val (screenX, screenY, screenWidth, screenHeight) = WaylandLib.getScreenRect()
+        val (screenX, screenY, screenWidth, screenHeight) = runCatching {
+            WaylandLib.getScreenRect()
+        }.getOrElse { e ->
+            Main.showError(localize("WaylandLibraryErrorMessage"), e)
+            exitProcess(0)
+        }
 
         if (getProperty("OverrideScreenDimensions", false)) {
             screenRect.setBounds(

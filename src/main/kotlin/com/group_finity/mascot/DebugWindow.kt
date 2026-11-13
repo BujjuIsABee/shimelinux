@@ -141,7 +141,7 @@ class DebugWindow(val imageSet: String) : JFrame() {
         environmentHeightValue.alignmentX = LEFT_ALIGNMENT
 
         statisticsPanel = JPanel(GridLayout(11, 2, 10, 0))
-        statisticsPanel.border = BorderFactory.createEmptyBorder(10, 10, 10, -30)
+        statisticsPanel.border = BorderFactory.createEmptyBorder(10, 10, 10, 0)
         statisticsPanel.add(shimejiXLabel)
         statisticsPanel.add(shimejiXValue)
         statisticsPanel.add(shimejiYLabel)

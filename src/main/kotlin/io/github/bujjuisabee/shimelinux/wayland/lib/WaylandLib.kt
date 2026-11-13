@@ -23,7 +23,6 @@
 package io.github.bujjuisabee.shimelinux.wayland.lib
 
 import com.group_finity.mascot.Main
-import com.group_finity.mascot.image.ImagePairs
 import com.group_finity.mascot.loadResource
 import com.group_finity.mascot.localize
 import java.io.File
@@ -51,7 +50,6 @@ object WaylandLib {
             System.load(libFile.absolutePath)
         } catch (e: Throwable) {
             Main.showError(localize("WaylandLibraryErrorMessage"), e)
-            ImagePairs.clear()
             exitProcess(0)
         }
     }
@@ -60,13 +58,13 @@ object WaylandLib {
      * Creates a Wayland layer surface with the given [id]. Mouse events will be sent to [mouseEventReceiver]. If
      * [useInputRegion] is `true`, mouse events on fully transparent pixels will be ignored.
      *
-     * @param mascotLayer The layer that the surface will be displayed on. Options include:
+     * Options for [layer] include:
      * - Background (`0`)
      * - Bottom (`1`)
      * - Top (`2`)
      * - Overlay (`3`)
      */
-    external fun createLayer(id: Int, mascotLayer: Int, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean)
+    external fun createLayer(id: Int, layer: Int, mouseEventReceiver: MouseEventReceiver, useInputRegion: Boolean)
 
     /**
      * Sets the bounds of the layer surface with the given [id].

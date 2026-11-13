@@ -41,7 +41,7 @@ class MoveWithTurn(
 ) : Move(schema, animations, params) {
     override val animation: Animation?
         get() = if (isTurning) {
-            animations[animations.size - 1]
+            animations[animations.size - 1] // force to last animation if turning
         } else {
             animations.dropLast(1).find { it.isEffective(variables) }
         }

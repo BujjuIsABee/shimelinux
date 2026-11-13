@@ -30,7 +30,7 @@ import java.awt.Graphics
 import javax.swing.JPanel
 
 /**
- * A panel that displays a mascot.
+ * A panel that displays an image for the [VirtualEnvironment].
  *
  * @author Kilkakon
  * @author Bujju

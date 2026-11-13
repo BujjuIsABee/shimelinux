@@ -26,6 +26,7 @@ import java.io.File
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
+import javax.sound.sampled.LineUnavailableException
 
 /**
  * Loads sounds.
@@ -36,6 +37,8 @@ import javax.sound.sampled.LineEvent
 object SoundLoader {
     /**
      * Puts the sound at [filename] in [Sounds] with the given [volume].
+     *
+     * @throws LineUnavailableException
      */
     @JvmStatic
     fun load(filename: String, volume: Float) {

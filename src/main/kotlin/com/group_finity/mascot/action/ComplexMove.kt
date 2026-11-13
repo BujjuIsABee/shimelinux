@@ -96,14 +96,14 @@ class ComplexMove(
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
 
     /**
-     * The X position that the [mascot] moves towards. If [characteristics] includes Scan, then the [target]'s X
+     * The X position that the [mascot] moves towards. If [characteristics] includes Scan, then the [target] mascot's X
      * position will be used instead.
      */
     private val targetX: Int
         get() = eval<Number>(schema.getString(PARAMETER_TARGETX), DEFAULT_TARGETX).toInt()
 
     /**
-     * The Y position that the [mascot] moves towards. If [characteristics] includes Scan, then the [target]'s Y
+     * The Y position that the [mascot] moves towards. If [characteristics] includes Scan, then the [target] mascot's Y
      * position will be used instead.
      */
     private val targetY: Int

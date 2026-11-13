@@ -26,7 +26,7 @@ import com.group_finity.mascot.script.VariableMap
 import java.util.ResourceBundle
 
 /**
- * Brings the [mascot] above all other windows.
+ * An action that brings the [mascot] above all other mascots.
  *
  * @author Kilkakon
  * @author Bujju

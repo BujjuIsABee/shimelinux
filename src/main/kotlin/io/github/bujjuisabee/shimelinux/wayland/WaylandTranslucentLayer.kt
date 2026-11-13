@@ -28,12 +28,12 @@ import io.github.bujjuisabee.shimelinux.wayland.lib.MouseEventReceiver
 import java.awt.Component
 
 /**
- * A Wayland layer surface that displays a mascot.
+ * A Wayland layer surface that displays an image.
  *
  * @author Bujju
  */
 class WaylandTranslucentLayer : TranslucentWindow, MouseEventReceiver {
-    private val layer = WaylandLayer(this, true)
+    private var layer = WaylandLayer(this, true)
     private var image: WaylandNativeImage? = null
     private var imageChanged = false
 
@@ -48,14 +48,26 @@ class WaylandTranslucentLayer : TranslucentWindow, MouseEventReceiver {
 
     override fun updateImage() {
         if (imageChanged) {
-            image?.let { layer.setImage(it.rgb) }
             imageChanged = false
+            image?.let { layer.setImage(it.rgb) }
         }
     }
 
     override fun setAlwaysOnTop(value: Boolean) {}
 
-    override fun bringToFront() {}
+    override fun bringToFront() {
+        // Recreate the layer surface so it appears above all others
+        layer.let { previous ->
+            layer = WaylandLayer(this, true)
+            layer.bounds = previous.bounds
+            imageChanged = true
+            updateImage()
+
+            previous.mouseListeners.forEach { layer.addMouseListener(it) }
+            previous.mouseMotionListeners.forEach { layer.addMouseMotionListener(it) }
+            previous.dispose()
+        }
+    }
 
     override fun dispose() {
         layer.dispose()

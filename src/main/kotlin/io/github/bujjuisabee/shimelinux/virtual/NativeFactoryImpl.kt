@@ -30,7 +30,7 @@ import io.github.bujjuisabee.shimelinux.generic.GenericNativeImage
 import java.awt.image.BufferedImage
 
 /**
- * A native factory implementation for windowed mode, where all mascots are displayed within a single window.
+ * A native factory implementation for windowed mode, where all Shimeji are displayed within a single window.
  *
  * @author Kilkakon
  * @author Bujju
@@ -41,5 +41,5 @@ class NativeFactoryImpl : NativeFactory() {
     override fun newNativeImage(src: BufferedImage, mirror: Boolean): NativeImage = GenericNativeImage(src, mirror)
 
     override fun newTranslucentWindow(): TranslucentWindow = VirtualTranslucentPanel()
-        .also { (environment as VirtualEnvironment).addShimeji(it) } // add the mascot to environment
+        .also { (environment as VirtualEnvironment).addShimeji(it) } // add the panel to the window
 }

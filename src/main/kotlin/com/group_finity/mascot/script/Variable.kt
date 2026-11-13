@@ -22,6 +22,8 @@
 
 package com.group_finity.mascot.script
 
+import com.group_finity.mascot.exception.VariableException
+
 /**
  * Defines a variable that provides a value.
  *
@@ -42,6 +44,8 @@ abstract class Variable {
 
     /**
      * Gets the value of the variable, passing the given [variables].
+     *
+     * @throws VariableException
      */
     abstract fun get(variables: VariableMap): Any?
 
@@ -49,6 +53,8 @@ abstract class Variable {
         /**
          * Returns a [Script] if [source] starts with "${" or "#{", a [Constant] if it does not, or `null` if it is
          * `null`.
+         *
+         * @throws VariableException
          */
         fun parse(source: String?): Variable? = if (source == null) {
             null

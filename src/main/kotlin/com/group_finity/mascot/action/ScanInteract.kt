@@ -38,7 +38,8 @@ import java.util.logging.Logger
 private val logger: Logger = Logger.getLogger(ScanInteract::class.java.name)
 
 /**
- * An action that scans for a mascot with the [affordance], then sets the behavior of [mascot] if one is found.
+ * An action that sets the [mascot]'s behavior to [behavior] and another mascot's behavior to [targetBehavior] if they
+ * are overlapping and have the [affordance].
  *
  * @author Kilkakon
  * @author Bujju
@@ -66,25 +67,25 @@ class ScanInteract(
         get() = animations.firstOrNull { it.isEffective(variables) && isTurning == it.isTurn }
 
     /**
-     * The behavior to set for [mascot] if another mascot with the [affordance] is found.
+     * The behavior to set for [mascot].
      */
     private val behavior: String
         get() = eval(schema.getString(PARAMETER_BEHAVIOUR), DEFAULT_BEHAVIOUR)
 
     /**
-     * The behavior to set for the other mascot.
+     * The behavior to set for the [target] mascot.
      */
     private val targetBehavior: String
         get() = eval(schema.getString(PARAMETER_TARGETBEHAVIOUR), DEFAULT_TARGETBEHAVIOUR)
 
     /**
-     * Whether the [mascot] should face the other mascot.
+     * Whether the [mascot] should face the [target] mascot.
      */
     private val look: Boolean
         get() = eval(schema.getString(PARAMETER_LOOK), DEFAULT_LOOK)
 
     /**
-     * Whether the other mascot should face the [mascot].
+     * Whether the [target] mascot should face the [mascot].
      */
     private val targetLook: Boolean
         get() = eval(schema.getString(PARAMETER_TARGETLOOK), DEFAULT_TARGETLOOK)
