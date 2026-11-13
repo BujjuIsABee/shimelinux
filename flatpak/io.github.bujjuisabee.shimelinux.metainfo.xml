@@ -46,6 +46,26 @@
         </screenshot>
     </screenshots>
     <releases>
+        <release version="1.5.0" date="2026-11-13">
+            <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.5.0</url>
+            <description>
+                <p>Changelog:</p>
+                <ul>
+                    <li>Added new features from Shimeji-ee 1.0.23:</li>
+                    <ul>
+                        <li>BreedFall action that creates new Shimeji while a Shimeji falls.</li>
+                        <li>BringToFront action that brings a Shimeji in front of all others.</li>
+                        <li>MinimizeIE action that minimizes the active interactive window.</li>
+                        <li>Some new parameters for existing actions (Look for ScanInteract and Arc for Jump).</li>
+                        <li>Added a list of a Shimeji's variables to the Reveal Statistics menu.</li>
+                        <li>Reduced memory usage</li>
+                    </ul>
+                    <li>Fixed a bug where errors caused by interacting with a Shimeji with the mouse would cause the app to freeze in the Wayland environment.</li>
+                    <li>Fixed a bug where the program would pause for a moment before closing after being open for a while in the Wayland environment.</li>
+                    <li>Errors from a sound file not existing or failing to get the screen dimensions in the Wayland environment are now handled properly.</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.4.3" date="2026-11-01">
             <url type="details">https://github.com/BujjuIsABee/shimelinux/releases/tag/v1.4.3</url>
             <description>
